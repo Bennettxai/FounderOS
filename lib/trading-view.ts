@@ -13,7 +13,7 @@ export type PhantomView = {
   fetchedAt: string;
 };
 
-/** "68SH…BST2" — the first and last four of a base58 address. */
+/** "68SH…BST2"  -  the first and last four of a base58 address. */
 export function shortAddress(address: string): string {
   return address.length <= 10 ? address : `${address.slice(0, 4)}…${address.slice(-4)}`;
 }
@@ -32,7 +32,7 @@ export type TradingPayload = {
   activity: TradeActivity[];
   /** The agent's reasoning: the only thing on screen on a no-trade day. */
   analysis: TradeAnalysis | null;
-  /** Live at the broker right now — state, not history. */
+  /** Live at the broker right now  -  state, not history. */
   openOrders: TradingOrder[];
   status: ConnectorStatus;
   source: string | null;
@@ -93,7 +93,7 @@ export function positionSizes(positions: TradingPosition[]): Array<{ label: stri
 
 export type ActivityFilter = 'all' | 'agent' | 'you' | 'rejected';
 
-const isAgent = (a: TradeActivity) => /agent/i.test(a.agent) && !/operator/i.test(a.agent);
+const isAgent = (a: TradeActivity) => /agent/i.test(a.agent) && !/alex/i.test(a.agent);
 
 /** Who did it and how it ended. "you" is anything a human placed, manual or
  *  override; "agent" is the Markets Agent whatever the outcome; "rejected" is
@@ -117,5 +117,68 @@ export function activityCounts(rows: TradeActivity[]): Record<ActivityFilter, nu
     agent: filterActivity(rows, 'agent').length,
     you: filterActivity(rows, 'you').length,
     rejected: filterActivity(rows, 'rejected').length,
+  };
+}
+
+// ── The Accounts card in Deal Volume's shape (slab kit, 2026-09-24) ─────────
+
+export type TradingMeter = { label: string; frac: number; display: string; hue: string };
+export type TradingVolume = {
+  /** Brokerage total across every fed account (the wallet rides separately). */
+  headline: number;
+  chips: Array<{ tone: 'ok' | 'err' | 'accent'; text: string }>;
+  caption: string;
+  meters: TradingMeter[];
+  foot: string;
+};
+
+// One hue per account (anti-drift rule), all on the colorway.
+export const TRADING_HUE = { agentic: 'var(--accent)', individual: 'var(--ramp-1)', phantom: 'var(--ramp-4)' };
+
+const money = (n: number, cents = true) =>
+  n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: cents ? 2 : 0 });
+
+/**
+ * The /trading Accounts card as Brand Deals' Deal Volume: the brokerage total
+ * as the count-up headline, the day's P&L and the book as dot chips, and one
+ * meter per account plus the Phantom wallet, each its honest share of
+ * everything held. A wallet with no price, or no wallet, is an empty meter
+ * that says why, never a $0 fill.
+ */
+export function tradingVolume(x: { accounts: TradingAccountSnapshot[]; positions: TradingPosition[]; phantom: PhantomView | null }): TradingVolume {
+  const brokerage = x.accounts.reduce((s, a) => s + a.accountValueUsd, 0);
+  const walletUsd = x.phantom?.usdValue ?? 0;
+  const total = brokerage + walletUsd;
+  const day = x.accounts.reduce((s, a) => s + a.dayPnlUsd, 0);
+  const invested = x.positions.reduce((s, p) => s + p.marketValueUsd, 0);
+  const share = (n: number) => (total > 0 ? Math.max(0, Math.min(1, n / total)) : 0);
+  const n = x.accounts.length;
+
+  const meters: TradingMeter[] = x.accounts.map((a) => ({
+    label: `${a.accountLabel} · ${a.accountId === AGENTIC_ID ? 'agent may trade' : 'read-only to agents'}`,
+    frac: share(a.accountValueUsd),
+    display: money(a.accountValueUsd),
+    hue: a.accountId === AGENTIC_ID ? TRADING_HUE.agentic : TRADING_HUE.individual,
+  }));
+  const p = x.phantom;
+  meters.push({
+    label: p ? `Phantom · ${p.sol} SOL · ${shortAddress(p.address)}` : 'Phantom · wallet not reachable',
+    frac: p && p.usdValue !== null ? share(p.usdValue) : 0,
+    display: p ? (p.usdValue === null ? 'price unavailable' : money(p.usdValue)) : '--',
+    hue: TRADING_HUE.phantom,
+  });
+
+  return {
+    headline: brokerage,
+    chips: [
+      { tone: day > 0 ? 'ok' : day < 0 ? 'err' : 'accent', text: `${day > 0 ? '+' : day < 0 ? '-' : ''}${money(Math.abs(day))} today` },
+      {
+        tone: 'accent',
+        text: x.positions.length === 0 ? 'all cash' : `${money(invested, false)} in ${x.positions.length} position${x.positions.length === 1 ? '' : 's'}`,
+      },
+    ],
+    caption: `brokerage, ${n} account${n === 1 ? '' : 's'}${p ? ` · ${money(total)} with the wallet` : ''}`,
+    meters,
+    foot: `only the agentic sleeve can be traded by an agent · ${p?.usdPerSol ? `${money(p.usdPerSol)} / SOL` : 'wallet read from a public RPC'}`,
   };
 }

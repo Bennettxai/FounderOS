@@ -17,7 +17,7 @@ function sources(dir: string): string[] {
 }
 
 /**
- * Interaction-layer contract (Founder OS Interaction Rebrand, 2026-09-07).
+ * Interaction-layer contract (Bennett OS Interaction Rebrand, 2026-09-07).
  * The look stays Monolith Signal; what changes is how the surface answers the
  * mouse: hover lens (magnify + magnetic pull), press sink, async idle→busy→done,
  * sliding tab selection, radius on controls while structural boxes stay square.
@@ -59,7 +59,7 @@ describe('interaction layer foundation', () => {
     for (const s of ["ctl: '6px'", "panel: '10px'", "tile: '12px'", "lens: '630ms'", "press: '200ms'", 'om-pop', 'om-shimmer']) {
       expect(tw).toContain(s);
     }
-    // premium pass (2026-09-07, the operator's override of real-screen-wins): structural
+    // premium pass (2026-09-07, Bennett's override of real-screen-wins): structural
     // boxes round to the mock's scale instead of staying square
     expect(tw).toContain("'sm-t': '5px'");
     expect(tw).toContain("'md-t': '8px'");
@@ -185,7 +185,7 @@ describe('doctor / funnel / finances / integrations interaction pass', () => {
     expect(src).toContain('pressable');
   });
   test('funnel control-line links press and sit on the ctl radius', () => {
-    const src = read('app/funnel/page.tsx');
+    const src = read('app/funnel/page.tsx') + read('components/FunnelLayoutToggle.tsx');
     expect(src).toContain('pressable');
     expect(src).toContain('rounded-ctl');
   });
@@ -198,24 +198,10 @@ describe('doctor / funnel / finances / integrations interaction pass', () => {
     expect(read('components/ConnectionCard.tsx')).toContain('rounded-tile');
     expect(read('components/ConnectFlow.tsx')).toContain('pressable');
   });
-  test('the cursor spotlight is page-wide, mounted once in the layout, like the design screens', () => {
-    // The mock puts data-spot on the whole screen, so the glow follows the
-    // cursor across sidebar and content alike. One fixed layer replaces the
-    // per-card islands (home Done today, doctor stage) so nothing doubles up.
-    expect(read('app/layout.tsx')).toContain('<PageSpotlight />');
-    const spot = read('components/Spotlight.tsx');
-    expect(spot).toContain('export function PageSpotlight');
-    expect(spot).toContain('spotlight is-page');
-    const css = read('app/globals.css');
-    expect(css).toMatch(/\.spotlight\.is-page\s*\{[^}]*position:\s*fixed/);
-    expect(css).toContain('var(--px');
-    const lens = read('lib/hooks/useLens.ts');
-    expect(lens).toContain('documentElement');
-    expect(lens).toContain('--px');
-    expect(read('app/page.tsx')).not.toContain('data-spot');
-    expect(read('app/doctor/page.tsx')).not.toContain('data-spot');
-  });
-});
+  test('the public demo does not mount a cursor spotlight', () => {
+    expect(read('app/layout.tsx')).not.toContain('<PageSpotlight />');
+    expect(read('components/Spotlight.tsx')).not.toContain('<span');
+  });});
 
 describe('trading / usage interaction pass', () => {
   test('trading position, order and trade-log rows carry the row lens', () => {
@@ -229,7 +215,7 @@ describe('trading / usage interaction pass', () => {
     expect(src).toContain('rounded-ctl');
     expect(src).toContain('animate-enter');
   });
-  // The /usage board only exists on the founder-os lineage; main has not
+  // The /usage board only exists on the bennett-os lineage; main has not
   // taken that feature yet, so the contract is conditional on the file.
   test.skipIf(!existsSync(join(process.cwd(), 'components/UsageBoard.tsx')))('usage seat cards carry the row lens', () => {
     const src = read('components/UsageBoard.tsx');
@@ -275,7 +261,8 @@ describe('tab completion pass: every control presses', () => {
   const withRawButtons = componentFiles.filter((n) => read(`components/${n}`).includes('<button'));
 
   test.each(withRawButtons)('%s buttons press', (name) => {
-    expect(read(`components/${name}`)).toContain('pressable');
+    // The slab kit's chipClass() and PILL (components/slab.tsx) carry `pressable` themselves.
+    expect(read(`components/${name}`)).toMatch(/pressable|chipClass\(|\bPILL\b/);
   });
 
   test('the comms lane rows carry the row lens', () => {
@@ -311,7 +298,9 @@ describe('turn-3 pass: the screens the earlier passes missed', () => {
           else if (c === '>' && depth === 0) break;
           i += 1;
         }
-        if (!src.slice(idx, i + 1).includes('pressable')) {
+        // The slab kit's chipClass() and PILL (components/slab.tsx) carry `pressable` themselves.
+        const tag = src.slice(idx, i + 1);
+        if (!tag.includes('pressable') && !tag.includes('chipClass(') && !/\bPILL\b/.test(tag)) {
           offenders.push(`${rel}:${src.slice(0, idx).split('\n').length}`);
         }
         idx = src.indexOf('<button', i);
@@ -345,13 +334,15 @@ describe('turn-3 pass: the screens the earlier passes missed', () => {
   test('funnel venture tabs, view toggles and segment chips carry the control lens', () => {
     // mock-3c pass folded the four view text links into two mapped chip Links,
     // so 5 source sites now cover every control (each map renders many chips)
-    const src = read('app/funnel/page.tsx');
+    const src = read('app/funnel/page.tsx') + read('components/FunnelLayoutToggle.tsx');
     expect((src.match(/data-lens="c"/g) ?? []).length).toBeGreaterThanOrEqual(5);
   });
 
   test('trading open orders and trade log rows carry the row lens', () => {
     const src = read('components/trading/TradingBoard.tsx');
-    expect((src.match(/data-lens="r"/g) ?? []).length).toBeGreaterThanOrEqual(4);
+    // open orders, positions, trade log. The account meters left for the
+    // slab kit's shared MeterStack on 2026-09-24 and are not rows.
+    expect((src.match(/data-lens="r"/g) ?? []).length).toBeGreaterThanOrEqual(3);
   });
 
   test('integrations category rows, connection tiles and connect controls carry the lens', () => {

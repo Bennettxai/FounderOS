@@ -18,19 +18,20 @@ import {
   PLATFORM_LABELS,
 } from '@/lib/social';
 import { syncFromZernioLive } from '@/lib/social-live';
-import { zernioRecentPosts, zernioPostDays } from '@/lib/connectors/zernio';
-import { buildEmailList, syncBeehiivEmail } from '@/lib/email-list';
+import { zernioRecentPosts, zernioPostDaysKnown } from '@/lib/connectors/zernio';
+import { buildEmailList } from '@/lib/email-list';
 import { likeToViewRatio, averageLikeToView, formatRatioPct } from '@/lib/engagement';
 import type { SocialPlatform } from '@/lib/schemas';
-import { PageHeader } from '@/components/PageHeader';
-import { Badge, SectionHead } from '@/components/terminal';
+import { Slab, SlabTitle, SlabCard, BigStat, Chip, MeterStack, InsightCard, PILL, PILL_ACCENT } from '@/components/slab';
+import { StepLine, DotMatrix } from '@/components/slab-charts';
+import { socialVolume } from '@/lib/social-volume';
 import { formatFollowers, formatPct } from '@/components/SocialStats';
 import { SocialStatStrip } from '@/components/SocialStatStrip';
 import { AudienceConsistencyLazy } from '@/components/AudienceConsistencyLazy';
 import { AudiencePie } from '@/components/AudiencePie';
 import { PostComposer } from '@/components/PostComposer';
-import { Rise } from '@/components/motion';
 import { CountUp } from '@/components/CountUp';
+import { Rise } from '@/components/motion';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,15 +43,15 @@ const PLATFORM_ICONS: Record<SocialPlatform, PlatformIcon> = {
   linkedin: Linkedin,
 };
 
-// Recent published content — seeded dummy until a Zernio published-posts pull
+// Recent published content  -  seeded dummy until a Zernio published-posts pull
 // lands (the publish queue below is the real, wired path). views/likes carry
 // the like-to-view (engagement) ratio shown per post + averaged in the header.
 const RECENT_POSTS = [
   { tag: 'Instagram · Reel', ago: '2h', caption: '3 agents that run my business while I sleep', kind: 'views', views: 12400, likes: 1104 },
   { tag: 'TikTok · Video', ago: '6h', caption: 'POV: your operating system has a command palette', kind: 'views', views: 8100, likes: 640 },
   { tag: 'X · Thread', ago: '1d', caption: 'How I wired 7 real connectors into one OS', kind: 'impressions', views: 1200, likes: 74 },
-  { tag: 'YouTube · Long', ago: '2d', caption: 'Founder OS walkthrough — building in public #4', kind: 'views', views: 940, likes: 88 },
-  { tag: 'Instagram · Carousel', ago: '3d', caption: 'The demo-first, real-ready architecture', kind: 'reach', views: 6700, likes: 717 },
+  { tag: 'YouTube · Long', ago: '2d', caption: 'Founder OS walkthrough  -  building in public #4', kind: 'views', views: 940, likes: 88 },
+  { tag: 'Instagram · Carousel', ago: '3d', caption: 'The larp-first, real-ready architecture', kind: 'reach', views: 6700, likes: 717 },
 ];
 
 // Human label for a raw Zernio platform string (falls back to capitalising it).
@@ -95,8 +96,10 @@ export default async function SocialPage() {
   // Live follower-count sync from Zernio/Late (falls back to static config when
   // the API is unreachable). This makes every figure on the page real-time.
   await syncFromZernioLive(db);
-  // Live Beehiiv subscriber count (no-op without a key → seeded fallback).
-  await syncBeehiivEmail(db);
+  // Beehiiv is snapshotted by the analytics heartbeat (every 15 min, launchd),
+  // not here: collecting on render made the series a record of when this tab
+  // was opened rather than of the list (BEN-659). This page only reads.
+
   const dash = buildSocialDashboard(db);
   const email = buildEmailList(db);
   // The platform actually leading 7-day growth (real snapshots, null-safe);
@@ -111,7 +114,7 @@ export default async function SocialPage() {
 
   // Real published posts straight from Zernio/Late. Engagement (likes/views) is
   // behind Late's paid analytics add-on, so live posts show the post link in its
-  // place — never invented numbers. Falls back to sample posts (with the L/V
+  // place  -  never invented numbers. Falls back to sample posts (with the L/V
   // ratio) only when the live history is empty.
   const livePosts = await zernioRecentPosts(5);
   const recentLive = livePosts.length > 0;
@@ -124,21 +127,53 @@ export default async function SocialPage() {
   // Late) for the interactive left-column charts. `today` is computed server-side
   // and passed down so the chart's date axis can't drift between server/client.
   const audiencePoints = audienceSeries(db).all.points;
-  const postDays = await zernioPostDays();
+  // null = Zernio gave no answer: the history is unknown, never "nothing posted".
+  const knownDays = await zernioPostDaysKnown().catch(() => null);
+  const postsKnown = knownDays !== null;
+  const postDays = knownDays ?? [];
   const today = new Date().toISOString().slice(0, 10);
 
+  // The Brand Deals slab's numbers (2026-09-24), all from the rows above.
+  const audienceGrowthNow = audienceGrowth(db);
+  const v = socialVolume({
+    channels: [
+      ...dash.platforms.map((p) => ({ key: p.platform, label: PLATFORM_LABELS[p.platform], value: p.followers })),
+      { key: 'email', label: 'Email list', value: email.subscribers },
+    ],
+    total,
+    growth7: audienceGrowthNow.d7,
+    leader: growthLeader,
+    dmThreads: dmInbox.map((t) => ({ name: t.name, unreplied: t.unreplied })),
+    queued,
+    postDays,
+    today,
+  });
+  const topPlatform = v.mix.reduce((best, m) => (m.count > best.count ? m : best), v.mix[0]);
+
   return (
-    <div>
-      <PageHeader
+    <Slab>
+      <SlabTitle
         eyebrow="audience"
         title="Social"
-        right={<Badge tone="ok">● zernio live</Badge>}
+        meta={`${formatFollowers(total)} reach · ${postsKnown ? v.postsInWindow : '?'} posts in 30 days · ${queued} queued · ${dmInbox.length} DM threads`}
+        right={
+          <>
+            <Chip tone="ok">zernio live</Chip>
+            <Link href="/social/beehiiv" className={PILL}>
+              Beehiiv
+            </Link>
+            <Link href="/agents" className={PILL_ACCENT}>
+              Social agent
+            </Link>
+          </>
+        }
       />
 
-      {/* Every account on the first screen — compact row, one cell per channel.
-          Click through for the platform detail. */}
-      <SectionHead label="Accounts" count={`${formatFollowers(total)} total`} />
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+      {/* Hero row, Brand Deals' shape: every account + the volume card.
+          Every account stays on the first screen; click through for detail. */}
+      <div className="grid grid-cols-[2fr_1fr] gap-6 max-[1200px]:grid-cols-1">
+        <SlabCard i={1} title="Accounts" sub={`${formatFollowers(total)} total`}>
+      <div className="grid grid-cols-2 gap-3 px-6 pb-6 pt-4 sm:grid-cols-3">
         {dash.platforms.map((p, i) => {
           const Icon = PLATFORM_ICONS[p.platform];
           const share = total > 0 && p.followers != null ? (p.followers / total) * 100 : 0;
@@ -148,7 +183,7 @@ export default async function SocialPage() {
               href={`/social/${p.platform}`}
               title={`${share.toFixed(0)}% of reach`}
               data-lens="r"
-              className="pressable is-row rise group rounded-lg-t border border-os-border bg-os-surface px-4 py-4"
+              className="pressable is-row rise group rounded-[10px] border border-os-border bg-os-bg px-4 py-4"
               style={{ '--rise-i': i } as React.CSSProperties}
             >
               <div className="flex items-center gap-2">
@@ -176,12 +211,12 @@ export default async function SocialPage() {
           );
         })}
 
-        {/* Email list — same cell, Beehiiv-backed; opens the Beehiiv dashboard */}
+        {/* Email list  -  same cell, Beehiiv-backed; opens the Beehiiv dashboard */}
         <Link
           href="/social/beehiiv"
           title={`${total > 0 && email.subscribers != null ? ((email.subscribers / total) * 100).toFixed(0) : 0}% of reach · open Beehiiv analytics`}
           data-lens="r"
-          className="pressable is-row rise rounded-lg-t border border-os-border bg-os-surface px-4 py-4"
+          className="pressable is-row rise rounded-[10px] border border-os-border bg-os-bg px-4 py-4"
           style={{ '--rise-i': dash.platforms.length } as React.CSSProperties}
         >
           <div className="flex items-center gap-2">
@@ -199,7 +234,7 @@ export default async function SocialPage() {
           <div className="mt-3 font-mono text-[26px] font-semibold leading-none tracking-[-0.02em]">
             {email.subscribers == null ? formatFollowers(null) : <CountUp value={email.subscribers} kind="followers" />}
           </div>
-          <div className="mt-1.5 truncate font-mono text-[9.5px] text-os-dim">Beehiiv · the operator&apos;s Newsletter</div>
+          <div className="mt-1.5 truncate font-mono text-[9.5px] text-os-dim">Beehiiv · Alex&apos;s Newsletter</div>
           <div className="mt-3 h-1 overflow-hidden rounded-sm-t bg-os-surface2">
             <div
               className="fill h-full bg-os-accent opacity-60"
@@ -208,15 +243,64 @@ export default async function SocialPage() {
           </div>
         </Link>
       </div>
+        </SlabCard>
 
-      {/* Summary strip — Total reach + Audience-growth + Total-DMs interactive
+        <SlabCard i={2} title="Audience Volume" className="flex flex-col">
+          <div className="flex flex-1 flex-col px-6 pb-6 pt-3">
+            <BigStat value={v.headline} kind="followers" chips={v.chips} caption={v.caption} />
+            <MeterStack meters={v.meters} foot={v.foot} empty="no channel is reporting followers yet" />
+          </div>
+        </SlabCard>
+      </div>
+
+      {/* Second row: posting line, platform mix, THE gradient card */}
+      <div className="mb-6 mt-6 grid grid-cols-3 gap-6 max-[1200px]:grid-cols-1">
+        <SlabCard i={3} title="Posting Activity" sub="last 30 days">
+          <div className="px-6 pt-3">
+            <BigStat
+              size={30}
+              value={v.postsInWindow}
+              display={postsKnown ? undefined : ' - '}
+              caption={postsKnown ? 'posts out through Zernio' : 'Zernio not answering · posting history unknown'}
+            />
+          </div>
+          <StepLine
+            series={v.series}
+            hue="var(--send-activity)"
+            unit=" posts"
+            empty={postsKnown ? 'No posts in the last 30 days.' : 'Posting history unavailable right now.'}
+          />
+        </SlabCard>
+
+        <SlabCard i={4} title="Platform Mix" sub="posts per platform">
+          <div className="flex items-end justify-between gap-4 px-6 pb-6 pt-3">
+            <BigStat
+              size={30}
+              display={topPlatform.count > 0 ? topPlatform.label : postsKnown ? 'none' : ' - '}
+              caption={topPlatform.count > 0 ? `most posted · ${topPlatform.count} posts` : postsKnown ? 'nothing posted in 30 days' : 'posting history unknown'}
+            />
+            <DotMatrix cols={v.mix} hue="var(--ramp-1)" />
+          </div>
+        </SlabCard>
+
+        <InsightCard
+          i={5}
+          badge="Needs reply"
+          value={v.insight.value}
+          headline={v.insight.headline}
+          body={v.insight.body}
+          frac={v.insight.frac}
+        />
+      </div>
+
+      {/* Summary strip  -  Total reach + Audience-growth + Total-DMs interactive
           tiles, and the Instagram DMs tile (click to open the inbox and reply).
           The old "Top platform" tile was retired as a dead metric. */}
-      <Rise i={8}>
+      <Rise i={6}>
       <SocialStatStrip
         growthLeader={growthLeader}
         audienceTotal={total}
-        audienceGrowth={audienceGrowth(db)}
+        audienceGrowth={audienceGrowthNow}
         totalDms={totalDms(db)}
         dmGrowth={dmGrowth(db)}
         platformsCount={dash.platforms.length}
@@ -227,7 +311,7 @@ export default async function SocialPage() {
 
       {/* Charts left, audience-share pie riding the right of the same card;
           Recent posts live underneath as a row of boxes. */}
-      <Rise i={9} className="mb-6">
+      <Rise i={7} className="mb-6">
         <AudienceConsistencyLazy
           audience={audiencePoints}
           postDays={postDays}
@@ -251,23 +335,23 @@ export default async function SocialPage() {
         />
       </Rise>
 
-      {/* Recent posts — box row, newest first; the dot strip grades recency
+      {/* Recent posts  -  box row, newest first; the dot strip grades recency
           (all dots lit = most recent, fading down to the oldest). */}
-      <Rise as="section" i={10} className="mb-6">
-        <SectionHead
-          label="Recent posts"
-          count={
-            recentLive
-              ? `${livePosts.length} live · zernio`
-              : `${formatRatioPct(averageLikeToView(RECENT_POSTS))} avg L/V · sample`
-          }
-        />
-        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-5">
+      <SlabCard
+        i={8}
+        title="Recent posts"
+        sub={
+          recentLive
+            ? `${livePosts.length} live · zernio`
+            : `${formatRatioPct(averageLikeToView(RECENT_POSTS))} avg L/V · sample`
+        }
+      >
+        <div className="grid gap-3 px-6 pb-6 pt-4 sm:grid-cols-2 xl:grid-cols-5">
           {recentLive
             ? livePosts.map((p, i) => (
                 <div
                   key={`${p.url}-${i}`}
-                  data-lens="r" className="pressable is-row flex flex-col rounded-lg-t border border-os-border bg-os-surface px-3.5 py-3"
+                  data-lens="r" className="pressable is-row flex flex-col rounded-[10px] border border-os-border bg-os-bg px-3.5 py-3"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-os-accent">
@@ -293,7 +377,7 @@ export default async function SocialPage() {
                 </div>
               ))
             : RECENT_POSTS.map((p, i) => (
-                <div key={p.caption} data-lens="r" className="pressable is-row flex flex-col rounded-lg-t border border-os-border bg-os-surface px-3.5 py-3">
+                <div key={p.caption} data-lens="r" className="pressable is-row flex flex-col rounded-[10px] border border-os-border bg-os-bg px-3.5 py-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-os-accent">{p.tag}</span>
                     <span className="shrink-0 font-mono text-[10px] text-os-dim">{p.ago}</span>
@@ -316,13 +400,24 @@ export default async function SocialPage() {
                 </div>
               ))}
         </div>
-      </Rise>
+      </SlabCard>
 
-      {/* Publish — compose a post that queues for the Social agent */}
-      <section className="mt-10">
-        <SectionHead label="Publish" count={`${queued} queued`} link="Social agent" href="/agents" />
-        <PostComposer initialPosts={posts} />
-      </section>
-    </div>
+      {/* Publish  -  compose a post that queues for the Social agent */}
+      <SlabCard
+        i={9}
+        title="Publish"
+        sub={`${queued} queued`}
+        className="mt-6"
+        action={
+          <Link href="/agents" className={PILL}>
+            Social agent
+          </Link>
+        }
+      >
+        <div className="px-6 pb-6 pt-4">
+          <PostComposer initialPosts={posts} />
+        </div>
+      </SlabCard>
+    </Slab>
   );
 }

@@ -13,7 +13,7 @@ const dateLabel = (iso: string) =>
 function Metric({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: 'ok' | 'warn' | 'err' }) {
   const color = tone === 'ok' ? 'text-os-ok' : tone === 'warn' ? 'text-os-warn' : tone === 'err' ? 'text-os-err' : 'text-os-text';
   return (
-    <div className="rounded-sm-t border border-os-border bg-os-bg px-3 py-2.5">
+    <div className="rounded-[8px] border border-os-border bg-os-surface px-3 py-2.5">
       <div className="font-mono text-[9px] uppercase tracking-[0.16em] text-os-dim">{label}</div>
       <div className={`mt-1 font-mono text-[17px] font-semibold leading-none tracking-[-0.02em] ${color}`}>{value}</div>
       {sub && <div className="mt-1 font-mono text-[9.5px] text-os-dim">{sub}</div>}
@@ -30,39 +30,41 @@ export function NewsletterList({ newsletters }: { newsletters: Newsletter[] }) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   if (newsletters.length === 0) {
-    return <p className="rounded-lg-t border border-os-border bg-os-surface px-4 py-6 text-center font-mono text-[11px] text-os-dim">No newsletters yet.</p>;
+    return <p className="py-6 text-center text-[12.5px] text-os-dim">No newsletters yet.</p>;
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       {newsletters.map((n) => {
         const expanded = openId === n.id;
         return (
-          <div key={n.id} className="overflow-hidden rounded-lg-t border border-os-border bg-os-surface">
+          <div key={n.id} className="overflow-hidden rounded-[10px] border border-os-border bg-os-bg">
             <button
               onClick={() => setOpenId(expanded ? null : n.id)}
               aria-expanded={expanded}
-              className="pressable flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-os-surface2"
+              className="pressable flex w-full items-center gap-4 px-5 py-4 text-left hover:bg-[color-mix(in_oklab,var(--text)_4%,transparent)]"
             >
               <span className="shrink-0 text-os-dim">
                 {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-semibold">{n.title}</span>
-                <span className="mt-0.5 block font-mono text-[9.5px] uppercase tracking-[0.12em] text-os-dim">
+                <span className="block truncate text-[13.5px] font-medium">{n.title}</span>
+                <span className="mt-0.5 block font-mono text-[11px] text-os-dim">
                   {dateLabel(n.publishedAt)} · {fmt(n.recipients)} sent
                 </span>
               </span>
-              <span className="shrink-0 text-right">
-                <span className="block font-mono text-[17px] font-semibold leading-none tracking-[-0.02em] text-os-accent">
-                  {pct(n.openRate)}
-                </span>
-                <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-[0.14em] text-os-dim">open rate</span>
+              <span className="hidden shrink-0 font-mono text-[11px] tabular-nums text-os-dim sm:inline">{pct(n.clickRate)} click</span>
+              <span
+                className="shrink-0 rounded-full px-2.5 py-0.5 font-mono text-[11px] tabular-nums tracking-[0.04em]"
+                style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}
+                title="open rate"
+              >
+                {pct(n.openRate)} open
               </span>
             </button>
 
             {expanded && (
-              <div className="border-t border-os-border px-4 pb-4 pt-3">
+              <div className="border-t border-os-border px-5 pb-5 pt-4">
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
                   <Metric label="Recipients" value={fmt(n.recipients)} />
                   <Metric label="Delivered" value={fmt(n.delivered)} sub={pct(n.deliveryRate) + ' delivery'} tone="ok" />
@@ -79,7 +81,7 @@ export function NewsletterList({ newsletters }: { newsletters: Newsletter[] }) {
                     target="_blank"
                     rel="noreferrer"
                     data-lens="c"
-                    className="pressable is-dark mt-3 inline-flex items-center gap-1.5 rounded-ctl border border-os-border px-2.5 py-1 font-mono text-[10.5px] text-os-accent"
+                    className="pressable is-dark mt-4 inline-flex items-center gap-1.5 rounded-full border border-os-border px-3.5 py-1.5 text-[12.5px] text-os-accent"
                   >
                     Read the issue <ExternalLink className="h-3 w-3" />
                   </a>

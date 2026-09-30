@@ -3,7 +3,9 @@ import { getDb } from '@/lib/data';
 import { scanClaudeProjects, defaultProjectsDir, seatId } from '@/lib/connectors/claude-usage';
 import { codexSeat } from '@/lib/connectors/codex-usage';
 import { ollamaLane } from '@/lib/connectors/ollama-usage';
-import { seatVerdict, type SeatUsage } from '@/lib/usage';
+import { combineSeats, combineOllama, type SeatUsage } from '@/lib/usage';
+
+import { isGated } from '@/lib/gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +17,11 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   const now = new Date();
+  // Public demo never scans the host's private model transcripts or services.
+  if (isGated()) return NextResponse.json({
+    generatedAt: now.toISOString(), claude: null, codex: null,
+    ollama: combineOllama(null, [], now),
+  });
   const errors: Record<string, string> = {};
 
   let local: SeatUsage | null = null;
@@ -41,10 +48,9 @@ export async function GET() {
   const seats = [...(local ? [local] : []), ...pushed];
   return NextResponse.json({
     generatedAt: now.toISOString(),
-    seats,
-    codex,
-    ollama: await ollamaLane(),
-    verdict: seatVerdict(seats.filter((s) => s.kind === 'claude'), now),
+    claude: combineSeats(seats.filter((s) => s.kind === 'claude'), now),
+    codex: combineSeats([...(codex ? [codex] : []), ...pushed.filter((s) => s.kind === 'codex')], now),
+    ollama: combineOllama({ id: 'local', label: 'Local machine', lane: { ...await ollamaLane(), plan: null, requests: null } }, [], now),
     errors: Object.keys(errors).length ? errors : undefined,
   });
 }

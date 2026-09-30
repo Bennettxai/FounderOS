@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * The funnel as a circle — the journey runs outside → in. Seven acquisition
+ * The funnel as a circle  -  the journey runs outside → in. Seven acquisition
  * wedges around the rim (Instagram incl. paid ads, YouTube, newsletter, X,
  * LinkedIn, forms, word of mouth); concentric stage rings pull leads inward;
  * the center core is the purchase. Every node is a client: it enters outside
  * the rim in its wedge, spirals in through the rings it really visited, then
- * drifts alive inside its current band. Same node language as the flow view —
+ * drifts alive inside its current band. Same node language as the flow view  -
  * size = likelihood, hue = entry wedge, fade-to-red = quiet decay, green =
  * converted (and converted nodes leave their wedge for the shared core:
  * inside is inside).
@@ -30,9 +30,12 @@ const SEG_INSET = 0.13;
 const TOP = -Math.PI / 2; // wedge 0 starts at 12 o'clock
 
 /** Stage ring radii, outermost (first touch) → the converted core. */
-const RING = [288, 228, 170, 114, 48];
+// One radius per stage, outside → in; the last is the Closed core. Derived
+// from FUNNEL_STAGES so the rings follow the stage list (four since 2026-09-24).
+const RING = FUNNEL_STAGES.map((_, i, all) => (i === all.length - 1 ? 48 : Math.round(288 - (i * (288 - 114)) / Math.max(1, all.length - 2))));
+const CORE = RING[RING.length - 1];
 
-/** One hue per acquisition wedge — s4 (phosphor green) is skipped so no
+/** One hue per acquisition wedge  -  s4 (phosphor green) is skipped so no
  * wedge ever wears the conversion color. */
 const WEDGE_COLOR = [
   'var(--funnel-s0)',
@@ -65,10 +68,10 @@ const wedgeAngle = (n: FunnelRadialNode, i: number): number =>
 /**
  * The radius a node holds for a given ring: inside the band between its ring
  * and the next one in, likelihood pulling it deeper (hot ICP fit sits closer
- * to the purchase). Ring 4 = the core disc, likelihood ignored — they bought.
+ * to the purchase). Ring 4 = the core disc, likelihood ignored  -  they bought.
  */
 function bandRadius(n: FunnelRadialNode, i: number, ring: number): number {
-  if (ring >= RING.length - 1) return 6 + rnd(i, 12) * (RING[4] - 16);
+  if (ring >= RING.length - 1) return 6 + rnd(i, 12) * (CORE - 16);
   const outer = RING[ring] - 8;
   const inner = RING[ring + 1] + 12;
   const depth = 0.15 + 0.6 * (n.likelihood / 100) + rnd(i, 1) * 0.2;
@@ -78,7 +81,7 @@ function bandRadius(n: FunnelRadialNode, i: number, ring: number): number {
 /** Where node i drifts once it has arrived: alive, but held inside its band. */
 function orbitTarget(n: FunnelRadialNode, i: number, tMs: number): Pos {
   if (n.currentRing >= RING.length - 1) {
-    // converted: free slow orbit inside the shared core — they're in
+    // converted: free slow orbit inside the shared core  -  they're in
     const a = i * GOLDEN + tMs * 0.00005 * (rnd(i, 3) > 0.5 ? 1 : -1);
     return polar(a, bandRadius(n, i, 4));
   }
@@ -94,7 +97,7 @@ function replayPos(n: FunnelRadialNode, i: number, tMs: number, stagger: number)
   if (t <= 0) return polar(a, RING[0] + 46 + rnd(i, 5) * 26); // waiting outside the rim
   const stops = [RING[0] + 46, ...n.rings.map((ring) => bandRadius(n, i, ring))];
   const twist = (rnd(i, 8) > 0.5 ? 1 : -1) * 0.07; // slight spiral, not a straight dive
-  // shortest angular path into the core — never the long way around the circle
+  // shortest angular path into the core  -  never the long way around the circle
   const coreDelta = ((((i * GOLDEN) % TAU) - a + TAU * 1.5) % TAU) - Math.PI;
   for (let leg = 0; leg < stops.length - 1; leg++) {
     if (t < HOP_MS) {
@@ -109,7 +112,7 @@ function replayPos(n: FunnelRadialNode, i: number, tMs: number, stagger: number)
     if (t < DWELL_MS) return polar(a, stops[leg + 1]);
     t -= DWELL_MS;
   }
-  return null; // replay finished — hand over to the orbit
+  return null; // replay finished  -  hand over to the orbit
 }
 
 export function FunnelRadial({
@@ -117,13 +120,13 @@ export function FunnelRadial({
   initialLeadId,
 }: {
   model: FunnelRadialModel;
-  /** Deep link (?lead=) — the attention rail pins this lead's dossier. */
+  /** Deep link (?lead=)  -  the attention rail pins this lead's dossier. */
   initialLeadId?: string | null;
 }) {
   const { nodes, segments } = model;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoverId, setHoverId] = useState<string | null>(null);
-  // rail clicks navigate with ?lead= — pin that lead's dossier
+  // rail clicks navigate with ?lead=  -  pin that lead's dossier
   useEffect(() => {
     if (initialLeadId && nodes.some((n) => n.id === initialLeadId)) setSelectedId(initialLeadId);
   }, [initialLeadId, nodes]);
@@ -197,7 +200,7 @@ export function FunnelRadial({
         {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
       </button>
 
-      {/* hover readout — what the cursor is on, listed at the top, no click */}
+      {/* hover readout  -  what the cursor is on, listed at the top, no click */}
       {anchorNode && (
         <div className="pointer-events-none absolute left-2 top-1.5 z-20 flex items-baseline gap-2 font-mono">
           <span className="text-[12px] font-semibold text-os-text">{anchorNode.name}</span>
@@ -208,12 +211,12 @@ export function FunnelRadial({
       )}
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        className="block w-full"
+        className="funnel-radial-canvas block w-full"
         role="img"
         aria-label="Clients spiralling from their acquisition source into the conversion core"
         onClick={() => setSelectedId(null)}
       >
-        {/* stage rings — the journey's depth markers, outside → in */}
+        {/* stage rings  -  the journey's depth markers, outside → in */}
         {RING.slice(0, -1).map((r, s) => (
           <g key={`ring-${s}`}>
             <circle cx={CX} cy={CY} r={r} fill="none" stroke="var(--border)" strokeDasharray="2 6" />
@@ -240,8 +243,8 @@ export function FunnelRadial({
           return (
             <g key={seg.id}>
               <line
-                x1={polar(boundary, RING[4] + 12).x}
-                y1={polar(boundary, RING[4] + 12).y}
+                x1={polar(boundary, CORE + 12).x}
+                y1={polar(boundary, CORE + 12).y}
                 x2={polar(boundary, RING[0]).x}
                 y2={polar(boundary, RING[0]).y}
                 stroke="var(--border)"
@@ -266,18 +269,18 @@ export function FunnelRadial({
           );
         })}
 
-        {/* the core — inside is where they bought */}
+        {/* the core  -  inside is where they bought */}
         <circle
           className="funnel-hub-ring"
           cx={CX}
           cy={CY}
-          r={RING[4] + 10}
+          r={CORE + 10}
           fill="none"
           stroke="var(--ok)"
           strokeOpacity={0.45}
           strokeDasharray="3 7"
         />
-        <circle cx={CX} cy={CY} r={RING[4]} fill="var(--surface-2)" stroke="var(--ok)" strokeOpacity={0.55} strokeWidth={1.2} />
+        <circle cx={CX} cy={CY} r={CORE} fill="var(--surface-2)" stroke="var(--ok)" strokeOpacity={0.55} strokeWidth={1.2} />
         <text
           x={CX}
           y={CY - 2}

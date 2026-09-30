@@ -1,3 +1,4 @@
+import { isGated } from '@/lib/gate';
 import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -95,6 +96,7 @@ function localSearch(storePath: string, query: string, limit = 5): BrainSearchRe
 
 /** Read every markdown page in the store as { path (posix-relative), content }. */
 export function readStoreNotes(storePath: string = DEFAULT_STORE): { path: string; content: string }[] {
+  if (isGated()) return [];
   const notes: { path: string; content: string }[] = [];
   for (const file of walkMarkdown(storePath)) {
     try {
@@ -231,6 +233,23 @@ function storeFolders(storePath: string): { name: string; files: number }[] {
 }
 
 export function createGBrainProvider(opts: { exec?: ExecFn; storePath?: string } = {}): GBrainProvider {
+  if (isGated()) {
+    const detail = 'Demo mode: local knowledge and diagnostics are private.';
+    return {
+      name: 'demo',
+      async status() { return { connected: false, provider: 'demo', detail }; },
+      async search() { return []; },
+      async localStats() { return { markdownFiles: 0, storePath: 'demo/brain-store' }; },
+      async overview() {
+        return {
+          store: { path: 'demo/brain-store', totalFiles: 0, folders: [] },
+          doctor: { connected: false, status: 'demo', healthScore: null, checks: [], detail },
+        };
+      },
+      async stats() { return null; },
+      async capture() { return { ok: false, error: 'Capture is disabled in the public demo.' }; },
+    };
+  }
   const exec = opts.exec ?? defaultExec;
   const storePath = opts.storePath ?? DEFAULT_STORE;
 

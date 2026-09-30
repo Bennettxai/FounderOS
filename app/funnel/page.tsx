@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { FunnelLayoutToggle } from '@/components/FunnelLayoutToggle';
 import {
   attentionQueue,
   funnelSummary,
@@ -21,8 +22,11 @@ import { trakyoStatus } from '@/lib/connectors/trakyo';
 import { metaAdsStatus } from '@/lib/connectors/meta-ads';
 import { getVenture } from '@/lib/ventures';
 import { FunnelRadialLazy, FunnelSpaceLazy } from '@/components/FunnelGraphsLazy';
-import { Badge, SectionHead } from '@/components/terminal';
+import { Badge } from '@/components/terminal';
 import { Rise } from '@/components/motion';
+import { Slab, SlabTitle, SlabCard, BigStat, MeterStack, InsightCard, chipClass } from '@/components/slab';
+import { StepLine } from '@/components/slab-charts';
+import { funnelVolume } from '@/lib/funnel-volume';
 import {
   FunnelStageSchema,
   FunnelVentureSchema,
@@ -34,6 +38,7 @@ import {
 import type { ConnectorStatus } from '@/lib/connectors/types';
 
 export const dynamic = 'force-dynamic';
+const STAGE_LABEL = Object.fromEntries(FUNNEL_STAGES.map((s) => [s.id, s.label]));
 
 const VENTURE_TABS: { id: FunnelVenture | 'all'; label: string }[] = [
   { id: 'all', label: 'All clients' },
@@ -54,7 +59,7 @@ function ventureColor(id: FunnelVenture): string {
   return getVenture(id)?.color ?? 'var(--accent)';
 }
 
-/** Compact source check: ✓ when connected, ○ when pending — detail on hover. */
+/** Compact source check: ✓ when connected, ○ when pending  -  detail on hover. */
 function SourceCheck({ status, live, count }: { status: ConnectorStatus; live?: boolean; count?: number }) {
   const ok = status.state === 'connected';
   return (
@@ -70,15 +75,16 @@ function SourceCheck({ status, live, count }: { status: ConnectorStatus; live?: 
   );
 }
 
+/** One touch on a journey, as a rounded pill: channel glyph, label, date. */
 function TouchChip({ touch }: { touch: FunnelTouch }) {
   return (
     <span
-      className="inline-flex max-w-[260px] items-center gap-1.5 rounded-sm-t border border-os-border bg-os-surface2 px-2 py-1"
+      className="inline-flex max-w-[260px] items-center gap-1.5 rounded-full border border-os-border px-2.5 py-1"
       title={`${touch.stage} · via ${touch.source} · ${touch.at}`}
     >
-      <span className="shrink-0 font-mono text-[10px] text-os-accent">{CHANNEL_GLYPHS[touch.channel] ?? '·'}</span>
-      <span className="truncate text-[11px] text-os-muted">{touch.label}</span>
-      <span className="shrink-0 font-mono text-[9.5px] text-os-dim">{touch.at.slice(5)}</span>
+      <span className="shrink-0 font-mono text-[10.5px] text-os-accent">{CHANNEL_GLYPHS[touch.channel] ?? '·'}</span>
+      <span className="truncate text-[11.5px] text-os-muted">{touch.label}</span>
+      <span className="shrink-0 font-mono text-[10px] text-os-dim">{touch.at.slice(5)}</span>
     </span>
   );
 }
@@ -89,12 +95,36 @@ const RELATIONSHIP_VAR: Record<FunnelJourney['relationship'], string> = {
   cold: 'var(--funnel-cold)',
 };
 
-/** Compact outreach links — only the channels this lead actually has. */
+const PILL_BASE = 'shrink-0 rounded-full px-2.5 py-0.5 font-mono text-[10.5px] uppercase tracking-[0.1em]';
+
+/** Brand Deals status pills: closed reads ok, a stalled lead err, the rest neutral. */
+function stagePillStyle(journey: FunnelJourney, now: Date): React.CSSProperties {
+  const state = journeyMeta(journey, now).state;
+  if (state === 'converted') return { background: 'color-mix(in oklab, var(--ok) 16%, transparent)', color: 'var(--ok)' };
+  if (state === 'stalled' || state === 'decayed') return { background: 'color-mix(in oklab, var(--err) 16%, transparent)', color: 'var(--err)' };
+  return { background: 'color-mix(in oklab, var(--text) 8%, transparent)', color: 'var(--text-2)' };
+}
+
+/** Quiet days fade toward red as a lead decays (same rule as the graph). */
+function quietStyle(days: number, journey: FunnelJourney): React.CSSProperties | undefined {
+  const decay = decayFactor(days, journey.status);
+  return decay > 0 ? { color: `color-mix(in oklab, var(--err) ${Math.round(Math.sqrt(decay) * 85)}%, var(--text-2))` } : undefined;
+}
+
+function ValuePill({ amount }: { amount: number }) {
+  return (
+    <span className="shrink-0 rounded-full px-2.5 py-0.5 font-mono text-[10.5px] tabular-nums tracking-[0.04em]" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
+      {usd(amount)}
+    </span>
+  );
+}
+
+/** Compact outreach links, only the channels this lead actually has. */
 function ContactActions({ journey }: { journey: FunnelJourney }) {
   const digits = journey.phone?.replace(/[^\d]/g, '');
-  const isGhl = journey.url?.includes('gohighlevel');
+  const isCall = journey.url?.includes('fathom');
   return (
-    <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide">
+    <span className="flex items-center gap-2.5 font-mono text-[10.5px] uppercase tracking-wide">
       {journey.email && (
         <a href={`mailto:${journey.email}`} title={journey.email} className="text-os-muted hover:text-os-accent">
           email
@@ -123,15 +153,15 @@ function ContactActions({ journey }: { journey: FunnelJourney }) {
           rel="noopener noreferrer"
           className="text-os-dim hover:text-os-accent"
         >
-          {isGhl ? 'ghl↗' : 'attio↗'}
+          {isCall ? 'call↗' : 'open↗'}
         </a>
       )}
-      {!journey.email && !journey.phone && !journey.url && <span className="text-os-dim">—</span>}
+      {!journey.email && !journey.phone && !journey.url && <span className="text-os-dim">no contact</span>}
     </span>
   );
 }
 
-/** One attention row — clicking it pins that lead's dossier in the canvas. */
+/** One attention row, roomy: clicking it pins that lead's dossier in the canvas. */
 function AttentionRow({
   journey,
   now,
@@ -142,35 +172,27 @@ function AttentionRow({
   href: string;
 }) {
   const meta = journeyMeta(journey, now);
-  const decay = decayFactor(meta.daysSinceLastTouch, journey.status);
-  const stageLabel = FUNNEL_STAGES.find((s) => s.id === journey.status)?.label ?? journey.status;
   return (
     <Link
       href={href}
       data-lens="r"
-      className="pressable is-row group flex items-baseline gap-2 border-t border-os-border px-2.5 py-1.5"
+      className="pressable is-row group grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-os-border px-6 py-3.5 last:border-0 hover:bg-[color-mix(in_oklab,var(--text)_4%,transparent)]"
     >
-      <span className="min-w-0 flex-1 truncate text-[12px] font-semibold group-hover:text-os-accent">
-        {journey.person ?? journey.name}
+      <span className="min-w-0">
+        <span className="block truncate text-[13.5px] font-medium group-hover:text-os-accent">{journey.person ?? journey.name}</span>
+        <span className="block truncate font-mono text-[11px] text-os-dim">
+          {[journey.company, `${journey.likelihood}% likely`].filter(Boolean).join(' · ')}
+        </span>
       </span>
-      {journey.company && (
-        <span className="hidden max-w-[120px] truncate text-[10.5px] text-os-dim sm:inline">{journey.company}</span>
-      )}
-      <span className="shrink-0 font-mono text-[9.5px] uppercase tracking-wide text-os-dim">{stageLabel}</span>
-      <span
-        className="shrink-0 font-mono text-[10px]"
-        style={
-          decay > 0
-            ? { color: `color-mix(in oklab, var(--err) ${Math.round(Math.sqrt(decay) * 85)}%, var(--text-2))` }
-            : { color: 'var(--text-3)' }
-        }
-      >
+      <span className="flex items-center gap-2">
+        {(journey.amountUsd ?? 0) > 0 && <ValuePill amount={journey.amountUsd ?? 0} />}
+        <span className={PILL_BASE} style={stagePillStyle(journey, now)}>
+          {STAGE_LABEL[journey.status]}
+        </span>
+      </span>
+      <span className="w-[44px] text-right font-mono text-[11px] tabular-nums text-os-dim" style={quietStyle(meta.daysSinceLastTouch, journey)}>
         {meta.daysSinceLastTouch}d
       </span>
-      <span className="shrink-0 font-mono text-[10px] text-os-muted">{journey.likelihood}%</span>
-      {(journey.amountUsd ?? 0) > 0 && (
-        <span className="shrink-0 font-mono text-[10px] text-os-muted">{usd(journey.amountUsd ?? 0)}</span>
-      )}
     </Link>
   );
 }
@@ -180,8 +202,8 @@ const agoDays = (ts: string, now: Date): string => {
   return d === 0 ? 'today' : `${d}d ago`;
 };
 
-/** Two table rows per client: the formatted data line, then their touches. */
-function JourneyTableRows({
+/** One roomy row per client: the data line, then their touches. */
+function JourneyRow({
   journey,
   now,
   lastMsg,
@@ -191,10 +213,8 @@ function JourneyTableRows({
   /** undefined = lookup not run (no segment selected) · null = no thread found */
   lastMsg?: CommsItem | null;
 }) {
-  const stageLabel = FUNNEL_STAGES.find((s) => s.id === journey.status)?.label ?? journey.status;
   const converted = journey.status === 'converted';
   const meta = journeyMeta(journey, now);
-  const decay = decayFactor(meta.daysSinceLastTouch, journey.status);
   const entrySource = journey.touches[0]?.source;
   const lane =
     entrySource === 'attio' || entrySource === 'ghl'
@@ -203,85 +223,71 @@ function JourneyTableRows({
         ? 'ads'
         : 'organic';
   return (
-    <>
-      <tr className="border-t border-os-border">
-        <td className="px-3 py-2.5">
-          <span className="flex items-center gap-2">
-            <span
-              className="h-2 w-2 shrink-0 rounded-full"
-              style={{ background: ventureColor(journey.venture) }}
-              title={getVenture(journey.venture)?.label}
-            />
-            <span className="min-w-0">
-              <span className="block truncate text-[12.5px] font-semibold" title={journey.name}>
-                {journey.person ?? journey.name}
-              </span>
-              {journey.company && (
-                <span className="block truncate text-[10px] text-os-dim">{journey.company}</span>
-              )}
+    <div data-lens="r" className="is-row border-b border-os-border px-6 py-3.5 last:border-0 hover:bg-[color-mix(in_oklab,var(--text)_4%,transparent)]">
+      <div className="grid grid-cols-[minmax(200px,1fr)_auto_auto_auto_auto] items-center gap-5 max-[1000px]:grid-cols-[1fr_auto]">
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span
+            className="h-2 w-2 shrink-0 rounded-full"
+            style={{ background: ventureColor(journey.venture) }}
+            title={getVenture(journey.venture)?.label}
+          />
+          <span className="min-w-0">
+            <span className="block truncate text-[13.5px] font-medium" title={journey.name}>
+              {journey.person ?? journey.name}
+            </span>
+            <span className="block truncate font-mono text-[11px] text-os-dim">
+              {[journey.company, converted && journey.product ? journey.product : null].filter(Boolean).join(' · ') || lane}
             </span>
           </span>
-        </td>
-        <td className="px-3 py-2.5 font-mono text-[10.5px] uppercase tracking-wide">
-          <span className={converted ? 'text-os-ok' : meta.state === 'stalled' ? 'text-os-err' : 'text-os-muted'}>
-            {stageLabel}
+        </span>
+        <span className="flex items-center gap-2">
+          {converted && <ValuePill amount={journey.amountUsd ?? 0} />}
+          <span className={PILL_BASE} style={{ background: `color-mix(in oklab, ${RELATIONSHIP_VAR[journey.relationship]} 16%, transparent)`, color: RELATIONSHIP_VAR[journey.relationship] }}>
+            {journey.relationship}
           </span>
-        </td>
-        <td
-          className={`px-3 py-2.5 font-mono text-[11px] ${meta.state === 'stalled' && decay === 0 ? 'text-os-err' : 'text-os-dim'}`}
-          style={
-            decay > 0
-              ? { color: `color-mix(in oklab, var(--err) ${Math.round(Math.sqrt(decay) * 85)}%, var(--text-2))` }
-              : undefined
-          }
+          <span className={PILL_BASE} style={stagePillStyle(journey, now)}>
+            {STAGE_LABEL[journey.status]}
+          </span>
+        </span>
+        <span
+          className={`w-[64px] font-mono text-[11px] tabular-nums max-[1000px]:hidden ${meta.state === 'stalled' && decayFactor(meta.daysSinceLastTouch, journey.status) === 0 ? 'text-os-err' : 'text-os-dim'}`}
+          style={quietStyle(meta.daysSinceLastTouch, journey)}
+          title="days since the last touch"
         >
-          {meta.daysSinceLastTouch}d
-        </td>
-        <td className="px-3 py-2.5 font-mono text-[10.5px] capitalize" style={{ color: RELATIONSHIP_VAR[journey.relationship] }}>
-          {journey.relationship}
-        </td>
-        <td className="px-3 py-2.5 font-mono text-[11px] text-os-muted">{journey.likelihood}%</td>
-        <td className="px-3 py-2.5 font-mono text-[10.5px] uppercase tracking-wide text-os-dim">{lane}</td>
-        <td className="max-w-[220px] px-3 py-2.5">
-          {converted ? (
-            <span className="block truncate font-mono text-[10.5px] text-os-ok" title={journey.product ?? undefined}>
-              {usd(journey.amountUsd ?? 0)}
-              {journey.product ? ` · ${journey.product}` : ''}
-            </span>
-          ) : (
-            <span className="font-mono text-[10.5px] text-os-dim">—</span>
-          )}
-        </td>
-        <td className="px-3 py-2.5">
+          {meta.daysSinceLastTouch}d quiet
+        </span>
+        <span className="w-[72px] font-mono text-[11px] tabular-nums text-os-muted max-[1000px]:hidden" title="likelihood to buy">
+          {journey.likelihood}% likely
+        </span>
+        <span className="max-[1000px]:hidden">
           <ContactActions journey={journey} />
-        </td>
-      </tr>
-      <tr>
-        <td colSpan={8} className="px-3 pb-3">
-          <div className="flex flex-wrap items-center gap-1.5">
-            {journey.touches.map((t, i) => (
-              <span key={t.id} className="flex items-center gap-1.5">
-                {i > 0 && <span className="font-mono text-[10px] text-os-dim">→</span>}
-                <TouchChip touch={t} />
+        </span>
+      </div>
+      <div className="mt-2.5 flex flex-wrap items-center gap-1.5 pl-[18px]">
+        <span className="mr-1 font-mono text-[10.5px] uppercase tracking-wide text-os-dim" title="entry lane">
+          {lane}
+        </span>
+        {journey.touches.map((t, i) => (
+          <span key={t.id} className="flex items-center gap-1.5">
+            {i > 0 && <span className="font-mono text-[10px] text-os-dim">→</span>}
+            <TouchChip touch={t} />
+          </span>
+        ))}
+        {!converted && <span className="font-mono text-[10px] text-os-dim">→ …</span>}
+        {lastMsg !== undefined && (
+          <span className="ml-auto flex min-w-0 items-center gap-1.5 font-mono text-[10.5px]">
+            <span className="shrink-0 uppercase tracking-wide text-os-dim">last msg</span>
+            {lastMsg ? (
+              <span className="min-w-0 truncate text-os-muted" title={lastMsg.preview}>
+                via {lastMsg.source} · {agoDays(lastMsg.ts, now)} · “{lastMsg.preview.slice(0, 60)}”
               </span>
-            ))}
-            {!converted && <span className="font-mono text-[10px] text-os-dim">→ …</span>}
-            {lastMsg !== undefined && (
-              <span className="ml-auto flex min-w-0 items-center gap-1.5 font-mono text-[10px]">
-                <span className="shrink-0 uppercase tracking-wide text-os-dim">last msg</span>
-                {lastMsg ? (
-                  <span className="min-w-0 truncate text-os-muted" title={lastMsg.preview}>
-                    via {lastMsg.source} · {agoDays(lastMsg.ts, now)} · “{lastMsg.preview.slice(0, 60)}”
-                  </span>
-                ) : (
-                  <span className="text-os-dim">no thread on record</span>
-                )}
-              </span>
+            ) : (
+              <span className="text-os-dim">no thread on record</span>
             )}
-          </div>
-        </td>
-      </tr>
-    </>
+          </span>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -318,8 +324,8 @@ export default async function FunnelPage({
   const now = new Date();
   // Same composer the /api/funnel route uses, so the page can never again miss
   // a source the route has (this is how every Stripe buyer went invisible):
-  // Attio ∪ GHL live journeys, Trakyo touches + Stripe payments folded on,
-  // venture-filtered; seeded funnel otherwise.
+  // Typeform leads, calendar bookings + Fathom calls, Trakyo attribution and
+  // Stripe payments folded on, venture-filtered; seeded funnel otherwise.
   const composed = await composeFunnelJourneys(now, venture);
   const { attioLive, ghlLive, isLive } = composed;
   const excludedCount = (attioLive?.closedLost ?? 0) + (ghlLive?.excluded ?? 0);
@@ -355,25 +361,30 @@ export default async function FunnelPage({
     trakyoStatus(),
     metaAdsStatus(),
   ]);
+  // Funnel Volume, the step line and the insight card (lib/funnel-volume).
+  const vol = funnelVolume({ journeys, archived: archived.length, now });
 
   return (
-    <div>
-      {/* Camera-ready: two slim rows, then the space owns the viewport. */}
-      <Rise as="header" i={0} className="mb-2 flex items-end justify-between gap-4">
-        <h1 className="text-[25px] font-bold uppercase leading-[1.1] tracking-[0.06em]">Funnel</h1>
-        <div className="flex shrink-0 items-center gap-2">
-          {isLive ? (
-            <Badge tone="ok">live · {liveLabel}</Badge>
-          ) : (
-            <Badge tone="warn" ghost>
-              demo data
-            </Badge>
-          )}
-          <Badge tone="accent">
-            {summary.converted}/{summary.clients} converted · {usd(summary.revenueUsd)}
-          </Badge>
-        </div>
-      </Rise>
+    <Slab>
+      <SlabTitle
+        eyebrow="client journeys · leads → conversations → sales"
+        title="Funnel"
+        meta={`${summary.clients} active client${summary.clients === 1 ? '' : 's'} · ${summary.converted} closed · ${usd(summary.revenueUsd)} revenue · ${archived.length} archived`}
+        right={
+          <>
+            {isLive ? (
+              <Badge tone="ok">live · {liveLabel}</Badge>
+            ) : (
+              <Badge tone="warn" ghost>
+                demo data
+              </Badge>
+            )}
+            <span className="rounded-full border border-os-border px-4 py-2 text-[13px] tabular-nums text-os-muted">
+              {summary.converted}/{summary.clients} converted · {usd(summary.revenueUsd)}
+            </span>
+          </>
+        }
+      />
 
       {/* one control line: venture filter · synced sources · view toggle */}
       <Rise i={1} className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
@@ -384,7 +395,7 @@ export default async function FunnelPage({
               <Link
                 key={tab.id}
                 href={href(tab.id === 'all' ? undefined : (tab.id as FunnelVenture), view)}
-                title={tab.id !== 'all' && isLive ? 'Live split = deal-name heuristic; add a venture attribute in Attio for exact' : undefined}
+                title={tab.id !== 'all' && isLive ? 'Live split = name heuristic: Vantage when the form or call names it' : undefined}
                 data-lens="c" className={`pressable rounded-ctl border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
  active
  ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-os-accent'
@@ -403,35 +414,15 @@ export default async function FunnelPage({
           })}
         </span>
         <span className="h-3 w-px bg-os-border" />
-        <span className="flex items-center gap-2.5" title={isLive ? `${excludedCount} lost/closed-lost excluded` : undefined}>
-          <SourceCheck status={attio} live={Boolean(attioLive?.journeys.length)} count={attioLive?.total} />
-          <SourceCheck status={ghl} live={Boolean(ghlLive?.journeys.length)} count={ghlLive?.total} />
+        <span className="flex items-center gap-2.5" title="leads · calls booked · calls held · attribution · paid">
+          <SourceCheck status={attio} live={Boolean(attioLive?.total)} count={attioLive?.total} />
+          <SourceCheck status={ghl} live={Boolean(ghlLive?.total)} count={ghlLive?.total} />
           <SourceCheck status={trakyo} />
           <SourceCheck status={metaAds} />
         </span>
         <span className="ml-auto flex items-center gap-1.5">
-          {VIEWS.map((v) => {
-            const active = layout === v.id && view === 'live';
-            return (
-              <Link
-                key={v.id}
-                href={href(venture, 'live', stage, v.id)}
-                title={
-                  v.id === 'flow'
-                    ? "Open space left → right · every lead orbits the stage it's in now"
-                    : 'Circle, outside → in · center is the purchase'
-                }
-                data-lens="c"
-                className={`pressable rounded-ctl border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
- active
- ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-os-accent'
- : 'border-os-border text-os-dim hover:border-os-border-strong hover:text-os-muted'
- }`}
-              >
-                {v.label}
-              </Link>
-            );
-          })}
+          <FunnelLayoutToggle layout={layout} archived={view === 'archive'}
+            options={VIEWS.map(v => ({ ...v, href: href(venture, 'live', stage, v.id, lead) }))} />
           <span className="mx-0.5 h-3 w-px bg-os-border" />
           <Link
             href={view === 'archive' ? href(venture, 'live') : href(venture, 'archive')}
@@ -448,192 +439,168 @@ export default async function FunnelPage({
         </span>
       </Rise>
 
-      {/* The space — every node is a client travelling toward conversion.
+      {/* The space  -  every node is a client travelling toward conversion.
           Leads quiet past DECAY_DAYS decay into the archive tab. */}
-      <Rise as="section" i={2}>
-        <div className="rounded-lg-t border border-os-border bg-os-surface p-2">
-          {view === 'archive' ? (
-            archived.length === 0 ? (
-              <p className="py-6 text-center font-mono text-[11.5px] text-os-dim">
+      {view === 'archive' ? (
+        <SlabCard title="Archive" sub={`${archived.length} quiet past ${DECAY_DAYS} days`} i={3}>
+          <div className="mt-4 border-t border-os-border">
+            {archived.length === 0 ? (
+              <p className="px-6 py-8 text-center text-[12.5px] text-os-dim">
                 Nothing decayed · no lead has sat quiet past {DECAY_DAYS} days.
               </p>
             ) : (
-              <table className="w-full border-collapse text-left">
-                <thead>
-                  <tr className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-os-dim">
-                    <th className="px-3 pb-1 pt-2 font-normal">Lead</th>
-                    <th className="px-3 pb-1 pt-2 font-normal">Reached</th>
-                    <th className="px-3 pb-1 pt-2 font-normal">Quiet</th>
-                    <th className="px-3 pb-1 pt-2 font-normal">Likelihood</th>
-                    <th className="px-3 pb-1 pt-2 font-normal">Last touch</th>
-                    <th className="px-3 pb-1 pt-2 font-normal" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {archived.map((j) => {
-                    const meta = journeyMeta(j, now);
-                    const last = j.touches[j.touches.length - 1];
-                    return (
-                      <tr key={j.id} className="border-t border-os-border text-os-dim">
-                        <td className="px-3 py-2">
-                          <span className="flex items-center gap-2">
-                            <span
-                              className="h-1.5 w-1.5 shrink-0 rounded-full opacity-60"
-                              style={{ background: ventureColor(j.venture) }}
-                            />
-                            <span className="truncate text-[12px] text-os-muted">{j.name}</span>
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 font-mono text-[10px] uppercase tracking-wide">
-                          {FUNNEL_STAGES.find((s) => s.id === j.status)?.label ?? j.status}
-                        </td>
-                        <td className="px-3 py-2 font-mono text-[10.5px]">{meta.daysSinceLastTouch}d</td>
-                        <td className="px-3 py-2 font-mono text-[10.5px]">{j.likelihood}%</td>
-                        <td className="max-w-[300px] truncate px-3 py-2 text-[11px]" title={last?.label}>
-                          {last?.label ?? '—'}
-                        </td>
-                        <td className="px-3 py-2 text-right">
-                          {j.url && (
-                            <a
-                              href={j.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-mono text-[9.5px] uppercase tracking-wide text-os-dim hover:text-os-accent"
-                            >
-                              attio ↗
-                            </a>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )
-          ) : radial ? (
-            <FunnelRadialLazy model={radial} initialLeadId={lead} />
-          ) : spaceNodes ? (
-            <FunnelSpaceLazy nodes={spaceNodes} summary={summary} initialLeadId={lead} />
-          ) : null}
-        </div>
-      </Rise>
-
-      {/* What to act on today — the funnel answering a question. Every row
-          click pins that lead's dossier in the canvas above. */}
-      {view === 'live' && (attention.pushNow.length > 0 || attention.saveNow.length > 0) && (
-        <Rise as="section" i={3} className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <div className="rounded-lg-t border border-os-border bg-os-surface">
-            <div className="flex items-baseline justify-between px-2.5 py-2">
-              <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-os-accent">
-                push now
-              </span>
-              <span className="font-mono text-[9px] uppercase tracking-wide text-os-dim">
-                hot + moving · close them
-              </span>
-            </div>
-            {attention.pushNow.length === 0 ? (
-              <p className="border-t border-os-border px-2.5 py-2 font-mono text-[10px] text-os-dim">
-                no hot leads in motion right now
-              </p>
-            ) : (
-              attention.pushNow.map((j) => (
-                <AttentionRow key={j.id} journey={j} now={now} href={href(venture, view, stage, layout, j.id)} />
-              ))
+              archived.map((j) => {
+                const meta = journeyMeta(j, now);
+                const last = j.touches[j.touches.length - 1];
+                return (
+                  <div
+                    key={j.id}
+                    className="grid grid-cols-[minmax(200px,1fr)_auto_auto_auto] items-center gap-5 border-b border-os-border px-6 py-3.5 last:border-0 max-[1000px]:grid-cols-[1fr_auto]"
+                  >
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <span className="h-2 w-2 shrink-0 rounded-full opacity-60" style={{ background: ventureColor(j.venture) }} />
+                      <span className="min-w-0">
+                        <span className="block truncate text-[13.5px] font-medium text-os-muted">{j.name}</span>
+                        <span className="block truncate font-mono text-[11px] text-os-dim" title={last?.label}>
+                          {last?.label ?? 'no touches'}
+                        </span>
+                      </span>
+                    </span>
+                    <span className={PILL_BASE} style={stagePillStyle(j, now)}>
+                      {STAGE_LABEL[j.status]}
+                    </span>
+                    <span className="font-mono text-[11px] tabular-nums text-os-dim max-[1000px]:hidden">
+                      {meta.daysSinceLastTouch}d quiet · {j.likelihood}% likely
+                    </span>
+                    <span className="w-[56px] text-right max-[1000px]:hidden">
+                      {j.url && (
+                        <a
+                          href={j.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-[10.5px] uppercase tracking-wide text-os-dim hover:text-os-accent"
+                        >
+                          {j.url.includes('fathom') ? 'call ↗' : 'open ↗'}
+                        </a>
+                      )}
+                    </span>
+                  </div>
+                );
+              })
             )}
           </div>
-          <div className="rounded-lg-t border border-os-border bg-os-surface">
-            <div className="flex items-baseline justify-between px-2.5 py-2">
-              <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.22em] text-os-err">
-                save now
-              </span>
-              <span className="font-mono text-[9px] uppercase tracking-wide text-os-dim">
-                fading toward the archive · highest likelihood first
-              </span>
-            </div>
-            {attention.saveNow.length === 0 ? (
-              <p className="border-t border-os-border px-2.5 py-2 font-mono text-[10px] text-os-dim">
-                nothing fading · every lead is fresh
-              </p>
-            ) : (
-              attention.saveNow.map((j) => (
-                <AttentionRow key={j.id} journey={j} now={now} href={href(venture, view, stage, layout, j.id)} />
-              ))
-            )}
+        </SlabCard>
+      ) : (
+        <Rise as="section" i={2}>
+          <div className="rounded-lg-t border border-os-border bg-os-surface p-2">
+            {radial ? (
+              <FunnelRadialLazy model={radial} initialLeadId={lead} />
+            ) : spaceNodes ? (
+              <FunnelSpaceLazy nodes={spaceNodes} summary={summary} initialLeadId={lead} />
+            ) : null}
           </div>
         </Rise>
       )}
 
-      {/* The same clients as formatted data — pick a segment, contact them */}
-      <Rise as="section" i={4} className="mt-8">
-        <SectionHead label="Journey data" count={`${tableJourneys.length}`} />
-        <div className="mb-3 flex flex-wrap items-center gap-1.5">
-          <Link
-            href={href(venture, view, undefined)}
-            data-lens="c" className={`pressable rounded-ctl border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
- !stage
- ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-os-accent'
- : 'border-os-border text-os-dim hover:border-os-border-strong hover:text-os-muted'
- }`}
-          >
-            All segments
-          </Link>
-          {FUNNEL_STAGES.map((s, i) => {
-            const active = stage === s.id;
-            return (
-              <Link
-                key={s.id}
-                href={href(venture, view, active ? undefined : s.id)}
-                data-lens="c" className={`pressable rounded-ctl border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
- active
- ? 'border-[var(--accent-line)] bg-[var(--accent-soft)] text-os-accent'
- : 'border-os-border text-os-dim hover:border-os-border-strong hover:text-os-muted'
- }`}
-              >
-                <span
-                  className="mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle"
-                  style={{ background: `var(--funnel-s${i})` }}
-                />
-                {s.label} ({stageCounts.get(s.id) ?? 0})
-              </Link>
-            );
-          })}
-          {stage && !commsFeed && tableJourneys.length > 0 && (
-            <span className="font-mono text-[10px] text-os-dim">comms feed unavailable · last messages hidden</span>
+      {/* Below the graph, the Brand Deals rows: volume, activity, THE insight. */}
+      {view === 'live' && (
+        <div className="mt-6 grid grid-cols-3 gap-6 max-[1200px]:grid-cols-1">
+          <SlabCard title="Funnel Volume" sub={`${summary.clients} active`} i={4} className="flex flex-col">
+            <div className="flex flex-1 flex-col px-6 pb-6 pt-3">
+              <BigStat value={vol.revenueUsd} kind="usd" chips={vol.chips} caption={vol.caption} />
+              <MeterStack meters={vol.meters} foot={vol.foot} empty="no leads yet" />
+            </div>
+          </SlabCard>
+
+          <SlabCard title="Lead Activity" sub="last 30 days" i={5}>
+            <div className="px-6 pt-3">
+              <BigStat size={30} value={vol.touchesInWindow} caption="touches across every journey: forms, bookings, calls, payments" />
+            </div>
+            <StepLine series={vol.series} hue="var(--send-activity)" unit=" touches" empty="No touches in this window." />
+          </SlabCard>
+
+          <InsightCard
+            i={6}
+            badge="Needs you today"
+            value={vol.insight.value}
+            headline={vol.insight.headline}
+            body={vol.insight.body}
+            frac={vol.insight.frac}
+          />
+        </div>
+      )}
+
+      {/* What to act on today: the funnel answering a question. Every row
+          click pins that lead's dossier in the canvas above. */}
+      {view === 'live' && (attention.pushNow.length > 0 || attention.saveNow.length > 0) && (
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <SlabCard title="Push Now" sub="hot + moving · close them" i={7}>
+            <div className="mt-4 border-t border-os-border">
+              {attention.pushNow.length === 0 ? (
+                <p className="px-6 py-6 text-center text-[12.5px] text-os-dim">no hot leads in motion right now</p>
+              ) : (
+                attention.pushNow.map((j) => (
+                  <AttentionRow key={j.id} journey={j} now={now} href={href(venture, view, stage, layout, j.id)} />
+                ))
+              )}
+            </div>
+          </SlabCard>
+          <SlabCard title="Save Now" sub="fading toward the archive · highest likelihood first" i={8}>
+            <div className="mt-4 border-t border-os-border">
+              {attention.saveNow.length === 0 ? (
+                <p className="px-6 py-6 text-center text-[12.5px] text-os-dim">nothing fading · every lead is fresh</p>
+              ) : (
+                attention.saveNow.map((j) => (
+                  <AttentionRow key={j.id} journey={j} now={now} href={href(venture, view, stage, layout, j.id)} />
+                ))
+              )}
+            </div>
+          </SlabCard>
+        </div>
+      )}
+
+
+      {/* The same clients as a list: pick a segment, contact them. */}
+      <SlabCard
+        title="Journeys"
+        sub={`${tableJourneys.length} of ${journeys.length}`}
+        i={10}
+        className="mt-6"
+        action={
+          <>
+            <Link href={href(venture, view, undefined)} data-lens="c" className={chipClass(!stage)}>
+              All {journeys.length}
+            </Link>
+            {FUNNEL_STAGES.map((s, i) => {
+              const active = stage === s.id;
+              return (
+                <Link
+                  key={s.id}
+                  href={href(venture, view, active ? undefined : s.id)}
+                  data-lens="c"
+                  className={`${chipClass(active)} inline-flex items-center gap-1.5`}
+                >
+                  <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: `var(--funnel-s${i})` }} />
+                  {s.label} {stageCounts.get(s.id) ?? 0}
+                </Link>
+              );
+            })}
+          </>
+        }
+      >
+        {stage && !commsFeed && tableJourneys.length > 0 && (
+          <p className="px-6 pt-3 font-mono text-[11px] text-os-dim">comms feed unavailable · last messages hidden</p>
+        )}
+        <div className="mt-4 border-t border-os-border">
+          {tableJourneys.length === 0 ? (
+            <p className="px-6 py-8 text-center text-[12.5px] text-os-dim">No leads in this segment.</p>
+          ) : (
+            tableJourneys.map((j) => (
+              <JourneyRow key={j.id} journey={j} now={now} lastMsg={commsFeed ? lastMessageFor(j, commsFeed) : undefined} />
+            ))
           )}
         </div>
-        {tableJourneys.length === 0 ? (
-          <p className="rounded-lg-t border border-dashed border-os-border bg-os-surface px-4 py-5 text-center font-mono text-[11.5px] text-os-dim">
-            No leads in this segment.
-          </p>
-        ) : (
-          <div className="overflow-x-auto rounded-lg-t border border-os-border bg-os-surface">
-            <table className="w-full border-collapse text-left">
-              <thead>
-                <tr className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-os-dim">
-                  <th className="px-3 pb-1 pt-3 font-normal">Client</th>
-                  <th className="px-3 pb-1 pt-3 font-normal">Stage</th>
-                  <th className="px-3 pb-1 pt-3 font-normal">Quiet</th>
-                  <th className="px-3 pb-1 pt-3 font-normal">Relationship</th>
-                  <th className="px-3 pb-1 pt-3 font-normal">Likelihood</th>
-                  <th className="px-3 pb-1 pt-3 font-normal">Entry</th>
-                  <th className="px-3 pb-1 pt-3 font-normal">Value</th>
-                  <th className="px-3 pb-1 pt-3 font-normal">Contact</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tableJourneys.map((j) => (
-                  <JourneyTableRows
-                    key={j.id}
-                    journey={j}
-                    now={now}
-                    lastMsg={commsFeed ? lastMessageFor(j, commsFeed) : undefined}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Rise>
-    </div>
+      </SlabCard>
+    </Slab>
   );
 }

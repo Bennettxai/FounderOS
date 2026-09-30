@@ -37,7 +37,7 @@ const ROUTE_VERB: Record<Receipt['route'], string> = {
 };
 
 /**
- * Interject — throw a thought at the OS without picking an app first. Free
+ * Interject  -  throw a thought at the OS without picking an app first. Free
  * text routes itself (task words → board, tell/ask → agent relay, else a
  * G-Brain note); a chip pins the route when the guess would be wrong. The
  * receipt is honest: it shows where the thing actually landed, or the error.
@@ -69,10 +69,10 @@ export function InterjectComposer() {
   };
 
   return (
-    <section className="rounded-panel border border-os-border bg-os-surface">
-      <div className="flex items-center gap-3 border-b border-os-border px-4 py-2.5">
+    <section data-part="card" className="rounded-panel border border-os-border bg-os-surface">
+      <div data-part="card-head" className="flex items-center gap-3 border-b border-os-border px-4 py-2.5">
         <Label>Interject</Label>
-        <span className="font-mono text-[10px] text-os-dim">task · agent · note — routed for you</span>
+        <span className="font-mono text-[10px] text-os-dim">task · agent · note  -  routed for you</span>
       </div>
       <div className="flex flex-col gap-2.5 p-4">
         <textarea
@@ -85,7 +85,8 @@ export function InterjectComposer() {
             }
           }}
           rows={3}
-          placeholder="call the client back re: project scope…  (Enter sends, Shift+Enter breaks)"
+          data-part="input"
+          placeholder="call Nick back re: Tampa scope…  (Enter sends, Shift+Enter breaks)"
           className="w-full resize-none rounded-ctl border border-os-border bg-os-bg px-3 py-2.5 font-mono text-[12.5px] text-os-text outline-none state-fade placeholder:text-os-dim focus:border-os-border-strong"
         />
         <div className="flex items-center gap-1.5">

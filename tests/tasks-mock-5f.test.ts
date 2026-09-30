@@ -6,7 +6,7 @@ import { nextScheduledOccurrence } from '@/lib/cron-scheduler';
 const read = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
 
 /**
- * Mock 5f (the operator, 2026-09-07): /tasks becomes the mock's three-section
+ * Mock 5f (Alex, 2026-09-07): /tasks becomes the mock's three-section
  * screen. A cron card strip up top (square dot, cadence plus next fire,
  * ok/runs count, failures in red), the Paperclip board queue in the middle
  * (open-issue count, routing chips, Create issue, per-row age), and a
@@ -74,7 +74,7 @@ describe('/tasks mock-5f: board queue', () => {
     expect(board).toContain("'Conductor routes'");
     expect(board).toContain("'TECH'");
     expect(board).toContain("'Sales'");
-    expect(board).toMatch(/from '@\/components\/Pressable'/);
+    expect(board).toContain('chipClass('); // the Brand Deals pills (2026-09-24)
   });
 
   test('the submit is Create issue and rows carry an age from updatedAt', () => {
@@ -84,7 +84,7 @@ describe('/tasks mock-5f: board queue', () => {
   });
 
   test('no em dashes anywhere in the file', () => {
-    expect(board).not.toContain('—');
+    expect(board).not.toContain('\u2014');
   });
 });
 

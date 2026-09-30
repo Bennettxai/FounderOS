@@ -1,3 +1,4 @@
+import { isGated } from '@/lib/gate';
 import { GATED, connected as gatedConnected } from '@/lib/connectors/demo-status';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -176,6 +177,7 @@ export function invalidateWhatsappCache(): void {
 }
 
 export async function recentChats(limit = 40): Promise<CommsItem[]> {
+  if (isGated()) return [];
   const now = Date.now();
   // Superset rule, as with email and slack: a cache of 40 answers a call for 15.
   if (chatCache && chatCache.limit >= limit && now - chatCache.at < WHATSAPP_CACHE_TTL_MS) {

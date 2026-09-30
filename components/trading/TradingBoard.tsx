@@ -2,12 +2,15 @@
 
 /**
  * Trading: the Robinhood accounts and the Phantom wallet as one slab in the
- * Brand Deals mould, big and boxy with the same tab as its model. The page floats as one surface, numerals rule, data owns
+ * Brand Deals mould (Alex, 2026-09-18: "big and boxy, like the brand deals
+ * tab as a model"). The page floats as one surface, numerals rule, data owns
  * the chroma (one hue per account), the sleeve's value line is the hero with
  * the agent's reasoning beside it, hatched meters for the accounts, a
  * dot-matrix of position sizes, exactly ONE gradient insight card (the agent's
  * next move), open orders, a filterable trade log with a detail drawer, and
- * the limits editor at the foot.
+ * the limits editor at the foot. Since 2026-09-24 it is built from the shared
+ * slab kit (components/slab.tsx): the same title row, count-up headline, dot
+ * chips, sweeping meters, dot matrix and insight card as every other page.
  *
  * Monitor-only by design: the broker numbers arrive by push from the Markets
  * Agent runner (`agents/markets/run.ts --feed`), so the board re-reads the OS
@@ -16,28 +19,22 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { X, RefreshCw, ExternalLink, Lightbulb, Bot } from 'lucide-react';
+import { X, RefreshCw, ExternalLink, Bot } from 'lucide-react';
 import { Badge, Label } from '@/components/terminal';
 import { Chip } from '@/components/Pressable';
 import { AgentTradeChart } from '@/components/AgentTradeChart';
 import { AgentReasoning } from '@/components/AgentReasoning';
 import { TradingLimits } from '@/components/TradingLimits';
-import { useCountUp } from '@/components/CountUp';
+import { Slab, SlabTitle, BigStat, MeterStack, InsightCard, chipClass } from '@/components/slab';
+import { DotMatrix } from '@/components/slab-charts';
 import { agentSummary } from '@/lib/trading-chart';
-import { AGENTIC_ID, activityCounts, filterActivity, freshness, positionSizes, shortAddress, type ActivityFilter, type TradingPayload } from '@/lib/trading-view';
+import { AGENTIC_ID, TRADING_HUE, activityCounts, filterActivity, freshness, positionSizes, tradingVolume, type ActivityFilter, type TradingPayload } from '@/lib/trading-view';
 import type { TradeActivity, TradingAccountSnapshot, TradingOrder } from '@/lib/schemas';
 
 const EASE = 'cubic-bezier(.2,.7,.2,1)';
 
-// One hue per account (anti-drift rule). All of them ride the colorway.
-const HUE = {
-  agentic: 'var(--accent)', // the sleeve the agent trades
-  individual: 'var(--ramp-1)', // the account that holds the money
-  phantom: 'var(--ramp-4)', // the wallet, read-only to everyone
-};
-
-const GRAIN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")";
+// One hue per account (anti-drift rule), shared with the view-model's meters.
+const HUE = TRADING_HUE;
 
 const usd = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
 const usd0 = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -108,68 +105,6 @@ function CardHead({ title, meta, onRefresh }: { title: string; meta?: React.Reac
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-/** Account meter: label/display row over a static hatch fill with a hue glow. */
-function Meter({ label, frac: rawFrac, display, hue, delay, tag }: { label: string; frac: number; display: string; hue: string; delay: number; tag?: React.ReactNode }) {
-  const frac = Number.isFinite(rawFrac) && rawFrac > 0 ? Math.max(0.02, Math.min(1, rawFrac)) : 0.02;
-  return (
-    <div data-lens="r" className="min-w-0 rounded-[8px] px-1 py-0.5 -mx-1">
-      <div className="flex items-baseline justify-between gap-3">
-        {/* the name never truncates: the badge wraps under it when the card is narrow */}
-        <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[13.5px] text-os-muted">
-          <span className="whitespace-nowrap">{label}</span>
-          {tag}
-        </span>
-        <span className="shrink-0 text-[14px] font-semibold tabular-nums">{display}</span>
-      </div>
-      <div className="mt-2 h-[10px] overflow-hidden rounded-full" style={{ background: 'color-mix(in oklab, var(--text) 8%, transparent)' }}>
-        <div
-          className="h-full rounded-full"
-          style={{
-            width: `${frac * 100}%`,
-            background: `linear-gradient(90deg, transparent 72%, color-mix(in oklab, ${hue} 60%, white) 100%), repeating-linear-gradient(45deg, ${hue}, ${hue} 6px, color-mix(in oklab, ${hue} 45%, transparent) 6px, color-mix(in oklab, ${hue} 45%, transparent) 12px)`,
-            boxShadow: `0 0 14px color-mix(in oklab, ${hue} 45%, transparent), inset 0 0 5px color-mix(in oklab, ${hue} 55%, transparent)`,
-            animation: `tb-meter-in 1.2s ${EASE} ${delay}ms both`,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function StatNumber({ value }: { value: number }) {
-  const v = useCountUp(value);
-  return <>{v}</>;
-}
-
-function DollarStat({ value, cents = false }: { value: number; cents?: boolean }) {
-  const v = useCountUp(value);
-  return <>{cents ? usd(v) : usd0(v)}</>;
-}
-
-/** Waffle dot-matrix mini: position-size distribution. */
-function DotMatrix({ cols, hue }: { cols: Array<{ label: string; count: number }>; hue: string }) {
-  const max = Math.max(...cols.map((c) => c.count), 1);
-  return (
-    <div className="flex items-end gap-3">
-      {cols.map((c, ci) => {
-        const dots = Math.max(c.count === 0 ? 0 : 1, Math.round((c.count / max) * 6));
-        const strength = c.count === max ? 1 : c.count >= max * 0.6 ? 0.55 : 0.25;
-        return (
-          <div key={c.label} className="flex flex-col items-center gap-1.5">
-            <div className="flex flex-col-reverse gap-[3px]">
-              {Array.from({ length: dots }, (_, i) => (
-                <span key={i} className="block h-[7px] w-[7px] rounded-full" style={{ background: hue, opacity: strength, animation: `tb-fadein .3s ${EASE} ${900 + ci * 90 + i * 55}ms both` }} />
-              ))}
-              {dots === 0 && <span className="block h-[7px] w-[7px] rounded-full" style={{ background: hue, opacity: 0.12 }} />}
-            </div>
-            <span className="whitespace-nowrap font-mono text-[10px] text-os-dim">{c.label}</span>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -283,66 +218,58 @@ export function TradingBoard({ initial }: { initial: TradingPayload }) {
     () => agentSummary(agentAccount, positions.filter((p) => p.accountId === AGENTIC_ID), activity.filter((a) => a.accountId === AGENTIC_ID)),
     [agentAccount, positions, activity],
   );
-  const combined = accounts.reduce((s, a) => s + a.accountValueUsd, 0);
-  const dayPnl = accounts.reduce((s, a) => s + a.dayPnlUsd, 0);
+  const vol = useMemo(() => tradingVolume({ accounts, positions, phantom }), [accounts, positions, phantom]);
   const invested = positions.reduce((s, p) => s + p.marketValueUsd, 0);
   const sizes = useMemo(() => positionSizes(positions), [positions]);
   const counts = useMemo(() => activityCounts(activity), [activity]);
   const rows = useMemo(() => filterActivity(activity, logFilter), [activity, logFilter]);
   const selected = activity.find((a) => a.id === selectedId) ?? null;
-  const day = pnl(dayPnl);
-  const phantomUsd = phantom?.usdValue ?? 0;
-  const total = combined + phantomUsd;
+  const total = accounts.reduce((s, a) => s + a.accountValueUsd, 0) + (phantom?.usdValue ?? 0);
   const deployedFrac = agentAccount ? agent.deployedUsd / Math.max(agentAccount.accountValueUsd, 1) : 0;
 
   return (
     <div>
       <style>{`
         @keyframes tb-rise { from { opacity: 0; transform: translateY(10px) scale(.992); } to { opacity: 1; transform: none; } }
-        @keyframes tb-fadein { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes tb-meter-in { from { width: 0; } }
-        @keyframes tb-drift { from { background-position: 0% 0%; } to { background-position: 12% 8%; } }
         .tb-card { transition: transform .15s ease, border-color .15s ease; }
         .tb-card:hover { transform: translateY(-1px); border-color: var(--border-strong); }
       `}</style>
 
       {/* The slab: the whole view floats as one surface. */}
-      <div
-        className="rounded-[28px] border border-os-border p-7"
-        style={{ background: 'var(--bg-2)', boxShadow: '0 1px 2px rgba(0,0,0,.4), 0 24px 70px -18px rgba(0,0,0,.6)', animation: `tb-rise .7s ${EASE} both` }}
-      >
-        {/* Title row */}
-        <div className="mb-7 flex flex-wrap items-end justify-between gap-5">
-          <div className="min-w-0">
-            <div className="mb-2 font-mono text-[11px] uppercase tracking-[0.32em] text-os-dim">// markets · robinhood + phantom · agent-fed</div>
-            <h1 className="text-[46px] font-semibold leading-none tracking-[-0.035em]">Trading</h1>
-            <div className="mt-3 font-mono text-[11px] text-os-dim">
+      <Slab>
+        <SlabTitle
+          eyebrow="markets · robinhood + phantom · agent-fed"
+          title="Trading"
+          meta={
+            <>
               {usd(total)} across {accounts.length} account{accounts.length === 1 ? '' : 's'}
               {phantom ? ' + wallet' : ''} · {fresh.label}
               {fresh.state === 'stale' && ' · the feed has not pushed in a while'}
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            {fresh.state === 'live' ? (
-              <Badge tone="ok">live · robinhood</Badge>
-            ) : fresh.state === 'stale' ? (
-              <Badge tone="warn">stale · {fresh.label.replace('synced ', '')}</Badge>
-            ) : fresh.state === 'seeded' ? (
-              <Badge tone="warn">seeded · awaiting the feed</Badge>
-            ) : (
-              <Badge tone="err">no feed</Badge>
-            )}
-            <span className="rounded-full border border-os-border px-4 py-2 text-[13px] text-os-muted">monitor-only · refreshes 60s</span>
-            <button
-              onClick={refresh}
-              aria-label="Refresh feed"
-              title="Refresh feed"
-              className="pressable grid h-10 w-10 place-items-center rounded-full border border-os-border text-os-muted hover:border-os-border-strong hover:text-os-text"
-            >
-              <RefreshCw size={15} strokeWidth={1.7} className={busy ? 'animate-spin' : ''} />
-            </button>
-          </div>
-        </div>
+            </>
+          }
+          right={
+            <>
+              {fresh.state === 'live' ? (
+                <Badge tone="ok">live · robinhood</Badge>
+              ) : fresh.state === 'stale' ? (
+                <Badge tone="warn">stale · {fresh.label.replace('synced ', '')}</Badge>
+              ) : fresh.state === 'seeded' ? (
+                <Badge tone="warn">seeded · awaiting the feed</Badge>
+              ) : (
+                <Badge tone="err">no feed</Badge>
+              )}
+              <span className="rounded-full border border-os-border px-4 py-2 text-[13px] text-os-muted">monitor-only · refreshes 60s</span>
+              <button
+                onClick={refresh}
+                aria-label="Refresh feed"
+                title="Refresh feed"
+                className="pressable grid h-10 w-10 place-items-center rounded-full border border-os-border text-os-muted hover:border-os-border-strong hover:text-os-text"
+              >
+                <RefreshCw size={15} strokeWidth={1.7} className={busy ? 'animate-spin' : ''} />
+              </button>
+            </>
+          }
+        />
 
         {accounts.length === 0 ? (
           <Card delay={120} className="px-6 py-12 text-center">
@@ -399,50 +326,11 @@ export function TradingBoard({ initial }: { initial: TradingPayload }) {
 
               <Card delay={220} className="flex flex-col">
                 <CardHead title="Accounts" meta={status.detail} onRefresh={refresh} />
-                <div className="flex flex-1 flex-col px-6 pb-6">
-                  <div className="mt-3 flex flex-wrap items-center gap-2.5">
-                    <span className="text-[44px] font-semibold leading-none tracking-[-0.035em] tabular-nums">
-                      <DollarStat value={combined} cents />
-                    </span>
-                    <span className={`inline-flex items-center gap-1.5 rounded-full border border-os-border px-2.5 py-1 font-mono text-[11.5px] tabular-nums ${day.cls}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${dayPnl >= 0 ? 'bg-os-ok' : 'bg-os-err'}`} /> {day.text} today
-                    </span>
-                  </div>
-                  <div className="mb-5 mt-2 text-[13px] text-os-dim">
-                    brokerage, {accounts.length} account{accounts.length === 1 ? '' : 's'} · {usd0(invested)} in {positions.length} position{positions.length === 1 ? '' : 's'}
-                  </div>
-                  <div className="flex flex-1 flex-col justify-around gap-6 border-t border-os-border pt-5">
-                    {accounts.map((a, i) => (
-                      <Meter
-                        key={a.accountId}
-                        label={a.accountLabel}
-                        tag={
-                          <Badge tone={a.accountId === AGENTIC_ID ? 'ok' : 'default'} ghost>
-                            {a.accountId === AGENTIC_ID ? 'agent may trade' : 'read-only to agents'}
-                          </Badge>
-                        }
-                        frac={total > 0 ? a.accountValueUsd / total : 0}
-                        display={usd(a.accountValueUsd)}
-                        hue={a.accountId === AGENTIC_ID ? HUE.agentic : HUE.individual}
-                        delay={500 + i * 150}
-                      />
-                    ))}
-                    <Meter
-                      label={phantom ? `Phantom · ${phantom.sol} SOL` : 'Phantom · SOL'}
-                      tag={
-                        <Badge tone="default" ghost>
-                          {phantom ? shortAddress(phantom.address) : 'wallet not reachable'}
-                        </Badge>
-                      }
-                      frac={total > 0 ? phantomUsd / total : 0}
-                      display={phantom ? (phantom.usdValue === null ? 'price unavailable' : usd(phantom.usdValue)) : '--'}
-                      hue={HUE.phantom}
-                      delay={800}
-                    />
-                  </div>
-                  <div className="mt-5 border-t border-os-border pt-3 text-center font-mono text-[10.5px] tracking-[0.1em] text-os-dim">
-                    only the agentic sleeve can be traded by an agent · {phantom?.usdPerSol ? `${usd(phantom.usdPerSol)} / SOL` : 'wallet read from a public RPC'}
-                  </div>
+                <div className="flex flex-1 flex-col px-6 pb-6 pt-3">
+                  {/* Deal Volume's shape: count-up headline, dot chips, one meter
+                      per account plus the wallet, each its share of everything held */}
+                  <BigStat value={vol.headline} kind="usdCents" chips={vol.chips} caption={vol.caption} />
+                  <MeterStack meters={vol.meters} foot={vol.foot} />
                 </div>
               </Card>
             </div>
@@ -465,12 +353,7 @@ export function TradingBoard({ initial }: { initial: TradingPayload }) {
               <Card delay={420} className="flex min-h-0 flex-col">
                 <CardHead title="Positions" meta={`${usd0(invested)} invested`} onRefresh={refresh} />
                 <div className="flex items-end justify-between gap-4 px-6 pt-3">
-                  <div>
-                    <div className="text-[30px] font-semibold tabular-nums tracking-[-0.03em]">
-                      <StatNumber value={positions.length} />
-                    </div>
-                    <div className="mt-1 text-[13px] text-os-dim">open position{positions.length === 1 ? '' : 's'}</div>
-                  </div>
+                  <BigStat size={30} value={positions.length} caption={`open position${positions.length === 1 ? '' : 's'}`} />
                   <DotMatrix cols={sizes} hue={HUE.individual} />
                 </div>
                 <ul className="mt-4 max-h-[236px] flex-1 overflow-y-auto border-t border-os-border">
@@ -494,48 +377,29 @@ export function TradingBoard({ initial }: { initial: TradingPayload }) {
                 </ul>
               </Card>
 
-              {/* the ONE gradient insight card */}
-              <Card
-                delay={520}
-                className="overflow-hidden !border-transparent"
-                style={{
-                  background: [
-                    'radial-gradient(120% 90% at 85% 8%, color-mix(in oklab, var(--tile-glow-a) 55%, transparent), transparent 60%)',
-                    'radial-gradient(130% 110% at 12% 92%, color-mix(in oklab, var(--tile-glow-b) 55%, transparent), transparent 62%)',
-                    'radial-gradient(110% 110% at 55% 55%, color-mix(in oklab, var(--tile-glow-c) 45%, transparent), transparent 70%)',
-                    'var(--surface)',
-                  ].join(', '),
-                  backgroundSize: '160% 160%',
-                  animation: `tb-rise .6s ${EASE} 520ms both, tb-drift 14s ease-in-out 1s infinite alternate`,
-                }}
-              >
-                <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: GRAIN, mixBlendMode: 'overlay', opacity: 0.85 }} />
-                <div className="pointer-events-none absolute -right-14 -top-16 h-56 w-56 rotate-[24deg] rounded-[36px] border border-white/25 bg-white/5" style={{ backdropFilter: 'blur(3px)' }} />
-                <div className="relative flex h-full flex-col px-6 py-5 text-white">
-                  <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[12px] backdrop-blur">
-                    <Lightbulb size={13} strokeWidth={1.7} /> Agent · next move
-                  </span>
-                  <div className="mt-4 text-[64px] font-semibold leading-none tracking-[-0.03em] tabular-nums">
-                    <StatNumber value={openOrders.length > 0 ? openOrders.length : (analysis?.signals ?? 0)} />
-                  </div>
-                  <div className="mt-2 text-[16px] font-semibold leading-snug">
-                    {openOrders.length > 0
-                      ? `order${openOrders.length === 1 ? '' : 's'} working at the broker.`
-                      : analysis
-                        ? `signal${analysis.signals === 1 ? '' : 's'} on the last run, ${timeAgo(analysis.at, now)} ago.`
-                        : 'runs recorded. The agent has not reported in.'}
-                  </div>
-                  <div className="mt-1.5 line-clamp-4 text-[12.5px] leading-relaxed text-white/75">
-                    {analysis?.notes || 'Index core: QQQ and SPY, bought on dips and topped up monthly, with buys stopping at the kill-switch floor. Every order is checked in code before it reaches the broker.'}
-                  </div>
-                  <div className="mt-auto flex gap-1.5 pt-4">
-                    {Array.from({ length: 8 }, (_, i) => (
-                      <span key={i} className="h-[3px] flex-1 rounded-full" style={{ background: i < Math.round(deployedFrac * 8) ? '#fff' : 'rgba(255,255,255,.25)' }} />
-                    ))}
-                  </div>
-                  <div className="mt-1.5 font-mono text-[10px] text-white/60">{Math.round(deployedFrac * 100)}% of the sleeve deployed</div>
-                </div>
-              </Card>
+              {/* the ONE gradient insight card: the agent's next move */}
+              <InsightCard
+                i={6}
+                badge="Agent · next move"
+                value={openOrders.length > 0 ? openOrders.length : (analysis?.signals ?? 0)}
+                headline={
+                  openOrders.length > 0
+                    ? `order${openOrders.length === 1 ? '' : 's'} working at the broker.`
+                    : analysis
+                      ? `signal${analysis.signals === 1 ? '' : 's'} on the last run, ${timeAgo(analysis.at, now)} ago.`
+                      : 'runs recorded. The agent has not reported in.'
+                }
+                body={
+                  <>
+                    <span className="line-clamp-4">
+                      {analysis?.notes ||
+                        'Index core: QQQ and SPY, bought on dips and topped up monthly, with buys stopping at the kill-switch floor. Every order is checked in code before it reaches the broker.'}
+                    </span>
+                    <span className="mt-1.5 block font-mono text-[10px] text-white/60">{Math.round(deployedFrac * 100)}% of the sleeve deployed</span>
+                  </>
+                }
+                frac={deployedFrac}
+              />
             </div>
 
             {/* Open orders */}
@@ -562,13 +426,7 @@ export function TradingBoard({ initial }: { initial: TradingPayload }) {
                       ['rejected', `Rejected ${counts.rejected}`],
                     ] as Array<[ActivityFilter, string]>
                   ).map(([key, label]) => (
-                    <button
-                      key={key}
-                      onClick={() => setLogFilter(key)}
-                      className={`pressable rounded-full px-4 py-1.5 text-[12.5px] ${
-                        logFilter === key ? 'bg-os-accent font-semibold text-os-ink' : 'border border-os-border text-os-muted hover:text-os-text'
-                      }`}
-                    >
+                    <button key={key} onClick={() => setLogFilter(key)} className={chipClass(logFilter === key)}>
                       {label}
                     </button>
                   ))}
@@ -623,7 +481,7 @@ export function TradingBoard({ initial }: { initial: TradingPayload }) {
             Example rows. The first real push from the Markets Agent feed replaces them.
           </div>
         )}
-      </div>
+      </Slab>
 
       {/* Detail drawer: the full rationale, never truncated away */}
       {selected && <div className="fixed inset-0 z-[60] bg-black/45 backdrop-blur-[2px]" onClick={() => setSelectedId(null)} aria-hidden="true" />}
@@ -639,7 +497,7 @@ export function TradingBoard({ initial }: { initial: TradingPayload }) {
               </div>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <Badge tone={statusTone(selected.status)}>{selected.status}</Badge>
-                <Badge tone={/agent/i.test(selected.agent) && !/operator/i.test(selected.agent) ? 'ok' : 'default'} ghost>
+                <Badge tone={/agent/i.test(selected.agent) && !/alex/i.test(selected.agent) ? 'ok' : 'default'} ghost>
                   {selected.agent}
                 </Badge>
                 <Badge tone="default" ghost>

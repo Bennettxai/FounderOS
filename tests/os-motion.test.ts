@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest';
 const read = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
 
 /**
- * OS-wide slab motion (the operator, 2026-09-17): the brand-deals slab's four
+ * OS-wide slab motion (Alex, 2026-09-17): the brand-deals slab's four
  * moves become shared utilities, extending the om-* vocabulary rather than
  * duplicating it: cards rise in on a stagger, numerals count in, bars fill,
  * lines draw. Finances and Social carry the full treatment; every page gets
@@ -72,18 +72,19 @@ describe('slab motion: every page gets the beat', () => {
 describe('slab motion: Finances carries the full treatment', () => {
   const page = read('app/finances/page.tsx');
 
-  test('the four summary tiles rise on a stagger and count their money in', () => {
-    expect(page).toMatch(/from '@\/components\/motion'/);
-    expect(page).toMatch(/from '@\/components\/CountUp'/);
-    expect((page.match(/<Rise /g) ?? []).length).toBeGreaterThanOrEqual(6);
-    expect((page.match(/<CountUp [^>]*kind="usd"/g) ?? []).length).toBeGreaterThanOrEqual(3);
-    expect(page).toContain('rise-card');
+  // 2026-09-24: the four summary tiles became the Brand Deals slab (see
+  // tests/finances-slab.test.ts): kit cards on a stagger, a count-up headline.
+  test('the slab cards rise on a stagger and count their money in', () => {
+    expect(page).toMatch(/from '@\/components\/slab'/);
+    expect((page.match(/<(SlabCard|InsightCard)[\s>]/g) ?? []).length).toBeGreaterThanOrEqual(6);
+    expect((page.match(/<BigStat[\s\S]*?kind="usd"/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 
-  test('the category bars fill and the business bars grow', () => {
-    expect(read('components/MonthlyExpenses.tsx')).toMatch(/className="[^"]*\bfill\b/);
+  test('the category bars sweep out like Deal Volume and the business bars grow', () => {
+    expect(read('components/MonthlyExpenses.tsx')).toContain('<VolumeMeter');
     expect(read('components/BusinessIncomeChart.tsx')).toMatch(/\bgrow\b/);
     expect(read('app/globals.css')).toContain('@keyframes os-grow');
+    expect(read('app/globals.css')).toContain('@keyframes vol-meter-in');
   });
 });
 
@@ -107,7 +108,9 @@ describe('slab motion: Social carries the full treatment', () => {
   });
 
   test('recent posts rise on a stagger too', () => {
-    expect((page.match(/<Rise /g) ?? []).length).toBeGreaterThanOrEqual(3);
+    // Since the Brand Deals slab (2026-09-24) the kit's cards rise through Rise themselves.
+    expect((page.match(/<(Rise|SlabCard|InsightCard)[\s>]/g) ?? []).length).toBeGreaterThanOrEqual(3);
+    expect(page).toMatch(/<SlabCard[\s\S]{0,40}i=\{\d+\}[\s\S]{0,40}title="Recent posts"/);
   });
 });
 

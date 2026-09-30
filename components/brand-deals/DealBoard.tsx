@@ -1,22 +1,24 @@
 'use client';
 
 /**
- * Brand Deals: the Slab "Deal Journeys" slab (Futurism / Zentra layout,
+ * Brand Deals: the GladOS "Deal Journeys" slab (Futurism / Zentra layout,
  * imported 2026-09-17) fed by the Notion Brand Deals Hub. The page floats as
  * one slab, numerals rule, data owns all chroma (one hue per domain), a
  * hatched stepped funnel is the hero with an AI prompt bar melting out of it
  * (wired as a live filter), barber-pole meters, a step-line and a dot-matrix
  * mini, exactly ONE gradient insight card, and a detail drawer.
  *
- * Read-only by design: Notion stays the source of truth (the brand-deal agents
- * and any invited collaborators work there), so every deal deep-links back and
- * nothing here writes. The board rereads the hub on refresh or within the
- * connector's cache window.
+ * Read-only by design: Notion stays the source of truth (Alex's brand-deal
+ * agents and his friend's guest access live there), so every deal deep-links
+ * back and nothing here writes. The board rereads the hub on refresh or
+ * within the connector's cache window.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { X, Search, Sparkles, RefreshCw, Lightbulb, ExternalLink, CalendarClock } from 'lucide-react';
 import { Badge, Label } from '@/components/terminal';
+import { VolumeMeter } from '@/components/VolumeMeter';
+import { StepLine, DotMatrix } from '@/components/slab-charts';
 import { PipelineChart, useCountUp, CARET_ANIMATION } from '@/components/PipelineChart';
 import type { BrandDealsResult } from '@/lib/connectors/brand-deals';
 import type { BrandDeal } from '@/lib/schemas';
@@ -63,7 +65,7 @@ function syncAge(syncedAt: number | null): string | null {
 /** Card shell: near-bg surface, soft dual shadow, stagger-in, 1px hover lift. */
 function Card({ children, delay = 0, className = '', style }: { children: React.ReactNode; delay?: number; className?: string; style?: React.CSSProperties }) {
   return (
-    <div className={`bd-card relative rounded-[12px] border border-os-border bg-os-surface ${className}`} style={{ animation: `bd-rise .6s ${EASE} ${delay}ms both`, ...style }}>
+    <div className={`bd-card relative rounded-[12px] border border-os-border bg-os-surface ${className}`} style={{ animation: `bd-rise .6s ${EASE} ${delay}ms backwards`, ...style }}>
       {children}
     </div>
   );
@@ -113,30 +115,6 @@ function CardHead({ title, onRefresh, hubUrl }: { title: string; onRefresh: () =
   );
 }
 
-/** Status meter: label/display row over a static hatch fill with a hue glow. */
-function Meter({ label, frac: rawFrac, display, hue, delay }: { label: string; frac: number; display: string; hue: string; delay: number }) {
-  const frac = Number.isFinite(rawFrac) && rawFrac > 0 ? Math.max(0.02, Math.min(1, rawFrac)) : 0.02;
-  return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <span className="text-[13.5px] text-os-muted">{label}</span>
-        <span className="text-[14px] font-semibold tabular-nums">{display}</span>
-      </div>
-      <div className="mt-2 h-[10px] overflow-hidden rounded-full" style={{ background: 'color-mix(in oklab, var(--text) 8%, transparent)' }}>
-        <div
-          className="h-full rounded-full"
-          style={{
-            width: `${frac * 100}%`,
-            background: `linear-gradient(90deg, transparent 72%, color-mix(in oklab, ${hue} 60%, white) 100%), repeating-linear-gradient(45deg, ${hue}, ${hue} 6px, color-mix(in oklab, ${hue} 45%, transparent) 6px, color-mix(in oklab, ${hue} 45%, transparent) 12px)`,
-            boxShadow: `0 0 14px color-mix(in oklab, ${hue} 45%, transparent), inset 0 0 5px color-mix(in oklab, ${hue} 55%, transparent)`,
-            animation: `bd-meter-in 1.2s ${EASE} ${delay}ms both`,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
 function StatNumber({ value }: { value: number }) {
   const v = useCountUp(value);
   return <>{v}</>;
@@ -145,96 +123,6 @@ function StatNumber({ value }: { value: number }) {
 function DollarStat({ value }: { value: number }) {
   const v = useCountUp(value);
   return <>{fmtUsd(v)}</>;
-}
-
-/** Stepped line over vertical pinstripes: Notion edits per day, quiet days kept. */
-function StepLine({ series }: { series: Array<{ label: string; count: number }> }) {
-  const total = series.reduce((n, s) => n + s.count, 0);
-  if (series.length === 0 || total === 0) return <div className="px-6 py-8 text-[12px] text-os-dim">No edits in this window.</div>;
-  const W = 600;
-  const H = 150;
-  const max = Math.max(...series.map((b) => b.count), 1);
-  const stepW = W / series.length;
-  const y = (c: number) => H - 14 - (c / max) * (H - 60);
-  let path = `M 0 ${y(series[0].count)}`;
-  series.forEach((b, i) => {
-    path += ` H ${(i + 1) * stepW}`;
-    if (i < series.length - 1) path += ` V ${y(series[i + 1].count)}`;
-  });
-  const peakIdx = series.reduce((bi, b, i) => (b.count > series[bi].count ? i : bi), 0);
-  const area = `${path} V ${H} H 0 Z`;
-  return (
-    <div className="relative px-6 pb-5">
-      <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" aria-hidden="true">
-        <defs>
-          <pattern id="bd-pins" width="5" height="8" patternUnits="userSpaceOnUse">
-            <rect width="1.2" height="8" fill={HUE.activity} opacity="0.28" />
-          </pattern>
-          <linearGradient id="bd-pinfade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fff" stopOpacity="0.9" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0.05" />
-          </linearGradient>
-          <mask id="bd-pinmask">
-            <rect width={W} height={H} fill="url(#bd-pinfade)" />
-          </mask>
-        </defs>
-        <path d={area} fill="url(#bd-pins)" mask="url(#bd-pinmask)" />
-        <path
-          d={path}
-          fill="none"
-          stroke={HUE.activity}
-          strokeWidth="3"
-          strokeLinejoin="round"
-          pathLength={1}
-          style={{ strokeDasharray: 1, strokeDashoffset: 1, animation: `bd-draw 1.6s ${EASE} .5s both` }}
-        />
-        <circle cx={(peakIdx + 0.5) * stepW} cy={y(series[peakIdx].count)} r="4.5" fill={HUE.activity} style={{ animation: `bd-fadein .4s ${EASE} 1.9s both` }} />
-      </svg>
-      <div
-        className="pointer-events-none absolute whitespace-nowrap rounded-full border border-os-border px-2.5 py-1 text-[11px] backdrop-blur"
-        style={{
-          left: `calc(24px + (100% - 48px) * ${(peakIdx + 0.5) / series.length})`,
-          top: `${(y(series[peakIdx].count) / H) * 100}%`,
-          transform: 'translate(-50%, -140%)',
-          background: 'color-mix(in oklab, var(--bg) 75%, transparent)',
-          animation: `bd-fadein .5s ${EASE} 2s both`,
-        }}
-      >
-        <span className="font-semibold tabular-nums" style={{ color: HUE.activity }}>
-          {series[peakIdx].count}
-        </span>{' '}
-        <span className="text-os-muted">on {series[peakIdx].label}</span>
-      </div>
-      <div className="mt-1 flex justify-between font-mono text-[10.5px] text-os-dim">
-        <span>{series[0].label}</span>
-        <span>{series[series.length - 1].label}</span>
-      </div>
-    </div>
-  );
-}
-
-/** Waffle dot-matrix mini: deal-size distribution. */
-function DotMatrix({ cols, hue }: { cols: Array<{ label: string; count: number }>; hue: string }) {
-  const max = Math.max(...cols.map((c) => c.count), 1);
-  return (
-    <div className="flex items-end gap-3">
-      {cols.map((c, ci) => {
-        const dots = Math.max(c.count === 0 ? 0 : 1, Math.round((c.count / max) * 6));
-        const strength = c.count === max ? 1 : c.count >= max * 0.6 ? 0.55 : 0.25;
-        return (
-          <div key={c.label} className="flex flex-col items-center gap-1.5">
-            <div className="flex flex-col-reverse gap-[3px]">
-              {Array.from({ length: dots }, (_, i) => (
-                <span key={i} className="block h-[7px] w-[7px] rounded-full" style={{ background: hue, opacity: strength, animation: `bd-fadein .3s ${EASE} ${900 + ci * 90 + i * 55}ms both` }} />
-              ))}
-              {dots === 0 && <span className="block h-[7px] w-[7px] rounded-full" style={{ background: hue, opacity: 0.12 }} />}
-            </div>
-            <span className="whitespace-nowrap font-mono text-[10px] text-os-dim">{c.label}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 const FILTER_TO_STAGE_IDX: Record<Filter, number> = { all: 0, 'tier-s': 0, talks: 1, production: 2, paid: 3, declined: 3 };
@@ -329,7 +217,7 @@ export function DealBoard({ initial }: { initial: BrandDealsResult }) {
       {/* The slab: the whole view floats as one surface. */}
       <div
         className="rounded-[28px] border border-os-border p-7"
-        style={{ background: 'var(--bg-2)', boxShadow: '0 1px 2px rgba(0,0,0,.4), 0 24px 70px -18px rgba(0,0,0,.6)', animation: `bd-rise .7s ${EASE} both` }}
+        style={{ background: 'var(--bg-2)', boxShadow: '0 1px 2px rgba(0,0,0,.4), 0 24px 70px -18px rgba(0,0,0,.6)', animation: `bd-rise .7s ${EASE} backwards` }}
       >
         {/* Title row */}
         <div className="mb-7 flex flex-wrap items-end justify-between gap-5">
@@ -429,9 +317,9 @@ export function DealBoard({ initial }: { initial: BrandDealsResult }) {
                 open pipeline across {openCount} deal{openCount === 1 ? '' : 's'} · {vol.quotedDeals} of {deals.length} priced
               </div>
               <div className="flex flex-1 flex-col justify-around gap-6 border-t border-os-border pt-5">
-                <Meter label={`In talks (${vol.counts.talks})`} frac={vol.openUsd > 0 ? vol.talksUsd / vol.openUsd : 0} display={fmtUsd(vol.talksUsd)} hue={HUE.amber} delay={500} />
-                <Meter label={`In production (${vol.counts.production})`} frac={vol.openUsd > 0 ? vol.productionUsd / vol.openUsd : 0} display={fmtUsd(vol.productionUsd)} hue={HUE.cobalt} delay={650} />
-                <Meter
+                <VolumeMeter label={`In talks (${vol.counts.talks})`} frac={vol.openUsd > 0 ? vol.talksUsd / vol.openUsd : 0} display={fmtUsd(vol.talksUsd)} hue={HUE.amber} delay={500} />
+                <VolumeMeter label={`In production (${vol.counts.production})`} frac={vol.openUsd > 0 ? vol.productionUsd / vol.openUsd : 0} display={fmtUsd(vol.productionUsd)} hue={HUE.cobalt} delay={650} />
+                <VolumeMeter
                   label={`Paid vs declined (${vol.counts.paid}/${vol.counts.declined})`}
                   frac={vol.paidUsd + vol.declinedUsd > 0 ? vol.paidUsd / (vol.paidUsd + vol.declinedUsd) : 0}
                   display={`${fmtUsd(vol.paidUsd)} / ${fmtUsd(vol.declinedUsd)}`}
@@ -456,7 +344,7 @@ export function DealBoard({ initial }: { initial: BrandDealsResult }) {
               </span>
               <span className="ml-2 text-[13px] text-os-dim">Notion edits, last 30 days</span>
             </div>
-            <StepLine series={series} />
+            <StepLine series={series} hue={HUE.activity} empty="No edits in this window." />
           </Card>
 
           <Card delay={420}>
@@ -484,10 +372,10 @@ export function DealBoard({ initial }: { initial: BrandDealsResult }) {
                 'radial-gradient(120% 90% at 85% 8%, color-mix(in oklab, var(--tile-glow-a) 55%, transparent), transparent 60%)',
                 'radial-gradient(130% 110% at 12% 92%, color-mix(in oklab, var(--tile-glow-b) 55%, transparent), transparent 62%)',
                 'radial-gradient(110% 110% at 55% 55%, color-mix(in oklab, var(--tile-glow-c) 45%, transparent), transparent 70%)',
-                'var(--surface)',
+                'var(--insight-base)',
               ].join(', '),
               backgroundSize: '160% 160%',
-              animation: `bd-rise .6s ${EASE} 520ms both, bd-drift 14s ease-in-out 1s infinite alternate`,
+              animation: `bd-rise .6s ${EASE} 520ms backwards, bd-drift 14s ease-in-out 1s infinite alternate`,
             }}
           >
             <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: GRAIN, mixBlendMode: 'overlay', opacity: 0.85 }} />

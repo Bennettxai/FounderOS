@@ -217,10 +217,13 @@ let postDaysCache: { at: number; data: ZernioPostDay[] } | null = null;
 /** Full real posting history (date + cross-post platforms per post), 60s-cached.
     The endpoint returns the full set (~tens of posts), no pagination. */
 export async function zernioPostDays(): Promise<ZernioPostDay[]> {
+  return (await zernioPostDaysKnown()) ?? [];
+}
+export async function zernioPostDaysKnown(): Promise<ZernioPostDay[] | null> {
   const now = Date.now();
   if (postDaysCache && now - postDaysCache.at < LIVE_TTL_MS) return postDaysCache.data;
   const key = zernioKey();
-  if (!key) return GATED ? gatedPostDays() : [];
+  if (!key) return GATED ? gatedPostDays() : null;
   const config = readConfig();
   try {
     const res = await fetch(`${config.baseUrl ?? 'https://getlate.dev/api'}/history?limit=200`, {
@@ -233,7 +236,7 @@ export async function zernioPostDays(): Promise<ZernioPostDay[]> {
     postDaysCache = { at: now, data };
     return data;
   } catch {
-    return postDaysCache?.data ?? [];
+    return postDaysCache?.data ?? null;
   }
 }
 

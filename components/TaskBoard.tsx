@@ -5,9 +5,11 @@
  * Drag a card to a column and it persists to SQLite via PATCH /api/agents/work;
  * a 6s poll pulls the board back from the server so cards also move on their own
  * as agents commit and finish work. Optimistic on drop, reconciled on poll.
+ * 2026-09-24: sits in a Brand Deals SlabCard; the page passes its stagger.
  */
 import { useEffect, useRef, useState } from 'react';
 import { User } from 'lucide-react';
+import { SlabCard } from '@/components/slab';
 import type { AgentTask } from '@/lib/schemas';
 
 // click-advance target for each column; done is terminal (drag it back if needed)
@@ -23,9 +25,11 @@ const COLUMNS: { status: AgentTask['status']; label: string; tone: string }[] = 
 export function TaskBoard({
   initialTasks,
   agentNames,
+  i = 8,
 }: {
   initialTasks: AgentTask[];
   agentNames: Record<string, string>;
+  i?: number;
 }) {
   const [tasks, setTasks] = useState(initialTasks);
   const [dragId, setDragId] = useState<string | null>(null);
@@ -67,15 +71,14 @@ export function TaskBoard({
   };
 
   return (
-    <div>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-[0.26em] text-os-muted">Local kanban</span>
-          <span className="font-mono text-[10px] text-os-dim">{tasks.length}</span>
-        </div>
-        <span className="font-mono text-[10px] text-os-dim">drag between lanes · or click ▸ to advance</span>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <SlabCard
+      i={i}
+      className="mt-6"
+      title="Local kanban"
+      sub={tasks.length}
+      action={<span className="font-mono text-[11px] text-os-dim">drag between lanes · or click ▸ to advance</span>}
+    >
+      <div className="grid gap-4 px-6 pb-6 pt-4 md:grid-cols-2 xl:grid-cols-4">
         {COLUMNS.map((col) => {
           const colTasks = tasks.filter((t) => t.status === col.status);
           const over = overCol === col.status;
@@ -93,16 +96,21 @@ export function TaskBoard({
                 if (dragId) void move(dragId, col.status);
                 setDragId(null);
               }}
-              className={`state-fade flex min-h-[260px] flex-col gap-2.5 rounded-panel border p-3 ${
-                over ? 'border-os-accent bg-os-surface2' : 'border-os-border bg-os-surface'
+              className={`state-fade flex min-h-[260px] flex-col gap-2.5 rounded-[10px] border p-3 ${
+                over ? 'border-os-accent bg-os-surface2' : 'border-os-border bg-os-bg'
               }`}
             >
               <div className="mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full" style={{ background: col.tone }} />
-                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-os-muted">{col.label}</span>
+                  <span className="text-[13px] font-semibold text-os-text">{col.label}</span>
                 </span>
-                <span className="font-mono text-[11px] text-os-dim">{colTasks.length}</span>
+                <span
+                  className="rounded-full px-2.5 py-0.5 font-mono text-[10.5px] tabular-nums"
+                  style={{ color: col.tone, background: `color-mix(in oklab, ${col.tone} 14%, transparent)` }}
+                >
+                  {colTasks.length}
+                </span>
               </div>
 
               {colTasks.map((task) => {
@@ -116,7 +124,7 @@ export function TaskBoard({
                     setDragId(null);
                     setOverCol(null);
                   }}
-                  className={`cursor-grab rounded-lg border border-os-border bg-os-bg p-3 transition-opacity active:cursor-grabbing ${
+                  className={`cursor-grab rounded-[10px] border border-os-border bg-os-surface p-3 transition-opacity active:cursor-grabbing ${
                     dragId === task.id ? 'opacity-40' : ''
                   }`}
                 >
@@ -135,7 +143,7 @@ export function TaskBoard({
                         onClick={() => void move(task.id, nextStatus)}
                         title={`Advance to ${COLUMNS.find((c) => c.status === nextStatus)?.label ?? nextStatus}`}
                         data-lens="c"
-                        className="pressable shrink-0 rounded-ctl border border-os-border px-1.5 py-0.5 text-[10px] text-os-dim hover:text-os-text"
+                        className="pressable shrink-0 rounded-full border border-os-border px-2 py-0.5 text-[10px] text-os-dim hover:text-os-text"
                       >
                         ▸
                       </button>
@@ -146,7 +154,7 @@ export function TaskBoard({
               })}
 
               {colTasks.length === 0 && (
-                <div className="rounded-lg border border-dashed border-os-border px-3 py-6 text-center font-mono text-[10px] text-os-dim">
+                <div className="rounded-[10px] border border-dashed border-os-border px-3 py-6 text-center font-mono text-[10.5px] text-os-dim">
                   drop here
                 </div>
               )}
@@ -154,6 +162,6 @@ export function TaskBoard({
           );
         })}
       </div>
-    </div>
+    </SlabCard>
   );
 }

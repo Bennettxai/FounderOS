@@ -1,7 +1,7 @@
 import { layoutBrainNodes, polar, type BrainCluster } from '@/lib/brain-viz';
 
 /**
- * The G-Brain knowledge core — three data rings around a health gauge.
+ * The G-Brain knowledge core  -  three data rings around a health gauge.
  * Pure SVG (animations are CSS in globals.css), so it renders on the server.
  * `compact` hides cluster labels + ring callouts for the Home mini card.
  */
@@ -9,7 +9,7 @@ export function BrainViz({
   clusters,
   health,
   supabasePages = 918,
-  version = 'v0.41',
+  version = 'v0.47',
   compact = false,
 }: {
   clusters: BrainCluster[];
@@ -24,7 +24,7 @@ export function BrainViz({
   const C = 2 * Math.PI * arcR;
   const healthArc = ((health ?? 0) / 100) * C;
 
-  // Supabase outer dots — a sampled view of the remote page count
+  // Supabase outer dots  -  a sampled view of the remote page count
   const outer: { x: number; y: number }[] = [];
   for (let i = 0; i < 42; i++) {
     const a = (i / 42) * 360 + (i % 5) * 1.7;
@@ -57,7 +57,7 @@ export function BrainViz({
         <path d="M260 260 L260 40 A220 220 0 0 1 369 69 Z" fill="url(#sweepGrad)" />
       </g>
 
-      {/* outer ring — supabase (paused) */}
+      {/* outer ring  -  supabase (paused) */}
       <g className="brain-ring r3">
         <circle cx="260" cy="260" r="210" fill="none" stroke="var(--border-strong)" strokeDasharray="2 7" strokeWidth="1" />
         {outer.map((p, i) => (
@@ -65,7 +65,7 @@ export function BrainViz({
         ))}
       </g>
 
-      {/* middle ring — ollama bge-m3 embeddings */}
+      {/* middle ring  -  ollama bge-m3 embeddings */}
       <g className="brain-ring r2">
         <circle cx="260" cy="260" r="158" fill="none" stroke="var(--border-strong)" strokeWidth="1" opacity="0.8" />
         {Array.from({ length: 8 }, (_, i) => {
@@ -85,7 +85,7 @@ export function BrainViz({
         })}
       </g>
 
-      {/* inner ring — brain-store pages */}
+      {/* inner ring  -  brain-store pages */}
       <g className="brain-ring r1">
         <circle cx="260" cy="260" r="108" fill="none" stroke="var(--brain-1)" strokeOpacity="0.3" strokeWidth="1" />
         {nodes.map((n, i) => (
@@ -139,7 +139,7 @@ export function BrainViz({
         )}
         <circle cx="260" cy="260" r="58" fill="var(--surface)" stroke="var(--brain-1)" strokeOpacity="0.35" strokeWidth="1" />
         <text x="260" y="252" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="30" fontWeight="600" fill="var(--text)">
-          {health ?? '—'}
+          {health ?? ' - '}
         </text>
         <text x="260" y="272" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing="2.5" fill="var(--text-3)">
           HEALTH / 100

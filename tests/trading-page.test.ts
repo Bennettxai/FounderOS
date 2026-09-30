@@ -5,11 +5,11 @@ import { describe, expect, test } from 'vitest';
 const read = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
 
 /**
- * /trading is one slab in the Brand Deals mould (the operator, 2026-09-18: "big and
+ * /trading is one slab in the Brand Deals mould (Alex, 2026-09-18: "big and
  * boxy, kind of like the brand deals tab as a model"). The page stays a server
  * component that reads the same payload GET /api/trading serves and hands it
  * to a client board, which refreshes itself every 60s. Every layout call
- * the operator made on the old page survives here: both accounts side by side, the
+ * Alex made on the old page survives here: both accounts side by side, the
  * agent's own value graph, the sleeve and the reasoning sharing one level row,
  * open orders naming agent vs you, honesty when nothing has traded.
  */
@@ -42,19 +42,22 @@ describe('the trading slab', () => {
     expect(board).toMatch(/Refresh feed/);
   });
 
+  // Since 2026-09-24 the slab, the meters and the gradient card come from the
+  // shared kit (components/slab.tsx; see tests/trading-volume.test.ts).
   test('floats as one slab with the Brand Deals motion: rise-in cards, drawn line, hatched meters, one gradient card', () => {
-    expect(board).toMatch(/rounded-\[28px\]/);
+    expect(board).toContain('<Slab>');
     expect(board).toMatch(/@keyframes tb-rise/);
-    expect(board).toMatch(/@keyframes tb-meter-in/);
-    expect(board).toMatch(/@keyframes tb-drift/);
-    expect((board.match(/tile-glow-a/g) ?? []).length).toBe(1);
+    expect(board).toContain('<MeterStack');
+    expect((board.match(/<InsightCard/g) ?? []).length).toBe(1);
   });
 
   test('renders one balance meter per account and names which one the agent may trade', () => {
     expect(board).toMatch(/accounts\.map/);
     expect(board).toMatch(/accountLabel/);
-    expect(board).toMatch(/agent may trade/);
-    expect(board).toMatch(/read-only to agents/);
+    expect(board).toMatch(/tradingVolume\(/);
+    const view = read('lib/trading-view.ts');
+    expect(view).toMatch(/agent may trade/);
+    expect(view).toMatch(/read-only to agents/);
   });
 
   test('gives the agent its own value graph fed by the agentic account, and says plainly when it has not traded', () => {
@@ -108,8 +111,9 @@ describe('the trading slab', () => {
 
   test('mounts the limits editor and the Phantom wallet card', () => {
     expect(board).toContain('TradingLimits');
-    expect(board).toMatch(/Phantom/);
-    expect(board).toMatch(/shortAddress\(/);
+    expect(board).toMatch(/Phantom|phantom/);
+    // the wallet meter (and its short address) is built by the view-model
+    expect(read('lib/trading-view.ts')).toMatch(/Phantom · \$\{p\.sol\} SOL · \$\{shortAddress\(/);
   });
 });
 
@@ -141,7 +145,7 @@ describe('the agent chart component', () => {
 });
 
 /**
- * The limits card. the operator asked to change the agent's parameters from the OS
+ * The limits card. Alex asked to change the agent's parameters from the OS
  * rather than by editing DEFAULT_LIMITS and redeploying, so every field the
  * agent enforces has to be present and editable.
  */

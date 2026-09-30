@@ -61,7 +61,7 @@ export function Badge({
   );
 }
 
-/** Mono section label: `LABEL  count ————` */
+/** Mono section label: `LABEL  count  -  -  -  - ` */
 export function Label({
   children,
   count,
@@ -72,7 +72,7 @@ export function Label({
   rule?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-os-dim">
+    <div data-part="label" className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-os-dim">
       <span className="whitespace-nowrap">{children}</span>
       {count != null && <span className="text-os-muted">{count}</span>}
       {rule && <span className="h-px flex-1 bg-os-border" />}

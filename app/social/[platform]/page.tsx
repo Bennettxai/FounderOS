@@ -3,14 +3,23 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { getDb } from '@/lib/data';
 import { PLATFORM_LABELS, platformDetail, syncFromZernioConfig } from '@/lib/social';
+import { platformVolume } from '@/lib/social-volume';
 import type { SocialPlatform } from '@/lib/schemas';
 import { formatFollowers, formatPct, GrowthBadge } from '@/components/SocialStats';
 import { FollowerBarChart } from '@/components/FollowerBarChart';
-import { Rise } from '@/components/motion';
-import { CountUp } from '@/components/CountUp';
+import { Slab, SlabTitle, SlabCard, BigStat, MeterStack, InsightCard, PILL, PILL_ACCENT } from '@/components/slab';
+import { StepLine } from '@/components/slab-charts';
 
 export const dynamic = 'force-dynamic';
 
+const WINDOW_DAYS = 30;
+
+/**
+ * One platform, in the Brand Deals slab (2026-09-24): what you land on from
+ * a /social account tile. Every number in the hero and the second row comes
+ * from lib/social-volume's platformVolume, fed with this platform's own
+ * snapshots and growth windows.
+ */
 export default function SocialPlatformPage({ params }: { params: { platform: string } }) {
   const db = getDb();
   syncFromZernioConfig(db);
@@ -18,89 +27,122 @@ export default function SocialPlatformPage({ params }: { params: { platform: str
   if (!detail) notFound();
 
   const { account, followers, growth, snapshots } = detail;
+  const label = PLATFORM_LABELS[account.platform];
+  const v = platformVolume({ label, followers, growth, snapshots, today: new Date().toISOString().slice(0, 10), days: WINDOW_DAYS });
   const newestFirst = [...snapshots].reverse();
 
   return (
-    <div>
-      <Link
-        href="/social"
-        className="mb-4 inline-flex items-center gap-1.5 text-xs text-os-muted linky"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        All platforms
-      </Link>
+    <Slab>
+      <SlabTitle
+        eyebrow={`audience · ${account.handle}`}
+        title={label}
+        meta={`${formatFollowers(followers)} followers · ${formatPct(growth.d7)} 7d · ${snapshots.length} snapshots`}
+        right={
+          <>
+            <Link href="/social" className={PILL}>
+              <ArrowLeft className="h-3.5 w-3.5" /> All platforms
+            </Link>
+            {account.url && (
+              <a href={account.url} target="_blank" rel="noreferrer" data-lens="c" className={PILL_ACCENT}>
+                Open profile <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
+          </>
+        }
+      />
 
-      <Rise as="header" i={0} className="mb-8 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-[25px] font-bold uppercase leading-[1.1] tracking-[0.06em]">{PLATFORM_LABELS[account.platform]}</h1>
-          <p className="mt-1 text-sm text-os-muted">{account.handle}</p>
-        </div>
-        {account.url && (
-          <a
-            href={account.url}
-            target="_blank"
-            rel="noreferrer"
-            data-lens="c"
-            className="pressable is-dark flex items-center gap-1.5 rounded-ctl border border-os-border px-3 py-1.5 text-xs text-os-muted"
-          >
-            Open profile
-            <ExternalLink className="h-3 w-3" />
-          </a>
-        )}
-      </Rise>
+      {/* Hero row, Brand Deals' shape: the follower history + the volume card */}
+      <div className="grid grid-cols-[2fr_1fr] gap-6 max-[1200px]:grid-cols-1">
+        <SlabCard
+          i={1}
+          title="Follower History"
+          sub={`${snapshots.length} snapshots`}
+          action={
+            <>
+              <GrowthBadge label="7d" value={growth.d7} />
+              <GrowthBadge label="30d" value={growth.d30} />
+              <GrowthBadge label="60d" value={growth.d60} />
+              <GrowthBadge label="all" value={growth.allTime} />
+            </>
+          }
+        >
+          <div className="px-6 pb-5 pt-2">
+            {/* the diagram: one bar per snapshot  -  hover for exact count + change */}
+            <FollowerBarChart series={snapshots.map((s) => ({ date: s.capturedAt, followers: s.followers }))} />
+            {newestFirst.length > 0 && (
+              <div className="mt-2 flex flex-wrap items-center gap-3 font-mono text-[10.5px] text-os-dim">
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-[3px] w-3 rounded-full bg-os-ok" /> gained vs prev
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-[3px] w-3 rounded-full bg-os-err" /> dipped
+                </span>
+                <span className="ml-auto">
+                  latest {newestFirst[0].capturedAt} · {newestFirst[0].source}
+                </span>
+              </div>
+            )}
+          </div>
+        </SlabCard>
 
-      <Rise i={1} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5 ultra:grid-cols-5">
-        <div className="rounded-xl border border-os-border bg-os-surface p-5">
-          <div className="text-xs uppercase tracking-wider text-os-muted">Followers</div>
-          <div className="mt-2 text-3xl font-bold tracking-tight">
-            {followers === null ? formatFollowers(followers) : <CountUp value={followers} kind="followers" />}
+        <SlabCard i={2} title="Follower Volume" className="flex flex-col">
+          <div className="flex flex-1 flex-col px-6 pb-6 pt-3">
+            <BigStat
+              value={v.headline ?? undefined}
+              display={v.headline == null ? formatFollowers(null) : undefined}
+              kind="followers"
+              chips={v.chips}
+              caption={v.caption}
+            />
+            <MeterStack meters={v.meters} foot={v.foot} empty="no snapshots recorded for this platform yet" />
           </div>
-        </div>
-        {(
-          [
-            ['Growth · 7d', growth.d7],
-            ['Growth · 30d', growth.d30],
-            ['Growth · 60d', growth.d60],
-            ['Growth · all time', growth.allTime],
-          ] as const
-        ).map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-os-border bg-os-surface p-5">
-            <div className="text-xs uppercase tracking-wider text-os-muted">{label}</div>
-            <div className={`mt-2 text-3xl font-bold tracking-tight ${value === null ? 'text-os-dim' : ''}`}>
-              {formatPct(value)}
-            </div>
-          </div>
-        ))}
-      </Rise>
+        </SlabCard>
+      </div>
 
-      <Rise as="section" i={2} className="mt-6 rounded-xl border border-os-border bg-os-surface p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-os-muted">
-            Follower history
-          </h2>
-          <div className="flex gap-1.5">
-            <GrowthBadge label="7d" value={growth.d7} />
-            <GrowthBadge label="30d" value={growth.d30} />
-            <GrowthBadge label="60d" value={growth.d60} />
-            <GrowthBadge label="all" value={growth.allTime} />
+      {/* Second row: the growth windows, daily gains, THE gradient card */}
+      <div className="mt-6 grid grid-cols-3 gap-6 max-[1200px]:grid-cols-1">
+        <SlabCard i={3} title="Growth Windows" sub="vs the snapshot that far back">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5 px-6 pb-6 pt-4">
+            {(
+              [
+                ['7 days', growth.d7],
+                ['30 days', growth.d30],
+                ['60 days', growth.d60],
+                ['all time', growth.allTime],
+              ] as const
+            ).map(([windowLabel, value]) => (
+              <BigStat
+                key={windowLabel}
+                size={30}
+                display={formatPct(value)}
+                chips={value == null ? [] : value === 0 ? [{ text: 'flat' }] : [{ tone: value > 0 ? 'ok' : 'err', text: value > 0 ? 'up' : 'down' }]}
+                caption={value == null ? `${windowLabel} · not enough history` : windowLabel}
+              />
+            ))}
           </div>
-        </div>
-        {/* the diagram: one bar per snapshot — hover for exact count + change */}
-        <FollowerBarChart series={snapshots.map((s) => ({ date: s.capturedAt, followers: s.followers }))} />
-        {newestFirst.length > 0 && (
-          <div className="mt-2 flex items-center gap-3 font-mono text-[9.5px] uppercase tracking-[0.08em] text-os-dim">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-[2px] w-3 bg-os-ok" /> gained vs prev
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-[2px] w-3 bg-os-err" /> dipped
-            </span>
-            <span className="ml-auto">
-              {newestFirst.length} snapshots · latest {newestFirst[0].capturedAt} · {newestFirst[0].source}
-            </span>
+        </SlabCard>
+
+        <SlabCard i={4} title="Daily Gains" sub={`last ${WINDOW_DAYS} days`}>
+          <div className="px-6 pt-3">
+            <BigStat
+              size={30}
+              value={v.gainedDays}
+              caption={v.intervals > 0 ? `days with a gain, of ${v.intervals} tracked` : 'no day-over-day history yet'}
+            />
           </div>
-        )}
-      </Rise>
-    </div>
+          <StepLine series={v.series} hue="var(--ok)" unit=" gained" empty={`No follower gains in the last ${WINDOW_DAYS} days.`} />
+        </SlabCard>
+
+        <InsightCard
+          i={5}
+          badge={`${WINDOW_DAYS}-day change`}
+          value={v.insight.value}
+          display={v.insight.display}
+          headline={v.insight.headline}
+          body={v.insight.body}
+          frac={v.insight.frac}
+        />
+      </div>
+    </Slab>
   );
 }

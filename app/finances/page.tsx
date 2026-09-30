@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, Scale, Landmark, Send } from 'lucide-react';
+import { ExternalLink, Send, Upload } from 'lucide-react';
 import { configuredProcessors, monthToDateIncome, stripeMtdForKey, stripeSnapshot, wiseOutgoing, paykitMonthToDateIncome } from '@/lib/connectors/payments';
 import {
   incomeAccounts,
@@ -15,13 +15,12 @@ import { openPaykitHistory, type PaykitHistory } from '@/lib/paykit-history';
 import type { SpendRow } from '@/lib/spend-report';
 import { openBankStore } from '@/lib/bank';
 import { businessSeries } from '@/lib/bank-statements';
-import { PageHeader } from '@/components/PageHeader';
 import { StatementUploader } from '@/components/StatementUploader';
 import { MonthlyExpenses } from '@/components/MonthlyExpenses';
 import { BusinessIncomeChart } from '@/components/BusinessIncomeChart';
-import { Badge, Label, SectionHead } from '@/components/terminal';
-import { Rise } from '@/components/motion';
-import { CountUp } from '@/components/CountUp';
+import { Slab, SlabTitle, SlabCard, BigStat, Chip, MeterStack, InsightCard, PILL, PILL_ACCENT } from '@/components/slab';
+import { StepLine, DotMatrix } from '@/components/slab-charts';
+import { moneyVolume, spendSeries, chargeSizes } from '@/lib/finances-volume';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +38,7 @@ function ago(unix: number): string {
 export default async function FinancesPage() {
   const stripeKeyed = configuredProcessors(process.env).some((p) => p.id === 'stripe' && p.configured);
 
-  // Stripe is only "live" when the API actually answers — a present-but-invalid
+  // Stripe is only "live" when the API actually answers  -  a present-but-invalid
   // key (or a server env missing it) stays honest pending, never a fake live.
   let stripeLive = false;
   let mtdUsd: number | null = null;
@@ -72,7 +71,7 @@ export default async function FinancesPage() {
   try {
     fbHistory = openPaykitHistory();
   } catch {
-    fbHistory = null; // No writable data dir — the band below still renders.
+    fbHistory = null; // No writable data dir  -  the band below still renders.
   }
   let fbAa: Awaited<ReturnType<typeof paykitMonthToDateIncome>> = null;
   let stripeMer: Awaited<ReturnType<typeof stripeMtdForKey>> = null;
@@ -86,17 +85,17 @@ export default async function FinancesPage() {
   }
   // A PayKit month the snapshots do not reach back before stays a BAND, not a
   // number: the API alone cannot split a repeat buyer's lifetime spend across
-  // months, so the card shows "floor – ceiling" rather than the old confident
+  // months, so the card shows "floor - ceiling" rather than the old confident
   // (and, for six months, inflated) single figure. See OS-655.
   const liveIncomeUsd: Record<string, number | IncomeBand> = {};
   if (fbAa != null) liveIncomeUsd['paykit-lc'] = fbAa;
   if (stripeMer != null) liveIncomeUsd['stripe-vantage'] = stripeMer.amountCents / 100;
   const accounts = incomeAccounts({ connected: stripeLive, mtdUsd }, configuredMap, liveIncomeUsd);
-  // Outgoing Wise transfers — null (no Wise key) hides the section entirely.
+  // Outgoing Wise transfers  -  null (no Wise key) hides the section entirely.
   const wiseOut = await wiseOutgoing(process.env).catch(() => null);
   const incomeMtd = totalIncome(accounts);
   // Expenses from the uploaded statement ledger when present; the DECLARED set
-  // fees otherwise (Marco CSM — subscriptions arrive via statement upload).
+  // fees otherwise (Marco CSM  -  subscriptions arrive via statement upload).
   // Every out-row goes to the client so the pie and the full expenditure
   // statement can be recomputed per month without another round trip.
   let ledgerRows: SpendRow[] = [];
@@ -131,227 +130,236 @@ export default async function FinancesPage() {
     : null;
   const expenses = expensesLive ? ledgerSpend.reduce((s, c) => s + c.total, 0) : totalExpenses(DECLARED_EXPENSES);
   const netMonthly = net(incomeMtd, expenses);
+  // Income is month to date, so only this month's statement (or the monthly
+  // set fees) can be netted against it.
+  const now = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const statementIsThisMonth = ledgerMonth === thisMonth;
+  const netComparable = !expensesLive || statementIsThisMonth;
   const liveCount = accounts.filter((a) => a.live).length;
-  // Scale bars by the ceiling so a bounded account is not drawn as if its floor
-  // were the whole story; the printed figure still leads with the floor.
-  const maxAccount = Math.max(...accounts.map((a) => a.incomeUpper ?? a.income ?? 0), 1);
   const incomeMtdUpper = totalIncomeUpper(accounts);
+  // The Brand Deals shape (2026-09-24): the page's own money as a count-up
+  // headline, dot chips, honest share meters and the one insight card.
+  const vol = moneyVolume({ accounts, expenses, expensesLive, monthLabel, statementIsThisMonth });
+  const spend = spendSeries(ledgerRows);
+  const sizes = chargeSizes(recent);
+  const largestCharge = recent.reduce((m, c) => Math.max(m, c.amount), 0) / 100;
+  const latestSpend = spend.at(-1) ?? null;
 
   return (
-    <div>
-      <PageHeader
-        eyebrow="every processor, one view"
+    <Slab>
+      <SlabTitle
+        eyebrow="money · every processor, one view"
         title="Finances"
+        meta={
+          <>
+            {usd(incomeMtd)}
+            {incomeMtdUpper > incomeMtd ? ` - ${usd(incomeMtdUpper)}` : ''} in this month · {usd(expenses)} out
+            {expensesLive ? ` (${monthLabel} statement)` : ' (set fees)'} · {liveCount}/{accounts.length} processors live
+            {stripeLive ? ` · Stripe balance ${usd(available, true)}, ${usd(pending, true)} pending` : ' · Stripe balance needs a live key'}
+          </>
+        }
         right={
-          <Badge tone={netMonthly >= 0 ? 'ok' : 'err'}>
-            {netMonthly >= 0 ? '+' : '−'}
-            {usd(Math.abs(netMonthly))} net /mo
-          </Badge>
+          <>
+            {netComparable && (
+              <Chip tone={netMonthly >= 0 ? 'ok' : 'err'}>
+                {netMonthly >= 0 ? '+' : '−'}
+                {usd(Math.abs(netMonthly))} net /mo
+              </Chip>
+            )}
+            <a href="#statements" className={PILL}>
+              <Upload size={13} strokeWidth={1.7} /> Upload statement
+            </a>
+            <a href="https://dashboard.stripe.com/" target="_blank" rel="noreferrer" className={PILL_ACCENT}>
+              Open Stripe <ExternalLink size={12} strokeWidth={1.8} />
+            </a>
+          </>
         }
       />
 
-      {/* Summary tiles — slim single-line rows so the page opens condensed */}
-      <section className="mb-5 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-        <Rise i={0} className="rise-card flex flex-col gap-1 rounded-lg-t border border-os-border bg-os-surface px-3 py-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label>Income · MTD</Label>
-            <ArrowDownLeft className="h-3 w-3 text-os-ok" strokeWidth={1.8} />
-          </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="font-mono text-[16px] font-semibold leading-none tracking-[-0.02em] text-os-ok">
-              <CountUp value={incomeMtd} kind="usd" />
-              {/* The headline leads with the proven floor. When a source could
-                  only bound its month, the ceiling rides alongside instead of
-                  being quietly folded in. */}
-              {incomeMtdUpper > incomeMtd ? (
-                <span className="text-os-dim"> – {usd(incomeMtdUpper)}</span>
-              ) : null}
-            </span>
-            <span className="min-w-0 truncate font-mono text-[9.5px] uppercase tracking-[0.1em] text-os-dim">
-              {liveCount}/{accounts.length} live
-            </span>
-          </div>
-        </Rise>
+      {/* Hero row: where the money goes + the Money Volume card */}
+      <div className="grid grid-cols-[2fr_1fr] gap-6 max-[1200px]:grid-cols-1">
+        <SlabCard i={1} className="flex flex-col">
+          {/* Monthly expenses by category, month by month (client-side) */}
+          <MonthlyExpenses
+            rows={ledgerRows}
+            months={ledgerMonths}
+            fallback={expensesByCategory(DECLARED_EXPENSES).map((c) => ({
+              category: c.category,
+              totalCents: Math.round(c.total * 100),
+            }))}
+          >
+            {/* Statement ingestion: pick a card lane, drop a CSV or PDF */}
+            <div id="statements" className="h-full scroll-mt-24">
+              <StatementUploader />
+            </div>
+          </MonthlyExpenses>
+        </SlabCard>
 
-        <Rise i={1} className="rise-card flex flex-col gap-1 rounded-lg-t border border-os-border bg-os-surface px-3 py-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label>Expenses · /mo</Label>
-            <ArrowUpRight className="h-3 w-3 text-os-err" strokeWidth={1.8} />
+        <SlabCard i={2} title="Money Volume" sub="month to date" className="flex flex-col">
+          <div className="flex flex-1 flex-col px-6 pb-6 pt-3">
+            <BigStat
+              value={vol.headline}
+              kind="usd"
+              unit={vol.upper != null ? `- ${usd(vol.upper)}` : undefined}
+              chips={vol.chips}
+              caption={vol.caption}
+            />
+            <MeterStack meters={vol.meters} foot={vol.foot} empty="no processors wired yet" />
           </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="font-mono text-[16px] font-semibold leading-none tracking-[-0.02em]"><CountUp value={expenses} kind="usd" /></span>
-            <span
-              className={`min-w-0 truncate font-mono text-[9.5px] uppercase tracking-[0.1em] ${expensesLive ? 'text-os-ok' : 'text-os-warn'}`}
-            >
-              {expensesLive ? `uploaded · ${monthLabel}` : 'set fees · card subs via statement'}
-            </span>
-          </div>
-        </Rise>
+        </SlabCard>
+      </div>
 
-        <Rise i={2} className="rise-card flex flex-col gap-1 rounded-lg-t border border-os-border bg-os-surface px-3 py-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label>Net · /mo</Label>
-            <Scale className="h-3 w-3 text-os-accent" strokeWidth={1.8} />
+      {/* Second row: spend by month, charge sizes, THE gradient card */}
+      <div className="mt-6 grid grid-cols-3 gap-6 max-[1200px]:grid-cols-1">
+        <SlabCard i={3} title="Spend by month" sub={expensesLive ? 'card statements' : 'no statements yet'}>
+          <div className="px-6 pt-3">
+            <BigStat
+              size={30}
+              value={latestSpend?.count ?? 0}
+              kind="usd"
+              caption={latestSpend ? `spent in ${latestSpend.label}, across ${spend.length} uploaded month${spend.length === 1 ? '' : 's'}` : 'upload a card statement to chart spend'}
+            />
           </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span
-              className={`font-mono text-[16px] font-semibold leading-none tracking-[-0.02em] ${netMonthly >= 0 ? 'text-os-ok' : 'text-os-err'}`}
-            >
-              {netMonthly >= 0 ? '' : '−'}
-              <CountUp value={Math.abs(netMonthly)} kind="usd" />
-            </span>
-            <span className="min-w-0 truncate font-mono text-[9.5px] uppercase tracking-[0.1em] text-os-dim">in − out</span>
-          </div>
-        </Rise>
+          <StepLine series={spend} hue="var(--ramp-4)" unit=" USD" empty="No card statements uploaded yet." />
+        </SlabCard>
 
-        <Rise i={3} className="rise-card flex flex-col gap-1 rounded-lg-t border border-os-border bg-os-surface px-3 py-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label>Stripe balance</Label>
-            <Landmark className="h-3 w-3 text-os-accent" strokeWidth={1.8} />
+        <SlabCard i={4} title="Charge sizes" sub={stripeLive ? 'Stripe · recent' : 'Stripe not live'}>
+          <div className="flex items-end justify-between gap-4 px-6 pb-6 pt-3">
+            <div>
+              <BigStat size={30} value={recent.length} caption={`recent charge${recent.length === 1 ? '' : 's'}`} />
+              <div className="mt-4 w-fit rounded-full border border-os-border px-3 py-1 text-[12px] text-os-muted">
+                Largest: <span className="font-semibold tabular-nums">{stripeLive && recent.length > 0 ? usd(largestCharge, true) : ' - '}</span>
+              </div>
+            </div>
+            <DotMatrix cols={sizes} hue="var(--ramp-1)" />
           </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="font-mono text-[16px] font-semibold leading-none tracking-[-0.02em]">
-              {stripeLive ? <CountUp value={available} kind="usdCents" /> : '—'}
-            </span>
-            <span className="min-w-0 truncate font-mono text-[9.5px] uppercase tracking-[0.1em] text-os-dim">
-              {stripeLive ? `${usd(pending, true)} pending` : 'connect Stripe'}
-            </span>
-          </div>
-        </Rise>
-      </section>
+        </SlabCard>
 
-      {/* Income by processor */}
-      {/* Income by business — from uploaded bank statements, with a range dropdown */}
+        {/* the ONE gradient insight card: what was kept */}
+        <InsightCard
+          i={5}
+          badge="Kept this month"
+          display={vol.insight.display}
+          headline={vol.insight.headline}
+          body={vol.insight.body}
+          frac={vol.insight.frac}
+        />
+      </div>
+
+      {/* Income by business  -  from uploaded bank statements, with range chips */}
       {bankSeries.length > 0 && (
-        <Rise as="section" i={4} className="mb-5">
-          <SectionHead label="Income · by business" count="bank deposits" />
-          <div className="grid gap-3.5 lg:grid-cols-2">
+        <SlabCard i={6} title="Income · by business" sub="bank deposits" className="mt-6">
+          <div className="grid gap-4 px-6 pb-6 pt-4 lg:grid-cols-2">
             {bankSeries.map((s) => (
               <BusinessIncomeChart key={s.business} series={s} />
             ))}
           </div>
-        </Rise>
+        </SlabCard>
       )}
 
-      {/* Monthly expenses by category, month by month (client-side) */}
-      <Rise i={5}>
-      <MonthlyExpenses
-        rows={ledgerRows}
-        months={ledgerMonths}
-        fallback={expensesByCategory(DECLARED_EXPENSES).map((c) => ({
-          category: c.category,
-          totalCents: Math.round(c.total * 100),
-        }))}
-      >
-        {/* Statement ingestion: pick a card lane, drop a CSV or PDF */}
-        <StatementUploader />
-      </MonthlyExpenses>
-      </Rise>
-
-      <Rise as="section" i={6} className="mb-5">
-        <SectionHead label="Income · by processor" count={`${liveCount}/${accounts.length} live`} />
-        <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+      <SlabCard i={7} title="Income · by processor" sub={`${liveCount}/${accounts.length} live`} className="mt-6">
+        <div className="mt-4 border-t border-os-border">
           {accounts.map((a) => (
-            <div key={a.id} data-lens="r" className="pressable is-row rounded-lg-t border border-os-border bg-os-surface px-4 py-3">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="text-[13px] font-semibold">{a.label}</div>
-                  <div className="mt-0.5 font-mono text-[9.5px] text-os-dim">{a.processor}</div>
+            <div
+              key={a.id}
+              data-lens="r"
+              className="pressable is-row grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-5 border-b border-os-hairline px-6 py-3.5 last:border-0 max-[700px]:grid-cols-[minmax(0,1fr)_auto]"
+            >
+              <div className="min-w-0">
+                <div className="truncate text-[13.5px] font-medium">{a.label}</div>
+                <div className="truncate font-mono text-[11px] text-os-dim">
+                  {a.processor}
+                  {/* A bounded month says so out loud rather than printing one
+                      confident number the source cannot actually support. */}
+                  {a.unsplittableCustomers > 0
+                    ? ` · ${a.unsplittableCustomers} repeat ${a.unsplittableCustomers === 1 ? 'customer' : 'customers'} · split unavailable`
+                    : ''}
                 </div>
-                {a.live ? (
-                  <Badge tone="ok">
-                    <span className="dot ok pulse mr-1 inline-block" /> live
-                  </Badge>
-                ) : a.configured ? (
-                  <Badge tone="warn">key set</Badge>
-                ) : (
-                  <Badge ghost>connect →</Badge>
-                )}
               </div>
-              <div className="mt-2 flex items-baseline gap-1.5">
-                <span className="font-mono text-[18px] font-semibold tracking-[-0.02em]">
-                  {a.income != null ? usd(a.income) : '—'}
-                  {a.incomeUpper != null ? (
-                    <span className="text-os-dim"> – {usd(a.incomeUpper)}</span>
-                  ) : null}
-                </span>
-                <span className="font-mono text-[9.5px] text-os-dim">
+              <div className="text-right">
+                <div className="font-mono text-[15px] font-semibold tabular-nums">
+                  {a.income != null ? usd(a.income) : ' - '}
+                  {a.incomeUpper != null ? <span className="text-os-dim"> - {usd(a.incomeUpper)}</span> : null}
+                </div>
+                <div className="font-mono text-[10.5px] text-os-dim">
                   {a.live ? 'this month' : a.configured ? 'pull pending' : 'awaiting key'}
-                </span>
-              </div>
-              {/* A bounded month says so out loud rather than printing one
-                  confident number the source cannot actually support. */}
-              {a.unsplittableCustomers > 0 ? (
-                <div className="mt-1 font-mono text-[9.5px] text-os-dim">
-                  {a.unsplittableCustomers} repeat {a.unsplittableCustomers === 1 ? 'customer' : 'customers'} · split unavailable
-                </div>
-              ) : null}
-              <div className="mt-2 h-1 overflow-hidden rounded-sm-t bg-os-surface2">
-                {/* Floor solid, the unprovable remainder faint on top. */}
-                <div className="flex h-full">
-                  <div
-                    className="h-full bg-os-accent opacity-60"
-                    style={{ width: `${a.income != null ? (a.income / maxAccount) * 100 : 0}%` }}
-                  />
-                  <div
-                    className="h-full bg-os-accent opacity-20"
-                    style={{
-                      width: `${a.incomeUpper != null ? ((a.incomeUpper - (a.income ?? 0)) / maxAccount) * 100 : 0}%`,
-                    }}
-                  />
                 </div>
               </div>
+              <span
+                className="rounded-full px-2.5 py-0.5 font-mono text-[10.5px] uppercase tracking-[0.12em] max-[700px]:hidden"
+                style={
+                  a.live
+                    ? { background: 'color-mix(in oklab, var(--ok) 16%, transparent)', color: 'var(--ok)' }
+                    : a.configured
+                      ? { background: 'color-mix(in oklab, var(--warn) 15%, transparent)', color: 'var(--warn)' }
+                      : { background: 'color-mix(in oklab, var(--text) 8%, transparent)', color: 'var(--text-2)' }
+                }
+              >
+                {a.live ? 'live' : a.configured ? 'key set' : 'connect →'}
+              </span>
             </div>
           ))}
         </div>
-      </Rise>
+      </SlabCard>
 
-      {/* Recent income — real Stripe charges */}
+      {/* Recent income  -  real Stripe charges */}
       {stripeLive && recent.length > 0 && (
-        <Rise as="section" i={7} className="mb-5">
-          <SectionHead label="Recent income" count="Stripe · live" />
-          <ul className="space-y-1.5">
+        <SlabCard i={8} title="Recent income" sub="Stripe · live" className="mt-6">
+          <ul className="mt-4 border-t border-os-border">
             {recent.map((c, i) => (
               <li
                 key={`${c.created}-${i}`}
-                data-lens="r" className="pressable is-row flex items-center gap-3.5 rounded-lg-t border border-os-border bg-os-surface px-4 py-3"
+                data-lens="r"
+                className="pressable is-row flex items-center gap-4 border-b border-os-hairline px-6 py-3.5 last:border-0"
               >
-                <span className="font-mono text-[15px] font-semibold text-os-ok">+{usd(c.amount / 100, true)}</span>
-                <span className="min-w-0 flex-1 truncate text-[12.5px] text-os-muted">{c.description}</span>
+                <span
+                  className="shrink-0 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold tabular-nums"
+                  style={{ background: 'color-mix(in oklab, var(--ok) 16%, transparent)', color: 'var(--ok)' }}
+                >
+                  +{usd(c.amount / 100, true)}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-[13px] text-os-muted">{c.description}</span>
                 <span className="shrink-0 font-mono text-[11px] text-os-dim">{ago(c.created)}</span>
               </li>
             ))}
           </ul>
-      </Rise>
+        </SlabCard>
       )}
-      {/* Outgoing transfers — Wise (hidden entirely until a Wise key lands) */}
+
+      {/* Outgoing transfers  -  Wise (hidden entirely until a Wise key lands) */}
       {wiseOut && (
-        <Rise as="section" i={8}>
-          <SectionHead label="Outgoing · Wise" count={`${wiseOut.length} transfer${wiseOut.length === 1 ? '' : 's'}`} />
+        <SlabCard
+          i={9}
+          title="Outgoing · Wise"
+          sub={`${wiseOut.length} transfer${wiseOut.length === 1 ? '' : 's'}`}
+          className="mt-6"
+        >
           {wiseOut.length === 0 ? (
-            <div className="rounded-lg-t border border-os-border bg-os-surface px-4 py-3 font-mono text-[11px] text-os-dim">
-              Wise connected · no recent outgoing transfers
-            </div>
+            <div className="px-6 py-7 text-center font-mono text-[11.5px] text-os-dim">Wise connected · no recent outgoing transfers</div>
           ) : (
-            <ul className="space-y-1.5">
+            <ul className="mt-4 border-t border-os-border">
               {wiseOut.map((t, i) => (
                 <li
                   key={`${t.created}-${i}`}
-                  data-lens="r" className="pressable is-row flex items-center gap-3.5 rounded-lg-t border border-os-border bg-os-surface px-4 py-3"
+                  data-lens="r"
+                  className="pressable is-row flex items-center gap-4 border-b border-os-hairline px-6 py-3.5 last:border-0"
                 >
                   <Send className="h-[15px] w-[15px] shrink-0 text-os-err" strokeWidth={1.8} />
-                  <span className="font-mono text-[15px] font-semibold text-os-err">
+                  <span
+                    className="shrink-0 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold tabular-nums"
+                    style={{ background: 'color-mix(in oklab, var(--err) 16%, transparent)', color: 'var(--err)' }}
+                  >
                     −{(t.amountCents / 100).toLocaleString('en-US', { style: 'currency', currency: t.currency })}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-[12.5px] text-os-muted">{t.reference ?? t.status}</span>
+                  <span className="min-w-0 flex-1 truncate text-[13px] text-os-muted">{t.reference ?? t.status}</span>
                   <span className="shrink-0 font-mono text-[11px] text-os-dim">{t.status}</span>
                 </li>
               ))}
             </ul>
           )}
-      </Rise>
+        </SlabCard>
       )}
-
-    </div>
+    </Slab>
   );
 }

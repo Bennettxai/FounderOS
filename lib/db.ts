@@ -334,6 +334,8 @@ CREATE TABLE IF NOT EXISTS cron_runs (
   summary TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_cron_runs_cron ON cron_runs (cron_id, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_cron_runs_started ON cron_runs (started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_agent_runs_started ON agent_runs (started_at DESC);
 CREATE TABLE IF NOT EXISTS digest_reads (
   key TEXT PRIMARY KEY,
   read_at TEXT NOT NULL
@@ -908,6 +910,14 @@ export function openDb(path: string) {
     });
 
   const agentRuns = {
+    since(sinceIso: string, agentIds?: string[]): AgentRun[] {
+      if (agentIds && agentIds.length === 0) return [];
+      const filter = agentIds ? ` AND agent_id IN (${agentIds.map(() => '?').join(', ')})` : '';
+      return db
+        .prepare(`SELECT * FROM agent_runs WHERE started_at >= ?${filter} ORDER BY started_at DESC, rowid DESC`)
+        .all(sinceIso, ...(agentIds ?? []))
+        .map(rowToRun);
+    },
     count(): number {
       const row = db.prepare('SELECT COUNT(*) AS count FROM agent_runs').get() as { count: number };
       return row.count;
@@ -1053,6 +1063,12 @@ export function openDb(path: string) {
     });
 
   const cronRuns = {
+    since(sinceIso: string): CronRun[] {
+      return db
+        .prepare('SELECT * FROM cron_runs WHERE started_at >= ? ORDER BY started_at DESC, rowid DESC')
+        .all(sinceIso)
+        .map(rowToCronRun);
+    },
     insert(r: CronRun): void {
       CronRunSchema.parse(r);
       db.prepare(

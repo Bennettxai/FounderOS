@@ -40,6 +40,7 @@ describe('parseClaudeLine', () => {
     const p = parseClaudeLine(claudeLine());
     expect(p).toEqual({
       ts: '2026-09-05T14:00:00.000Z',
+      cwd: undefined, entrypoint: undefined, sidechain: false,
       model: 'claude-opus-5',
       in: 100,
       out: 50,

@@ -6,13 +6,14 @@ import { stripeSnapshot } from '@/lib/connectors/payments';
 import { gatherCommsFeed } from '@/lib/comms-feed';
 import { inboundLast24h } from '@/lib/comms';
 import { collapseRuns } from '@/lib/agents/run-digest';
-import { PageHeader } from '@/components/PageHeader';
 import { CountUp } from '@/components/CountUp';
 import { Rise } from '@/components/motion';
 import { HomeNeedsYou } from '@/components/HomeNeedsYou';
 import { InterjectComposer } from '@/components/InterjectComposer';
 import { Kbd, Label, SparkBars } from '@/components/terminal';
-import { runsPerDay, inboundPerDay, stateOfWorld, type Tone } from '@/lib/pulse-history';
+import { runsPerDay, inboundPerDay, stateOfWorld, operatingVolume, dailySeries, sourceMix, homeAttention, type Tone } from '@/lib/pulse-history';
+import { SlabTitle, SlabCard, BigStat, MeterStack, InsightCard } from '@/components/slab';
+import { StepLine, DotMatrix } from '@/components/slab-charts';
 import type { ConnectorStatus } from '@/lib/connectors/types';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,7 @@ const TONE_CLASS: Record<Tone, string> = {
   dim: 'text-os-dim',
 };
 
-/** Live connector map — a bar per connector, colored by real state. Honest
+/** Live connector map  -  a bar per connector, colored by real state. Honest
     stand-in for a time series we don't store (connector uptime has no history). */
 function ConnectorBars({ connections }: { connections: ConnectorStatus[] }) {
   const w = 72;
@@ -47,8 +48,8 @@ function ConnectorBars({ connections }: { connections: ConnectorStatus[] }) {
   );
 }
 
-/** Real health meter — fills to the current score. No fabricated trend line. */
-/** Ten fixed cells, lit while `i < score/10` — the artboard's G-Brain foot.
+/** Real health meter  -  fills to the current score. No fabricated trend line. */
+/** Ten fixed cells, lit while `i < score/10`  -  the artboard's G-Brain foot.
     A continuous rail reads as a percentage bar; the score is a graded check,
     and ten cells say so. Unlit cells stay on --border so the track is legible
     without competing with the lit run. */
@@ -111,11 +112,11 @@ function StatTile({
   return (
     <Link
       href={href}
-      data-lens="r" className="pressable is-row group flex flex-col gap-2 rounded-tile border border-os-border bg-os-surface px-[18px] py-4"
+      data-lens="r" data-part="tile" className="pressable is-row group flex flex-col gap-2 rounded-tile border border-os-border bg-os-surface px-[18px] py-4"
     >
       <div className="flex items-center justify-between">
         <Label>{label}</Label>
-        {/* the artboard keeps this visible at rest in #5c5c5c — it is the
+        {/* the artboard keeps this visible at rest in #5c5c5c  -  it is the
             tile's "this opens something" tell, and a tell you only see once
             you are already hovering has told you nothing */}
         <span aria-hidden="true" className="lens-child font-mono text-[11px] leading-none text-os-dim group-hover:text-os-text">
@@ -145,8 +146,9 @@ export default async function HomePage() {
 
   const agents = db.agents.all();
   const recentRuns = db.agentRuns.recent(40);
-  // Wider pull just for the runs/day sparkline — 40 may not span a week.
-  const runsForSpark = db.agentRuns.recent(400);
+  // The runs/day sparkline and the 14-day activity line, bounded in SQL (one
+  // spare day so a local-day window never loses its first morning to UTC).
+  const runsForSpark = db.agentRuns.since(new Date(Date.now() - 15 * 86_400_000).toISOString());
 
   const connected = connections.filter((c) => c.state === 'connected').length;
   // "Down" = genuinely erroring only; not_configured means no key set, not broken.
@@ -155,7 +157,7 @@ export default async function HomePage() {
   const health = overview.doctor.healthScore;
   const inbound = inboundLast24h(feed);
   const failedRuns = recentRuns.filter((r) => !r.ok).length;
-  // Real sparkline series from actual history — no synthetic arrays.
+  // Real sparkline series from actual history  -  no synthetic arrays.
   const agentsSpark = runsPerDay(runsForSpark, 7);
   const commsSpark = inboundPerDay(feed, 7);
   const hero = stateOfWorld({
@@ -168,7 +170,7 @@ export default async function HomePage() {
     failedRuns,
   });
 
-  // Done today — what the OS actually finished since local midnight: agent
+  // Done today  -  what the OS actually finished since local midnight: agent
   // runs that ended OK (collapsed so the 30-minute crons cost one line) plus
   // Stripe charges that landed today. Newest first, honest and small.
   const dayStart = new Date();
@@ -196,28 +198,47 @@ export default async function HomePage() {
       when: relativeTime(new Date(c.created * 1000).toISOString()),
     }));
   const doneToday = [...doneCharges, ...doneRuns].sort((a, b) => b.time - a.time).slice(0, 8);
+  // Brand Deals' Deal Volume card, worn by Home's own numbers (2026-09-24).
+  const vol = operatingVolume({
+    connected,
+    totalConnections: connections.length,
+    activeAgents,
+    totalAgents: agents.length,
+    health: health ?? null,
+    runs: runsForSpark,
+  });
+  const activity = dailySeries(runsForSpark.map((r) => r.startedAt), 14);
+  const activityTotal = activity.reduce((n, d) => n + d.count, 0);
+  const mix = sourceMix(feed);
+  // The ledger shows 8 collapsed lines; the COUNT is every run that finished
+  // OK today (from the wide pull) plus every charge that landed today.
+  const doneCount = vol.runsToday - vol.failedToday + doneCharges.length;
+  const attention = homeAttention({ inbound, failedToday: vol.failedToday, connectorsDown, doneToday: doneCount });
+  const chargedToday = (stripe?.recentCharges ?? [])
+    .filter((c) => c.created * 1000 >= dayStart.getTime())
+    .reduce((sum, c) => sum + c.amount / 100, 0);
 
   return (
-    <div>
-      <PageHeader
+    <div className="os-slab">
+      <SlabTitle
         eyebrow="command center"
-        title={greeting()}
-        caret
+        title={`${greeting()}, Alex`}
+        meta={
+          /* Honest state-of-the-world line  -  what needs you, straight from live data */
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px]">
+            {hero.map((s, i) => (
+              <span key={i} className="flex items-center gap-2">
+                {i > 0 && <span className="text-os-border-strong">·</span>}
+                <span className={TONE_CLASS[s.tone]}>{s.text}</span>
+              </span>
+            ))}
+          </span>
+        }
         right={<Kbd>⌘K</Kbd>}
       />
 
-      {/* Honest state-of-the-world line — what needs you, straight from live data */}
-      <Rise i={1} className="-mt-3 mb-[18px] flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[12px]">
-        {hero.map((s, i) => (
-          <span key={i} className="flex items-center gap-2">
-            {i > 0 && <span className="text-os-border-strong">·</span>}
-            <span className={TONE_CLASS[s.tone]}>{s.text}</span>
-          </span>
-        ))}
-      </Rise>
-
       {/* Pulse row */}
-      <Rise as="section" i={2} className="mb-[22px] grid grid-cols-4 gap-3 max-[1100px]:grid-cols-2">
+      <Rise as="section" i={1} className="mb-6 grid grid-cols-4 gap-3 max-[1100px]:grid-cols-2">
         <StatTile
           href="/integrations"
           label="Systems"
@@ -242,26 +263,88 @@ export default async function HomePage() {
         <StatTile
           href="/brain"
           label="G-Brain health"
-          value={health == null ? '—' : <CountUp value={health} />}
+          value={health == null ? ' - ' : <CountUp value={health} />}
           unit={`/ 100${overview.doctor.connected ? ` · ${overview.doctor.status}` : ' · offline'}`}
           valueClass="text-os-accent"
           foot={<HealthMeter value={health ?? null} />}
         />
       </Rise>
 
-      {/* Main grid: what needs the operator, the interject line, what got done */}
-      <div className="grid grid-cols-[1.05fr_0.95fr] items-start gap-6 max-[1100px]:grid-cols-1">
-        <Rise as="section" i={3} className="min-w-0">
+      {/* Hero row, Brand Deals' shape: the queue that needs Alex + the volume card */}
+      <div className="grid grid-cols-[2fr_1fr] gap-6 max-[1200px]:grid-cols-1">
+        {/* the queue stretches to the volume card's height, like Pipeline does */}
+        <Rise as="section" i={2} className="min-w-0 [&>[data-part=card]]:h-full">
           <HomeNeedsYou boardUrl={process.env.PAPERCLIP_API_URL ?? null} />
         </Rise>
 
-        <Rise as="section" i={4} className="flex min-w-0 flex-col gap-[22px]">
-          <InterjectComposer />
+        <SlabCard
+          i={3}
+          title="Operating volume"
+          className="flex flex-col self-start"
+          action={
+            <Link href="/agents" className="rounded-full border border-os-border px-3 py-1 font-mono text-[11px] text-os-dim hover:border-os-border-strong hover:text-os-text">
+              runs →
+            </Link>
+          }
+        >
+          <div className="flex flex-1 flex-col px-6 pb-6 pt-3">
+            <BigStat
+              value={vol.runsToday}
+              chips={[
+                ...(vol.failedToday > 0 ? [{ tone: 'err' as const, text: `${vol.failedToday} failed` }] : []),
+                ...(chargedToday > 0
+                  ? [{ tone: 'ok' as const, text: `${chargedToday.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} charged` }]
+                  : []),
+              ]}
+              caption={`agent runs today across ${vol.agentsToday} agent${vol.agentsToday === 1 ? '' : 's'}`}
+            />
+            <MeterStack meters={vol.meters} foot={`${connected} systems · ${activeAgents} agents · brain ${health ?? ' - '}/100`} />
+          </div>
+        </SlabCard>
+      </div>
 
-          <div className="relative overflow-hidden rounded-panel border border-os-border bg-os-surface">
-            <div className="flex items-center gap-3 border-b border-os-border px-4 py-2.5">
+      {/* Second row: activity line, inbound mix dots, THE gradient card */}
+      <div className="mt-6 grid grid-cols-3 gap-6 max-[1200px]:grid-cols-1">
+        <SlabCard i={4} title="Agent activity">
+          <div className="px-6 pt-3">
+            <BigStat size={30} value={activityTotal} caption="agent runs, last 14 days" />
+          </div>
+          <StepLine series={activity} hue="var(--send-activity)" empty="No agent runs in the last 14 days." />
+        </SlabCard>
+
+        <SlabCard i={5} title="Inbound mix">
+          <div className="flex items-end justify-between gap-4 px-6 pb-6 pt-3">
+            <div>
+              <BigStat size={30} value={feed.length} caption="latest messages in the feed" />
+              <Link href="/comms" className="mt-4 inline-block rounded-full border border-os-border px-3 py-1 text-[12px] text-os-muted hover:text-os-text">
+                <span className="font-semibold tabular-nums">{inbound}</span> in the last 24h →
+              </Link>
+            </div>
+            <DotMatrix cols={mix} hue="var(--ramp-1)" />
+          </div>
+        </SlabCard>
+
+        <InsightCard
+          i={6}
+          badge="Needs you now"
+          value={attention.count}
+          headline={attention.headline}
+          body={`${doneCount} thing${doneCount === 1 ? '' : 's'} already done today.`}
+          frac={attention.frac}
+        />
+      </div>
+
+      {/* Talk to the OS, and what it finished */}
+      <div className="mt-6 grid grid-cols-2 items-start gap-6 max-[1100px]:grid-cols-1">
+        <Rise as="section" i={7} className="min-w-0">
+          <InterjectComposer />
+        </Rise>
+
+        <Rise as="section" i={8} className="min-w-0">
+          <div data-part="card" className="relative overflow-hidden rounded-panel border border-os-border bg-os-surface">
+            <div data-part="card-head" className="flex items-center gap-3 border-b border-os-border px-4 py-2.5">
               <Label>Done today</Label>
-              <span className="font-mono text-[10px] text-os-dim">{doneToday.length} since midnight</span>
+              <span className="font-mono text-[10px] text-os-dim">{doneCount} since midnight</span>
               <Link href="/agents" className="ml-auto font-mono text-[10px] text-os-dim linky">
                 runs →
               </Link>
@@ -273,6 +356,7 @@ export default async function HomePage() {
                 {doneToday.map((d) => (
                   <li
                     key={d.key}
+                    data-part="row"
                     className="flex items-baseline gap-2.5 border-b border-os-hairline px-4 py-2 font-mono text-[11px] last:border-b-0"
                   >
                     <span className={`shrink-0 font-bold ${d.headClass}`}>{d.head}</span>

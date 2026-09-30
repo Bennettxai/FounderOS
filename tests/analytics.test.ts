@@ -47,7 +47,7 @@ describe('runsWithin', () => {
 });
 
 /**
- * Mock 5i polish (the operator, 2026-09-07): the run-volume card grows the 7d/14d/30d
+ * Mock 5i polish (Alex, 2026-09-07): the run-volume card grows the 7d/14d/30d
  * range chips, hoverable per-day bars, and the "hover a day / today" footer from
  * the mock. Interactivity means a client component: the server page hands it the
  * real 30-day run log and the card slices per range.
@@ -63,7 +63,9 @@ describe('/analytics mock-5i run-volume card', () => {
 
   test('the card is a client component with 7d / 14d / 30d range chips, 14d default', () => {
     expect(card).toContain("'use client'");
-    expect(card).toMatch(/from '@\/components\/Pressable'/);
+    // Brand Deals pills since 2026-09-24: the slab kit's chipClass, solid accent when on
+    expect(card).toMatch(/from '@\/components\/slab'/);
+    expect(card).toContain('chipClass(range === r)');
     // chips render {r}d over the ranges array, so pin the array + template
     expect(card).toMatch(/RANGES[^=]*= \[7, 14, 30\]/);
     expect(card).toMatch(/\{r\}d/);

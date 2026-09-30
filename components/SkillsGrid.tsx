@@ -7,6 +7,7 @@
  * footer path-or-owner. Click a card to expand its real SKILL.md in a reader.
  * The full doc loads on demand (GET /api/skills/[slug]) so the page ships
  * light, unless a card carries inline markdown (the seeded fallback).
+ * 2026-09-24: the wall is a Brand Deals SlabCard, its filters the slab pills.
  */
 import { useEffect, useState, type ReactNode } from 'react';
 import {
@@ -26,15 +27,15 @@ import {
   Sparkles,
   type LucideIcon,
 } from 'lucide-react';
-import { Chip } from '@/components/Pressable';
+import { SlabCard, chipClass } from '@/components/slab';
 
 export type SkillCard = {
-  id: string; // slug — also the /api/skills/[slug] key
+  id: string; // slug  -  also the /api/skills/[slug] key
   name: string;
   group: string;
   kind: 'claude' | 'operator';
   description: string;
-  meta: string; // source path or owner — the card footer
+  meta: string; // source path or owner  -  the card footer
   filePath: string;
   status?: 'live' | 'learning' | 'planned';
   markdown?: string; // inline (fallback); otherwise fetched by id
@@ -118,7 +119,7 @@ function Markdown({ src }: { src: string }) {
   return <div>{out}</div>;
 }
 
-export function SkillsGrid({ cards, sourceNote }: { cards: SkillCard[]; sourceNote: string }) {
+export function SkillsGrid({ cards, sourceNote, i = 6 }: { cards: SkillCard[]; sourceNote: string; i?: number }) {
   const [viewing, setViewing] = useState<SkillCard | null>(null);
   const [md, setMd] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('All');
@@ -171,63 +172,71 @@ export function SkillsGrid({ cards, sourceNote }: { cards: SkillCard[]; sourceNo
     URL.revokeObjectURL(url);
   };
 
+  // The reader modal sits OUTSIDE the SlabCard: the card's rise/lift transforms
+  // would otherwise become the containing block of its position: fixed.
   return (
-    <div>
-      <div className="mb-3 flex flex-wrap items-center gap-3">
-        <p className="min-w-0 flex-1 font-mono text-[11px] text-os-dim">{sourceNote}</p>
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="filter skills"
-          className="h-[26px] w-44 rounded-ctl border border-os-border bg-os-bg px-2.5 font-mono text-[11px] text-os-text placeholder:text-os-dim focus:border-os-border-strong focus:outline-none"
-        />
-      </div>
-
-      <div className="mb-4 flex flex-wrap items-center gap-1.5">
-        {FILTERS.map((f) => (
-          <Chip key={f} on={filter === f} onClick={() => setFilter(f)}>
+    <>
+      <SlabCard
+        i={i}
+        className="mt-6"
+        title="Skills"
+        sub={`${shown.length} of ${cards.length}`}
+        action={FILTERS.map((f) => (
+          <button key={f} onClick={() => setFilter(f)} className={chipClass(filter === f)}>
             {f} {cards.filter((c) => matches(c, f)).length}
-          </Chip>
+          </button>
         ))}
-      </div>
-
-      {shown.length === 0 ? (
-        <p className="font-mono text-[11px] text-os-dim">
-          no skills match{q ? ` "${query.trim()}"` : ''} · clear the filter to see all {cards.length}
-        </p>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {shown.map((c) => {
-            const Icon = skillIcon(c);
-            const status = c.status ?? 'live';
-            return (
-              <button
-                key={c.id}
-                onClick={() => open(c)}
-                title={`${c.name} · open SKILL.md`}
-                data-lens="r"
-                className="pressable is-row group flex flex-col gap-2 rounded-lg-t border border-os-border bg-os-surface p-4 text-left"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="truncate font-mono text-[9.5px] uppercase tracking-[0.14em] text-os-dim">
-                    {eyebrowOf(c)}
-                  </span>
-                  <span className="flex shrink-0 items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.1em] text-os-dim">
-                    <span className="h-1.5 w-1.5" style={{ background: STATUS[status] }} />
-                    {status}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4 shrink-0 text-os-accent" strokeWidth={1.8} />
-                  <span className="min-w-0 flex-1 truncate text-[13.5px] font-bold group-hover:text-os-text">{c.name}</span>
-                </div>
-                <p className="line-clamp-2 min-h-[30px] text-[11px] leading-snug text-os-dim">{c.description}</p>
-                <div className="truncate border-t border-os-border pt-2 font-mono text-[9.5px] text-os-dim">{c.meta}</div>
-              </button>
-            );
-          })}
+      >
+        <div className="flex flex-wrap items-center gap-3 px-6 pb-4 pt-4">
+          <p className="min-w-0 flex-1 font-mono text-[11px] text-os-dim">{sourceNote}</p>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="filter skills"
+            className="h-[34px] w-52 rounded-full border border-os-border bg-os-bg px-4 font-mono text-[12px] text-os-text placeholder:text-os-dim focus:border-os-border-strong focus:outline-none"
+          />
         </div>
-      )}
+
+        <div className="border-t border-os-border px-6 pb-6 pt-5">
+          {shown.length === 0 ? (
+            <p className="py-4 text-center text-[12.5px] text-os-dim">
+              no skills match{q ? ` "${query.trim()}"` : ''} · clear the filter to see all {cards.length}
+            </p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {shown.map((c) => {
+                const Icon = skillIcon(c);
+                const status = c.status ?? 'live';
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => open(c)}
+                    title={`${c.name} · open SKILL.md`}
+                    data-lens="r"
+                    className="pressable is-row group flex flex-col gap-2 rounded-[10px] border border-os-border bg-os-bg p-4 text-left"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-mono text-[9.5px] uppercase tracking-[0.14em] text-os-dim">
+                        {eyebrowOf(c)}
+                      </span>
+                      <span className="flex shrink-0 items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.1em] text-os-dim">
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: STATUS[status] }} />
+                        {status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 shrink-0 text-os-accent" strokeWidth={1.8} />
+                      <span className="min-w-0 flex-1 truncate text-[13.5px] font-bold group-hover:text-os-text">{c.name}</span>
+                    </div>
+                    <p className="line-clamp-2 min-h-[30px] text-[11px] leading-snug text-os-dim">{c.description}</p>
+                    <div className="truncate border-t border-os-border pt-2 font-mono text-[9.5px] text-os-dim">{c.meta}</div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </SlabCard>
 
       {viewing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm" onClick={() => setViewing(null)}>
@@ -261,6 +270,6 @@ export function SkillsGrid({ cards, sourceNote }: { cards: SkillCard[]; sourceNo
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

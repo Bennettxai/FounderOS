@@ -74,7 +74,7 @@ describe('theme registry', () => {
     const block = css.match(/:root\[data-theme='mono-light'\] \{[^}]+\}/)?.[0] ?? '';
     expect(block).toContain('--bg: #f2f6f9');
     expect(block).toContain('--text: #16222c');
-    expect(block).toContain('--accent: #1f84c6');
+    expect(block).toContain('--accent: #4db3de');
     // the old slate-as-accent Daylight is gone
     expect(block).not.toContain('--accent: #1b1e23');
   });

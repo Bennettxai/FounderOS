@@ -1,0 +1,36 @@
+import { afterEach, expect, test, vi } from 'vitest';
+import fs from 'node:fs';
+import { recentChats } from '@/lib/connectors/whatsapp';
+import { readUserSkills, readPluginSkills, readSkillMarkdown } from '@/lib/skills-catalog';
+import { createGBrainProvider, readStoreNotes } from '@/lib/connectors/gbrain';
+import { getBrainProvider } from '@/lib/brain';
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
+test('public demo never reads local chats or installed skill files', async () => {
+  vi.stubEnv('DEMO_GATE', '1');
+  const files = vi.spyOn(fs, 'readdirSync').mockImplementation(() => { throw new Error('host read'); });
+  const content = vi.spyOn(fs, 'readFileSync').mockImplementation(() => { throw new Error('host read'); });
+  const exists = vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+  expect(await recentChats()).toEqual([]);
+  expect(readUserSkills()).toEqual([]);
+  expect(readPluginSkills()).toEqual([]);
+  expect(readSkillMarkdown('private-skill')).toBeNull();
+  expect(files).not.toHaveBeenCalled();
+  expect(content).not.toHaveBeenCalled();
+  expect(exists).not.toHaveBeenCalled();
+});
+test('demo brain diagnostics, search and capture never access host storage or CLI', async () => {
+  vi.stubEnv('DEMO_GATE', '1');
+  vi.stubEnv('BRAIN_PROVIDER', 'federated');
+  const exec = vi.fn().mockResolvedValue({ code: 0, stdout: '{}', stderr: '' });
+  const files = vi.spyOn(fs, 'readdirSync').mockImplementation(() => { throw new Error('host read'); });
+  const provider = createGBrainProvider({ exec, storePath: '/private/brain' });
+  expect((await provider.overview()).store.totalFiles).toBe(0);
+  expect(await provider.search('private')).toEqual([]);
+  expect(await provider.stats()).toBeNull();
+  expect((await provider.localStats()).markdownFiles).toBe(0);
+  expect((await provider.capture({ text: 'test' })).ok).toBe(false);
+  expect(readStoreNotes('/private/brain')).toEqual([]);
+  expect((await getBrainProvider().status()).provider).toBe('demo');
+  expect(exec).not.toHaveBeenCalled();
+  expect(files).not.toHaveBeenCalled();
+});

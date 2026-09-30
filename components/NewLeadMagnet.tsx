@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X } from 'lucide-react';
+import { PILL, PILL_ACCENT } from '@/components/slab';
 
 /**
- * Create a lead magnet from inside the OS (the operator). Deploy the
+ * Create a lead magnet from inside the OS (Alex, 2026-08-14). Deploy the
  * page wherever, then register it here so the row lives with everything else.
  * The Content Gen skill posts to the same route, so a page it ships lands in
  * this table without anyone typing.
@@ -62,7 +63,7 @@ export function NewLeadMagnet() {
     }
   };
 
-  const field = 'w-full rounded-sm-t border border-os-border bg-os-bg px-2.5 py-2 text-[12px] text-os-text outline-none placeholder:text-os-dim focus:border-os-border-strong';
+  const field = 'w-full rounded-[8px] border border-os-border bg-os-surface px-2.5 py-2 text-[12px] text-os-text outline-none placeholder:text-os-dim focus:border-os-border-strong';
   const label = 'mb-1 block font-mono text-[9.5px] uppercase tracking-[0.16em] text-os-dim';
 
   if (!open) {
@@ -73,12 +74,12 @@ export function NewLeadMagnet() {
             setDone(null);
             setOpen(true);
           }}
-          className="pressable flex items-center gap-1.5 rounded-sm-t border border-os-border bg-os-surface px-3 py-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-widest text-os-accent hover:border-os-border-strong"
+          className={`pressable ${PILL_ACCENT}`}
         >
-          <Plus className="h-3 w-3" /> New lead magnet
+          <Plus className="h-3.5 w-3.5" /> New lead magnet
         </button>
         {done && (
-          <span className="font-mono text-[10.5px] text-os-ok">
+          <span className="font-mono text-[11px] text-os-ok">
             Added {done} to the register.
           </span>
         )}
@@ -87,7 +88,7 @@ export function NewLeadMagnet() {
   }
 
   return (
-    <form onSubmit={submit} className="mb-4 rounded-lg-t border border-os-border bg-os-surface p-4">
+    <form onSubmit={submit} className="mb-4 rounded-[10px] border border-os-border bg-os-bg p-5">
       <div className="mb-3 flex items-center">
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-os-dim">Register a page</span>
         <button type="button" onClick={() => setOpen(false)} aria-label="Close" className="pressable ml-auto text-os-dim hover:text-os-text">
@@ -152,7 +153,7 @@ export function NewLeadMagnet() {
       <button
         type="submit"
         disabled={busy}
-        className="pressable mt-3 rounded-sm-t border border-os-border bg-os-surface2 px-3 py-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-widest text-os-accent hover:border-os-border-strong disabled:opacity-40"
+        className={`${PILL} mt-4 disabled:opacity-40`}
       >
         {busy ? 'saving…' : 'add to the register'}
       </button>

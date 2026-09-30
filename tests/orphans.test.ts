@@ -5,6 +5,8 @@ import path from 'node:path';
 // Every component must be imported somewhere — no dead files. If a component is
 // intentionally kept unused (rare), add its basename here with a reason.
 const KNOWN_ORPHANS: string[] = [
+  // Shared UI compatibility exports, intentionally disabled for the public demo.
+  'Spotlight',
   // The old unified /comms feed, superseded by the per-source lane board
   // (CommsBoard + SlackClientBoard). Kept for a one-line revert until the board
   // is proven out; delete both this entry and the file once it is.

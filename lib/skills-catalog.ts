@@ -1,3 +1,4 @@
+import { isGated } from '@/lib/gate';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -103,6 +104,7 @@ export function skillGroup(name: string): string {
 
 /** List the real skills on disk (metadata only). Empty when the dir is absent. */
 export function readUserSkills(dir: string = skillsDir()): CatalogSkill[] {
+  if (isGated()) return [];
   let entries: fs.Dirent[];
   try {
     entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -138,6 +140,7 @@ export function readUserSkills(dir: string = skillsDir()): CatalogSkill[] {
  *  slack, …), slugged `plugin:skill` like the CLI names them. Only the live
  *  version of each plugin is read. Empty when the manifest is absent. */
 export function readPluginSkills(dir: string = pluginsDir()): CatalogSkill[] {
+  if (isGated()) return [];
   const home = os.homedir();
   const out: CatalogSkill[] = [];
   for (const [plugin, installPath] of installedPluginPaths(dir)) {
@@ -172,6 +175,7 @@ export function readPluginSkills(dir: string = pluginsDir()): CatalogSkill[] {
  *  `plugin:skill` slug resolved through the live plugin install. Null on a bad
  *  slug or missing file (honest). */
 export function readSkillMarkdown(slug: string, dir: string = skillsDir()): string | null {
+  if (isGated()) return null;
   if (slug.includes(':')) {
     const parts = slug.split(':');
     if (parts.length !== 2 || !parts.every(validHalf)) return null; // no path traversal

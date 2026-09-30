@@ -13,21 +13,21 @@ import type { DecisionKind, DeliverableDecision } from '@/lib/schemas';
 import { Label } from '@/components/terminal';
 
 /**
- * Needs You — the queue of agent work waiting on the operator.
+ * Needs You  -  the queue of agent work waiting on Alex.
  *
- * The point is a place to see tasks are getting done and to approve the
- * ones agents need input on, without having to dig through every file.
+ * Alex, 2026-08-20: "I need a way to see that I'm getting tasks done or a
+ * place I can go to verify work ... I want to be able to approve tasks that
+ * agents need my input on."
  *
- * It reads the SAME payload the Deliverables tab already polls, one fetch, two
- * views, and filters it through the agents' own naming vocabulary. On a busy
- * board that turns a large pile of undifferentiated files into a much smaller
- * set that are actually asking for something, with a good chunk of those being
- * replies staged and never sent.
+ * It reads the SAME payload the Deliverables tab already polls  -  one fetch, two
+ * views  -  and filters it through the agents' own naming vocabulary. On the real
+ * board that turns 92 undifferentiated files into 46 that are actually asking
+ * him for something, 40 of which are replies staged and never sent.
  *
  * Mock 3a turned the row from a link into the answer itself: kind glyph, where
  * it came from, what it is, why the Conductor surfaced it, and the two calls in
- * place. The row still opens the review panel for the full text, but the
- * operator should never have to open it to say yes.
+ * place. The row still opens the review panel for the full text, but he should
+ * never have to open it to say yes.
  *
  * Deliberately not a second poller and not a second source of truth: if it ever
  * disagreed with Deliverables about what exists, both would stop being trusted.
@@ -39,7 +39,7 @@ const GLYPH_TONE: Record<Classified['glyphTone'], string> = {
   dim: 'border-os-border text-os-dim',
 };
 
-/** What the white button says, per kind. "Approve" is not the operator's word for it. */
+/** What the white button says, per kind. "Approve" is not a verb he uses. */
 const PRIMARY: Record<ApprovalKind, { label: string; busy: string; done: string }> = {
   staged: { label: 'send it', busy: 'sending', done: 'sent' },
   decision: { label: 'go ahead', busy: 'recording', done: 'called' },
@@ -72,13 +72,15 @@ function subject(name: string): string {
 }
 
 /**
- * The dot, on the piece of content itself: a way to see what hasn't been
- * looked at yet directly on the piece of content that was created, rather
- * than in a separate unread list.
+ * The dot, on the piece of content itself.
  *
- * NEW means it appeared since the operator last opened anything here. UPDATED
- * means they read it and an agent has rewritten it since, which on this board
- * happens a lot: files sometimes get retracted by their own authors.
+ * Alex, 2026-08-22: "can you put the dot of what I haven't seen any updates
+ * to on the actual piece of content that was created so I can know that that
+ * was created?"
+ *
+ * NEW means it appeared since he last opened anything here. UPDATED means he
+ * read it and an agent has rewritten it since, which on this board happens a
+ * lot: two files were retracted by their own authors today.
  */
 function UnseenDot({ state }: { state: UnseenState }) {
   if (!state) return null;
@@ -114,7 +116,7 @@ function Row({
   const words = PRIMARY[c.ask];
 
   /**
-   * Every handled row leaves with a receipt the operator can take back. The undo clears
+   * Every handled row leaves with a receipt he can take back. The undo clears
    * the decision rather than writing an opposite one, so the file returns to
    * the queue exactly as the agent left it.
    */
@@ -130,6 +132,7 @@ function Row({
       tabIndex={0}
       onClick={() => onOpen(c)}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onOpen(c))}
+      data-part="row"
       className={`pressable is-row grid w-full cursor-pointer grid-cols-[22px_minmax(0,1fr)] gap-2.5 border-b border-os-border px-3 py-2.5 text-left last:border-b-0 ${
         c.overdue ? 'bg-os-err/[0.06]' : ''
       }`}
@@ -150,7 +153,8 @@ function Row({
           <span className="ml-auto shrink-0">{when(c.modifiedAt)}</span>
         </div>
 
-        {/* The title is the document's own, not the filename: a raw filename reads as noise, not English. */}
+        {/* The title is the document's own, not the filename. Alex,
+            2026-08-21: "That's not fucking English I can't read it." */}
         <div className="mt-0.5 text-[12.5px] font-semibold leading-snug text-os-text" title={c.name}>
           {text}
         </div>
@@ -248,18 +252,18 @@ export function NeedsYouList({
   }
 
   const files = groups.flatMap((g) => g.items).filter((i) => i.kind === 'file');
-  // What the operator has already approved or dismissed leaves the queue, and comes back
+  // What he has already approved or dismissed leaves the queue  -  and comes back
   // by itself if the agent rewrites it (see lib/deliverable-decisions).
   const { open: ranked, decided } = partitionByDecision(needsYou(files), decisions);
-  // "Not now" is not a decision; it is a hold on the operator's own view for two hours.
+  // "Not now" is not a decision; it is a hold on his own view for two hours.
   const queue = ranked.filter((c) => !snoozedOf(c));
   const held = ranked.length - queue.length;
   const overdue = queue.filter((c) => c.overdue).length;
   const unread = queue.filter((c) => unseenOf(c) !== null).length;
 
   return (
-    <section className="rounded-panel border border-os-border bg-os-surface">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-os-border px-4 py-2.5">
+    <section data-part="card" className="rounded-panel border border-os-border bg-os-surface">
+      <div data-part="card-head" className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-os-border px-4 py-2.5">
         <Label>Needs you</Label>
         <span className="font-mono text-[10px] text-os-dim">
           {queue.length} of {files.length} agent files are waiting on you
@@ -278,9 +282,9 @@ export function NeedsYouList({
             open board <ExternalLink className="h-3 w-3" />
           </a>
         )}
-        {/* Bulk clear. DISMISS only:
+        {/* Bulk clear (Alex, 2026-08-22: "bulk clear as well"). DISMISS only:
             on a staged item approve means SEND IT, so there is deliberately no
-            bulk approve. Two clicks, because a large batch of dismissals is not undoable in
+            bulk approve. Two clicks, because 45 dismissals is not undoable in
             one gesture even though each row individually is. */}
         {queue.length > 0 &&
           (confirming ? (

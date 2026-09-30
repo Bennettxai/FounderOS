@@ -5,8 +5,8 @@ import { describe, expect, test } from 'vitest';
 const read = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
 
 /**
- * Mock 5g (the operator, 2026-09-07): /skills drops the grouped icon sections for
- * one filtered card wall — a filter input, All / Claude Code / Operator /
+ * Mock 5g (Alex, 2026-09-07): /skills drops the grouped icon sections for
+ * one filtered card wall  -  a filter input, All / Claude Code / Operator /
  * Draft chips with live counts, and cards that read eyebrow (source ·
  * scope), status, title, two-line description, footer path-or-owner. The
  * SKILL.md reader modal and download stay exactly as they were.
@@ -21,7 +21,7 @@ describe('/skills mock-5g card wall', () => {
   });
 
   test('All / Claude Code / Operator / Draft chips carry live counts', () => {
-    expect(grid).toMatch(/from '@\/components\/Pressable'/);
+    expect(grid).toContain('chipClass('); // the Brand Deals filter pills (2026-09-24)
     expect(grid).toContain("'Claude Code'");
     expect(grid).toContain("'Operator'");
     expect(grid).toContain("'Draft'");
@@ -40,6 +40,6 @@ describe('/skills mock-5g card wall', () => {
   });
 
   test('no em dashes in the source note', () => {
-    expect(page).not.toContain('—');
+    expect(page).not.toContain(' - ');
   });
 });

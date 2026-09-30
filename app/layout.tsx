@@ -9,7 +9,6 @@ import { Toaster } from '@/components/Toaster';
 import { CohortBanner } from '@/components/CohortBanner';
 import { CohortModal } from '@/components/CohortModal';
 import { LensProvider } from '@/lib/hooks/useLens';
-import { PageSpotlight } from '@/components/Spotlight';
 import { getDb } from '@/lib/data';
 import type { PaletteAgent } from '@/lib/palette';
 import { THEME_INIT_SCRIPT } from '@/lib/theme';
@@ -44,7 +43,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Toaster>
         <LensProvider />
-        <PageSpotlight />
         <Sidebar />
         {/* os-shell yields to the Conductor dock: the panel sets --conductor-w
             and the whole content column glides left instead of being covered */}

@@ -2,10 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Terminal direction — phosphor green command deck.
+/* Terminal direction  -  phosphor green command deck.
    Raw vars exist for the brain viz SVG and color-mix effects;
    the same values live in tailwind.config.ts as os.* classes. */
-/* Theme-independent design constants — every skin shares the same motion.
+/* Theme-independent design constants  -  every skin shares the same motion.
    These must live on a bare :root: scoping them to one theme silently kills
    every var(--ease) animation on the others. */
 :root {
@@ -30,7 +30,7 @@
 }
 
 /* ── Data-ramp tokens ─────────────────────────────────────────────────────
-   Reached for by the components imported from Slab (PipelineChart, the
+   Reached for by the components imported from GladOS (PipelineChart, the
    brand-deals slab). Derived from the colorway, never raw hex, so every
    theme keeps its own hues and no ported surface can drift off-palette.
    Pinned by tests/brand-deals-slab.test.ts. */
@@ -44,16 +44,18 @@
   --tile-glow-a: var(--brain-1);
   --tile-glow-b: var(--brain-2);
   --tile-glow-c: var(--accent);
+  /* the gradient insight card's floor; light colorways darken it below */
+  --insight-base: var(--surface);
 }
 
-/* Workflow tree node surfaces (Slab import). Layered translucent gradients
+/* Workflow tree node surfaces (GladOS import). Layered translucent gradients
    off the colorway's own surface and bg, so every theme keeps its tint. */
 :root {
   --wft-node-bg: linear-gradient(165deg, color-mix(in oklab, var(--surface-2) 55%, transparent) 0%, color-mix(in oklab, var(--bg) 65%, transparent) 55%, color-mix(in oklab, var(--bg) 82%, transparent) 100%);
   --wft-node-bg-hover: linear-gradient(165deg, color-mix(in oklab, var(--surface-2) 70%, transparent) 0%, color-mix(in oklab, var(--bg) 75%, transparent) 55%, color-mix(in oklab, var(--bg) 90%, transparent) 100%);
 }
 
-/* Blueprint glass + elevation (Slab import). Derived from the colorway. */
+/* Blueprint glass + elevation (GladOS import). Derived from the colorway. */
 :root {
   --glass-a: color-mix(in oklab, var(--surface-2) 70%, transparent);
   --glass-b: color-mix(in oklab, var(--surface) 78%, transparent);
@@ -88,7 +90,7 @@
   --brain-1: #8b7cff;
   --brain-2: #5ec9f8;
   --brain-3: #4ade96;
-  /* Funnel space — neutral blues by relationship temperature (green/red come
+  /* Funnel space  -  neutral blues by relationship temperature (green/red come
      from the semantic ok/err tokens). */
   --funnel-hot: #5ec9f8;
   --funnel-warm: #3f7fd9;
@@ -108,8 +110,8 @@
   --kg-tool: var(--brain-2);
 }
 
-/* Light — the swap: warm tan/paper with a Claude clay-orange accent. Status
-   colors (ok/warn/err) stay semantic — ok keeps green so a live system still
+/* Light  -  the swap: warm tan/paper with a Claude clay-orange accent. Status
+   colors (ok/warn/err) stay semantic  -  ok keeps green so a live system still
    reads "green" in both themes; only the accent shifts cool→warm. */
 :root[data-theme='light'] {
   color-scheme: light;
@@ -150,7 +152,7 @@
   --kg-tool: var(--brain-2);
 }
 
-/* Midnight — the neural view's deep navy promoted to a full skin: signal
+/* Midnight  -  the neural view's deep navy promoted to a full skin: signal
    blue accent, cool surfaces, status colors stay semantic. */
 :root[data-theme='midnight'] {
   color-scheme: dark;
@@ -191,7 +193,7 @@
   --kg-tool: var(--brain-2);
 }
 
-/* Ember — coal dark with the vault's reddish orange carrying the identity. */
+/* Ember  -  coal dark with the vault's reddish orange carrying the identity. */
 :root[data-theme='ember'] {
   color-scheme: dark;
   --bg: #0c0806;
@@ -231,17 +233,17 @@
   --kg-tool: var(--brain-2);
 }
 
-/* Mono — MONOLITH SIGNAL: white/grey structure
-    on bare black, boxes flattened, zero glow/grid, and a strict traffic-light
-    rule — color only ever means status: green good · yellow degraded · red bad. */
-/* Mono (Monolith Signal) — the default identity; bare :root rides along so a
+/* Mono  -  MONOLITH SIGNAL (design handoff 2026-07-10): white/grey structure
+   on bare black, boxes flattened, zero glow/grid, and a strict traffic-light
+   rule  -  color only ever means status: green good · yellow degraded · red bad. */
+/* Mono (Monolith Signal)  -  the default identity; bare :root rides along so a
    pre-script or no-JS load already renders Monolith. */
 :root,
 :root[data-theme='mono'] {
   color-scheme: dark;
   --bg: #0a0a0a;
   --bg-2: #0a0a0a;
-  --surface: #0a0a0a; /* boxes are gone — surfaces flatten to bg */
+  --surface: #0a0a0a; /* boxes are gone  -  surfaces flatten to bg */
   --surface-2: #141414; /* hover fill (nav rows, list rows) */
   --surface-3: #1c1c1c;
   --border: #242424; /* structural rules */
@@ -249,7 +251,7 @@
   --text: #f2f2f2;
   --text-2: #9c9c9c;
   --text-3: #5c5c5c;
-  /* Accent IS white — active nav, primary badges, inverted fills. */
+  /* Accent IS white  -  active nav, primary badges, inverted fills. */
   --accent: #f2f2f2;
   --accent-2: #d4d4d4;
   --accent-ink: #0a0a0a;
@@ -262,7 +264,7 @@
   --glow: none; /* glows are dead */
   --grid: transparent; /* background grid is dead */
   --hairline: #1c1c1c;
-  /* Brain viz — neutralized; structure is grey, agents carry status. */
+  /* Brain viz  -  neutralized; structure is grey, agents carry status. */
   --brain-1: #f2f2f2;
   --brain-2: #9c9c9c;
   --brain-3: #5c5c5c;
@@ -278,35 +280,34 @@
   --funnel-s4: var(--ok);
   --funnel-s5: #575757;
   --funnel-s6: #474747;
-  /* Design decision: tools burn red on the monolith radial. */
+  /* Alex's call (2026-07-10): tools burn red on the monolith radial. */
   --kg-tool: #ff2d3f;
 }
 
-/* Daylight — a calm, comfortable light skin (not the stark Monolith): white
+/* Daylight  -  a calm, comfortable light skin (not the stark Monolith): white
    cards lifted off a soft grey canvas, a legible grey text hierarchy, gentle
    grey rules, and real color allowed back into the viz so charts and status
    read clearly on white. */
 :root[data-theme='mono-light'] {
   color-scheme: light;
-  /* G-Brain blue pass: anchored to the inverted knowledge-graph
-      from the Zero API cover — the orange core inverts to steel azure
-      (invert(#E07B39) ≈ #1F84C6), the ground to a cool blue-white. */
-  --bg: #f2f6f9; /* cool blue-white canvas — the inverted graph's ground */
+  /* Daylight blue sampled from Alex's graph reference (2026-09-24). */
+  --bg: #f2f6f9; /* cool blue-white canvas  -  the inverted graph's ground */
   --bg-2: #e9eff5;
   --surface: #ffffff; /* cards are white, lifted off the canvas */
   --surface-2: #e9eff4; /* hover fill (nav rows, list rows) */
   --surface-3: #dce6ee;
-  --border: #cfdce6; /* blue-grey rules — clear but not harsh */
+  --border: #cfdce6; /* blue-grey rules  -  clear but not harsh */
   --border-strong: #afc3d2; /* hover / emphasis / chips / kbd */
-  --text: #16222c; /* primary — dark blue-slate ink */
-  --text-2: #47596b; /* muted — legible slate blue */
-  --text-3: #70839a; /* dim — still readable, no wash-out */
-  /* Accent is the graph's steel azure: active nav, badges, inverted fills. */
-  --accent: #1f84c6;
-  --accent-2: #1a70a9;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(31, 132, 198, 0.08);
-  --accent-line: rgba(31, 132, 198, 0.28);
+  --text: #16222c; /* primary  -  dark blue-slate ink */
+  --text-2: #47596b; /* muted  -  legible slate blue */
+  --text-3: #70839a; /* dim  -  still readable, no wash-out */
+  /* Lighter blue-cyan (Alex, 2026-09-24: "a mix of the blue accent and
+     cyan, a little bit lighter"): between #1f84c6 and cyan, one step up. */
+  --accent: #4db3de;
+  --accent-2: #2f93c0;
+  --accent-ink: #16222c;
+  --accent-soft: rgba(77, 179, 222, 0.1);
+  --accent-line: rgba(77, 179, 222, 0.32);
   /* Status stays semantic so a live system still reads "green". */
   --ok: #17924e;
   --warn: #b7791f;
@@ -316,12 +317,12 @@
   --hairline: #e3eaf1; /* soft blue-tinted row dividers */
   /* Viz stays in the graph's cool family: violet / azure / teal. */
   --brain-1: #6d5cf0;
-  --brain-2: #1f84c6;
+  --brain-2: #4db3de;
   --brain-3: #2dbdaf;
   --funnel-hot: #d92d20;
   --funnel-warm: #b7791f;
   --funnel-cold: #6b83a3;
-  --funnel-s0: #1f84c6;
+  --funnel-s0: #4db3de;
   --funnel-s1: #6d5cf0;
   --funnel-s2: #b7791f;
   --funnel-s3: #0f9c8a;
@@ -388,11 +389,11 @@ body {
   background: var(--text-3);
 }
 
-/* ── Interaction layer (Founder OS Interaction Rebrand) ──
-    The look stays Monolith Signal; the surface now answers the mouse: hover
-    lens (magnify + magnetic pull via useLens), press sink, spotlight, radius
-    on controls only. Colors route through theme vars so every colorway keeps
-    its own palette. */
+/* ── Interaction layer (Founder OS Interaction Rebrand, 2026-09-07) ──
+   The look stays Monolith Signal; the surface now answers the mouse: hover
+   lens (magnify + magnetic pull via useLens), press sink, spotlight, radius
+   on controls only. Colors route through theme vars so every colorway keeps
+   its own palette. */
 :root {
   --ease-lens: cubic-bezier(0.22, 0.61, 0.36, 1); /* hover lens in + out */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* checkmark pop only */
@@ -421,9 +422,9 @@ body {
   /* radius is never animated */
 }
 /* A pressable that is placed absolutely or fixed keeps its placement. The
-    lens only needs a positioned box; forcing relative here silently dropped
-    five controls (the graph's Fullscreen tab among them) out of their frames
-    and into the clipped overflow below. */
+   lens only needs a positioned box; forcing relative here silently dropped
+   five controls (the graph's Fullscreen tab among them) out of their frames
+   and into the clipped overflow below (found 2026-09-17). */
 .pressable.absolute {
   position: absolute;
 }
@@ -539,7 +540,7 @@ body {
 }
 
 /* Not a hover: a state change the app makes on its own (drag-over, drop target,
-   focus ring, a selected row). These run on the press clock — --dur-lens is
+   focus ring, a selected row). These run on the press clock  -  --dur-lens is
    630ms, which reads as lag when a file is hovering over a drop zone. */
 .state-fade {
   transition:
@@ -580,9 +581,14 @@ body {
   display: inline-block;
 }
 
-/* ── Slab motion (OS-wide) ───────────────────────────────────
-    The brand-deals slab's four moves as shared utilities, on the house ease:.rise the element rises in, staggered by --rise-i at 90ms a step.draw an SVG line draws itself (needs pathLength={1} on the path).fill a horizontal bar fills from the left.grow a vertical bar grows from the bottom.rise-card adds the slab's 1px hover lift (two properties, lens clock).
-    Reduced motion kills all of it below. */
+/* ── Slab motion (OS-wide, 2026-09-17) ───────────────────────────────────
+   The brand-deals slab's four moves as shared utilities, on the house ease:
+   .rise   the element rises in, staggered by --rise-i at 90ms a step
+   .draw   an SVG line draws itself (needs pathLength={1} on the path)
+   .fill   a horizontal bar fills from the left
+   .grow   a vertical bar grows from the bottom
+   .rise-card adds the slab's 1px hover lift (two properties, lens clock).
+   Reduced motion kills all of it below. */
 @keyframes os-rise {
   from { opacity: 0; transform: translateY(10px) scale(0.992); }
   to { opacity: 1; transform: none; }
@@ -603,7 +609,7 @@ body {
   --rise-i: 0;
 }
 .rise {
-  animation: os-rise 0.6s var(--ease) both;
+  animation: os-rise 0.6s var(--ease) backwards;
   animation-delay: calc(var(--rise-i) * 90ms);
 }
 .rise-card {
@@ -724,7 +730,7 @@ body {
    pack's decision, not a departure from it, and the acceptance test keeps a
    half-built one from creeping back in. */
 
-/* Emblem spin/glow is dead — machinery, not mascots (Monolith lettering
+/* Emblem spin/glow is dead  -  machinery, not mascots (Monolith lettering
    pass; applies to every colorway). */
 .emblem {
   transition: none;
@@ -760,7 +766,7 @@ body {
 .dot.ok {
   background: var(--ok);
 }
-/* Pulse ring replaced by an LED blink — steps(), not ease. */
+/* Pulse ring replaced by an LED blink  -  steps(), not ease. */
 .dot.ok.pulse {
   animation: led-blink 2.6s steps(1) infinite;
 }
@@ -807,7 +813,7 @@ body {
   }
 }
 
-/* View entrance — transform-only so content is never hidden if
+/* View entrance  -  transform-only so content is never hidden if
    animations are throttled or reduced-motion is on. */
 .view {
   animation: view-in 0.24s var(--ease);
@@ -824,7 +830,7 @@ body {
 }
 
 /* Pop-out overlays (G-Brain doctor/search): the scrim fades in and the
-   panel glides up into place — opening must never read as a blank snap. */
+   panel glides up into place  -  opening must never read as a blank snap. */
 .overlay-in {
   animation: overlay-in 0.22s ease-out both;
 }
@@ -870,7 +876,7 @@ body {
 }
 
 /* ---------------- Funnel journey space ---------------- */
-/* Fullscreen: the space becomes the whole frame — built to be filmed. */
+/* Fullscreen: the space becomes the whole frame  -  built to be filmed. */
 /* Flow view: paths still in motion march toward the right edge. */
 .funnel-live {
   stroke-dasharray: 7 5;
@@ -882,7 +888,7 @@ body {
   }
 }
 /* Info neuron: a pulse gliding a department's line. pathLength is normalised to
-   1 so one segment sweeps the whole edge regardless of length. No filter/glow —
+   1 so one segment sweeps the whole edge regardless of length. No filter/glow  -
    the graph re-lays its edges every physics frame, and a per-frame filter
    repaint on a moving dash read as a flashing strobe. A calm, opaque-capped
    sweep instead. */
@@ -892,7 +898,7 @@ body {
   animation-delay: var(--kg-syn-delay, 0s);
   opacity: 0.55;
 }
-/* the smaller neuron branching out to each SOP — shorter, fainter, a touch
+/* the smaller neuron branching out to each SOP  -  shorter, fainter, a touch
    quicker so it reads as a lighter signal than the main department line */
 .kg-synapse-sm {
   stroke-dasharray: 0.07 0.93;
@@ -915,7 +921,7 @@ body {
     opacity: 0.3;
   }
 }
-/* Expanding halo behind each client node — the "alive" heartbeat. */
+/* Expanding halo behind each client node  -  the "alive" heartbeat. */
 .funnel-halo {
   transform-box: fill-box;
   transform-origin: center;
@@ -950,7 +956,7 @@ body {
   padding: 3vh 4vw;
 }
 
-/* Expanding halo behind a node — the "alive" heartbeat (hot leads, stalled
+/* Expanding halo behind a node  -  the "alive" heartbeat (hot leads, stalled
    reds, and freshly-converted greens each set their own duration inline). */
 .funnel-halo {
   transform-box: fill-box;
@@ -997,7 +1003,7 @@ body {
 
 /* ---------------- Conductor living core ----------------
    The super-agent's mark on the dock, the /agents chat, and the /org "AI Head"
-   card. Idle it is still (machinery, not mascots — see .emblem above). While an
+   card. Idle it is still (machinery, not mascots  -  see .emblem above). While an
    agent is being chatted with (.thinking) an accent arc orbits the ring, the
    core breathes, and a heartbeat halo pulses out. All motion is scoped to
    .thinking and disabled under prefers-reduced-motion. */
@@ -1198,13 +1204,13 @@ html.conductor-dragging .os-shell {
 }
 
 /* ── Agent liveness: a green that travels the border, not a flat state ─────
-    Design goal: a working agent should feel alive rather than
-    simply turn green. The colour ORBITS the element.
+   Alex's ask (2026-08-14): a working agent should feel alive rather than
+   simply turn green. The colour ORBITS the element.
 
-    Built on a rotating conic-gradient behind the card, masked to the border
-    band so only the edge shows. @property makes the angle animatable; where it
-    is unsupported the element still gets a solid green edge from the fallback
-    border-color, so this degrades to the old look rather than to nothing. */
+   Built on a rotating conic-gradient behind the card, masked to the border
+   band so only the edge shows. @property makes the angle animatable; where it
+   is unsupported the element still gets a solid green edge from the fallback
+   border-color, so this degrades to the old look rather than to nothing. */
 @property --agent-angle {
   syntax: '<angle>';
   initial-value: 0deg;
@@ -1394,13 +1400,13 @@ html.conductor-dragging .os-shell {
 }
 
 /* ── Blueprint ── */
-/* hierarchy edition: the system as expandable buckets -
-    machines → groups → things, three disclosure levels, focus mode (click
-    anything: everything unrelated blurs, its connections light up in its
-    kind's colour), ⌘K search, kind legend, inspector, ask bar. Port of
-    slab-blueprint-concept/hierarchy. One hue per kind: this is a map, not
-    the OS chrome, so it may use the whole wheel. Perf rules: the dot grid lives in screen
-    space, will-change only on the world, blur + backdrop drop while moving. */
+/* hierarchy edition (2026-09-16): the system as expandable buckets -
+   machines → groups → things, three disclosure levels, focus mode (click
+   anything: everything unrelated blurs, its connections light up in its
+   kind's colour), ⌘K search, kind legend, inspector, ask bar. Port of
+   glados-blueprint-concept/hierarchy. One hue per kind: this is a map, not
+   the OS chrome, so it may use the whole wheel . Perf rules: the dot grid lives in screen
+   space, will-change only on the world, blur + backdrop drop while moving. */
 :root {
   --bh-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
   --bh-node-a: #172622;
@@ -1425,18 +1431,22 @@ html.conductor-dragging .os-shell {
   --bh-k-store: #8fb4f6;
   --bh-k-surface: #b9c9c4;
   --bh-k-daemon: #3fd968;
+  --bh-k-service: #7ee0a8;
+  --bh-k-docker: #6fb8ff;
+  --bh-k-tool: #f59ec8;
   --bh-k-machine: #d6e3df;
   --bh-k-cloud: #5fd4c4;
   --bh-k-group: #93a19d;
 }
 
-/* page chrome: full-bleed, beside the sidebar (232px) or the icon rail (64px) */
+/* page chrome: full-bleed, beside the sidebar at whatever width it has
+   (dragged, the icon rail, or hidden at 0)  -  it publishes --sidebar-w */
 .bh-page,
 .bh-skeleton {
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 232px;
+  left: var(--sidebar-w, 232px);
   right: var(--conductor-w, 0px);
   z-index: 5;
   display: flex;
@@ -3211,7 +3221,7 @@ body[data-canvas='1'] .bh-skeleton {
   color: var(--text-2);
 }
 
-/* the operator shell fit for the Blueprint canvas: the donor pinned the page to
+/* Alex shell fit for the Blueprint canvas: the donor pinned the page to
    the viewport top and a fixed 232px sidebar; here the top bar is a 52px
    sticky strip and the sidebar is collapsible and drag-resizable, publishing
    its width as --sidebar-w. */
@@ -3219,4 +3229,117 @@ body[data-canvas='1'] .bh-skeleton {
 .bh-skeleton {
   top: 52px;
   left: var(--sidebar-w, 232px);
+}
+
+/* The Brand Deals slab, OS-wide (2026-09-24): every page floats on this one
+   surface. Home introduced it; components/slab.tsx is the kit that fills it. */
+.os-slab {
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--bg-2);
+  padding: clamp(16px, 2.2vw, 28px);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .4), 0 24px 70px -18px rgb(0 0 0 / .6);
+}
+.os-slab > header { margin-bottom: 28px; flex-wrap: wrap; }
+.os-slab > header > div:first-child { flex-shrink: 1; }
+.os-slab > header h1 {
+  font-size: clamp(28px, 3.2vw, 46px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -.035em;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+.os-slab .rounded-tile,
+.os-slab section.rounded-panel,
+.os-slab div.relative.rounded-panel { border-radius: 12px; }
+.os-slab .rounded-tile { padding: 22px; }
+.os-slab .rounded-tile > div:nth-child(2) {
+  font-size: 34px;
+  flex-wrap: wrap;
+}
+.os-slab .rounded-tile:hover { border-color: var(--border-strong); }
+@media (max-width: 600px) {
+  .os-slab .rounded-tile { padding: 14px; }
+  .os-slab .rounded-tile small { white-space: normal; }
+}
+
+/* The Deal Volume bar's sweep-out (components/VolumeMeter.tsx), global so
+   Home's meters grow the same way Brand Deals' do. */
+@keyframes vol-meter-in { from { width: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .vol-fill { animation: none !important; }
+}
+/* The insight card's slow glow drift and the slab charts' late fade-ins. */
+@keyframes os-drift { from { background-position: 0% 0%; } to { background-position: 12% 8%; } }
+@keyframes os-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Home, all the way down in the Brand Deals look (2026-09-24). The pieces
+   carry data-part hooks; only .os-slab restyles them, so the same
+   components on the Agents tabs keep the console look. */
+.os-slab [data-part="card"] {
+  border-radius: 12px;
+  background: var(--surface);
+  transition: transform .15s ease, border-color .15s ease;
+}
+.os-slab [data-part="card"]:hover { transform: translateY(-1px); border-color: var(--border-strong); }
+.os-slab [data-part="card-head"] {
+  border-bottom: 0;
+  padding: 20px 24px 10px;
+  row-gap: 8px;
+}
+.os-slab [data-part="card-head"] [data-part="label"] {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  text-transform: none;
+  color: var(--text);
+}
+.os-slab [data-part="card-head"] > span { font-size: 11px; }
+.os-slab [data-part="card-head"] a,
+.os-slab [data-part="card-head"] button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 11px;
+  letter-spacing: .02em;
+  text-transform: none;
+}
+.os-slab [data-part="card-head"] a:hover,
+.os-slab [data-part="card-head"] button:hover { border-color: var(--border-strong); color: var(--text); }
+.os-slab [data-part="row"] {
+  padding: 14px 24px;
+  border-color: var(--hairline);
+}
+.os-slab li[data-part="row"] { padding: 11px 24px; font-size: 12px; }
+.os-slab [data-part="row"] button { border-radius: 9px; }
+.os-slab [data-part="input"] {
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+}
+.os-slab [data-part="card"] > div:has(> [data-part="input"]) { padding: 6px 24px 22px; }
+.os-slab [data-part="tile"] { gap: 10px; }
+.os-slab [data-part="tile"] [data-part="label"] {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-2);
+}
+
+/* Bound the radial view and its loading shell without cropping orbit labels. */
+.funnel-radial-canvas {
+  max-width: 760px;
+  margin-inline: auto;
+}
+.funnel-space-root:fullscreen .funnel-radial-canvas {
+  max-width: min(100%, calc(82vh * 1100 / 680));
+}
+
+/* Insight card on light colorways (2026-09-24): its type is white, so its
+   floor goes to deep ink here instead of the pale surface. */
+:root[data-theme='light'],
+:root[data-theme='mono-light'] {
+  --insight-base: color-mix(in oklab, var(--text) 90%, var(--brain-1));
 }

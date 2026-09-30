@@ -1,3 +1,4 @@
+import { isGated } from '@/lib/gate';
 /**
  * Brain adapter. Four providers:
  * - federated: both stores at once (lib/brain-federated.ts) — governed
@@ -50,6 +51,7 @@ const stubProvider: BrainProvider = {
 };
 
 export function getBrainProvider(): BrainProvider {
+  if (isGated()) return createGBrainProvider();
   const name = process.env.BRAIN_PROVIDER ?? 'federated';
   if (name === 'stub') return stubProvider;
   if (name === 'optimal') return createOptimalProvider();

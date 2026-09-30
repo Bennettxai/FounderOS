@@ -21,12 +21,13 @@ import { AsyncButton } from '@/components/AsyncButton';
 import { BoardTaskCard } from '@/components/BoardTaskCard';
 import { CountUp } from '@/components/CountUp';
 import { Label } from '@/components/terminal';
+import { publishBoard } from '@/components/board-live-store';
 import { boardDecisionFor, boardStats, groupIssues, modelSummary, orderRuns, orderSeats, runDuration, runningSince, RUN_OK, type BoardLivePayload } from '@/lib/board-live';
 import type { PaperclipAgent } from '@/lib/connectors/paperclip';
 
 /**
- * The live Paperclip board rendered natively in the OS: agents running live
- * on the OS, not a separate tool to check.
+ * The live Paperclip board rendered natively in the OS (Alex, 2026-08-07:
+ * "I want to see the agents running live on my OS, not go look at Paperclip").
  * Polls /api/board/live every 4s while the tab is visible: seat chips with
  * status LEDs and models, the heartbeat run feed, and the task lanes. Every
  * seat has a real Run button. Unreachable board shows an honest dead strip,
@@ -35,8 +36,8 @@ import type { PaperclipAgent } from '@/lib/connectors/paperclip';
 const POLL_MS = 4000;
 
 /**
- * One glyph per seat instead of an anonymous dot: a small icon per agent,
- * color coded with the department heads.
+ * One glyph per seat instead of an anonymous dot (Alex, 2026-08-14: "a
+ * little icon for each agent ... color coded with the department heads").
  * Matched by name so renamed/new seats still land somewhere; Bot is the
  * honest fallback for a seat we do not recognize.
  */
@@ -166,11 +167,11 @@ function SeatChip({ agent, since }: { agent: PaperclipAgent; since: string | nul
         className={`mt-0.5 h-3.5 w-3.5 shrink-0${running ? ' animate-pulse' : ''}`}
         style={{ color: seatIconColor(agent, live, color) }}
       />
-      {/* Name with the model line always under it: the model/adapter readout
-          must NOT disappear while the seat is running.
+      {/* Name with the model line always under it  -  Alex, 2026-08-14: the
+          model/adapter readout must NOT disappear while the seat is running.
           Both lines TRUNCATE and the chip stays two lines tall. Wrapping them
-          so nothing was cut made every chip up to twice as tall, and the agent
-          boxes read as oversized. A compact roster beats
+          so nothing was cut made every chip up to twice as tall  -  Alex,
+          2026-08-18: "the agent boxes are too big now". A compact roster beats
           a complete one here; the title tooltips carry the full strings, and
           the header's model roster already lists every model in play. */}
       <div className="min-w-0 flex-1">
@@ -230,8 +231,13 @@ export function BoardLive({ initial, boardUrl }: { initial: BoardLivePayload; bo
     return () => clearInterval(id);
   }, []);
 
+  // every snapshot, first paint included, feeds the slab hero above the tabs
+  useEffect(() => {
+    publishBoard(data);
+  }, [data]);
+
   const running = data.agents.filter((a) => a.status === 'running').length;
-  // the board's runs endpoint doesn't always join the agent — resolve names
+  // the board's runs endpoint doesn't always join the agent  -  resolve names
   // from the seats so the feed never shows a raw uuid
   const nameById = new Map(data.agents.map((a) => [a.id, a.name]));
   // The feed scrolls and now fills the column, so the old 14-row cap just
@@ -261,9 +267,9 @@ export function BoardLive({ initial, boardUrl }: { initial: BoardLivePayload; bo
           )}
         </div>
         {/* The model roster gets its own full-width line and WRAPS. Squeezed
-            into the header row it had to truncate, so anything past the fifth
-            model clipped to an ellipsis and the rest of the seats went unseen.
-            A wrapping line keeps every seat visible at every width. */}
+            into the header row it was `ml-auto truncate`, so anything past the
+            fifth model clipped to an ellipsis  -  Alex, 2026-08-18: "can't
+            see the rest of the models on the board". */}
         {data.connected && (
           <p className="mt-1 font-mono text-[10px] leading-relaxed text-os-muted" title="models holding seats right now">
             {modelSummary(data.agents)}
@@ -273,7 +279,7 @@ export function BoardLive({ initial, boardUrl }: { initial: BoardLivePayload; bo
 
       {!data.connected ? (
         <p className="px-4 py-3 font-mono text-[10.5px] text-os-dim">
-          Paperclip is not answering on the private network. No fake data: this strip lights up the moment the board responds.
+          Paperclip is not answering on the tailnet. No fake data: this strip lights up the moment the board responds.
         </p>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-4">
@@ -304,9 +310,9 @@ export function BoardLive({ initial, boardUrl }: { initial: BoardLivePayload; bo
             ))}
           </div>
 
-          {/* the feed + lanes absorb ALL remaining panel height: use up the
-              white space, scroll inside the panel only. Move the lanes to
-              the right and add the stages.
+          {/* the feed + lanes absorb ALL remaining panel height (Alex:
+              use up the white space, scroll inside the panel only) */}
+          {/* Alex, 2026-08-18: "move that to the right and add the stages".
               The run feed is a fixed-shape list and never needed half the
               panel; the lanes did, so they take everything that is left. */}
           <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]">
@@ -336,7 +342,7 @@ export function BoardLive({ initial, boardUrl }: { initial: BoardLivePayload; bo
 
             <div className="flex min-h-0 flex-col">
               <div className="mb-2 shrink-0"><Label>Task lanes</Label></div>
-              {/* The stages always render — an empty lane reads as a stage with
+              {/* The stages always render  -  an empty lane reads as a stage with
                   nothing in it, whereas a missing lane reads as a broken board.
                   groupIssues guarantees at least in progress / todo / done. */}
               <div className="flex min-h-0 flex-1 gap-3 overflow-x-auto pb-1">
