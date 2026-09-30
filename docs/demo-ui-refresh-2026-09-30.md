@@ -24,5 +24,6 @@ explicit DEMO_GATE=1. Home renders the new slab, generic operator name, and zero
 spotlight elements. Comms, Skills, and Doctor responses were checked again after
 the host-read guards were added.
 
-Publication remains pending explicit approval to update main and push, per the
-workspace AGENTS.md. No remote or main branch was changed.
+Publication was explicitly authorized with "push" on September 30. Remote main
+changes through ad46d77 were merged cleanly before publication. The merged
+result passes all 3,464 tests across 313 files and TypeScript checking.
