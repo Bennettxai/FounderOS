@@ -7,8 +7,8 @@ describe('parseManyChatWebhook', () => {
   it('maps a canonical payload to an inbound Instagram DM message', () => {
     const m = parseManyChatWebhook({
       subscriber_id: '123',
-      name: 'Alex Rivera',
-      handle: 'alex.rivera',
+      name: 'Alex',
+      handle: 'alex',
       text: 'do you work with agencies?',
       direction: 'in',
       ts: '2026-07-18T14:02:00.000Z',
@@ -16,8 +16,8 @@ describe('parseManyChatWebhook', () => {
     expect(m).toMatchObject({
       platform: 'instagram',
       subscriberId: '123',
-      name: 'Alex Rivera',
-      handle: 'alex.rivera',
+      name: 'Alex',
+      handle: 'alex',
       text: 'do you work with agencies?',
       direction: 'in',
       source: 'manychat',

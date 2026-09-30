@@ -145,15 +145,15 @@ const fathomItem = (id: number, title: string, at: string) => ({
   created_at: at,
   recording_start_time: at,
   recording_end_time: at,
-  recorded_by: { name: 'Alex Rivera', email: 'alex@launchpadcohort.example.com' },
+  recorded_by: { name: 'Alex', email: 'alex@launchpadcohort.example.com' },
   calendar_invitees: [{ email: 'casey@example.com', name: 'Casey Example' }],
   transcript: [
     { speaker: { display_name: 'Casey Example' }, text: 'Doing well, my man.', timestamp: '00:00:00' },
-    { speaker: { display_name: 'Alex Rivera' }, text: 'Tell me about the rollout.', timestamp: '00:00:04' },
+    { speaker: { display_name: 'Alex' }, text: 'Tell me about the rollout.', timestamp: '00:00:04' },
   ],
   default_summary: { template_name: 'Enhanced', markdown_formatted: '## Meeting Purpose\n\nExplore AI for retention.' },
   action_items: [
-    { description: 'Draft proposal w/ CTO', completed: false, recording_timestamp: '00:31:12', assignee: { name: 'Alex Rivera' } },
+    { description: 'Draft proposal w/ CTO', completed: false, recording_timestamp: '00:31:12', assignee: { name: 'Alex' } },
   ],
 });
 
@@ -169,26 +169,26 @@ function fathomFetch(): typeof fetch {
     const demo = { ...fathomItem(3, 'Fathom Demo', '2021-09-16T20:42:47Z'), calendar_invitees: [{ email: 'demo.user@fathom.video', name: 'Demo User' }] };
     const body = cursor
       ? { items: [{ ...fathomItem(2, 'Empty call', '2026-07-01T10:00:00Z'), transcript: [] }, demo], next_cursor: null }
-      : { items: [fathomItem(1, 'Casey Example x Alex Rivera', '2026-08-25T16:03:36Z')], next_cursor: 'n2' };
+      : { items: [fathomItem(1, 'Casey Example x Alex', '2026-08-25T16:03:36Z')], next_cursor: 'n2' };
     return new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }) as unknown as typeof fetch;
 }
 
 describe('renderFathomCallPage', () => {
   test('facts, summary, action items, transcript, in that order', () => {
-    const md = renderFathomCallPage(fathomItem(1, 'Casey Example x Alex Rivera', '2026-08-25T16:03:36Z') as never);
-    expect(md.startsWith('---\ntitle: "Casey Example x Alex Rivera"\ntype: meeting\ndate: 2026-08-25\nsource: fathom\n---\n\n# Casey Example x Alex Rivera')).toBe(true);
+    const md = renderFathomCallPage(fathomItem(1, 'Casey Example x Alex', '2026-08-25T16:03:36Z') as never);
+    expect(md.startsWith('---\ntitle: "Casey Example x Alex"\ntype: meeting\ndate: 2026-08-25\nsource: fathom\n---\n\n# Casey Example x Alex')).toBe(true);
     expect(md).toContain('source: fathom');
     expect(md).toContain('fathom_recording_id: 1');
     expect(md).toContain('url: https://fathom.video/calls/1');
-    expect(md).toContain('recorded_by: Alex Rivera <alex@launchpadcohort.example.com>');
+    expect(md).toContain('recorded_by: Alex <alex@launchpadcohort.example.com>');
     expect(md).toContain('invitees: Casey Example <casey@example.com>');
     expect(md).toContain('## Summary');
     expect(md).toContain('Explore AI for retention.');
     expect(md).toContain('## Action items');
-    expect(md).toContain('- [ ] Draft proposal w/ CTO (Alex Rivera, 00:31:12)');
+    expect(md).toContain('- [ ] Draft proposal w/ CTO (Alex, 00:31:12)');
     expect(md).toContain('## Transcript');
-    expect(md).toContain('[00:00:04] Alex Rivera: Tell me about the rollout.');
+    expect(md).toContain('[00:00:04] Alex: Tell me about the rollout.');
     expect(md).toContain('archive_version: 3');
     const order = ['## Summary', '## Action items', '## Transcript'].map((h) => md.indexOf(h));
     expect(order).toEqual([...order].sort((a, b) => a - b));
@@ -199,12 +199,12 @@ describe('renderFathomCallPage', () => {
     m.transcript = [
       { speaker: { display_name: 'Evan Mercer' }, text: 'All right.', timestamp: '00:00:00' },
       { speaker: { display_name: 'Evan Mercer' }, text: 'Hello.', timestamp: '00:00:01' },
-      { speaker: { display_name: 'Alex Rivera' }, text: 'Hi.', timestamp: '00:00:03' },
+      { speaker: { display_name: 'Alex' }, text: 'Hi.', timestamp: '00:00:03' },
     ];
     m.recording_end_time = '2031-01-01T00:00:00Z';
     const md = renderFathomCallPage(m as never);
     expect(md).toContain('[00:00:00] Evan Mercer: All right. Hello.');
-    expect(md).toContain('[00:00:03] Alex Rivera: Hi.');
+    expect(md).toContain('[00:00:03] Alex: Hi.');
     expect(md).not.toContain('duration:');
   });
 });
@@ -224,7 +224,7 @@ describe('sample cleanup', () => {
 describe('page regeneration by archive_version', () => {
   test('an existing page written by an older exporter is rewritten, a current one is skipped', async () => {
     const dir = store();
-    const name = '2026-08-25-casey-example-x-alex-rivera--fathom-1.md';
+    const name = '2026-08-25-casey-example-x-alex--fathom-1.md';
     fs.mkdirSync(path.join(dir, 'meetings'), { recursive: true });
     fs.writeFileSync(path.join(dir, 'meetings', name), '# old format page\n\nsource: fathom\n');
     const r = await exportFathomCalls({ key: 'fk', storeDir: dir, fetchFn: fathomFetch() });
@@ -243,7 +243,7 @@ describe('exportFathomCalls', () => {
     const r = await exportFathomCalls({ key: 'fk', storeDir: dir, fetchFn: fathomFetch() });
     expect(r.source).toBe('fathom');
     expect(r.found).toBe(3);
-    expect(r.exported).toEqual(['meetings/2026-08-25-casey-example-x-alex-rivera--fathom-1.md']);
+    expect(r.exported).toEqual(['meetings/2026-08-25-casey-example-x-alex--fathom-1.md']);
     expect(r.noTranscript).toEqual(['2']);
     expect(r.skippedSample).toEqual(['3']); // Fathom's own demo call, never the operator's knowledge
     const again = await exportFathomCalls({ key: 'fk', storeDir: dir, fetchFn: fathomFetch() });

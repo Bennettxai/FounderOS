@@ -125,8 +125,8 @@ describe('syncSocialSnapshots', () => {
       {
         instagram: { handle: '@founderos.ai', followers: 42000 },
         tiktok: { handle: '@founderos.ai', followers: 12000 },
-        facebook: { handle: 'Alex Rivera', followers: 100 }, // untracked platform
-        linkedin: { handle: 'Alex Rivera' }, // no follower count yet
+        facebook: { handle: 'Alex', followers: 100 }, // untracked platform
+        linkedin: { handle: 'Alex' }, // no follower count yet
       },
       '2026-06-13',
     );
@@ -211,7 +211,7 @@ describe('seeded social data', () => {
     const byPlatform = new Map(db.social.accounts().map((a) => [a.platform, a]));
     expect(byPlatform.get('instagram')?.handle).toBe('@founderos.ai');
     expect(byPlatform.get('twitter')?.handle).toBe('@Founderosai');
-    expect(byPlatform.get('linkedin')?.handle).toBe('Alex Rivera');
+    expect(byPlatform.get('linkedin')?.handle).toBe('Alex');
   });
 
   test('seeds multi-month history ending at the seeded current value', () => {

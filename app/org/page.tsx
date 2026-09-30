@@ -186,7 +186,7 @@ export default async function OrgChartPage({ searchParams }: { searchParams?: { 
       {/* Operator */}
       <Rise i={5} className="flex flex-col items-center">
         <Users className="h-7 w-7 text-os-text" />
-        <div className="mt-1 text-base font-bold tracking-wide">Alex Rivera</div>
+        <div className="mt-1 text-base font-bold tracking-wide">Alex</div>
         <div className="text-[10px] uppercase tracking-[0.3em] text-os-dim">Operator</div>
         <div className="mt-2 h-6 w-px bg-os-border-bright" />
         <div className="flex items-center gap-2">

@@ -9,9 +9,9 @@ const ACCOUNTS_FIXTURE = {
     { platform: 'tiktok', username: 'vantage.os', metadata: { profileData: { followersCount: 5000 } } },
     { platform: 'youtube', username: 'vantageos', metadata: { profileData: { followersCount: 900 } } },
     { platform: 'twitter', username: 'founderos', metadata: { profileData: { followersCount: 3000 } } },
-    { platform: 'linkedin', username: 'Alex Rivera', metadata: { profileData: { followersCount: 1200 } } },
+    { platform: 'linkedin', username: 'Alex', metadata: { profileData: { followersCount: 1200 } } },
     // facebook count via page fan_count fallback
-    { platform: 'facebook', username: 'Alex Rivera', metadata: { availablePages: [{ fan_count: 42 }] } },
+    { platform: 'facebook', username: 'Alex', metadata: { availablePages: [{ fan_count: 42 }] } },
     // no usable count anywhere -> omitted
     { platform: 'pinterest', username: 'x', metadata: { profileData: {} } },
   ],

@@ -156,7 +156,7 @@ describe('companies and software stay out of the people tier (live-data regressi
     item({ source: 'email', sender, title: `Personal — ${sender}`, preview: subject });
 
   test('CI and repo notifications are software, even when the sender is your own name', () => {
-    expect(classify(gmail('Alex Rivera', '[yourname/demo-app] Run failed: CI - main'), ctx()).tier).toBe('noise');
+    expect(classify(gmail('Alex', '[yourname/demo-app] Run failed: CI - main'), ctx()).tier).toBe('noise');
   });
 
   test('ticketing and venue blasts are companies', () => {

@@ -9,7 +9,7 @@ const LIVE = {
   instagram: { handle: '@vantage.os', followers: 20000 },
   tiktok: { handle: '@vantage.os', followers: 5000 },
   youtube: { handle: '@vantageos', followers: 900 },
-  facebook: { handle: 'Alex Rivera', followers: 42 }, // untracked -> skipped
+  facebook: { handle: 'Alex', followers: 42 }, // untracked -> skipped
 };
 
 describe('syncFromZernioLive', () => {

@@ -1122,7 +1122,7 @@ const socialAccounts: SocialAccount[] = [
   { platform: 'tiktok', handle: '@founderos.ai', url: 'https://tiktok.com/@founderos.ai', order: 2 },
   { platform: 'twitter', handle: '@Founderosai', url: 'https://x.com/Founderosai', order: 3 },
   { platform: 'youtube', handle: '@founderosai', url: 'https://youtube.com/@founderosai', order: 4 },
-  { platform: 'linkedin', handle: 'Alex Rivera', url: null, order: 5 },
+  { platform: 'linkedin', handle: 'Alex', url: null, order: 5 },
 ];
 
 // Demo follower counts. LinkedIn has no baseline in this demo, so it gets
@@ -1218,9 +1218,9 @@ const socialDms: SocialDm[] = DM_TARGETS.map((t) => ({
 // threads, inbound + outbound, believable Vantage / FounderOS lead-gen tone.
 const socialDmMessages: SocialDmMessage[] = [
   // Alex — agency owner off a reel
-  ['ig-alex', 'Alex Rivera', 'alex.rivera', 'in', 'saw your reel on the 3-agent setup 🔥 do you actually work with agencies?', null, '2026-07-18T14:02:00.000Z'],
-  ['ig-alex', 'Alex Rivera', 'alex.rivera', 'out', 'appreciate it! yeah — agencies are exactly who Vantage is built for. what are you running right now?', null, '2026-07-18T14:09:00.000Z'],
-  ['ig-alex', 'Alex Rivera', 'alex.rivera', 'in', 'SMMA, ~12 clients, drowning in fulfillment tbh 😅', null, '2026-07-18T14:15:00.000Z'],
+  ['ig-alex', 'Alex', 'alex', 'in', 'saw your reel on the 3-agent setup 🔥 do you actually work with agencies?', null, '2026-07-18T14:02:00.000Z'],
+  ['ig-alex', 'Alex', 'alex', 'out', 'appreciate it! yeah — agencies are exactly who Vantage is built for. what are you running right now?', null, '2026-07-18T14:09:00.000Z'],
+  ['ig-alex', 'Alex', 'alex', 'in', 'SMMA, ~12 clients, drowning in fulfillment tbh 😅', null, '2026-07-18T14:15:00.000Z'],
   // Jordan — keyword flow "SCALE"
   ['ig-jordan', 'Jordan Blake', 'jordanbuilds', 'in', 'SCALE', 'SCALE', '2026-07-18T12:41:00.000Z'],
   ['ig-jordan', 'Jordan Blake', 'jordanbuilds', 'out', 'boom 💥 here’s the free breakdown → founderos.ai/scale. want me to show how it maps to your funnel?', 'SCALE', '2026-07-18T12:41:20.000Z'],
@@ -1932,7 +1932,7 @@ export const seededCrons: AgentCron[] = [
  * because nothing ever re-ran the seed. The stamp forces exactly one re-seed
  * per change.
  */
-export const SEED_VERSION = '2026-09-18-ui-port';
+export const SEED_VERSION = '2026-09-30-alex-first-name';
 
 export function seedDatabase(db: FounderDb): void {
   // INSERT OR REPLACE in every repo makes re-seeding idempotent by id.

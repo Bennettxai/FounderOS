@@ -13,7 +13,7 @@ import { loomStatus, loomVideoMeta, isLoomUrl } from '@/lib/connectors/loom';
 
 const oembedBody = {
   title: 'Founder OS walkthrough',
-  author_name: 'Alex Rivera',
+  author_name: 'Alex',
   thumbnail_url: 'https://cdn.loom.com/sessions/thumbnails/abc-00001.jpg',
   duration: 184.5,
   html: '<iframe src="https://www.loom.com/embed/abc"></iframe>',
@@ -66,7 +66,7 @@ describe('loomVideoMeta', () => {
     const m = await loomVideoMeta('https://www.loom.com/share/abc123', okFetch());
     expect(m).not.toBeNull();
     expect(m!.title).toBe('Founder OS walkthrough');
-    expect(m!.author).toBe('Alex Rivera');
+    expect(m!.author).toBe('Alex');
     expect(m!.durationSeconds).toBe(184.5);
     expect(m!.thumbnailUrl).toContain('cdn.loom.com');
   });

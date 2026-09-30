@@ -50,6 +50,6 @@ describe('POST /api/social/dm/reply', () => {
     const stored = getDb().social.dmMessages('instagram').find((m) => m.id === body.message.id);
     expect(stored?.text).toBe('here is pricing');
     expect(stored?.source).toBe('manychat');
-    expect(stored?.name).toBe('Alex Rivera'); // resolved from the existing thread
+    expect(stored?.name).toBe('Alex'); // resolved from the existing thread
   });
 });
