@@ -17,8 +17,8 @@ const read = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
  * the load-bearing bits — lock them here.
  */
 describe('cohort invite constants', () => {
-  it('points at founderos.example.com over https', () => {
-    expect(COHORT_URL).toBe('https://founderos.example.com');
+  it('points at founderos.sh over https', () => {
+    expect(COHORT_URL).toBe('https://founderos.sh');
   });
 
   it('carries the exact footer CTA line', () => {
@@ -62,11 +62,13 @@ describe('wiring', () => {
     expect(layout.indexOf('{children}')).toBeLessThan(layout.indexOf('<CohortBanner'));
   });
 
-  test('the banner is a server-rendered link to founderos.example.com carrying the CTA', () => {
+  test('the banner is a server-rendered link to founderos.sh carrying the CTA', () => {
     const src = read('components/CohortBanner.tsx');
     expect(src).toContain('COHORT_CTA');
     expect(src).toContain('COHORT_URL');
     expect(src).toContain('rel="noreferrer"');
+    expect(src).toContain('founderos.sh');
+    expect(src).not.toContain('founderos.example.com');
     expect(src).not.toContain("'use client'"); // static — no JS shipped for it
   });
 

@@ -99,7 +99,7 @@ export function CohortModal() {
               onClick={dismiss}
               className="inline-flex items-center justify-center gap-1.5 rounded-sm-t border border-os-accent bg-os-accent px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-os-ink transition-opacity hover:opacity-90"
             >
-              Join the cohort — founderos.example.com
+              Join the cohort — founderos.sh
               <ArrowUpRight className="h-3 w-3" />
             </a>
             <button
