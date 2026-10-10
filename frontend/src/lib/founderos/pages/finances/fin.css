@@ -1,0 +1,141 @@
+/* /finances furniture in production's radius scale (chips 5, controls 6,
+   panels 10, pills round), from --bn-* tokens only. */
+.fin-icon-btn {
+	border: 1px solid var(--bn-border-strong);
+	border-radius: var(--bn-r-chip, 5px);
+	padding: 6px;
+	color: var(--bn-text-2);
+}
+.fin-icon-btn:hover:not(:disabled) {
+	background: var(--bn-surface-2);
+}
+.fin-icon-btn:disabled {
+	opacity: 0.3;
+}
+/* the month steppers beside the pills (prod rounded-ctl) */
+.fin-step {
+	border-color: var(--bn-border);
+	color: var(--bn-text-2);
+}
+.fin-step:hover:not(:disabled) {
+	border-color: var(--bn-border-strong);
+}
+.fin-step:disabled {
+	opacity: 0.3;
+}
+/* the expenditure statement's "all time" switch (prod rounded-sm-t) */
+.fin-range {
+	border: 1px solid var(--bn-border-strong);
+	border-radius: var(--bn-r-chip, 5px);
+	padding: 6px 10px;
+	color: var(--bn-text-3);
+}
+.fin-range:hover {
+	background: var(--bn-surface-2);
+}
+.fin-range[data-on='true'] {
+	border-color: var(--bn-accent);
+	color: var(--bn-accent);
+}
+/* the upload strip's lanes: the chosen one outlined in accent */
+.fin-lane {
+	border-color: var(--bn-border);
+	color: var(--bn-text-3);
+}
+.fin-lane:hover {
+	background: var(--bn-surface-2);
+}
+.fin-lane[data-on='true'] {
+	border-color: var(--bn-accent);
+	color: var(--bn-accent);
+}
+/* a structural panel (prod rounded-lg-t: 10px), the business charts and the
+   statement's sections */
+.fin-panel {
+	border: 1px solid var(--bn-border);
+	border-radius: var(--bn-r-panel, 10px);
+	background: var(--bn-surface);
+}
+/* the bar's hover number */
+.fin-tip {
+	border: 1px solid var(--bn-border-strong);
+	border-radius: var(--bn-r-chip, 5px);
+	background: var(--bn-surface-2);
+}
+.fin-row {
+	border-bottom: 1px solid var(--bn-hairline);
+}
+.fin-row:last-child {
+	border-bottom: 0;
+}
+.fin-tag {
+	border-radius: 9999px;
+	padding: 2px 10px;
+	font-family: var(--bn-font, ui-monospace, monospace);
+	font-size: 10.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+}
+.fin-tag[data-tone='ok'] {
+	background: color-mix(in oklab, var(--bn-ok) 16%, transparent);
+	color: var(--bn-ok);
+}
+.fin-tag[data-tone='warn'] {
+	background: color-mix(in oklab, var(--bn-warn) 15%, transparent);
+	color: var(--bn-warn);
+}
+.fin-tag[data-tone='off'] {
+	background: color-mix(in oklab, var(--bn-text) 8%, transparent);
+	color: var(--bn-text-2);
+}
+.fin-tag[data-tone='err'] {
+	background: color-mix(in oklab, var(--bn-err) 16%, transparent);
+	color: var(--bn-err);
+}
+.fin-bar {
+	background: var(--bn-accent);
+}
+.fin-track {
+	border-radius: var(--bn-r-chip, 5px);
+	background: var(--bn-surface-2);
+}
+.fin-drop {
+	border: 1px dashed var(--bn-border-strong);
+	border-radius: var(--bn-r-panel, 10px);
+	background: var(--bn-surface);
+}
+.fin-drop[data-over='true'] {
+	border-color: var(--bn-accent);
+}
+.fin-primary {
+	background: var(--bn-text);
+	color: var(--bn-bg);
+	border-radius: var(--bn-r-ctl, 6px);
+	padding: 6px 12px;
+	font-family: var(--bn-font, ui-monospace, monospace);
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+}
+.fin-overlay {
+	background: var(--bn-bg);
+}
+/* the month chip's "statements still missing" marker (prod: warn dot, ringed
+   in the card surface) */
+.fin-flag {
+	position: absolute;
+	right: -2px;
+	top: -2px;
+	width: 7px;
+	height: 7px;
+	border-radius: 9999px;
+	background: var(--bn-warn);
+	box-shadow: 0 0 0 2px var(--bn-surface);
+}
+.fin-check:hover {
+	color: var(--bn-text);
+}
+/* the empty donut when a month has fewer than two slices */
+.fin-ring {
+	border: 14px solid color-mix(in oklab, var(--bn-text) 8%, transparent);
+}

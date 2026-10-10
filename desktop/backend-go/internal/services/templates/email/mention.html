@@ -1,0 +1,24 @@
+{{define "content"}}
+<h1>{{.MentionerName}} mentioned you</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p><strong>{{.MentionerName}}</strong> mentioned you in a {{.EntityType}}:</p>
+
+<div class="info-box">
+    <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">
+        In: <strong>{{.EntityTitle}}</strong>
+    </p>
+    <p style="margin: 0; font-style: italic; color: #374151;">
+        "{{.CommentSnippet}}"
+    </p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.CommentLink}}" class="button">View Comment</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>Reply to this email to respond to the conversation.</p>
+{{end}}

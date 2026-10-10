@@ -1,0 +1,29 @@
+{
+  "name": "Flexible Tables",
+  "version": "1.0.0",
+  "description": "Flexible Tables — user-defined tables with custom columns and rows",
+  "category": "data",
+  "actions": [
+    { "name": "create_table", "type": "api_call", "description": "Create a new flexible table" },
+    { "name": "list_tables", "type": "api_call", "description": "List all tables in workspace" },
+    { "name": "add_column", "type": "api_call", "description": "Add a column to a table" },
+    { "name": "insert_row", "type": "api_call", "description": "Insert a row into a table" },
+    { "name": "list_rows", "type": "api_call", "description": "List rows with pagination" },
+    { "name": "update_row", "type": "api_call", "description": "Update a row in a table" },
+    { "name": "delete_row", "type": "api_call", "description": "Delete a row from a table" }
+  ],
+  "protected_schemas": ["flexible_tables", "flexible_columns", "flexible_rows"],
+  "protected_routes": ["api/tables/*"],
+  "protected_operations": ["tables.drop_table", "tables.truncate"],
+  "migration_up": "CREATE TABLE IF NOT EXISTS flexible_tables (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), workspace_id UUID NOT NULL, name VARCHAR(255) NOT NULL, description TEXT, icon VARCHAR(100), created_by UUID, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()); CREATE TABLE IF NOT EXISTS flexible_columns (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), table_id UUID NOT NULL REFERENCES flexible_tables(id) ON DELETE CASCADE, name VARCHAR(255) NOT NULL, column_type VARCHAR(50) NOT NULL DEFAULT 'text', is_required BOOLEAN DEFAULT FALSE, default_value TEXT, sort_order INTEGER DEFAULT 0, created_at TIMESTAMPTZ DEFAULT NOW()); CREATE TABLE IF NOT EXISTS flexible_rows (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), table_id UUID NOT NULL REFERENCES flexible_tables(id) ON DELETE CASCADE, data JSONB NOT NULL DEFAULT '{}', created_by UUID, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW());",
+  "migration_down": "DROP TABLE IF EXISTS flexible_rows CASCADE; DROP TABLE IF EXISTS flexible_columns CASCADE; DROP TABLE IF EXISTS flexible_tables CASCADE;",
+  "routes": [
+    { "method": "GET", "path": "/api/tables", "handler": "ListTables" },
+    { "method": "POST", "path": "/api/tables", "handler": "CreateTable" },
+    { "method": "POST", "path": "/api/tables/:id/columns", "handler": "AddColumn" },
+    { "method": "GET", "path": "/api/tables/:id/rows", "handler": "ListRows" },
+    { "method": "POST", "path": "/api/tables/:id/rows", "handler": "InsertRow" },
+    { "method": "PUT", "path": "/api/tables/:id/rows/:rowId", "handler": "UpdateRow" },
+    { "method": "DELETE", "path": "/api/tables/:id/rows/:rowId", "handler": "DeleteRow" }
+  ]
+}

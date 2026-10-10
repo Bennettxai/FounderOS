@@ -1,0 +1,20 @@
+name: engineering
+title: Engineering Deep Dive
+audience: engineering
+genre: spec
+bandwidth: large
+modalities:
+  - text
+  - image
+  - video
+  - audio
+constraints:
+  tone: "Technical precision. Use domain terminology. Assume the reader writes code daily."
+  length: "As long as needed — completeness over brevity."
+  visuals: "Interactive SVG diagrams for architecture, data flow, and sequence diagrams. Mermaid-style rendered inline."
+  structure: "Overview → components → interfaces → data flow → edge cases → open questions."
+html_hints:
+  style: "Dark theme (bg #1a1a2e, text #e0e0e0). Monospace for code. Syntax highlighting for code blocks."
+  interactive: true
+  layout: "Full width with collapsible sections. Sticky table of contents sidebar."
+  code_blocks: "Syntax-highlighted with copy button. Language labels visible."

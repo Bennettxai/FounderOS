@@ -1,0 +1,35 @@
+{{define "content"}}
+<h1 class="text-danger">🚨 Task Overdue</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p>The following task is now <strong class="text-danger">overdue</strong>:</p>
+
+<div class="info-box danger">
+    <h2 style="margin: 0 0 8px 0;">📋 {{.TaskTitle}}</h2>
+    <p class="text-muted text-small" style="margin: 0;">{{.ProjectName}}</p>
+    <hr class="divider" style="margin: 12px 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td style="text-align: center; padding: 8px;">
+                <p class="text-muted text-small" style="margin: 0;">Was Due</p>
+                <p style="margin: 4px 0 0 0;">{{.DueDate}}</p>
+            </td>
+            <td style="text-align: center; padding: 8px;">
+                <p class="text-muted text-small" style="margin: 0;">Overdue By</p>
+                <p class="text-danger" style="margin: 4px 0 0 0; font-weight: 600;">{{.DaysOverdue}} day(s)</p>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.TaskLink}}" class="button button-danger">Complete Task</a>
+</div>
+
+<p class="text-muted text-small text-center">Need more time? Update the due date or contact your project lead.</p>
+{{end}}
+
+{{define "footer"}}
+<p>You're receiving this because you have overdue task notifications enabled.</p>
+{{end}}

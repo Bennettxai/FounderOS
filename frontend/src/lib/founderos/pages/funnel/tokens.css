@@ -1,0 +1,185 @@
+/* Page-local color tokens for /os/funnel and /os/analytics, derived from the
+   Monolith Signal --bn-* tokens exactly as FounderOS v1's mono colorway derives
+   them (app/globals.css: --ramp-*, --send-activity, --funnel-*). Scoped to the
+   page root so the shared theme stays untouched. */
+.bn-fn {
+	--brain-1: #f2f2f2;
+	--brain-2: #9c9c9c;
+	--ramp-1: var(--brain-2);
+	--ramp-2: color-mix(in oklab, var(--brain-2) 35%, var(--bn-text));
+	--ramp-3: var(--brain-1);
+	--ramp-4: color-mix(in oklab, var(--brain-1) 70%, var(--bn-accent));
+	--send-activity: color-mix(in oklab, var(--brain-2) 70%, var(--bn-text));
+	--fn-hot: var(--bn-ok);
+	--fn-warm: var(--bn-warn);
+	--fn-cold: #5c5c5c;
+	--fn-s0: #f2f2f2;
+	--fn-s1: #bdbdbd;
+	--fn-s2: #8a8a8a;
+	--fn-s3: #6e6e6e;
+	--fn-s4: var(--bn-ok);
+	--fn-s5: #575757;
+	--fn-s6: #474747;
+}
+
+@keyframes bn-fn-halo {
+	0% { transform: scale(0.5); opacity: 0.65; }
+	70%,
+	100% { transform: scale(2); opacity: 0; }
+}
+.bn-fn .fn-halo {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: bn-fn-halo 2.6s ease-out infinite;
+}
+/* hub rings breathe slowly so the sections read as living machinery (prod) */
+@keyframes bn-fn-hub {
+	0%,
+	100% { transform: scale(1); opacity: 0.35; }
+	50% { transform: scale(1.06); opacity: 0.6; }
+}
+.bn-fn .fn-hub-ring {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: bn-fn-hub 5.5s ease-in-out infinite;
+}
+@keyframes bn-fn-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+	.bn-fn .fn-halo,
+	.bn-fn .fn-hub-ring { animation: none; }
+	.bn-fn .fn-halo { opacity: 0; }
+}
+
+/* Brand Deals pills and filter chips (FounderOS v1 components/slab.tsx PILL,
+   PILL_ACCENT, chipClass), square per Monolith Signal. */
+.bn-fn .fn-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	border: 1px solid var(--bn-border);
+	padding: 0.5rem 1rem;
+	font-size: 13px;
+	color: var(--bn-text-2);
+	background: transparent;
+}
+.bn-fn .fn-pill:hover { border-color: var(--bn-border-strong); color: var(--bn-text); }
+.bn-fn .fn-pill:disabled { opacity: 0.5; }
+.bn-fn .fn-pill-accent {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	border: 1px solid color-mix(in oklab, var(--bn-accent) 25%, transparent);
+	background: var(--bn-accent-soft);
+	padding: 0.5rem 1rem;
+	font-size: 13px;
+	color: var(--bn-accent);
+}
+.bn-fn .fn-chip {
+	padding: 0.375rem 1rem;
+	font-size: 12.5px;
+	border: 1px solid var(--bn-border);
+	color: var(--bn-text-2);
+	background: transparent;
+}
+.bn-fn .fn-chip:hover { color: var(--bn-text); }
+.bn-fn .fn-chip[data-on] {
+	background: var(--bn-accent);
+	border-color: var(--bn-accent);
+	color: var(--bn-accent-ink);
+	font-weight: 600;
+}
+.bn-fn .fn-ctl {
+	border: 1px solid var(--bn-border);
+	padding: 0.125rem 0.5rem;
+	font-family: var(--bn-font, ui-monospace, monospace);
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.025em;
+	color: var(--bn-text-3);
+}
+.bn-fn .fn-ctl:hover { border-color: var(--bn-border-strong); color: var(--bn-text-2); }
+.bn-fn .fn-ctl[data-on] {
+	border-color: color-mix(in oklab, var(--bn-accent) 25%, transparent);
+	background: var(--bn-accent-soft);
+	color: var(--bn-accent);
+}
+.bn-fn .fn-select {
+	border: 1px solid var(--bn-border);
+	background: var(--bn-surface);
+	padding: 0.5rem 0.875rem;
+	font-size: 12.5px;
+	color: var(--bn-text-2);
+}
+/* /os/analytics audience rows: the platform circle fills on row hover. */
+.bn-fn .group:hover .fn-platform-icon { background: var(--bn-accent); color: var(--bn-accent-ink); }
+/* The selected VSL video row stays lit (prod: bg text 5%). */
+.bn-fn .fn-video[data-on] { background: color-mix(in oklab, var(--bn-text) 5%, transparent); }
+/* prod's rounded select control (FunnelChannelAnalytics / VslAnalytics `control`). */
+.bn-fn .fn-control,
+.fn-control {
+	border-color: var(--bn-border);
+	background: var(--bn-surface);
+	color: var(--bn-text-2);
+}
+/* the link studio's inputs (prod TrakyoLinkStudio `control`: bg, text). */
+.fn-input {
+	border-color: var(--bn-border);
+	background: var(--bn-bg);
+	color: var(--bn-text);
+}
+.fn-control:focus-visible { outline: 2px solid var(--bn-text); outline-offset: 2px; }
+.bn-fn .fn-row:hover { background: color-mix(in oklab, var(--bn-text) 4%, transparent); }
+.bn-fn .fn-tag {
+	flex-shrink: 0;
+	padding: 0.125rem 0.625rem;
+	font-family: var(--bn-font, ui-monospace, monospace);
+	font-size: 10.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Push Now / Save Now rows (v1 AttentionRow): the name lights on hover. */
+.bn-fn .fn-attn:hover .fn-attn-name { color: var(--bn-accent); }
+.bn-fn .fn-attn:hover { background: color-mix(in oklab, var(--bn-text) 4%, transparent); }
+
+/* Canvas fullscreen (prod app/globals.css .funnel-space-root:fullscreen). */
+.bn-fn .fn-fullscreen {
+	border-color: var(--bn-border);
+	background: var(--bn-surface-2);
+	color: var(--bn-text-3);
+}
+.bn-fn .fn-fullscreen:hover { border-color: var(--bn-border-strong); color: var(--bn-text); }
+.fn-space-root:fullscreen {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	background: var(--bn-bg);
+	padding: 3vh 4vw;
+}
+
+/* Channel Funnels boxes (prod FunnelChannelAnalytics, 2026-09-24). */
+.bn-fn .fn-channel {
+	border-color: var(--bn-border-strong);
+	background: color-mix(in oklab, var(--bn-text) 5%, transparent);
+}
+.bn-fn .fn-channel:hover {
+	border-color: color-mix(in oklab, var(--bn-accent) 25%, transparent);
+	background: color-mix(in oklab, var(--bn-text) 9%, transparent);
+}
+.bn-fn .fn-channel[data-on] {
+	border-color: color-mix(in oklab, var(--bn-accent) 25%, transparent);
+	background: var(--bn-accent-soft);
+}
+.bn-fn .fn-quiet-channel:hover { color: var(--bn-text-2); }
+.bn-fn .fn-quiet-channel[data-on] { color: var(--bn-accent); text-decoration: underline; }
+
+/* Bound the radial view and its loading shell without cropping orbit labels
+   (prod app/globals.css .funnel-radial-canvas). */
+.bn-fn .fn-radial-canvas {
+	max-width: 760px;
+	margin-inline: auto;
+}
+.fn-space-root:fullscreen .fn-radial-canvas {
+	max-width: min(100%, calc(82vh * 1100 / 680));
+}

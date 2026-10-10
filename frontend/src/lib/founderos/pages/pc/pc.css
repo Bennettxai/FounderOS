@@ -1,0 +1,25 @@
+/* pages-comms shared chrome: pills, filter chips, rows and panels over the
+   --bn-* tokens (hairline borders, square corners, color = status only). */
+.pc-pill { border-color: var(--bn-border); color: var(--bn-text-2); }
+.pc-pill:hover { border-color: var(--bn-border-strong); color: var(--bn-text); }
+.pc-pill-accent {
+	border-color: color-mix(in oklab, var(--bn-accent) 25%, transparent);
+	background: var(--bn-accent-soft);
+	color: var(--bn-accent);
+}
+.pc-filter { border-color: var(--bn-border); color: var(--bn-text-2); }
+.pc-filter:hover { color: var(--bn-text); }
+.pc-filter-on { background: var(--bn-accent); color: var(--bn-accent-ink); }
+.pc-panel { border: 1px solid var(--bn-border); background: var(--bn-bg); }
+.pc-surface { border: 1px solid var(--bn-border); background: var(--bn-surface); }
+.pc-row { transition: background-color 160ms ease; }
+.pc-row:hover { background: color-mix(in oklab, var(--bn-text) 4%, transparent); }
+.pc-hair { border-color: var(--bn-border); }
+.pc-input {
+	border: 1px solid var(--bn-border);
+	background: var(--bn-surface);
+	color: var(--bn-text);
+	outline: none;
+}
+.pc-input:focus { border-color: var(--bn-border-strong); }
+.pc-input::placeholder { color: var(--bn-text-3); }

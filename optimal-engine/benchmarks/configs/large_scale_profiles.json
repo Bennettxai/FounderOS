@@ -1,0 +1,37 @@
+{
+  "profiles": [
+    {
+      "name": "synthetic-500",
+      "description": "Initial large memory benchmark: 100 conversations, 500 questions.",
+      "conversations": 100,
+      "questions": 500,
+      "questions_per_conversation": 5,
+      "filler_tokens_per_conversation": 0,
+      "recommended_judge_votes": 3
+    },
+    {
+      "name": "synthetic-700",
+      "description": "BEAM-1M-shaped question volume: 35 conversations, 700 questions.",
+      "conversations": 35,
+      "questions": 700,
+      "questions_per_conversation": 20,
+      "recommended_judge_votes": 3
+    },
+    {
+      "name": "synthetic-1m-context",
+      "description": "Long-context stress profile: 35 conversations with about 1M filler tokens each.",
+      "conversations": 35,
+      "questions": 700,
+      "target_tokens_per_conversation": 1000000,
+      "recommended_compute": "Run only when storage, indexing, judge cost, and timeout budgets are explicit."
+    },
+    {
+      "name": "synthetic-10m-context",
+      "description": "Extreme long-context stress profile: 10 conversations with about 10M filler tokens each.",
+      "conversations": 10,
+      "questions": 200,
+      "target_tokens_per_conversation": 10000000,
+      "recommended_compute": "Do not run casually; use as a dedicated overnight stress test."
+    }
+  ]
+}

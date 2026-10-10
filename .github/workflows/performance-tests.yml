@@ -1,0 +1,354 @@
+name: Performance Tests
+
+# Weekly performance regression tests
+# Compares against baseline and alerts on degradation
+
+on:
+  # Weekly schedule - Sundays at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * 0'
+  push:
+    branches:
+      - release/mvp-stabilization
+      - 'release/**'
+  pull_request:
+    branches:
+      - release/mvp-stabilization
+      - 'release/**'
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - osa
+          - hybrid
+          - spike
+          - endurance
+      duration_hours:
+        description: 'Endurance test duration (hours)'
+        required: false
+        default: '2'
+
+env:
+  BASE_URL: http://localhost:8001
+  GO_VERSION: '1.26.2'
+  K6_VERSION: '0.48.0'
+
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    outputs:
+      test_suite: ${{ steps.config.outputs.test_suite }}
+      run_all: ${{ steps.config.outputs.run_all }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure test suite
+        id: config
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "test_suite=all" >> $GITHUB_OUTPUT
+            echo "run_all=true" >> $GITHUB_OUTPUT
+          else
+            echo "test_suite=${{ github.event.inputs.test_suite }}" >> $GITHUB_OUTPUT
+            if [ "${{ github.event.inputs.test_suite }}" = "all" ]; then
+              echo "run_all=true" >> $GITHUB_OUTPUT
+            else
+              echo "run_all=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  performance-tests:
+    name: Run Performance Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 180  # 3 hours max
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: businessos
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: businessos_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 \
+            --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | \
+            sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build backend
+        working-directory: desktop/backend-go
+        run: |
+          go mod download
+          go build -o bin/server ./cmd/server
+
+      - name: Run migrations
+        working-directory: desktop/backend-go
+        env:
+          DATABASE_URL: postgres://businessos:testpassword@localhost:5432/businessos_test?sslmode=disable
+        run: |
+          ./scripts/db/prepare_runtime_schema.sh
+
+      - name: Start backend server
+        working-directory: desktop/backend-go
+        env:
+          DATABASE_URL: postgres://businessos:testpassword@localhost:5432/businessos_test?sslmode=disable
+          REDIS_URL: redis://localhost:6379
+          PORT: 8001
+        run: |
+          ./bin/server &
+          echo $! > server.pid
+          sleep 10  # Wait for server to start
+
+      - name: Health check
+        run: |
+          curl -f http://localhost:8001/api/health || exit 1
+
+      - name: Create test user and get auth token
+        id: auth
+        run: |
+          # Create test user
+          curl -X POST http://localhost:8001/api/auth/signup \
+            -H "Content-Type: application/json" \
+            -d '{"email":"test@example.com","password":"testpassword123","name":"Test User"}' || true
+
+          # Login and get token
+          TOKEN=$(curl -X POST http://localhost:8001/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"test@example.com","password":"testpassword123"}' \
+            | jq -r '.token')
+
+          echo "AUTH_TOKEN=$TOKEN" >> $GITHUB_OUTPUT
+          echo "::add-mask::$TOKEN"
+
+      - name: Download baseline results
+        continue-on-error: true
+        run: |
+          mkdir -p baseline
+          # Download from artifacts or S3
+          # For now, use git-stored baselines if they exist
+          if [ -d "desktop/backend-go/baseline" ]; then
+            cp desktop/backend-go/baseline/*.json baseline/ || true
+          fi
+
+      - name: Run OSA Load Test
+        if: needs.setup.outputs.run_all == 'true' || github.event.inputs.test_suite == 'osa'
+        working-directory: desktop/backend-go/scripts/performance
+        env:
+          AUTH_TOKEN: ${{ steps.auth.outputs.AUTH_TOKEN }}
+        run: |
+          k6 run --out json=../../results-osa.json load_test_osa.js
+
+      - name: Run Hybrid Architecture Test
+        if: needs.setup.outputs.run_all == 'true' || github.event.inputs.test_suite == 'hybrid'
+        working-directory: desktop/backend-go/scripts/performance
+        env:
+          AUTH_TOKEN: ${{ steps.auth.outputs.AUTH_TOKEN }}
+        run: |
+          k6 run --out json=../../results-hybrid.json load_test_hybrid.js
+
+      - name: Run Spike Test
+        if: needs.setup.outputs.run_all == 'true' || github.event.inputs.test_suite == 'spike'
+        working-directory: desktop/backend-go/scripts/performance
+        env:
+          AUTH_TOKEN: ${{ steps.auth.outputs.AUTH_TOKEN }}
+        run: |
+          k6 run --out json=../../results-spike.json spike_test.js
+
+      - name: Run Endurance Test
+        if: needs.setup.outputs.run_all == 'true' || github.event.inputs.test_suite == 'endurance'
+        working-directory: desktop/backend-go/scripts/performance
+        env:
+          AUTH_TOKEN: ${{ steps.auth.outputs.AUTH_TOKEN }}
+          DURATION_HOURS: ${{ github.event.inputs.duration_hours || '2' }}
+        run: |
+          k6 run --out json=../../results-endurance.json endurance_test.js
+
+      - name: Analyze results
+        id: analyze
+        continue-on-error: true
+        working-directory: desktop/backend-go/scripts/performance
+        run: |
+          FAILED=0
+
+          # Analyze each test if baseline exists
+          if [ -f "../../baseline/baseline-osa.json" ] && [ -f "../../results-osa.json" ]; then
+            echo "Analyzing OSA load test..."
+            ./analyze_results.sh ../../baseline/baseline-osa.json ../../results-osa.json --verbose || FAILED=1
+          fi
+
+          if [ -f "../../baseline/baseline-hybrid.json" ] && [ -f "../../results-hybrid.json" ]; then
+            echo "Analyzing hybrid test..."
+            ./analyze_results.sh ../../baseline/baseline-hybrid.json ../../results-hybrid.json --verbose || FAILED=1
+          fi
+
+          if [ -f "../../baseline/baseline-spike.json" ] && [ -f "../../results-spike.json" ]; then
+            echo "Analyzing spike test..."
+            ./analyze_results.sh ../../baseline/baseline-spike.json ../../results-spike.json --verbose || FAILED=1
+          fi
+
+          if [ $FAILED -eq 1 ]; then
+            echo "degraded=true" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "degraded=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload results as artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results-${{ github.run_number }}
+          path: |
+            desktop/backend-go/results-*.json
+          retention-days: 90
+
+      - name: Generate HTML reports
+        if: always()
+        working-directory: desktop/backend-go
+        run: |
+          for file in results-*.json; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file" .json)
+              k6 report "$file" --out "${filename}.html" || true
+            fi
+          done
+
+      - name: Upload HTML reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-reports-${{ github.run_number }}
+          path: |
+            desktop/backend-go/results-*.html
+          retention-days: 30
+
+      - name: Stop backend server
+        if: always()
+        working-directory: desktop/backend-go
+        run: |
+          if [ -f server.pid ]; then
+            kill $(cat server.pid) || true
+            rm server.pid
+          fi
+
+      - name: Comment on PR (if applicable)
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const degraded = '${{ steps.analyze.outputs.degraded }}' === 'true';
+
+            const message = degraded
+              ? '⚠️ **Performance Regression Detected**\n\nPerformance tests show degradation > 20%. Please review the artifacts.'
+              : '✅ **Performance Tests Passed**\n\nNo significant performance regression detected.';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+      - name: Create GitHub Issue on failure
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Performance] Regression detected on ${new Date().toISOString().split('T')[0]}`,
+              body: `## Performance Regression Alert\n\n**Run:** ${context.runNumber}\n**Workflow:** ${context.workflow}\n\nPerformance tests detected significant degradation.\n\n**Artifacts:** https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\n**Action Required:**\n1. Review test results\n2. Identify root cause\n3. Optimize performance\n4. Re-run tests`,
+              labels: ['performance', 'regression', 'automated']
+            });
+
+  baseline-update:
+    name: Update Baseline (Manual)
+    runs-on: ubuntu-latest
+    needs: performance-tests
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.test_suite == 'all'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download test results
+        uses: actions/download-artifact@v3
+        with:
+          name: performance-results-${{ github.run_number }}
+          path: desktop/backend-go/results
+
+      - name: Update baselines
+        run: |
+          mkdir -p desktop/backend-go/baseline
+          cp desktop/backend-go/results/*.json desktop/backend-go/baseline/ || true
+
+          # Rename to baseline-*.json
+          cd desktop/backend-go/baseline
+          for file in results-*.json; do
+            if [ -f "$file" ]; then
+              newname=$(echo "$file" | sed 's/results-/baseline-/')
+              mv "$file" "$newname"
+            fi
+          done
+
+      - name: Commit updated baselines
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add desktop/backend-go/baseline/*.json
+          git commit -m "chore: update performance baselines [skip ci]" || exit 0
+          git push

@@ -1,0 +1,122 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 1 — builder
+# Compile deps and produce an OTP release via `mix release optimal`
+# ─────────────────────────────────────────────────────────────────────────────
+FROM hexpm/elixir:1.17.3-erlang-26.2.5-debian-bookworm-20260610-slim AS builder
+
+# Build-time tools: native extensions need gcc/make; libsqlite3-dev for exqlite
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        git \
+        pkg-config \
+        libssl-dev \
+        libsqlite3-dev \
+        libsnappy-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        liblz4-dev \
+        libzstd-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+ENV MIX_ENV=prod \
+    HEX_HTTP_CONCURRENCY=8 \
+    HEX_HTTP_TIMEOUT=120
+
+# Install Hex + Rebar once; cached as long as this layer is unchanged
+RUN mix local.hex --force && mix local.rebar --force
+
+# Fetch deps — layer is only invalidated when lock file changes
+COPY mix.exs mix.lock ./
+RUN --mount=type=cache,target=/root/.hex \
+    --mount=type=cache,target=/root/.mix \
+    mix deps.get --only prod
+
+# Compile deps separately so app-code changes don't bust this layer.
+# git init: rocksdb's rebar compile hook shells out to git; on host builds it
+# finds the outer repo, but the image build context has none — give it one.
+RUN git init -q . && \
+    git -c user.email=build@image -c user.name=build commit -q --allow-empty -m build
+RUN --mount=type=cache,target=/root/.hex \
+    --mount=type=cache,target=/root/.mix \
+    mix deps.compile
+
+# Copy application source
+COPY lib/       ./lib/
+COPY config/    ./config/
+COPY priv/      ./priv/
+COPY README.md  ./README.md
+
+# Build release — named `optimal` (matches releases() in mix.exs)
+RUN mix release optimal --overwrite
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 2 — runtime
+# Minimal Debian image with only Erlang runtime deps; no Elixir/Mix/build tools
+# ─────────────────────────────────────────────────────────────────────────────
+FROM debian:bookworm-slim AS runtime
+
+# Erlang runtime needs: openssl/libssl, ncurses, libstdc++; exqlite needs libsqlite3;
+# the rocksdb NIF links against snappy/zlib/bz2/lz4/zstd shared libs
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        libsqlite3-0 \
+        libssl3 \
+        libstdc++6 \
+        libsnappy1v5 \
+        zlib1g \
+        libbz2-1.0 \
+        liblz4-1 \
+        libzstd1 \
+        ncurses-bin \
+        wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Non-root user — UID 1000 to match common Docker conventions
+RUN groupadd -g 1000 optimal && \
+    useradd -u 1000 -g optimal -s /bin/sh -m optimal
+
+WORKDIR /app
+
+# Copy the release from builder
+COPY --from=builder --chown=optimal:optimal /app/_build/prod/rel/optimal ./
+
+# /data is the single persistent volume:
+#   /data/.optimal/     — SQLite DB + cache
+#   /data/<workspaces>/ — Markdown signal files
+# Pre-create it owned by the app user so fresh named volumes inherit
+# that ownership (the engine runs as uid 1000, not root).
+RUN mkdir -p /data/.optimal && chown -R optimal:optimal /data
+VOLUME ["/data"]
+
+USER optimal
+
+EXPOSE 4200
+
+# The engine needs:
+#   OPTIMAL_ENGINE_ROOT  — workspace root (mounted volume)
+#   OPTIMAL_ENGINE_DB    — SQLite path under the volume
+#   OPTIMAL_ENGINE_CACHE — cache dir under the volume
+#   OLLAMA_HOST          — optional, for embeddings
+# API must be enabled + bound to 0.0.0.0 inside the container so the
+# compose network can reach it; TLS termination is handled by the Caddy
+# reverse proxy in production.
+ENV OPTIMAL_ENGINE_ROOT=/data \
+    OPTIMAL_ENGINE_DB=/data/.optimal/index.db \
+    OPTIMAL_ENGINE_CACHE=/data/.optimal/cache \
+    OPTIMAL_ENGINE_TOPOLOGY=/data/.optimal/config.yaml \
+    OPTIMAL_ENGINE_TOPOLOGY_FULL=/data/topology.yaml \
+    OLLAMA_HOST=http://host.docker.internal:11434 \
+    OPTIMAL_API_ENABLED=true \
+    OPTIMAL_API_PORT=4200 \
+    OPTIMAL_API_INTERFACE=0.0.0.0 \
+    RELEASE_COOKIE=optimal_engine_docker
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget -qO- "http://localhost:4200/api/health" || exit 1
+
+CMD ["/app/bin/optimal", "start"]

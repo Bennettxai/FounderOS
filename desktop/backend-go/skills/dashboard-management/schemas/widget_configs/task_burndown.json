@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Task Burndown Widget Config",
+  "type": "object",
+  "properties": {
+    "days": {
+      "type": "integer",
+      "minimum": 7,
+      "maximum": 365,
+      "default": 30,
+      "description": "Time period to show in days"
+    },
+    "project_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Filter to specific project"
+    },
+    "show_ideal": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show ideal burndown line"
+    }
+  },
+  "additionalProperties": false
+}

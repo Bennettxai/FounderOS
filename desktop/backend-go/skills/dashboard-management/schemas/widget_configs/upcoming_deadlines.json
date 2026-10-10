@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Upcoming Deadlines Widget Config",
+  "type": "object",
+  "properties": {
+    "days_ahead": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 90,
+      "default": 7,
+      "description": "How many days ahead to look"
+    },
+    "show_overdue": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include overdue tasks"
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 30,
+      "default": 10,
+      "description": "Maximum items to show"
+    },
+    "project_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Filter to specific project"
+    }
+  },
+  "additionalProperties": false
+}

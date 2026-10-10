@@ -1,0 +1,1444 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Optimal Engine Build Progress</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #5f6b7f;
+      --line: #d8e0ea;
+      --line-strong: #aebdcc;
+      --blue: #2563eb;
+      --blue-soft: #eaf1ff;
+      --green: #15803d;
+      --green-soft: #e8f7ee;
+      --amber: #b45309;
+      --amber-soft: #fff3df;
+      --red: #b91c1c;
+      --red-soft: #fdecec;
+      --violet: #6d28d9;
+      --violet-soft: #f0eaff;
+      --shadow: 0 18px 44px rgba(25, 38, 64, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      background: #101826;
+      color: #e7edf7;
+      padding: 24px 18px;
+      border-right: 1px solid #223047;
+    }
+
+    aside h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    aside p {
+      margin: 0 0 20px;
+      color: #aebbd0;
+      font-size: 13px;
+    }
+
+    nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    nav a {
+      display: block;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #dce6f6;
+      font-size: 13px;
+      border: 1px solid transparent;
+    }
+
+    nav a:hover {
+      background: #182337;
+      border-color: #31425f;
+      text-decoration: none;
+    }
+
+    main {
+      padding: 28px;
+      max-width: 1480px;
+      width: 100%;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 22px;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    h2, h3, h4, p { letter-spacing: 0; }
+
+    h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    p { margin: 0 0 12px; color: var(--muted); }
+
+    .lead {
+      font-size: 16px;
+      max-width: 980px;
+    }
+
+    .grid-2, .grid-3, .grid-4 {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+      padding: 16px;
+    }
+
+    .card strong { color: var(--ink); }
+
+    .card.done { border-color: #9bd8ad; background: var(--green-soft); }
+    .card.partial { border-color: #f0c17d; background: var(--amber-soft); }
+    .card.next { border-color: #94b6ff; background: var(--blue-soft); }
+    .card.target { border-color: #c6afff; background: var(--violet-soft); }
+    .card.risk { border-color: #f1a3a3; background: var(--red-soft); }
+
+    .pill, .status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .status.done { color: var(--green); background: var(--green-soft); border-color: #9bd8ad; }
+    .status.partial { color: var(--amber); background: var(--amber-soft); border-color: #f0c17d; }
+    .status.next { color: var(--blue); background: var(--blue-soft); border-color: #94b6ff; }
+    .status.target { color: var(--violet); background: var(--violet-soft); border-color: #c6afff; }
+    .status.risk { color: var(--red); background: var(--red-soft); border-color: #f1a3a3; }
+
+    .progress {
+      width: 100%;
+      height: 9px;
+      background: #e8edf4;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .bar.done { background: var(--green); }
+    .bar.partial { background: var(--amber); }
+    .bar.target { background: var(--violet); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      padding: 11px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #253247;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    th:last-child, td:last-child { border-right: 0; }
+
+    code, .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      color: #1f2a44;
+    }
+
+    .diagram {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfdff;
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .flow {
+      display: grid;
+      gap: 14px;
+      min-width: 960px;
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: 150px repeat(6, minmax(130px, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+
+    .lane {
+      font-weight: 800;
+      font-size: 13px;
+      color: #253247;
+    }
+
+    .box {
+      min-height: 68px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 3px;
+    }
+
+    .box b { font-size: 13px; }
+    .box span { font-size: 11px; color: var(--muted); }
+    .box.blue { border-color: #8fb2ff; background: #f5f8ff; }
+    .box.green { border-color: #88cf9d; background: #f5fff8; }
+    .box.amber { border-color: #edbd79; background: #fff9ef; }
+    .box.violet { border-color: #b8a0ff; background: #faf7ff; }
+    .box.red { border-color: #eda0a0; background: #fff7f7; }
+
+    .arrow {
+      color: #617089;
+      font-size: 12px;
+      font-weight: 700;
+      padding-left: 8px;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 8px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .mark {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+    }
+
+    .mark.done { background: var(--green-soft); color: var(--green); border-color: #9bd8ad; }
+    .mark.next { background: var(--blue-soft); color: var(--blue); border-color: #94b6ff; }
+    .mark.partial { background: var(--amber-soft); color: var(--amber); border-color: #f0c17d; }
+    .mark.target { background: var(--violet-soft); color: var(--violet); border-color: #c6afff; }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+    }
+
+    .timeline-item:last-child { border-bottom: 0; padding-bottom: 0; }
+
+    .note {
+      border-left: 4px solid var(--blue);
+      background: var(--blue-soft);
+      padding: 13px 14px;
+      border-radius: 8px;
+      color: #23324f;
+    }
+
+    @media (max-width: 980px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { position: relative; height: auto; }
+      main { padding: 16px; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .section-head { flex-direction: column; }
+      .timeline-item { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <h1>Build Progress</h1>
+      <p>Implementation plan and status tracker for turning Optimal Engine into the governed workspace runtime.</p>
+      <nav>
+        <a href="#current-decision">Current Decision</a>
+        <a href="#data-layer-reality">Data Layer Reality</a>
+        <a href="#hosting-reality">Hosting Reality</a>
+        <a href="#live-checklist">Live Checklist</a>
+        <a href="#done">Done So Far</a>
+        <a href="#gate-tracker">Gate Tracker</a>
+        <a href="#first-gate">First Gate Plan</a>
+        <a href="#first-loop">First Working Loop</a>
+        <a href="#storage">Storage Ownership</a>
+        <a href="#interfaces">Interface Paths</a>
+        <a href="#acceptance">Acceptance Checks</a>
+        <a href="#deferred">Deferred Work</a>
+        <a href="#progress-log">Progress Log</a>
+        <a href="optimal-engine-architecture-map.html">Architecture Map</a>
+        <a href="../../README-CURRENT-BUILD.md">Current README</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="hero" id="current-decision">
+        <div class="section-head">
+          <div>
+            <h2>Current Build Gate</h2>
+            <p class="lead">Gate 1 closed the workspace and Node topology loop. Gate 2 is the Markdown wiki service: the human-facing surface that renders Nodes and workspace trees into stored wiki pages, markdown projections, export records, projection revisions, and link-health records before deeper source-first and multimodal intake hardening.</p>
+          </div>
+          <span class="status partial">Markdown wiki service</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="card done">
+            <h3>Closed Gate</h3>
+            <p><strong>Workspace + Node Topology.</strong> Humans and agents can create a workspace, starter Nodes, rhythm files, agent SOP, and projection records.</p>
+            <div class="progress"><div class="bar done" style="width: 100%"></div></div>
+          </div>
+          <div class="card partial">
+            <h3>Active Gate</h3>
+            <p><strong>Markdown Wiki Service.</strong> Node pages and workspace tree pages now render through the service into wiki rows, markdown files, export records, projection revisions, and link-health records. Backlinks, import/export, rebuild, and HTTP surfaces remain.</p>
+            <div class="progress"><div class="bar partial" style="width: 60%"></div></div>
+          </div>
+          <div class="card next">
+            <h3>Then</h3>
+            <p><strong>Source-first intake, then multimodality.</strong> Preserve or quarantine every input before interpretation, then handle raw artifacts and extraction projections across text, files, images, audio, video, tables, and payloads.</p>
+            <div class="progress"><div class="bar partial" style="width: 30%"></div></div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top: 16px;">
+          Correct first loops now verified include: <span class="mono">Workspace -> Node -> Projection -> Edit -> Source Package -> Signal</span>, <span class="mono">API Workspace -> Topology Lifecycle -> Standard Node Types</span>, <span class="mono">Workspace -> Scoped Parent/Relationship/Membership -> Rejected Cross-Workspace Write</span>, <span class="mono">Node -> Wiki Page -> .wiki Markdown -> Export Record -> Projection Revision -> Link Health</span>, <span class="mono">Workspace Tree -> Wiki Page -> Projection Revision</span>, <span class="mono">Versioned Memory -> Source Package -> Pending Claim -> Evidence Edge -> Ledger</span>, <span class="mono">Source Package -> Claim -> Fact -> Memory Object -> Evidence Edges -> Ledger</span>, <span class="mono">Raw File -> Asset Store -> Source Package -> Asset Row -> Derivation Ledger</span>, <span class="mono">Text Extraction -> Derived Source Package -> Pending Claim</span>, <span class="mono">Query -> Fresh Context Package -> Active Pool -> Observation -> Pending Claim</span>, <span class="mono">Active Pool -> Workflow Trace -> Procedure -> Skill Package</span>, <span class="mono">Registered Tool/Model -> Governed Call -> Output Validation -> Run Record -> Audit Link</span>, and <span class="mono">JSON/JSONL Dataset -> Evaluation Runner -> Persisted Run Summary</span>. This page tracks gate completion, not a fake whole-product percentage.
+        </div>
+      </section>
+
+      <section id="data-layer-reality">
+        <div class="section-head">
+          <div>
+            <h2>Data Layer Reality</h2>
+            <p>The data layer is running and command-verified for the current gates, but it is not complete. The store opens, migrations run through 038, topology/projection/evidence records work, API workspace creation seeds topology, cross-workspace parent/relationship/member writes are blocked, normal versioned memory creation writes Source Packages and pending Claims, smart memory intake gates low-salience writes and semantically chooses add/update/skip before accepted writes enter that governed bridge, and <span class="mono">POST /api/memory/remember</span> now exposes that same path to JSON API callers without letting duplicate writes create extra pending Claims. Claims can be listed, fetched, rejected, reviewed in a queue, or promoted into Facts and Memory Objects through service and API review paths, governed raw files can be preserved as Source Packages plus asset rows plus derivation ledger entries, <span class="mono">Pipeline.run/2</span> routes parser assets through AssetStore before downstream processing, the Indexer forwards workspace scope into that governed pipeline for binary assets, <span class="mono">POST /api/assets</span> accepts JSON base64 or local paths into the same governed asset pipeline with optional adapter execution, and <span class="mono">Connectors.preserve_payload_assets/4</span> gives connector adapters a tested path for attachment/file preservation. <span class="mono">Connectors.Runner</span> now preserves attachments/files from raw sync payloads automatically when an adapter returns those payloads with its Signals, and connector sync uses the governed tool-call path by default unless a caller explicitly passes <span class="mono">governed: false</span>. The multimodal registry defines adapter targets, resolves JSON-safe string adapter IDs such as <span class="mono">openai_whisper</span> or <span class="mono">openai-whisper</span> against the registered tool map, <span class="mono">asset_adapter_runs</span> records adapter attempts/outputs, <span class="mono">asset_extractions</span> and typed projection tables store transcript/OCR/visual/embedding outputs, <span class="mono">MemoryCore.run_asset_adapter/3</span> can execute configured local adapter commands while recording completed, failed, or unavailable status, and supported completed runs now auto-project through <span class="mono">MultimodalExtractionParser</span> into typed extraction rows. Structured transcript JSON can create segment rows, structured document JSON can create page/element/table OCR rows, and frame JSON can create visual observation/object-detection rows. Text-bearing adapter/extraction outputs can become derived Source Packages plus pending Claims. Claim promotion now blocks stale Claims by default, returns conflicts for contradictory current Facts, and requires explicit <span class="mono">supersedes_fact_id</span> to replace a current Fact; supersession marks the old Fact, marks linked Memory Objects stale/superseded, marks affected Context Packages stale, writes a <span class="mono">supersedes</span> edge, and records the ledger entry. Governed recall can assemble/persist fresh Context Packages containing accepted Facts, current Memory Objects, and source-linked asset extraction projections; the package now records explicit retrieval-plan metadata and applies real structured subject/action/object plus modality/extraction-type filters before package assembly. Stale Context Packages can be refreshed from their original query, actor, authorization envelope, time mode, detail depth, and limit. Stale Context Packages can also be batch refreshed, <span class="mono">POST /api/memory-core/context-packages/refresh-stale</span> exposes that flow to app/agent callers, <span class="mono">mix optimal.context.refresh_stale</span> exposes it to CLI/cron callers, <span class="mono">MemoryCore.ContextRefreshScheduler</span> exposes it to the supervised runtime, and successfully replaced stale packages are marked <span class="mono">refreshed</span> so the queue does not repeat the same work. Active Memory Pools can load Context Packages, refresh stale loaded Context Packages through the Retrieval Coordinator, and publish observations as pending Claims. A first Workflow/Skill lifecycle is built, Tool/Model Governance records allowed, rejected, completed, output-rejected, and failed tool executions, and <span class="mono">Evaluation.run_benchmark/2</span>, <span class="mono">Evaluation.load_dataset/2</span>, <span class="mono">Evaluation.run_dataset/2</span>, and <span class="mono">mix optimal.eval.run</span> now execute JSON/JSONL benchmark cases through governed retrieval, Context Package assembly, deterministic answer extraction, judging, per-case persistence, and aggregate score updates. The missing work is richer adapter-specific output parsing for real provider schemas; a real UI surface for claim review; retrieval planning beyond current SQL-like structured filters into FTS/vector/graph/temporal/workflow paths; richer per-workspace scheduler policy/metrics/backoff for stale Context Package refresh; external judges/model adapters, result dashboards; recovery/rebuild; and implementing real provider sync/download adapters that return payloads with attachment/file data.</p>
+          </div>
+          <span class="status partial">Running, gate-verified</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="card done">
+            <h3>Running Now</h3>
+            <ul class="checklist">
+              <li><span class="mark done">✓</span><span>SQLite store starts and runs migrations.</span></li>
+              <li><span class="mark done">✓</span><span>Compatibility context store, FTS, entities, edges, decisions, sessions, vectors, observations.</span></li>
+              <li><span class="mark done">✓</span><span>Workspace, Node, membership, wiki, asset, chunk, embedding, data architecture, and Memory Core schema groups exist.</span></li>
+              <li><span class="mark done">✓</span><span>Focused Gate 1 through Gate 7 tests pass for the built slices. Latest expanded focused suite: 118 tests, 0 failures.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">mix optimal.reality_check</span> now verifies store tables, topology hierarchy, Node Types, typed relationships, scoped membership, projection drift, edit re-entry, Source -> Claim -> Fact -> Memory Object lifecycle, Fact supersession policy, Context Package assembly/filtering/refresh/batch refresh, Active Pool stale-context refresh, Workflow Traces, procedural memory, Skill Packages, model/tool definitions, allowed/rejected/completed/output-rejected call records, run audit links, observation capture, default connector-governed execution, connector sync payload asset preservation, evaluation records, JSONL dataset-runner execution, assets, asset adapter runs, asset extraction projections, and ledger entries. Current result: 125 probes, 125 passing.</span></li>
+              <li><span class="mark done">✓</span><span>Migration 035 adds asset governance metadata: content hash, modality, source package link, original path, trust label, retention class, access policy, security labels, partitions, and metadata indexes.</span></li>
+            </ul>
+          </div>
+
+          <div class="card partial">
+            <h3>Partially Built</h3>
+            <ul class="checklist">
+              <li><span class="mark done">✓</span><span>Source Package and Derivation Ledger have typed write paths for intake and workspace edit capture.</span></li>
+              <li><span class="mark done">✓</span><span>Workspace creation now seeds standard Node Types and uses the configured root path for workspace files.</span></li>
+              <li><span class="mark done">✓</span><span>API workspace creation now routes through the topology lifecycle, so API-created workspaces also seed standard Node Types.</span></li>
+              <li><span class="mark done">✓</span><span>Workspace-scoped Node identity, duplicate slugs across workspaces, and parent/child hierarchy are now implemented and tested.</span></li>
+              <li><span class="mark done">✓</span><span>Node Type, Node Relationship, scoped Node Membership, and topology change review/apply modules are now implemented and tested.</span></li>
+              <li><span class="mark partial">!</span><span>Export, projection, and link health records now have a lifecycle service and focused tests.</span></li>
+              <li><span class="mark partial">!</span><span>Projection edit capture now creates Source Packages for content edits or pending topology change requests for structure edits.</span></li>
+              <li><span class="mark partial">!</span><span>Content edits can optionally route back through Signal intake into a markdown signal file and compatibility context row.</span></li>
+              <li><span class="mark done">✓</span><span>Source Package -> Claim -> Fact -> Memory Object now has a first deterministic lifecycle service with support edges and ledger entries.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">Memory.remember/2</span> now has an encoding gate and semantic dedup decision so agent-facing memory writes can skip filler, skip duplicates, update superseded memories, or add new memories while preserving intake metadata.</span></li>
+              <li><span class="mark done">✓</span><span>Governed recall now has a first Context Package service that reads accepted Facts, current Memory Objects, and asset extraction projections, then filters partitions before package assembly.</span></li>
+              <li><span class="mark done">✓</span><span>Governed recall now excludes stale Facts, contradicted Facts, stale Memory Objects, and superseded Memory Objects before Context Package assembly.</span></li>
+              <li><span class="mark done">✓</span><span>Stale Context Packages can now be refreshed from the original request scope into a new fresh package linked back to the stale package, batch refresh can drain stale package queues without repeating already-refreshed packages, <span class="mono">POST /api/memory-core/context-packages/refresh-stale</span> exposes the flow to app/agent callers, <span class="mono">mix optimal.context.refresh_stale</span> exposes it to CLI/cron callers, and <span class="mono">MemoryCore.ContextRefreshScheduler</span> exposes it to the supervised runtime.</span></li>
+              <li><span class="mark done">✓</span><span>Active Memory Pools now load Context Packages, refresh stale loaded Context Packages through Retrieval, publish observations as Source Packages, and create pending Claims instead of accepting observations as truth.</span></li>
+              <li><span class="mark done">✓</span><span>Workflow/Skill now has a first lifecycle service from Active Pool to Workflow Trace, Generalized Workflow, Procedural Memory Object, and draft disabled Skill Package.</span></li>
+              <li><span class="mark done">✓</span><span>Tool/Model Governance now has a first control-plane service for registered definitions, required privileges, partition checks, schema-required input checks, schema-required output checks, allowed/rejected/completed/output-rejected run records, run audit links, and optional observation capture into Active Pools only after valid completed output.</span></li>
+              <li><span class="mark done">✓</span><span>Raw files can now enter governed asset storage as workspace-scoped assets, Source Packages, and derivation ledger entries.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">Pipeline.run/2</span> now preserves parser assets through AssetStore before VLM enrichment, decomposition, and embedding; downstream chunks can still use content-hash asset refs while asset paths point to governed storage.</span></li>
+              <li><span class="mark done">✓</span><span>Binary indexing now forwards workspace scope into the governed pipeline so indexed assets preserve into the intended workspace instead of default.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">POST /api/assets</span> now preserves JSON-uploaded or local-path files through Memory Core and can optionally run a multimodal adapter.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">Connectors.preserve_payload_assets/4</span> now preserves connector attachments/files through Memory Core with connector origin metadata and per-attachment error reporting.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">MultimodalToolRegistry</span> now defines open-source adapter targets, modality recommendations, role grouping, command availability checks, and adapter profiles for primary role, output formats, claimability, install profile, and default runtime arguments.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">asset_adapter_runs</span> now records multimodal adapter attempts and outputs as governed derived artifacts linked to assets, scopes, hashes, model metadata, and derivation ledger entries.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">MemoryCore.run_asset_adapter/3</span> now executes configured local commands or records unavailable/failed adapter runs without bypassing the evidence lifecycle.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">asset_extractions</span>, <span class="mono">asset_transcripts</span>, <span class="mono">asset_ocr_spans</span>, <span class="mono">asset_visual_observations</span>, and <span class="mono">asset_embedding_refs</span> now store typed adapter-output projections linked to assets, adapter runs, scopes, hashes, and derivation ledger entries.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">MemoryCore.run_asset_adapter/3</span> now auto-projects supported completed runs into those typed extraction tables by adapter role, with <span class="mono">auto_extract: false</span> available when a caller wants run-only capture.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">MultimodalExtractionParser</span> now splits structured adapter outputs into multiple typed projections for segment-level transcripts, page/element/table OCR spans, frame observations, and object detections.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">MemoryCore.claim_from_asset_extraction/2</span> turns text-bearing extraction projections into derived Source Packages plus pending Claims; reference-only embeddings stay projection records and are not claimable text.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">MemoryCore.claim_review_queue/1</span> and <span class="mono">GET /api/memory-core/claim-review</span> return review/lifecycle counts plus filterable Claim rows for app and agent review workflows.</span></li>
+              <li><span class="mark done">✓</span><span>Claim promotion now has policy gates: stale Claims are blocked by default, contradictory current Facts return conflict errors, and explicit supersession marks the replaced Fact plus linked Memory Objects stale/superseded, marks affected Context Packages stale, writes a <span class="mono">supersedes</span> edge, and records a Derivation Ledger entry.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">Connectors.Runner</span> can now preserve attachments/files from raw sync payloads returned by connector adapters before completing the connector run.</span></li>
+              <li><span class="mark partial">!</span><span>Real provider sync/download adapters still need to return raw payloads with attachment/file data so every external multimodal source follows the same evidence lifecycle.</span></li>
+            </ul>
+          </div>
+
+          <div class="card target">
+            <h3>Not Complete Yet</h3>
+            <ul class="checklist">
+              <li><span class="mark target">•</span><span>Provider-specific connector download wiring so extracted images, audio, video, attachments, tables, and binary payloads always enter through the governed pipeline.</span></li>
+              <li><span class="mark target">•</span><span>Policy-aware extraction, adapter-specific review policies, and richer scheduler policy/metrics/backoff for Context Package refresh.</span></li>
+              <li><span class="mark target">•</span><span>WorkspaceExport render/rebuild helpers.</span></li>
+              <li><span class="mark target">•</span><span>Full Retrieval Package planning, real tool/model dispatch execution, benchmark runners/result dashboards, and recovery/rebuild services.</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <table style="margin-top: 16px;">
+          <thead>
+            <tr>
+              <th>Store Layer</th>
+              <th>What It Stores</th>
+              <th>Status</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Physical database</td>
+              <td><span class="mono">SQLite now; Postgres target for production-grade deployment.</span></td>
+              <td><span class="status done">Running</span></td>
+              <td>Shared persistence substrate. Layer ownership is enforced by modules, not by separate databases yet.</td>
+            </tr>
+            <tr>
+              <td>Compatibility context store</td>
+              <td><span class="mono">contexts, contexts_fts, entities, edges, vectors, observations</span></td>
+              <td><span class="status done">Legacy path</span></td>
+              <td>Search and signal compatibility. Useful, but not durable truth by itself.</td>
+            </tr>
+            <tr>
+              <td>Workspace topology store</td>
+              <td><span class="mono">workspaces, nodes, node_types, node_relationships, node_members</span></td>
+              <td><span class="status partial">Started</span></td>
+              <td>Defines the human/business world: workspaces contain Nodes; projects are Node types.</td>
+            </tr>
+            <tr>
+              <td>Projection store</td>
+              <td><span class="mono">export_records, projection_revisions, link_health_records</span></td>
+              <td><span class="status partial">Schema + service</span></td>
+              <td>Tracks markdown/HTML/app/wiki outputs as generated projections with revision, drift, and link-health state.</td>
+            </tr>
+            <tr>
+              <td>Evidence and memory store</td>
+              <td><span class="mono">source_packages, claims, facts, memory_objects, relationship_edges, derivation_ledger</span></td>
+              <td><span class="status partial">First lifecycle built</span></td>
+              <td>Owns source-backed truth and institutional memory. Source, Claim, Fact, Memory Object, evidence edges, ledger writes, claim review queue, stale-claim blocking, contradiction conflict detection, explicit Fact supersession, and linked Memory Object closure are built.</td>
+            </tr>
+            <tr>
+              <td>Multimodal data store</td>
+              <td><span class="mono">assets, chunks, chunk_embeddings, architectures, processor_runs</span></td>
+              <td><span class="status partial">Partial</span></td>
+              <td>Supports text/code/image/audio/video/table/time-series structures, but still needs raw artifact governance tied to Source Packages.</td>
+            </tr>
+            <tr>
+              <td>Runtime work store</td>
+              <td><span class="mono">active_memory_pools, context_packages, workflow_traces, skill_packages, model/tool definitions, model_call_runs, tool_call_runs</span></td>
+              <td><span class="status partial">First runtime slices</span></td>
+              <td>Context Packages, Active Memory Pools, Workflow Traces, Procedural Memory Objects, draft Skill Packages, governed model/tool call records, a first governed dispatcher adapter, and default governed connector sync have lifecycle services. The remaining connector work is wiring real provider adapters and richer policy-specific grants.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="hosting-reality">
+        <div class="section-head">
+          <div>
+            <h2>Hosting Reality</h2>
+            <p>Optimal Engine does not require Docker for local development. Docker is already present as a self-hosted packaging and deployment option. The same engine data model should work in both modes.</p>
+          </div>
+          <span class="status partial">Docker optional</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="card done">
+            <h3>Local Mode</h3>
+            <p>Run directly from the repo with Elixir/Mix. Data lives on the local filesystem and SQLite database path configured for the engine.</p>
+            <ul class="checklist">
+              <li><span class="mark done">✓</span><span>No Docker required for local dev.</span></li>
+              <li><span class="mark done">✓</span><span>Good for building, testing, indexing local workspaces, and using markdown directly.</span></li>
+              <li><span class="mark done">✓</span><span>Current tests run this way.</span></li>
+            </ul>
+          </div>
+
+          <div class="card partial">
+            <h3>Docker Self-Hosted Mode</h3>
+            <p>The repo has a compose stack under <span class="mono">deploy/</span>. It runs the engine plus desktop/site/docs containers.</p>
+            <ul class="checklist">
+              <li><span class="mark partial">!</span><span><span class="mono">deploy/docker-compose.yml</span> starts the engine on port 4200.</span></li>
+              <li><span class="mark partial">!</span><span><span class="mono">deploy/Dockerfile.engine</span> builds an Elixir OTP release.</span></li>
+              <li><span class="mark partial">!</span><span>Persistent state is mounted at <span class="mono">/data</span> inside the engine container.</span></li>
+            </ul>
+          </div>
+
+          <div class="card target">
+            <h3>Production Target</h3>
+            <p>Production can be self-hosted with Docker today, but the long-term data layer should be able to move from SQLite to Postgres when the workload needs it.</p>
+            <ul class="checklist">
+              <li><span class="mark target">•</span><span>SQLite is the current built store.</span></li>
+              <li><span class="mark target">•</span><span>Postgres is the likely production-grade truth store target.</span></li>
+              <li><span class="mark target">•</span><span>Indexes/caches can remain attached and rebuildable.</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <table style="margin-top: 16px;">
+          <thead>
+            <tr>
+              <th>Mode</th>
+              <th>How It Runs</th>
+              <th>Where Data Lives</th>
+              <th>Use When</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Direct local</td>
+              <td><span class="mono">mix</span> commands and local engine runtime.</td>
+              <td>Configured local root path and SQLite DB path.</td>
+              <td>Development, tests, personal workspace, fast iteration.</td>
+            </tr>
+            <tr>
+              <td>Docker local/self-host</td>
+              <td><span class="mono">cd deploy &amp;&amp; docker compose up --build</span></td>
+              <td>Docker volume <span class="mono">optimal_data</span> mounted at <span class="mono">/data</span>.</td>
+              <td>Running the engine/API/UI stack as a packaged self-hosted system.</td>
+            </tr>
+            <tr>
+              <td>Production self-host</td>
+              <td>Compose production overlay with auth and reverse proxy/TLS.</td>
+              <td>Persistent volume today; future Postgres/object storage path when needed.</td>
+              <td>Team/organization deployment where uptime, auth, backup, and recovery matter.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note" style="margin-top: 16px;">
+          Architecture rule: Docker packages the runtime. It does not define the data model. The data model is owned by the store migrations and lifecycle modules.
+        </div>
+      </section>
+
+      <section id="live-checklist">
+        <div class="section-head">
+          <div>
+            <h2>Live Build Checklist</h2>
+            <p>This is the working checklist for the next implementation pass. It shows what we have already clarified, what needs code, and what proof will let us mark the item complete.</p>
+          </div>
+          <span class="status next">Working queue</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Item</th>
+              <th>Owner Layer</th>
+              <th>Status</th>
+              <th>Completion Proof</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0</td>
+              <td><strong>Architecture cockpit</strong><br>Progress page, architecture map, coverage matrix, gate sequence, and reality audit.</td>
+              <td>Architecture / Docs</td>
+              <td><span class="status done">Done</span></td>
+              <td>Static HTML and docs explain the build order, current reality, storage owners, and first gate.</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td><strong>Workspace-scoped Node identity</strong><br>Make every Node belong to a workspace and stop treating projects as workspace peers.</td>
+              <td>Workspace / Topology</td>
+              <td><span class="status done">Done</span></td>
+              <td>Tests prove Node create/read/update uses workspace scope and the same slug can exist in two workspaces.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><strong>Node types and relationships</strong><br>Add first-class type and relationship records instead of loose folder conventions.</td>
+              <td>Workspace / Topology</td>
+              <td><span class="status done">Done</span></td>
+              <td>Tables exist, default node types are seeded, and lifecycle modules can create Node Types and link Nodes.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><strong>Projection records</strong><br>Track markdown/HTML exports as generated views with versions and link health.</td>
+              <td>Workspace Export / Wiki Surface</td>
+              <td><span class="status done">Service built</span></td>
+              <td>WorkspaceExport records exports, projection revisions, link health, and drift checks; focused tests pass.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><strong>Human edit re-entry</strong><br>A markdown/wiki edit must become a Source Package or topology change request.</td>
+              <td>Workspace Export + Memory Core</td>
+              <td><span class="status done">Built</span></td>
+              <td>Content edits create Source Packages and ledger entries; topology edits create pending topology change requests; route-enabled content edits enter Signal intake.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><strong>Markdown wiki service</strong><br>Page tree, backlinks, broken-link checks, directives, revisions, import/export, render/rebuild, CLI and HTTP operations.</td>
+              <td>Wiki / Workspace Export / Retrieval</td>
+              <td><span class="status partial">First slice built</span></td>
+              <td><span class="mono">OptimalEngine.Wiki.Service</span> renders Node pages and workspace tree pages into <span class="mono">wiki_pages</span>, <span class="mono">.wiki/*.md</span>, export records, projection revisions, and link-health records. Remaining: backlinks, import/export, rebuild, HTTP, richer link repair.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><strong>Source-first intake hardening</strong><br>Commit evidence before interpretation, routing, or compatibility context writes.</td>
+              <td>Memory Core + Signal Pipeline</td>
+              <td><span class="status partial">Core path built</span></td>
+              <td>Intake and workspace edits preserve Source Packages and ledger entries; failed/quarantined source handling still needs a stronger policy path.</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td><strong>Multimodality and raw artifact governance</strong><br>Files, images, audio, video, tables, and API payloads need preserved assets, parser outputs, extraction projections, and adapter run records.</td>
+              <td>Memory Core + Pipeline + Multimodal Registry</td>
+              <td><span class="status partial">Spine built</span></td>
+              <td>Asset storage, adapter runs, extraction records, and extraction-to-Claim paths exist. Next proof is stronger provider-specific parsing, quarantine records, and recall from multimodal extractions.</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td><strong>Claim to Fact to Memory lifecycle</strong><br>Separate what a source said from what the engine accepts as true.</td>
+              <td>Memory Core</td>
+              <td><span class="status done">First slice built</span></td>
+              <td>One source produces a Claim; promotion writes a Fact; a Memory Object links evidence, confidence, precision, support edges, and ledger entries. Promotion now blocks stale Claims, detects contradictory current Facts, and supports explicit Fact supersession with edge and ledger records.</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td><strong>Governed recall package</strong><br>Return authorized context packages instead of loose search chunks.</td>
+              <td>Retrieval</td>
+              <td><span class="status partial">First slice built</span></td>
+              <td>A query returns source links, Facts, Memory Objects, confidence/precision summaries, filtered-object summary, authorization envelope metadata, and a persisted Context Package. Full retrieval planning and audit IDs remain next work.</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td><strong>Active Memory Pools</strong><br>Task-scoped working memory for humans, agents, context, observations, and pending Claims.</td>
+              <td>Active Collaboration + Memory Core</td>
+              <td><span class="status done">First slice built</span></td>
+              <td>Active pools can open, load Context Packages, publish observations as Source Packages, create pending Claims, track promotion candidates, and close/archive.</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td><strong>Workflow and Skill Package lifecycle</strong><br>Observed work becomes evidence-linked procedural candidates, not arbitrary prompts.</td>
+              <td>Workflow / Skill Runtime</td>
+              <td><span class="status done">First slice built</span></td>
+              <td>WorkflowSkill captures traces from active pools, generalizes workflows, creates procedural memory objects, packages draft disabled Skill Packages, and writes derivation ledger entries.</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td><strong>Tool/model governance and evaluation</strong><br>Registered calls, schema validation, audit, benchmark configs, result cards, rebuild and recovery checks.</td>
+              <td>Tool/Model Governance + Evaluation</td>
+              <td><span class="status partial">First slices built</span></td>
+              <td>Tool/model run records and evaluation runners exist. Next proof is end-to-end dashboard/reporting with reproducible benchmark configuration and recovery/rebuild tests.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="done">
+        <div class="section-head">
+          <div>
+            <h2>Done So Far</h2>
+            <p>These are architecture and audit artifacts already created or updated. They define the target shape, but they do not mean every backend service is implemented.</p>
+          </div>
+          <span class="status done">Architecture pass</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card done">
+            <h3>System Architecture HTML</h3>
+            <ul class="checklist">
+              <li><span class="mark done">✓</span><span><span class="mono">optimal-engine-architecture-map.html</span> explains the backend runtime, layer contracts, core flows, data lifecycle, human workflow, AI workflow, and build gates.</span></li>
+              <li><span class="mark done">✓</span><span>Added data anatomy and multimodal object model so data is not treated as only text or markdown.</span></li>
+              <li><span class="mark done">✓</span><span>Added coverage matrix to show which concepts are covered, partially built, or still target work.</span></li>
+            </ul>
+          </div>
+
+          <div class="card done">
+            <h3>Architecture Docs</h3>
+            <ul class="checklist">
+              <li><span class="mark done">✓</span><span><span class="mono">LAYER-OWNERSHIP-AND-DATA-FLOW.md</span> defines layers, storage ownership, and write rules.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">NODE-ONTOLOGY.md</span> defines Node identity, lifecycle, relationships, and anatomy.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">CURRENT-WORKSPACE-USAGE-MAP.md</span> maps the real markdown workspace to the target runtime.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">OPTIMIZED-BUILD-PHASES.md</span> replaced arbitrary phase counts with dependency gates.</span></li>
+            </ul>
+          </div>
+
+          <div class="card partial">
+            <h3>Code Reality Audit</h3>
+            <ul class="checklist">
+              <li><span class="mark done">✓</span><span>Topology code now supports workspace-scoped Node identity, default Node Types, custom Node Types, and typed Node Relationships.</span></li>
+              <li><span class="mark done">✓</span><span>WorkspaceExport now tracks exports, projection revisions, link health, and projection drift.</span></li>
+              <li><span class="mark done">✓</span><span>WorkspaceExport now captures projection edits as either source evidence or pending topology change requests.</span></li>
+              <li><span class="mark done">✓</span><span>Route-enabled projection edits now flow through existing Signal intake and create context/search projections.</span></li>
+              <li><span class="mark done">✓</span><span>Memory Core now has a first Source Package -> Claim -> Fact -> Memory Object lifecycle service with support edges and ledger writes.</span></li>
+              <li><span class="mark done">✓</span><span>Active Pools now load Context Packages and publish observations as pending Claims with source evidence.</span></li>
+              <li><span class="mark done">✓</span><span>Workflow/Skill promotion now has a first draft package path with Workflow Traces, Generalized Workflows, Procedural Memory Objects, Skill Packages, and ledger entries.</span></li>
+              <li><span class="mark partial">!</span><span>Governed recall now has a first source-backed Context Package path; full retrieval planning still needs graph/FTS/vector expansion and stronger actor grants.</span></li>
+            </ul>
+          </div>
+
+          <div class="card next">
+            <h3>This Page</h3>
+            <ul class="checklist">
+              <li><span class="mark next">→</span><span><span class="mono">optimal-engine-build-progress.html</span> tracks current plan, gate status, first implementation slice, and proof checks.</span></li>
+              <li><span class="mark next">→</span><span>Use this page as the implementation cockpit while code catches up to the architecture.</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="gate-tracker">
+        <div class="section-head">
+          <div>
+            <h2>Gate Tracker</h2>
+            <p>Gates are dependency proofs. They cross multiple layers and prove the next necessary capability. This order is deliberate.</p>
+          </div>
+          <span class="status partial">Mixed status</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Gate</th>
+              <th>Status</th>
+              <th>What It Proves</th>
+              <th>Current Code Reality</th>
+              <th>Next Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Topology + Workspace Surface + Source Re-entry</strong></td>
+              <td><span class="status done">Built</span></td>
+              <td>Humans can define the workspace world, see it as markdown/HTML, edit it, and have edits re-enter governed state.</td>
+              <td>Workspace creation, setup command, starter Nodes, default Node Types, Node hierarchy/tree, typed relationships, scoped memberships, topology review/apply, rhythm/agent starter files, export records, projection revisions, link health, drift checks, projection invalidation, edit capture, route-enabled re-entry, focused tests, and <span class="mono">mix optimal.reality_check</span> verification are built.</td>
+              <td>Add first render/rebuild helpers.</td>
+            </tr>
+            <tr>
+              <td><strong>2. Evidence Intake</strong></td>
+              <td><span class="status partial">Core path built</span></td>
+              <td>Every raw input becomes preserved evidence before interpretation.</td>
+              <td>Intake, workspace edits, Source Packages, content hashes, and derivation ledger entries are built for the current text/edit path.</td>
+              <td>Add raw artifact object-store handling and rejected-source/quarantine records for failed or unsafe sources.</td>
+            </tr>
+            <tr>
+              <td><strong>3. Truth Lifecycle</strong></td>
+              <td><span class="status partial">First slice built</span></td>
+              <td>The engine separates what was said from what is accepted as true.</td>
+              <td><span class="mono">KnowledgeLifecycle</span> can extract a Claim, promote a Fact, build a Memory Object, create support edges, and write derivation ledger entries. Focused tests and reality check pass.</td>
+              <td>Add adapter-specific review policy, scheduler policy/metrics/backoff, temporal narrowing, and richer extractor interfaces.</td>
+            </tr>
+            <tr>
+              <td><strong>4. Governed Recall</strong></td>
+              <td><span class="status partial">First slice built</span></td>
+              <td>Humans and agents receive scoped, permitted, source-backed context packages.</td>
+              <td><span class="mono">RetrievalCoordinator</span> can read accepted Facts/current Memory Objects, apply basic partition/security filters, persist a Context Package, and return structured links/summaries. Reality check verifies package assembly, persistence, and filtering.</td>
+              <td>Add real actor grants, node scope, graph/FTS/vector expansion, retrieval plan records, redaction links, and audit event IDs.</td>
+            </tr>
+            <tr>
+              <td><strong>5. Active Work Loop</strong></td>
+              <td><span class="status done">First slice built</span></td>
+              <td>Humans and agents share task context without turning observations into truth automatically.</td>
+              <td><span class="mono">ActiveMemoryPool</span> can open pools, load Context Packages, publish observations into Source Packages and pending Claims, track promotion candidates, refresh dirty/fresh state, and close/archive. Focused tests pass.</td>
+              <td>Add stronger membership enforcement, refresh invalidation, pool audit event IDs, and UI/API surfaces.</td>
+            </tr>
+            <tr>
+              <td><strong>6. Workflow + Skill Promotion</strong></td>
+              <td><span class="status done">First slice built</span></td>
+              <td>Repeated work becomes validated procedures with checks, exceptions, permissions, and audit.</td>
+              <td><span class="mono">WorkflowSkill</span> captures Workflow Traces from Active Pools, generalizes candidate workflows, creates Procedural Memory Objects, packages draft disabled Skill Packages, and writes derivation ledger entries. Focused tests and reality check pass.</td>
+              <td>Add review gates, validation checks, exception paths, rollback, execution policy enforcement, and tool/model requirements.</td>
+            </tr>
+            <tr>
+              <td><strong>7. Tool / Model Governance</strong></td>
+              <td><span class="status done">First slice built</span></td>
+              <td>Agents cannot use registered tools or model operations invisibly. The engine records allowed and rejected calls and can turn tool output into reviewed memory candidates.</td>
+              <td><span class="mono">ToolModelGovernance</span> can register MCP tool definitions and model call operations, enforce required privileges, enforce allowed partitions, check required input fields, execute allowed tool functions, block unauthorized execution, record failed executions, check required output fields, write model/tool run records, emit audit events, quarantine invalid outputs, and publish optional observations into Active Memory Pools only for completed valid output. <span class="mono">Signal.Dispatcher</span> now has a governed adapter, and <span class="mono">Connectors.Runner.run/2</span> uses governance by default, blocking unauthorized connector sync before execution or recording both connector-run and tool-call audit rows when allowed.</td>
+              <td>Add model provider adapters, richer schema validation, source/quarantine handling for failed executions, policy-specific grants, and MCP/API surfaces for registering and invoking governed tools.</td>
+            </tr>
+            <tr>
+              <td><strong>8. Evaluation + Recovery</strong></td>
+              <td><span class="status partial">Dataset runner built</span></td>
+              <td>The engine can prove quality, detect drift, rebuild projections, and show benchmark results honestly.</td>
+              <td>Focused tests, public audit, <span class="mono">evaluation_runs</span>, <span class="mono">evaluation_cases</span>, <span class="mono">Evaluation.run_benchmark/2</span>, <span class="mono">Evaluation.load_dataset/2</span>, <span class="mono">Evaluation.run_dataset/2</span>, <span class="mono">mix optimal.eval.run</span>, and <span class="mono">mix optimal.reality_check</span> exist. The runner executes JSON/JSONL cases through governed retrieval, Context Package assembly, deterministic answer extraction, judging, per-case persistence, and aggregate scoring.</td>
+              <td>Add projection rebuild checks, retrieval tests, link checks, source replay, external judges/model adapters, richer retrieval metrics, result exports, and benchmark dashboards.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="first-gate">
+        <div class="section-head">
+          <div>
+            <h2>First Gate Detailed Plan</h2>
+            <p>This is the exact implementation plan for the next build. It keeps complexity where it has a purpose: identity, lifecycle, projection, re-entry, and proof.</p>
+          </div>
+          <span class="status next">Implementation plan</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card done">
+            <h3>1. Topology Tables</h3>
+            <p>Make workspace shape explicit and durable.</p>
+            <ul class="checklist">
+              <li><span class="mark done">✓</span><span><span class="mono">node_types</span>: standardized and custom types, including project, person, product, operation, context.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">node_relationships</span>: parent, depends_on, blocks, references, collaborates_with, owns, participates_in.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">node_members</span>: humans, agents, teams, service accounts, tools; workspace-scoped membership service is built.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">topology_change_requests</span>: agent-proposed or human-proposed changes can be reviewed and selectively applied.</span></li>
+            </ul>
+          </div>
+
+          <div class="card done">
+            <h3>2. Surface Tables</h3>
+            <p>Make generated files and HTML auditable projections instead of hidden side effects.</p>
+            <ul class="checklist">
+              <li><span class="mark done">✓</span><span><span class="mono">export_records</span>: what object was exported, by whom, to which path/view, under which policy.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">projection_revisions</span>: version of generated markdown/HTML/wiki/app view.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">link_health_records</span>: broken links, backlinks, missing references, stale projections.</span></li>
+              <li><span class="mark done">✓</span><span>Projection invalidation marks affected exports and projection revisions stale when a source object changes.</span></li>
+            </ul>
+          </div>
+
+          <div class="card done">
+            <h3>3. Lifecycle Services</h3>
+            <p>Business logic should live in owning layer modules, not in the generic Store adapter.</p>
+            <ul class="checklist">
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceTopology.create_workspace/1</span> creates a workspace and seeds standard Node Types.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceTopology.setup_workspace/1</span> creates or refreshes the starter topology, starter files, and projection records.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceTopology.create_node/1</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceTopology.create_node_type/1</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceTopology.link_nodes/4</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceTopology.propose_change/1</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceTopology.review_change_request/3</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceTopology.node_tree/1</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">mix optimal.setup</span> gives humans and agent CLIs a first command for workspace creation.</span></li>
+            </ul>
+          </div>
+
+          <div class="card next">
+            <h3>4. Export + Re-entry Services</h3>
+            <p>Keep markdown useful without letting it become a second source of truth.</p>
+            <ul class="checklist">
+              <li><span class="mark next">→</span><span><span class="mono">WorkspaceExport.render_node_page/2</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceExport.record_export/1</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceExport.record_link_health/1</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceExport.detect_drift/2</span></span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceExport.capture_edit/2</span> creates a Source Package or topology change request.</span></li>
+              <li><span class="mark done">✓</span><span><span class="mono">WorkspaceExport.capture_edit/2</span> with <span class="mono">route: true</span> sends content edits through Signal intake.</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="first-loop">
+        <div class="section-head">
+          <div>
+            <h2>First Working Loop</h2>
+            <p>The first loop proves the product idea end to end: the human controls a workspace surface, the engine owns the state, and edits come back through governed intake.</p>
+          </div>
+          <span class="status next">Vertical slice</span>
+        </div>
+
+        <div class="diagram">
+          <div class="flow">
+            <div class="flow-row">
+              <div class="lane">Human setup</div>
+              <div class="box green"><b>Create workspace</b><span>tenant + workspace boundary</span></div>
+              <div class="box green"><b>Create Node</b><span>project/person/product/etc.</span></div>
+              <div class="box green"><b>Set Node type</b><span>project is a node type</span></div>
+              <div class="box green"><b>Link Nodes</b><span>depends_on, owns, references</span></div>
+              <div class="box green"><b>Add members</b><span>human, agent, team, tool</span></div>
+              <div class="box green"><b>Audit setup</b><span>who changed topology</span></div>
+            </div>
+            <div class="flow-row">
+              <div class="lane">Surface build</div>
+              <div class="box blue"><b>Render page</b><span>markdown or HTML</span></div>
+              <div class="box blue"><b>Record export</b><span>object versions + policy</span></div>
+              <div class="box blue"><b>Store revision</b><span>projection history</span></div>
+              <div class="box blue"><b>Check links</b><span>backlinks + broken links</span></div>
+              <div class="box blue"><b>Detect drift</b><span>stale projection warning</span></div>
+              <div class="box blue"><b>Expose surface</b><span>file, HTML, app, API</span></div>
+            </div>
+            <div class="flow-row">
+              <div class="lane">Human edit</div>
+              <div class="box amber"><b>Edit page</b><span>note, status, decision, link</span></div>
+              <div class="box amber"><b>Classify edit</b><span>topology vs source</span></div>
+              <div class="box amber"><b>Create Source Package</b><span>if evidence/content</span></div>
+              <div class="box amber"><b>Create change request</b><span>if topology mutation</span></div>
+              <div class="box amber"><b>Signal route</b><span>back to Node</span></div>
+              <div class="box amber"><b>Audit re-entry</b><span>edit did not bypass engine</span></div>
+            </div>
+            <div class="flow-row">
+              <div class="lane">Proof output</div>
+              <div class="box violet"><b>Node state</b><span>current topology</span></div>
+              <div class="box violet"><b>Projection health</b><span>valid/stale/broken</span></div>
+              <div class="box violet"><b>Source evidence</b><span>preserved edit input</span></div>
+              <div class="box violet"><b>Search row</b><span>compatibility path</span></div>
+              <div class="box violet"><b>Audit event</b><span>traceable action</span></div>
+              <div class="box violet"><b>Next gate ready</b><span>evidence intake can attach</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="storage">
+        <div class="section-head">
+          <div>
+            <h2>Storage Ownership</h2>
+            <p>One physical store is fine. The critical rule is that every table has one lifecycle owner and every projection can be traced back to the state that generated it.</p>
+          </div>
+          <span class="status partial">Needs code hardening</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Group</th>
+              <th>Owner Layer</th>
+              <th>Truth Or Projection</th>
+              <th>Key Records</th>
+              <th>Current Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Workspace shape</td>
+              <td>Workspace / Topology</td>
+              <td>Durable truth</td>
+              <td><span class="mono">workspaces, nodes, node_types, node_relationships, node_members</span></td>
+              <td><span class="status done">Built</span></td>
+            </tr>
+            <tr>
+              <td>Surface projection</td>
+              <td>Workspace Export / Wiki Surface</td>
+              <td>Projection with audit value</td>
+              <td><span class="mono">export_records, projection_revisions, link_health_records</span></td>
+              <td><span class="status partial">Service built</span></td>
+            </tr>
+            <tr>
+              <td>Evidence</td>
+              <td>Memory Core</td>
+              <td>Durable truth</td>
+              <td><span class="mono">source_packages, raw_artifacts, derivation_ledger</span></td>
+              <td><span class="status partial">Source path built</span></td>
+            </tr>
+            <tr>
+              <td>Interpretation</td>
+              <td>Signal Pipeline / Memory Core</td>
+              <td>Durable records and projections</td>
+              <td><span class="mono">signals, claims, facts, memory_objects, relationship_edges</span></td>
+              <td><span class="status partial">First lifecycle slice</span></td>
+            </tr>
+            <tr>
+              <td>Recall</td>
+              <td>Retrieval</td>
+              <td>Projection with audit value</td>
+              <td><span class="mono">retrieval_plans, retrieval_packages, context_packages, indexes</span></td>
+              <td><span class="status partial">Context Package slice</span></td>
+            </tr>
+            <tr>
+              <td>Active work</td>
+              <td>Active Collaboration</td>
+              <td>Task-local truth and pending knowledge</td>
+              <td><span class="mono">active_memory_pools, observations, pending_claims, memberships</span></td>
+              <td><span class="status partial">First slice built</span></td>
+            </tr>
+            <tr>
+              <td>Workflow and skills</td>
+              <td>Workflow / Skill Runtime</td>
+              <td>Evidence-linked procedure state</td>
+              <td><span class="mono">workflow_traces, generalized_workflows, procedural_memory_objects, skill_packages</span></td>
+              <td><span class="status partial">First slice built</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="interfaces">
+        <div class="section-head">
+          <div>
+            <h2>How People And Agents Use It</h2>
+            <p>The engine should support multiple surfaces without creating multiple truths. Each surface sends commands or edits into the same lifecycle.</p>
+          </div>
+          <span class="status done">Product rule</span>
+        </div>
+
+        <div class="grid-4">
+          <div class="card done">
+            <h3>Markdown</h3>
+            <p>Direct human-operable workspace. Good for local control, reading, editing, and portable projection.</p>
+          </div>
+          <div class="card done">
+            <h3>HTML / App</h3>
+            <p>Navigation, diagrams, dashboards, Node pages, reports, progress views, and visual status.</p>
+          </div>
+          <div class="card done">
+            <h3>CLI / API</h3>
+            <p>Fast commands, scripts, integrations, import/export, smoke tests, and app backend access.</p>
+          </div>
+          <div class="card done">
+            <h3>Agent / Tool</h3>
+            <p>Task execution through authorized context, active pools, registered tools, observations, and audit.</p>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top: 16px;">
+          Surface rule: a file edit, UI event, CLI command, API request, or agent tool call must become either a topology operation, a Source Package, an observation, a projection request, or an audited read.
+        </div>
+      </section>
+
+      <section id="acceptance">
+        <div class="section-head">
+          <div>
+            <h2>Acceptance Checks</h2>
+            <p>These are the checks that prove the first gate is real. If these do not pass, the gate is not complete.</p>
+          </div>
+          <span class="status next">Proof list</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Check</th>
+              <th>Expected Proof</th>
+              <th>Why It Matters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Create workspace</td>
+              <td>Workspace row, audit event, optional projection.</td>
+              <td>Establishes boundary for all future state.</td>
+            </tr>
+            <tr>
+              <td>Create project Node</td>
+              <td>Node row scoped to workspace, Node Type row/link, owner, lifecycle state.</td>
+              <td>Confirms project is a Node type, not a workspace peer.</td>
+            </tr>
+            <tr>
+              <td>Link Nodes</td>
+              <td>Typed relationship row with direction, validity, creator, and policy.</td>
+              <td>Prevents relationships from becoming loose markdown links only.</td>
+            </tr>
+            <tr>
+              <td>Export surface</td>
+              <td>Markdown or HTML generated from engine state, export record, projection revision.</td>
+              <td>Proves the human can see and operate the workspace.</td>
+            </tr>
+            <tr>
+              <td>Check links</td>
+              <td>Backlink and broken-link report stored as link health.</td>
+              <td>Prevents wiki drift and dead references.</td>
+            </tr>
+            <tr>
+              <td>Edit projection</td>
+              <td><span class="status done">Built</span> Edit captured as Source Package or topology change request.</td>
+              <td>Prevents markdown from silently bypassing governed state.</td>
+            </tr>
+            <tr>
+              <td>Route edit back to Node</td>
+              <td><span class="status done">Built</span> Signal record, route decision, compatibility context/search projection.</td>
+              <td>Connects the old signal/search advantage to the new object lifecycle.</td>
+            </tr>
+            <tr>
+              <td>Audit all actions</td>
+              <td>Trace from actor to command/edit to stored records and projection.</td>
+              <td>Lets the system explain how state changed.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="deferred">
+        <div class="section-head">
+          <div>
+            <h2>Do Not Start With These</h2>
+            <p>These are important, but they depend on the early gates. Starting here would create impressive surfaces over unstable lifecycle state.</p>
+          </div>
+          <span class="status risk">Defer</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="card risk">
+            <h3>Full App UI</h3>
+            <p>Build small generated views now. Do not build the full app before Node identity, projection records, and source re-entry are working.</p>
+          </div>
+          <div class="card risk">
+            <h3>Full Agent Autonomy</h3>
+            <p>Agents should not freely mutate topology or truth until tool governance, active pools, and pending-claim review exist.</p>
+          </div>
+          <div class="card risk">
+            <h3>Skill Runtime</h3>
+            <p>The first draft Skill Package lifecycle exists. Full execution, validation checks, exceptions, rollback, permissions, tool requirements, and runtime policy enforcement still come later.</p>
+          </div>
+          <div class="card risk">
+            <h3>Workflow Mining</h3>
+            <p>Trace capture from Active Pools exists. Mining repeated cases, clustering variants, exception paths, and review-based generalization still come later.</p>
+          </div>
+          <div class="card risk">
+            <h3>Public Benchmark Claims</h3>
+            <p>Benchmark pages should wait for repeatable datasets, judge configuration, run logs, and reproducible output records.</p>
+          </div>
+          <div class="card risk">
+            <h3>Extra Domain Tables</h3>
+            <p>Do not invent a table for every use case yet. Use Node types and custom metadata until a lifecycle proves a separate object is needed.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="progress-log">
+        <div class="section-head">
+          <div>
+            <h2>Progress Log</h2>
+            <p>Current record of what has been completed in this architecture pass.</p>
+          </div>
+          <span class="status done">2026-06-04</span>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <strong>Architecture map</strong>
+            <p>Built the main static architecture page with backend/runtime layers, data lifecycle, human and AI workflows, core flows, and gate map.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Reality audit</strong>
+            <p>Separated target architecture from actual code reality so schema-only and compatibility paths are not mistaken for finished services.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Data anatomy</strong>
+            <p>Added multimodal data model so source content can be text, code, table, image, audio, video, graph, time series, tensor, geo, binary, or structured payload.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Coverage matrix</strong>
+            <p>Mapped source evidence, claims, facts, memory objects, active pools, context packages, workflow promotion, tool/model governance, rebuildability, and wiki surface lessons into Optimal Engine gates.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Build sequence</strong>
+            <p>Replaced arbitrary phase counts with dependency gates. The first gate is the workspace surface plus source re-entry loop.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Progress dashboard</strong>
+            <p>Added this page to make the plan inspectable before implementation begins.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Gate 1 data slice</strong>
+            <p>Added workspace-scoped Node identity, Gate 1 topology/projection schema records, default Node Type seeds, and focused tests for the first data-layer build.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Topology lifecycle modules</strong>
+            <p>Added Node Type, Node Relationship, and WorkspaceTopology lifecycle modules so Gate 1 topology records can be created and read without raw SQL.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Workspace export lifecycle</strong>
+            <p>Added WorkspaceExport lifecycle service and tests for export records, projection revisions, link health records, and drift detection.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Focused verification</strong>
+            <p>Ran Gate 1 focused tests for WorkspaceExport, workspace-scoped Nodes, topology schema, and WorkspaceTopology; all passed.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Edit re-entry capture</strong>
+            <p>Added capture paths so projection edits become either Source Packages with derivation ledger entries or pending topology change requests.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Routed edit re-entry</strong>
+            <p>Added route-enabled edit capture so a content edit can be preserved as source evidence and then enter the existing Signal intake path, producing a signal file and compatibility context row.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Workspace topology hardening</strong>
+            <p>Added workspace creation with default Node Type seeding, configured-root filesystem provisioning, workspace-scoped node memberships, topology change review/apply, and a Node tree API for hierarchy loading.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Workspace setup command</strong>
+            <p>Added <span class="mono">WorkspaceTopology.setup_workspace/1</span>, <span class="mono">mix optimal.setup</span>, and tests for the first operator setup flow: workspace row, standard Node Types, starter Nodes, typed relationships, node markdown files, rhythm folders, agent SOP, export records, and projection revisions.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Reality check hardening</strong>
+            <p>Updated <span class="mono">mix optimal.reality_check</span> to verify the new workspace topology and projection spine: migrated tables, standard Node Types, hierarchy tree, typed relationship, scoped agent principal membership, projection drift, and projection edit re-entry into source evidence. The probe now cleans up its own throwaway workspace rows.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Projection invalidation</strong>
+            <p>Added <span class="mono">WorkspaceExport.invalidate_for_object/3</span> and <span class="mono">WorkspaceExport.invalidate_for_node/2</span>. A Node-backed projection can now be marked stale, its projection revisions are marked stale, and link health records explain which source object invalidated the surface.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Truth lifecycle slice</strong>
+            <p>Added <span class="mono">OptimalEngine.MemoryCore.KnowledgeLifecycle</span> and typed Memory Core store writes for Claims, Facts, Memory Objects, and Relationship Edges. A source can now become an unreviewed Claim, a reviewed Fact, a current Memory Object, three support edges, and three derivation ledger entries.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Reality check extended</strong>
+            <p>Updated <span class="mono">mix optimal.reality_check</span> with evidence/truth lifecycle and governed recall sections. The live audit verifies source preservation, claim separation, fact promotion, memory object creation, support edges, ledger entries, Context Package assembly, persistence, and filtering. Earlier checkpoint result: 80 probes, 80 passing.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Governed recall slice</strong>
+            <p>Added <span class="mono">OptimalEngine.MemoryCore.RetrievalCoordinator</span> and Context Package persistence. A query can now return accepted Facts and current Memory Objects as a structured package with source links, evidence links, confidence/precision summaries, authorization envelope metadata, and filtered-object counts.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Active Memory Pool slice</strong>
+            <p>Added <span class="mono">OptimalEngine.MemoryCore.ActiveMemoryPool</span>. A task pool can open, load a Context Package, publish an observation as a Source Package, create a pending Claim, track promotion candidates, mark refresh state dirty/fresh, and close/archive.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Workflow and Skill Package slice</strong>
+            <p>Added <span class="mono">OptimalEngine.MemoryCore.WorkflowSkill</span> plus typed writes for Workflow Traces, Generalized Workflows, Procedural Memory Objects, and Skill Packages. Observed Active Pool work can now become a trace, candidate workflow, candidate procedure, and draft disabled Skill Package with derivation ledger entries.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Reality check extended again</strong>
+            <p>Updated <span class="mono">mix optimal.reality_check</span> with a Workflow and Skill Package lifecycle section. Earlier checkpoint result: 86 probes, 86 passing, 0 warnings, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Tool and Model Governance slice</strong>
+            <p>Added <span class="mono">OptimalEngine.MemoryCore.ToolModelGovernance</span>, <span class="mono">model_call_runs</span>, and <span class="mono">tool_call_runs</span>. Registered tool/model definitions can now reject missing privileges, reject unauthorized partitions, record allowed calls, emit audit events, and publish optional tool observations back into Active Memory Pools as pending Claims.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Reality check extended to Gate 7</strong>
+            <p>Updated <span class="mono">mix optimal.reality_check</span> with Tool/Model Governance probes. Earlier checkpoint result: 97 probes, 97 passing, 0 warnings, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>API topology surface fixed</strong>
+            <p>Changed <span class="mono">POST /api/workspaces</span> to call <span class="mono">WorkspaceTopology.create_workspace/1</span>. API-created workspaces now seed the standard Node Types instead of only creating a workspace row.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Governed recall freshness hardening</strong>
+            <p>Updated <span class="mono">RetrievalCoordinator</span> to exclude stale Facts, contradicted Facts, stale Memory Objects, and superseded Memory Objects before Context Package assembly. Added regression tests for ISO timestamp parsing and supersession filtering.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Tool/model output validation</strong>
+            <p>Updated <span class="mono">ToolModelGovernance</span> so tool/model runs with missing required output fields are recorded as <span class="mono">output_rejected</span>, audited, and blocked from creating Active Pool observations or pending Claims. Earlier result after the audit-link checkpoint: 100 probes, 100 passing, 0 warnings, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Governed dispatcher execution slice</strong>
+            <p>Added <span class="mono">ToolModelGovernance.execute_tool_call/4</span> and a <span class="mono">Signal.Dispatcher</span> governed adapter. Unauthorized dispatches are blocked before adapter execution, authorized dispatches execute and write completed tool-run records, and executor failures are recorded as failed governed runs. Current result: 55 focused tests passing and <span class="mono">mix optimal.reality_check</span> at 104 probes, 104 passing, 0 warnings, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Governed connector execution slice</strong>
+            <p>Added <span class="mono">Connectors.run_governed/2</span> and <span class="mono">Connectors.Runner.run_governed/2</span>. Connector sync now registers a governed tool definition, blocks unauthorized sync before the connector runner executes, and records both existing <span class="mono">connector_runs</span> rows and Memory Core <span class="mono">tool_call_runs</span> rows when allowed. Also fixed the L0/Cortex startup ordering and stale Memory bridge calls. Commit pushed: <span class="mono">700d45d</span>. Current result: 64 focused tests passing and <span class="mono">mix optimal.reality_check</span> at 108 probes, 108 passing, 0 warnings, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>CI and topology scope hardening</strong>
+            <p>Raised test-only API rate-limit defaults so full CI no longer exhausts the anonymous bucket during the suite. Then hardened workspace topology writes so parent links, typed node relationships, and node memberships cannot silently cross workspace scope. Commits pushed: <span class="mono">bf5ab42</span> and <span class="mono">e58ae6f</span>. Latest local result: expanded focused suite at 118 tests passing and <span class="mono">mix optimal.reality_check</span> at 108 probes, 108 passing.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>User-facing memory enters Memory Core</strong>
+            <p>Updated <span class="mono">OptimalEngine.Memory.create/1</span> so normal versioned-memory writes also create a Memory Core Source Package, unreviewed pending Claim, support edge, and derivation ledger entry. This keeps the old API behavior while making user-facing memory creation enter the governed evidence lifecycle without auto-promoting truth. Commit pushed: <span class="mono">97ebe67</span>. Local verification passed with bridge, versioned-memory, dedup, expanded gate, and reality-check tests. GitHub CI is green.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Claim review lifecycle</strong>
+            <p>Added <span class="mono">OptimalEngine.MemoryCore.ClaimReview</span> plus typed claim get/list/update store functions. Pending Claims can now be listed, rejected, or promoted through the existing lifecycle into accepted Facts and current Memory Objects. This completes the first controlled truth-promotion loop without allowing Source Packages or Claims to become truth automatically. Commit pushed: <span class="mono">0ae4ea5</span>. Local claim-review tests, expanded gate tests, and <span class="mono">mix optimal.reality_check</span> passed.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Claim review API surface</strong>
+            <p>Added <span class="mono">GET /api/memory-core/claims</span>, <span class="mono">GET /api/memory-core/claims/:id</span>, <span class="mono">POST /api/memory-core/claims/:id/reject</span>, and <span class="mono">POST /api/memory-core/claims/:id/promote</span>. A human app, CLI, or agent can now govern pending Claims without bypassing the Memory Core lifecycle. Commit pushed: <span class="mono">130b7c4</span>. Local API, claim-review, and memory-bridge tests passed: 29 tests, 0 failures. GitHub CI is green.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Governed raw asset storage</strong>
+            <p>Added <span class="mono">OptimalEngine.MemoryCore.AssetStore</span>, <span class="mono">SourcePackage.from_artifact/3</span>, and migration 035 asset governance metadata. Raw files now copy into the workspace asset store, preserve a Source Package for the artifact, upsert a workspace-scoped asset row with modality/security/retention metadata, and write a derivation ledger entry. Commit pushed: <span class="mono">f5b77c4</span>. Local focused suites passed: 29 tests, 0 failures and 26 tests, 0 failures. <span class="mono">mix optimal.reality_check</span> passed at 108 probes, 108 OK.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Pipeline assets enter governed storage</strong>
+            <p>Updated <span class="mono">Pipeline.run/2</span> to pass options into parsing and preserve parser-produced assets through <span class="mono">MemoryCore.AssetStore</span> before VLM enrichment, decomposition, and embedding. Governed parsed assets now carry asset IDs, Source Package IDs, original paths, stored paths, content hashes, retention labels, and trust labels, while chunk asset refs remain content-hash compatible. Commit pushed: <span class="mono">bc55c1d</span>. Local pipeline asset integration, asset-store tests, and <span class="mono">mix optimal.reality_check</span> passed.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Indexed assets keep workspace scope</strong>
+            <p>Updated <span class="mono">Pipeline.Indexer.index_file/2</span> and binary indexing so workspace, actor, security label, and partition options pass into <span class="mono">Pipeline.run/2</span>. Indexed binary files now preserve governed assets in the requested workspace instead of default. Commit pushed: <span class="mono">835f619</span>. Local indexer asset-store tests passed and <span class="mono">mix optimal.reality_check</span> stayed at 108 probes, 108 OK.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Multimodal open-source tool registry</strong>
+            <p>Added <span class="mono">OptimalEngine.Pipeline.MultimodalToolRegistry</span>, focused registry tests, and a public reference doc for the open-source adapter stack. The registry now maps document, image, audio, video, table, text, and binary modalities to adapter targets including Docling, Marker, olmOCR, Unstructured, Tesseract, Whisper, whisper.cpp, FFmpeg, Qwen VL, ColPali, OpenCLIP, and ImageBind-style paths. Commit pushed: <span class="mono">9bd3a55</span>. Local focused suite passed: 9 tests, 0 failures. <span class="mono">mix optimal.reality_check</span> passed at 108 probes, 108 OK. Public GitHub CI is green.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Governed multimodal adapter runs</strong>
+            <p>Added migration 036 and <span class="mono">asset_adapter_runs</span> so OCR, transcript, visual reasoning, document parsing, and embedding adapters have a durable run record. Adapter runs now store adapter ID, role, modality, status, input hash, output hash/text/reference, model metadata, confidence/precision, scope labels, partition IDs, and a derivation ledger link. Commit pushed: <span class="mono">b0f701d</span>. Local focused suite passed: 10 tests, 0 failures. <span class="mono">mix optimal.reality_check</span> now covers assets and adapter runs at 110 probes, 110 OK. Public GitHub CI is green.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Governed multimodal adapter runner</strong>
+            <p>Added <span class="mono">OptimalEngine.Pipeline.MultimodalAdapterRunner</span> and <span class="mono">MemoryCore.run_asset_adapter/3</span>. The runner loads a governed asset, resolves the registry adapter, executes a configured local command when present, and records completed, failed, or unavailable status through <span class="mono">asset_adapter_runs</span>. Commit pushed: <span class="mono">248b942</span>. Local focused suite passed: 13 tests, 0 failures. <span class="mono">mix optimal.reality_check</span> stayed at 110 probes, 110 OK. Public GitHub CI is green.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Build goal alignment audit</strong>
+            <p>Added a public-safe alignment map at <span class="mono">docs/reference/build-goal-alignment.md</span>. It checks the implementation against the intended layers: Workspace/Topology, Signal Pipeline, Memory Core, Retrieval/Context, Active Pools, Workflow/Skill, Tool/Model Governance, Workspace Export, Evaluation, and public/private safety. It also records the honest gaps: app UI, benchmark runners/result dashboards, adapter-specific parsers, full retrieval planning, workflow mining/runtime, recovery/rebuild, and production hardening.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Adapter output to pending Claim</strong>
+            <p>Added <span class="mono">MemoryCore.claim_from_asset_adapter_run/2</span>. Completed adapter output is now preserved as a derived Source Package and converted into an unreviewed pending Claim; failed or unavailable adapter runs cannot create Claims. Local focused suite passed: 12 tests, 0 failures. <span class="mono">mix optimal.reality_check</span> stayed at 110 probes, 110 OK.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Typed asset extraction projections</strong>
+            <p>Added migration 037, <span class="mono">MemoryCore.record_asset_extraction/2</span>, <span class="mono">MemoryCore.claim_from_asset_extraction/2</span>, and typed projection tables for transcripts, OCR spans, visual observations, and embedding refs. Completed adapter runs can now write generic extraction rows plus typed projections; text-bearing projections can become derived Source Packages plus pending Claims, while reference-only embeddings remain governed projection records. Local focused suite passed: 20 tests, 0 failures. <span class="mono">mix optimal.reality_check</span> now reports 115 probes, 115 OK.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Adapter runner auto-projection</strong>
+            <p>Updated <span class="mono">MemoryCore.run_asset_adapter/3</span> through <span class="mono">MultimodalAdapterRunner</span> so supported completed adapter runs automatically create typed extraction projections. Document/OCR outputs become OCR spans, audio transcription outputs become transcript rows, visual reasoning outputs become visual observations, and embedding runs can create embedding refs. <span class="mono">auto_extract: false</span> keeps run-only capture available. Local focused suite passed: 21 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Extraction projections enter Context Packages</strong>
+            <p>Updated <span class="mono">RetrievalCoordinator</span> so governed recall can return asset extraction projections alongside accepted Facts and current Memory Objects. Context Packages now include extraction links, evidence links back to asset/adapter/source records, confidence/precision summaries across returned objects, and partition/security filtering before package assembly. Local focused suite passed: 28 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Structured multimodal extraction parsing</strong>
+            <p>Added <span class="mono">MultimodalExtractionParser</span> and updated the adapter runner so one completed adapter run can create multiple typed extraction projections. Transcript JSON can become segment-level transcript rows, and document JSON can become page-level OCR span rows. Local combined multimodal/retrieval suite passed: 30 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Governed API asset upload</strong>
+            <p>Added <span class="mono">POST /api/assets</span> so API clients can upload base64 file content or pass a local path into <span class="mono">MemoryCore.store_asset_file/2</span>. The route returns the preserved asset, Source Package, optional adapter run, and extraction projections. Local API suite passed: 27 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Connector attachment preservation</strong>
+            <p>Added <span class="mono">Connectors.preserve_payload_assets/4</span> and <span class="mono">Connectors.AssetIngest</span> so connector payload attachments/files can enter <span class="mono">MemoryCore.store_asset_file/2</span> with connector kind, connector id, external id, attachment id, source URI, security labels, partitions, and per-attachment error reporting. Local connector asset suite passed: 3 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Richer structured extraction parsing + README visuals</strong>
+            <p>Updated <span class="mono">MultimodalExtractionParser</span> so structured adapter output can normalize nested document pages, elements, tables, frame captions, frame observations, and object detections into existing typed extraction projection tables. Added public README Mermaid diagrams for the system flow, runtime layer map, and multimodal evidence path. Local adapter-runner suite passed: 8 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Connector sync payload asset preservation</strong>
+            <p>Extended the connector sync contract so adapters can return raw payloads alongside Signals. <span class="mono">Connectors.Runner</span> now preserves any payload <span class="mono">attachments</span> or <span class="mono">files</span> through <span class="mono">Connectors.AssetIngest</span> and Memory Core before completing the connector run, while keeping existing adapters compatible. Local connector runner/asset suite passed: 13 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Claim review queue API</strong>
+            <p>Added <span class="mono">MemoryCore.claim_review_queue/1</span> and <span class="mono">GET /api/memory-core/claim-review</span> so apps and agents can fetch review/lifecycle counts plus filterable Claim rows instead of scraping raw tables. Local claim review/API suite passed: 31 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Policy-gated Fact promotion</strong>
+            <p>Added typed Fact reads, stale Claim blocking, contradiction checks against current accepted Facts, explicit <span class="mono">supersedes_fact_id</span> promotion, superseded Fact state updates, linked Memory Object stale/superseded closure, affected Context Package stale marking, <span class="mono">supersedes</span> Relationship Edges, and Derivation Ledger entries. The promote API now returns 409 conflict responses for stale or contradictory Claims. Local claim review/API suite passed: 34 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Executable evaluation runner</strong>
+            <p>Added <span class="mono">Evaluation.run_benchmark/2</span>. Benchmark cases now execute through governed retrieval, assemble Context Packages, generate deterministic local answer surfaces from returned Facts, Memory Objects, and asset extractions, apply expected-answer judging by default, persist each <span class="mono">evaluation_case</span>, and update aggregate run scores. The runner also accepts external answerer/judge callbacks for future model-based benchmarks.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Benchmark dataset loader</strong>
+            <p>Added <span class="mono">Evaluation.load_dataset/2</span>, <span class="mono">Evaluation.run_dataset/2</span>, and <span class="mono">mix optimal.eval.run</span>. JSON envelopes, JSON arrays, JSONL, and NDJSON cases can now be loaded from disk, normalized into benchmark cases, executed through real Context Package retrieval, persisted as evaluation cases, and summarized. Local evaluation suite passed: 4 tests, 0 failures. <span class="mono">mix optimal.reality_check</span> now includes a dataset-runner probe and reports 125 probes, 125 passing.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Multimodal adapter profiles</strong>
+            <p>Moved adapter runtime behavior into <span class="mono">MultimodalToolRegistry</span> profiles. Each registered adapter can now declare primary role, output formats, whether its output can become a Claim, install profile, and default argument templates. <span class="mono">MultimodalAdapterRunner</span> now reads default arguments and adapter role from the registry instead of hardcoded runner branches. Local multimodal registry/runner suite passed: 14 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Provider-schema extraction parsing</strong>
+            <p>Hardened <span class="mono">MultimodalExtractionParser</span> for wrapped document payloads and real-tool-like metadata. It now merges document pages, texts, elements, chunks, items, and tables instead of selecting only the first collection; maps metadata/provenance page and bbox fields into OCR projections; converts cell-grid tables into markdown table spans; and carries element labels/source refs into metadata. Local adapter-runner suite passed: 9 tests, 0 failures.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Smart memory intake gate</strong>
+            <p>Added <span class="mono">Memory.EncodingGate</span>, <span class="mono">Memory.SemanticDedup</span>, and a map-based <span class="mono">Memory.remember/2</span> path. Agent-facing memory writes now evaluate novelty, salience, prediction-error/update language, semantic duplication, and supersession cues before choosing add/update/skip. Accepted writes still flow through versioned memory creation, Source Package preservation, pending Claim creation, evidence edge creation, and derivation ledger recording. Commit pushed: <span class="mono">adad911</span>. Local main-base verification passed: 91 focused tests, 0 failures; <span class="mono">mix optimal.reality_check</span> at 125 probes, 125 passing; public CI green.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Gated memory API + adapter ID hardening</strong>
+            <p>Added <span class="mono">POST /api/memory/remember</span> so app, CLI, and agent callers can write memories through the same encoding gate and semantic dedup path as <span class="mono">Memory.remember/2</span>. The API returns the chosen action, memory payload, gate scores, and dedup decision, and duplicate writes keep the pending Claim count stable. Also hardened the multimodal registry, adapter runner, and asset store so JSON string adapter IDs resolve against the registered tool map instead of relying on atom loading order. Commit pushed: <span class="mono">7278108</span>. Local verification passed: 99 focused tests, 0 failures; router suite 31 tests, 0 failures; <span class="mono">mix optimal.reality_check</span> at 125 probes, 125 passing; public CI green.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Active Memory Pool API surface</strong>
+            <p>Added <span class="mono">POST /api/memory-core/active-pools</span>, <span class="mono">GET /api/memory-core/active-pools/:id</span>, and pool routes for retrieve/load, refresh-context, observations, and close. A human app, CLI, or agent can now open task-scoped working memory, retrieve a governed Context Package into it, publish observations as Source Packages plus pending Claims, refresh loaded context, and close/archive the pool without bypassing Memory Core. Commit pushed: <span class="mono">d7003f4</span>. Local verification passed: 100 focused tests, 0 failures; router suite 32 tests, 0 failures; <span class="mono">mix optimal.reality_check</span> at 125 probes, 125 passing; public CI green.</p>
+          </div>
+          <div class="timeline-item">
+            <strong>Current build README</strong>
+            <p>Added <span class="mono">README-CURRENT-BUILD.md</span> as the short technical orientation for the current runtime shape, layer ownership, gates, storage model, and verification commands.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

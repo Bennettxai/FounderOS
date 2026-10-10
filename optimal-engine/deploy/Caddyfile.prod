@@ -1,0 +1,14 @@
+# Production API reverse proxy.
+# Used by docker-compose.prod.yml.
+
+{env.DOMAIN} {
+    tls {env.LETSENCRYPT_EMAIL}
+
+    reverse_proxy engine:4200
+    encode gzip
+
+    log {
+        output stdout
+        format json
+    }
+}

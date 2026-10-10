@@ -1,0 +1,55 @@
+# Skill Matching Tests
+
+skill: task-management
+
+should_match:
+  # Create
+  - "create a task"
+  - "add a task"
+  - "new task: Review docs"
+  - "remind me to call John"
+  - "add to my todo list"
+  
+  # Complete
+  - "mark task done"
+  - "complete Review PR"
+  - "I finished the report task"
+  - "done with that task"
+  
+  # Update
+  - "change due date to Friday"
+  - "update priority to high"
+  - "rename the task"
+  - "add description to task"
+  
+  # List/Filter
+  - "what tasks do I have"
+  - "show me my tasks"
+  - "list overdue tasks"
+  - "what's due today"
+  - "show high priority tasks"
+  
+  # Bulk
+  - "complete all tasks in project X"
+  - "mark everything done"
+  
+  # Assign
+  - "assign this to Sarah"
+  - "give this task to John"
+  
+  # Delete
+  - "delete the task"
+  - "remove old task"
+
+should_not_match:
+  # Analytics
+  - "why are tasks overdue"
+  - "analyze my productivity"
+  
+  # Dashboard
+  - "add a task widget"
+  - "show tasks on dashboard"
+  
+  # Project management
+  - "create a project"
+  - "add member to project"

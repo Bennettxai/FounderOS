@@ -1,0 +1,38 @@
+/* /trading furniture in production's shapes, from --bn-* tokens only. */
+.tb-hover:hover {
+	border-color: var(--bn-border-strong);
+	color: var(--bn-text);
+}
+/* the kebab menu: prod's rounded-md-t glass (its bg-os-bg2/95 is never
+   generated, so the panel is the backdrop blur over the card) */
+.tb-menu {
+	border: 1px solid var(--bn-border);
+	-webkit-backdrop-filter: blur(8px);
+	backdrop-filter: blur(8px);
+}
+.tb-menu-item {
+	color: var(--bn-text-2);
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+}
+.tb-menu-item:hover {
+	background: color-mix(in oklab, var(--bn-text) 6%, transparent);
+	color: var(--bn-text);
+}
+/* the limits editor's number boxes (prod rounded-ctl, bg, hairline) */
+.tb-limit {
+	border-color: var(--bn-border);
+	background: var(--bn-bg);
+	outline: none;
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+.tb-limit:focus {
+	border-color: var(--bn-accent);
+}
+.tb-limit::-webkit-inner-spin-button,
+.tb-limit::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}

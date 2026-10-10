@@ -1,0 +1,9 @@
+id: operation-weekly-review
+workspace_id: sample
+type: operational
+name: Weekly Review
+status: active
+purpose: Recurring operating loop for priorities, blockers, decisions, and memory promotion.
+owner: user:operator
+review_cadence: weekly
+

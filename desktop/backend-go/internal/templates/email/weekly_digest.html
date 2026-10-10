@@ -1,0 +1,83 @@
+{{define "content"}}
+<h1>Your Week in Review 📊</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p>Here's your OSA summary for <strong>{{.WeekRange}}</strong>:</p>
+
+<hr class="divider">
+
+<h2>📈 Your Stats</h2>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 16px 0;">
+    <tr>
+        <td style="padding: 12px; text-align: center; background: #ecfdf5; border-radius: 8px 0 0 8px;">
+            <p style="margin: 0; font-size: 28px; font-weight: 700; color: #10b981;">{{.TasksCompleted}}</p>
+            <p class="text-small text-muted" style="margin: 4px 0 0 0;">Completed</p>
+        </td>
+        <td style="padding: 12px; text-align: center; background: #eef2ff;">
+            <p style="margin: 0; font-size: 28px; font-weight: 700; color: #6366f1;">{{.TasksCreated}}</p>
+            <p class="text-small text-muted" style="margin: 4px 0 0 0;">Created</p>
+        </td>
+        <td style="padding: 12px; text-align: center; background: #fef2f2; border-radius: 0 8px 8px 0;">
+            <p style="margin: 0; font-size: 28px; font-weight: 700; color: #ef4444;">{{.TasksOverdue}}</p>
+            <p class="text-small text-muted" style="margin: 4px 0 0 0;">Overdue</p>
+        </td>
+    </tr>
+</table>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+    <tr>
+        <td style="padding: 8px 12px;">
+            <span style="color: #6b7280;">💬 Comments received:</span>
+            <strong>{{.CommentsReceived}}</strong>
+        </td>
+        <td style="padding: 8px 12px;">
+            <span style="color: #6b7280;">@ Mentions:</span>
+            <strong>{{.MentionsCount}}</strong>
+        </td>
+    </tr>
+</table>
+
+{{if .UpcomingDeadlines}}
+<hr class="divider">
+
+<h2>📅 Upcoming Deadlines</h2>
+
+<div class="info-box">
+    {{range .UpcomingDeadlines}}
+    <p style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px;">
+        <strong>{{.Title}}</strong><br>
+        <span class="text-small text-muted">Due: {{.DueDate}}</span>
+    </p>
+    {{end}}
+</div>
+{{end}}
+
+{{if .TopProjects}}
+<hr class="divider">
+
+<h2>🔥 Active Projects</h2>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+    {{range .TopProjects}}
+    <tr>
+        <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+            <strong>{{.Name}}</strong>
+        </td>
+        <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+            <span class="text-muted">{{.TaskCount}} tasks</span>
+        </td>
+    </tr>
+    {{end}}
+</table>
+{{end}}
+
+<div class="button-wrapper">
+    <a href="{{.DashboardLink}}" class="button">View Dashboard</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>Manage your digest settings in your notification preferences.</p>
+{{end}}

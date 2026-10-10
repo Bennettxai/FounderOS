@@ -1,0 +1,121 @@
+---
+# OptimalEngine — production overlay
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Prerequisites:
+#   1. Copy env.example → .env.prod and fill in all values
+#   2. Set OPTIMAL_AUTH_REQUIRED=true
+#   3. Ensure DOMAIN is pointed at this server's IP before first run
+#      (Caddy will attempt ACME challenge immediately)
+
+name: optimal-engine
+
+services:
+
+  # ─── Caddy reverse proxy + TLS ─────────────────────────────────────────
+  caddy:
+    image: caddy:2.8.4-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3 QUIC
+    volumes:
+      - ./Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    env_file: ./.env.prod
+    environment:
+      DOMAIN:             "${DOMAIN}"
+      LETSENCRYPT_EMAIL:  "${LETSENCRYPT_EMAIL}"
+    depends_on:
+      engine:
+        condition: service_healthy
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ─── Engine — production overrides ────────────────────────────────────
+  engine:
+    env_file: ./.env.prod
+    environment:
+      # Auth MUST be enabled in production
+      OPTIMAL_AUTH_REQUIRED: "true"
+      MIX_ENV: prod
+    restart: always
+    # Do not expose engine port directly in production — all traffic goes
+    # through the Caddy reverse proxy
+    ports: []
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      # Keep the persistent data volume; remove the sample workspace in prod
+      - optimal_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+
+  # ─── Optional Desktop — production overrides ─────────────────────────
+  desktop:
+    profiles: ["surfaces"]
+    env_file: ./.env.prod
+    ports: []
+    restart: always
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+
+  # ─── Optional Site — production overrides ────────────────────────────
+  site:
+    profiles: ["surfaces"]
+    env_file: ./.env.prod
+    ports: []
+    restart: always
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+
+  # ─── Optional Docs — production overrides ────────────────────────────
+  docs:
+    profiles: ["surfaces"]
+    env_file: ./.env.prod
+    ports: []
+    restart: always
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+
+volumes:
+  optimal_data:
+  caddy_data:
+  caddy_config:

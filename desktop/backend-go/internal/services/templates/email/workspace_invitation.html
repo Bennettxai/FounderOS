@@ -1,0 +1,46 @@
+{{define "content"}}
+<p class="eyebrow">Workspace invitation</p>
+<h1>{{.InviterName}} invited you to {{.WorkspaceName}}.</h1>
+
+<p>You've been invited to join the <strong class="text-primary">{{.WorkspaceName}}</strong> workspace on BusinessOS &mdash; the shared operating system where the team works together.</p>
+
+{{if .PersonalMessage}}
+<div class="info-box accent">
+    <table cellspacing="0" cellpadding="0" border="0" width="100%"><tr>
+        <td width="46" valign="top"><span class="avatar">{{slice .InviterName 0 1}}</span></td>
+        <td style="padding-left: 12px;">
+            <p class="text-small text-muted" style="margin:0 0 4px 0;">{{.InviterName}} says</p>
+            <p style="margin:0; color:rgba(255,255,255,0.78);">&ldquo;{{.PersonalMessage}}&rdquo;</p>
+        </td>
+    </tr></table>
+</div>
+{{end}}
+
+<div class="details-list">
+    <table cellspacing="0" cellpadding="0" border="0" width="100%"><tr>
+        <td width="50%" valign="top">
+            <dt>Your role</dt>
+            <dd><span class="badge badge-accent" style="margin-top:4px;">{{.Role}}</span></dd>
+        </td>
+        <td width="50%" valign="top">
+            <dt>Invited by</dt>
+            <dd>{{.InviterEmail}}</dd>
+        </td>
+    </tr></table>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.InvitationLink}}" class="button">Accept invitation</a>
+</div>
+
+<p class="text-center text-small text-muted">This invitation expires in {{.ExpiresIn}}.</p>
+
+<div class="link-fallback">
+    <p>Button not working? Paste this link into your browser:</p>
+    <a href="{{.InvitationLink}}">{{.InvitationLink}}</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>Don't recognize this invitation? You can safely ignore this email.</p>
+{{end}}

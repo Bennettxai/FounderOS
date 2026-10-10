@@ -1,0 +1,144 @@
+# Edge Case Tests
+# Tricky scenarios that require special handling
+
+skill: dashboard-management
+
+edge_cases:
+  # Ambiguity handling
+  - name: "Ambiguous widget reference"
+    user_input: "Remove the task widget"
+    issue: "Multiple task widgets could exist (task_summary, task_list, task_burndown)"
+    expected_behavior: |
+      If multiple task-related widgets exist on dashboard:
+      1. List the matching widgets
+      2. Ask which one to remove
+      3. Wait for clarification
+      
+      If only one task widget exists:
+      1. Remove it directly
+
+  - name: "Ambiguous dashboard reference"
+    user_input: "Add a widget to my project dashboard"
+    issue: "User might have multiple project-related dashboards"
+    expected_behavior: |
+      1. Search for dashboards with "project" in name
+      2. If one match: use it
+      3. If multiple: ask which one
+      4. If none: ask if they want to create one
+
+  # Typos and fuzzy matching
+  - name: "Typo in widget type"
+    user_input: "Add a task sumary widget"
+    issue: "typo: 'sumary' instead of 'summary'"
+    expected_behavior: |
+      1. Recognize fuzzy match to "task_summary"
+      2. Confirm with user: "Did you mean task summary?"
+      3. Proceed if confirmed
+
+  - name: "Non-standard widget name"
+    user_input: "Add a to-do list"
+    issue: "'to-do list' isn't exact match for any widget"
+    expected_behavior: |
+      1. Map to closest: task_list or task_summary
+      2. Suggest: "I can add a Task List that shows your tasks, or a Task Summary that groups them. Which would you prefer?"
+
+  # Conflicting requests
+  - name: "Remove and add same type"
+    user_input: "Remove the task summary and add a task summary grouped by project"
+    issue: "Seemingly contradictory request"
+    expected_behavior: |
+      Interpret as: "Replace task summary with different config"
+      1. Remove existing task_summary
+      2. Add new task_summary with group_by: project
+      3. Confirm: "Replaced your task summary with one grouped by project."
+
+  - name: "Clear and rebuild"
+    user_input: "Clear my dashboard and start fresh"
+    issue: "Destructive action needs confirmation"
+    expected_behavior: |
+      1. Confirm: "This will remove all X widgets from your dashboard. Continue?"
+      2. If confirmed: remove all widgets
+      3. Offer to add new widgets
+
+  # Boundary conditions
+  - name: "Dashboard full - add request"
+    user_input: "Add another metric card"
+    context: "Dashboard already has 12 widgets"
+    expected_behavior: |
+      1. Tool returns dashboard_full error
+      2. Offer options:
+         - Remove a widget to make room
+         - Create a new dashboard
+      3. Wait for user choice
+
+  - name: "Add to non-default dashboard"
+    user_input: "Add tasks to my Sales dashboard"
+    issue: "Need to target specific dashboard, not default"
+    expected_behavior: |
+      1. Use dashboard_name: "Sales" in tool call
+      2. Confirm which dashboard was modified
+
+  # Project context
+  - name: "Widget for specific project - project not found"
+    user_input: "Add a burndown for the Phoenix project"
+    issue: "Phoenix project might not exist"
+    expected_behavior: |
+      1. Try to resolve "Phoenix" to project_id
+      2. If not found: show available projects
+      3. Ask if they meant a different project
+
+  - name: "Widget for current project context"
+    user_input: "Add progress for this project"
+    context: "User is viewing Project Alpha"
+    expected_behavior: |
+      1. Use current project context if available
+      2. Pass project_id for Alpha to widget config
+      3. If no context: ask which project
+
+  # Widget-specific edge cases
+  - name: "Metric card without specifying metric"
+    user_input: "Add a metric card"
+    issue: "metric is required for metric_card"
+    expected_behavior: |
+      1. Ask which metric they want:
+         - Tasks due today
+         - Overdue tasks
+         - Completed this week
+         - Active projects
+      2. Create widget with chosen metric
+
+  - name: "Burndown without time range"
+    user_input: "Add a burndown"
+    expected_behavior: |
+      1. Use default: 30 days
+      2. Mention in response: "Added a 30-day burndown chart"
+
+  # Multi-step operations
+  - name: "Create dashboard then add widgets"
+    user_input: "Create a Weekly Review dashboard and add tasks and a burndown"
+    expected_behavior: |
+      Single tool call with both:
+      {
+        "action": "create_dashboard",
+        "name": "Weekly Review",
+        "widgets": [
+          {"type": "task_summary"},
+          {"type": "task_burndown"}
+        ]
+      }
+
+  - name: "Modify then verify"
+    user_input: "Add a task widget and show me my dashboard"
+    expected_behavior: |
+      1. Add the widget (add_widget action)
+      2. Response includes updated dashboard state
+      3. No need for separate get_dashboard call
+
+  # Permission edge cases
+  - name: "Modify workspace template"
+    user_input: "Update the team dashboard"
+    context: "User is not admin, 'team dashboard' is workspace template"
+    expected_behavior: |
+      1. Tool returns permission_denied
+      2. Explain: "You can't modify the team template (admin only)"
+      3. Offer: "I can create a personal copy you can customize"

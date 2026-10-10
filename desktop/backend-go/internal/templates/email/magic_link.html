@@ -1,0 +1,26 @@
+{{define "content"}}
+<h1 class="text-center">Sign in to OSA</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p>Click the button below to sign in to your OSA account. No password needed!</p>
+
+<div class="button-wrapper">
+    <a href="{{.MagicLink}}" class="button">Sign In to OSA</a>
+</div>
+
+<div class="info-box">
+    <p class="text-small text-muted" style="margin: 0;">
+        🔐 This link expires in <strong>{{.ExpiresIn}}</strong> and can only be used once.
+    </p>
+</div>
+
+<div class="link-fallback">
+    <p>If the button doesn't work, copy and paste this link into your browser:</p>
+    <a href="{{.MagicLink}}">{{.MagicLink}}</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>If you didn't request this login link, you can safely ignore this email.</p>
+{{end}}

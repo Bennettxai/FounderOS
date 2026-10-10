@@ -1,0 +1,78 @@
+# Skill Matching Tests
+# Validates that user phrases correctly match to this skill
+
+skill: dashboard-management
+
+# Phrases that SHOULD activate this skill
+should_match:
+  # Direct dashboard mentions
+  - "add a widget to my dashboard"
+  - "create a new dashboard"
+  - "set up my dashboard"
+  - "configure my dashboard"
+  - "customize my home view"
+  
+  # Widget-specific requests
+  - "show me my tasks on the dashboard"
+  - "add a task summary"
+  - "add a burndown chart"
+  - "I want to see deadlines"
+  - "show me a task list"
+  - "add upcoming deadlines"
+  
+  # Grouping/filtering
+  - "show tasks by project"
+  - "group my tasks by priority"
+  - "tasks organized by status"
+  
+  # Dashboard management
+  - "what dashboards do I have"
+  - "list my dashboards"
+  - "make this my default dashboard"
+  - "switch to a different dashboard"
+  
+  # Widget management
+  - "remove the burndown chart"
+  - "delete the task widget"
+  - "change the deadline widget to show 14 days"
+  - "update my task summary"
+  
+  # Metric cards
+  - "show me how many tasks are due today"
+  - "add a metric for overdue tasks"
+  - "I want to see completed tasks this week"
+  
+  # Complex requests
+  - "set up a project dashboard"
+  - "create a dashboard for sales"
+  - "add tasks, deadlines, and a chart"
+
+# Phrases that should NOT match this skill
+should_not_match:
+  # Task management (different skill)
+  - "create a task"
+  - "mark this task done"
+  - "what tasks do I have"
+  - "complete all my tasks"
+  - "add a task to my list"
+  
+  # Analytics (different skill)
+  - "why are my tasks overdue"
+  - "analyze my productivity"
+  - "what's my completion rate"
+  - "explain my task trends"
+  
+  # Project management (different skill)
+  - "create a project"
+  - "add Sarah to the project"
+  - "what projects am I working on"
+  
+  # Notifications (different skill)
+  - "mute notifications"
+  - "turn off alerts"
+  - "notification settings"
+  
+  # Generic/ambiguous
+  - "help me"
+  - "what can you do"
+  - "hello"

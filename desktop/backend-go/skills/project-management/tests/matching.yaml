@@ -1,0 +1,42 @@
+# Skill Matching Tests
+
+skill: project-management
+
+should_match:
+  # Create
+  - "create a project"
+  - "new project called Alpha"
+  - "start a project for Q1"
+  
+  # Members
+  - "add Sarah to the project"
+  - "remove John from Website"
+  - "who's on this project"
+  - "add team member"
+  
+  # Status
+  - "mark project complete"
+  - "put project on hold"
+  - "archive old project"
+  
+  # Details
+  - "change project deadline"
+  - "update project description"
+  - "rename the project"
+  
+  # List/View
+  - "what projects do I have"
+  - "show me active projects"
+  - "list my projects"
+
+should_not_match:
+  # Task operations
+  - "create a task"
+  - "what tasks are in project"
+  
+  # Analytics
+  - "how is the project doing"
+  - "project progress analysis"
+  
+  # Dashboard
+  - "add project progress to dashboard"

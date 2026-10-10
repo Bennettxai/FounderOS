@@ -1,0 +1,25 @@
+{
+  "name": "Documents",
+  "version": "1.0.0",
+  "description": "Document management — create, edit, version, and share documents",
+  "category": "productivity",
+  "actions": [
+    { "name": "create_document", "type": "api_call", "description": "Create a new document" },
+    { "name": "list_documents", "type": "api_call", "description": "List documents in workspace" },
+    { "name": "update_document", "type": "api_call", "description": "Update document content" },
+    { "name": "share_document", "type": "api_call", "description": "Share a document with a user" },
+    { "name": "get_version_history", "type": "api_call", "description": "Get document version history" }
+  ],
+  "protected_schemas": ["documents", "document_versions", "document_shares"],
+  "protected_routes": ["api/documents/*"],
+  "protected_operations": ["documents.purge_versions"],
+  "migration_up": "CREATE TABLE IF NOT EXISTS documents (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), workspace_id UUID NOT NULL, title VARCHAR(500) NOT NULL, content TEXT, content_type VARCHAR(50) DEFAULT 'markdown', created_by UUID, is_archived BOOLEAN DEFAULT FALSE, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()); CREATE TABLE IF NOT EXISTS document_versions (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE, version_number INTEGER NOT NULL, content TEXT, changed_by UUID, created_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(document_id, version_number)); CREATE TABLE IF NOT EXISTS document_shares (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE, shared_with UUID NOT NULL, permission VARCHAR(20) DEFAULT 'view', shared_by UUID, created_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(document_id, shared_with));",
+  "migration_down": "DROP TABLE IF EXISTS document_shares CASCADE; DROP TABLE IF EXISTS document_versions CASCADE; DROP TABLE IF EXISTS documents CASCADE;",
+  "routes": [
+    { "method": "GET", "path": "/api/documents", "handler": "ListDocuments" },
+    { "method": "POST", "path": "/api/documents", "handler": "CreateDocument" },
+    { "method": "PUT", "path": "/api/documents/:id", "handler": "UpdateDocument" },
+    { "method": "POST", "path": "/api/documents/:id/share", "handler": "ShareDocument" },
+    { "method": "GET", "path": "/api/documents/:id/versions", "handler": "GetVersionHistory" }
+  ]
+}

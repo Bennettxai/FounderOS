@@ -1,0 +1,51 @@
+# BusinessOS Agent Skills Configuration
+# This file defines which skills are available to the agent system
+
+version: "1.0"
+skills_directory: "./skills"
+
+# Global settings
+settings:
+  max_skills_in_context: 3          # Max skills loaded simultaneously
+  default_token_budget: 4000        # Token budget for skill content
+  enable_telemetry: true
+  enable_schema_validation: true
+
+# Skill definitions
+skills:
+  - name: dashboard-management
+    path: ./dashboard-management
+    enabled: true
+    priority: 1                      # Higher = checked first for matching
+    always_available: false          # If true, always in context
+
+  - name: analytics-insights
+    path: ./analytics-insights
+    enabled: true
+    priority: 2
+
+  - name: task-management
+    path: ./task-management
+    enabled: true
+    priority: 3
+
+  - name: project-management
+    path: ./project-management
+    enabled: true
+    priority: 4
+
+  - name: notification-management
+    path: ./notification-management
+    enabled: true
+    priority: 5
+
+# Skill groups (for batch loading related skills)
+skill_groups:
+  productivity:
+    - task-management
+    - project-management
+    - dashboard-management
+  
+  monitoring:
+    - analytics-insights
+    - notification-management

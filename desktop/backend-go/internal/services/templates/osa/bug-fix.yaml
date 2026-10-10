@@ -1,0 +1,326 @@
+name: "bug-fix"
+display_name: "Bug Fix for OSA-Generated App"
+description: "Fix bugs in OSA-generated applications with root cause analysis"
+category: "maintenance"
+version: "1.0.0"
+tags:
+  - "bug"
+  - "fix"
+  - "debugging"
+  - "maintenance"
+
+variables:
+  # Required variables
+  - name: "AppName"
+    type: "string"
+    required: true
+    description: "Name of the application with the bug"
+
+  - name: "BugDescription"
+    type: "string"
+    required: true
+    description: "Description of the bug and its symptoms"
+
+  - name: "ReproductionSteps"
+    type: "string"
+    required: true
+    description: "Steps to reproduce the bug"
+
+  # Optional variables
+  - name: "ErrorLogs"
+    type: "string"
+    required: false
+    default: ""
+    description: "Error logs or stack traces (if available)"
+
+  - name: "ExpectedBehavior"
+    type: "string"
+    required: false
+    default: ""
+    description: "What should happen (expected behavior)"
+
+  - name: "ActualBehavior"
+    type: "string"
+    required: false
+    default: ""
+    description: "What actually happens (actual behavior)"
+
+  - name: "Severity"
+    type: "string"
+    required: false
+    default: "medium"
+    description: "Bug severity (critical, high, medium, low)"
+
+  - name: "AffectedVersion"
+    type: "string"
+    required: false
+    default: ""
+    description: "Application version where bug was found"
+
+  - name: "Environment"
+    type: "string"
+    required: false
+    default: "production"
+    description: "Environment where bug occurs (production, staging, development)"
+
+  - name: "ExistingContext"
+    type: "object"
+    required: false
+    description: "Context about the application structure"
+
+template: |
+  # Bug Fix for {{.AppName}}
+
+  You are debugging and fixing a bug in the application: **{{.AppName}}**.
+
+  ## Bug Report
+
+  ### Description
+
+  {{.BugDescription}}
+
+  ### Severity
+
+  **{{.Severity}}** {{if eq .Severity "critical"}}🔴{{else if eq .Severity "high"}}🟠{{else if eq .Severity "medium"}}🟡{{else}}🟢{{end}}
+
+  {{- if eq .Severity "critical"}}
+  ⚠️ **CRITICAL BUG** - This bug is blocking users or causing data loss. Priority: IMMEDIATE FIX.
+  {{- else if eq .Severity "high"}}
+  ⚠️ **HIGH PRIORITY** - This bug significantly impacts functionality. Priority: FIX ASAP.
+  {{- else if eq .Severity "medium"}}
+  ⚙️ **MEDIUM PRIORITY** - This bug affects some users. Priority: FIX SOON.
+  {{- else}}
+  ℹ️ **LOW PRIORITY** - Minor issue with workaround available. Priority: FIX WHEN POSSIBLE.
+  {{- end}}
+
+  ### Reproduction Steps
+
+  {{.ReproductionSteps}}
+
+  {{- if .ExpectedBehavior}}
+  ### Expected Behavior
+
+  {{.ExpectedBehavior}}
+  {{- end}}
+
+  {{- if .ActualBehavior}}
+  ### Actual Behavior
+
+  {{.ActualBehavior}}
+  {{- end}}
+
+  {{- if .ErrorLogs}}
+  ### Error Logs
+
+  ```
+  {{.ErrorLogs}}
+  ```
+  {{- end}}
+
+  ### Environment
+
+  - **Environment**: {{.Environment}}
+  {{- if .AffectedVersion}}
+  - **Version**: {{.AffectedVersion}}
+  {{- end}}
+
+  ## Debugging Methodology
+
+  Follow this systematic approach to identify and fix the bug:
+
+  ### 1. Root Cause Analysis
+
+  **Step 1: Reproduce the bug**
+  - Follow the reproduction steps exactly
+  - Confirm the bug exists
+  - Document any variations in behavior
+
+  **Step 2: Analyze error logs**
+  {{- if .ErrorLogs}}
+  - Examine the provided error logs
+  - Identify the stack trace origin
+  - Look for error propagation path
+  {{- else}}
+  - Check application logs in `logs/` directory
+  - Look for error patterns around the time of the bug
+  - Use `slog` output to trace execution flow
+  {{- end}}
+
+  **Step 3: Locate the problematic code**
+  - Identify the layer where the bug originates (handler/service/repository)
+  - Review recent changes to affected files
+  - Check for edge cases not handled
+
+  **Step 4: Identify root cause**
+  Common bug categories:
+  - **Logic Error**: Incorrect algorithm or business logic
+  - **Null/Undefined**: Missing null checks or default values
+  - **Concurrency**: Race conditions or deadlocks
+  - **Database**: Wrong query, missing constraint, data inconsistency
+  - **Integration**: Third-party API errors or timeouts
+  - **Validation**: Missing input validation or edge case handling
+  - **Type Mismatch**: Incorrect type conversions or assumptions
+
+  ### 2. Fix Implementation
+
+  **Design the fix:**
+  - Minimal changes that address the root cause
+  - Avoid introducing new bugs
+  - Consider edge cases and error scenarios
+  - Maintain backward compatibility
+
+  **Apply the fix:**
+
+  {{- if .ExistingContext}}
+  Based on the application structure, apply fixes to the appropriate layer:
+
+  - **Handler Layer** (`internal/handlers/`):
+    - Input validation fixes
+    - Request parsing errors
+    - Response formatting issues
+
+  - **Service Layer** (`internal/services/`):
+    - Business logic errors
+    - Error handling improvements
+    - Add missing validations
+
+  - **Repository Layer** (`internal/database/`):
+    - SQL query fixes
+    - Transaction handling
+    - Database connection issues
+  {{- else}}
+  Apply fixes to the appropriate layer (handler/service/repository).
+  {{- end}}
+
+  ### 3. Prevent Regressions
+
+  **Add tests to prevent this bug from reoccurring:**
+
+  - **Unit Test**: Test the specific function that had the bug
+    ```go
+    func TestBugFix_{{.AppName}}_Issue(t *testing.T) {
+        // Arrange: Set up the scenario that caused the bug
+        // Act: Execute the fixed code
+        // Assert: Verify correct behavior
+        assert.NoError(t, err)
+        assert.Equal(t, expected, actual)
+    }
+    ```
+
+  - **Integration Test**: Test the complete flow that triggered the bug
+  - **E2E Test** (if user-facing): Test the user interaction that revealed the bug
+
+  ### 4. Code Quality Improvements
+
+  While fixing the bug, ensure:
+
+  ✅ **Logging**: Add `slog` logging for better debugging in the future
+  ```go
+  slog.Info("processing request", "user_id", userID, "action", action)
+  slog.Error("operation failed", "error", err, "context", additionalInfo)
+  ```
+
+  ✅ **Error Handling**: Wrap errors with context
+  ```go
+  return fmt.Errorf("failed to process payment for user %s: %w", userID, err)
+  ```
+
+  ✅ **Input Validation**: Add missing validation
+  ```go
+  if userID == uuid.Nil {
+      return fmt.Errorf("invalid user ID")
+  }
+  ```
+
+  ✅ **Null Checks**: Handle null/nil values
+  ```go
+  if user == nil {
+      return fmt.Errorf("user not found")
+  }
+  ```
+
+  ✅ **Edge Cases**: Add handling for boundary conditions
+
+  ## Technical Constraints
+
+  **MANDATORY:**
+  - Use `slog` for all logging (NO `fmt.Printf`)
+  - Context propagation (context as first parameter)
+  - Wrap errors with context: `fmt.Errorf("...: %w", err)`
+  - NO `panic` in production code
+  - All database queries via sqlc (if touching database code)
+
+  **TESTING:**
+  - Add regression test that fails without the fix
+  - Ensure all existing tests still pass
+  - Run full test suite: `go test ./...`
+  - Verify fix in environment where bug occurred
+
+  ## Fix Checklist
+
+  Before marking the bug as fixed:
+
+  - [ ] Bug reproduced successfully
+  - [ ] Root cause identified and documented
+  - [ ] Fix implemented with minimal changes
+  - [ ] Regression test added (test fails without fix, passes with fix)
+  - [ ] All existing tests pass
+  - [ ] Code builds without errors
+  - [ ] Logging improved for future debugging
+  - [ ] Error handling enhanced
+  - [ ] Edge cases considered and handled
+  - [ ] Fix verified in the same environment where bug occurred
+  {{- if eq .Severity "critical"}}
+  - [ ] Hotfix deployment plan prepared
+  - [ ] Rollback plan documented
+  - [ ] On-call team notified
+  {{- end}}
+
+  ## Documentation
+
+  Document the fix for future reference:
+
+  1. **Code Comments**: Add comments explaining why the fix is needed
+     ```go
+     // Fix: Handle null values that can occur when user data is incomplete
+     // This prevents panic when accessing user.Email (Issue #123)
+     if user.Email == nil {
+         user.Email = stringPtr("")
+     }
+     ```
+
+  2. **CHANGELOG.md**: Add entry under "Fixed" section
+     ```markdown
+     ### Fixed
+     - Fixed {{.BugDescription}} in {{.AppName}} ({{.Environment}})
+     ```
+
+  3. **Commit Message**: Use conventional commit format
+     ```
+     fix({{.AppName}}): resolve [brief description]
+
+     - Root cause: [brief explanation]
+     - Fix: [what was changed]
+     - Impact: [who is affected]
+
+     Fixes #[issue-number]
+     ```
+
+  ## Success Criteria
+
+  - ✅ Bug no longer occurs when following reproduction steps
+  - ✅ Root cause identified and documented
+  - ✅ Fix implemented with minimal code changes
+  - ✅ Regression test added and passing
+  - ✅ All existing tests pass
+  - ✅ No new bugs introduced
+  - ✅ Code builds without errors
+  - ✅ Logging improved for future debugging
+  {{- if eq .Severity "critical"}}
+  - ✅ Hotfix deployed to {{.Environment}}
+  - ✅ Monitoring confirms bug is resolved
+  {{- end}}
+
+  ---
+
+  **Begin debugging now. Use systematic approach: reproduce → analyze → fix → test → document.**

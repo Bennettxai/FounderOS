@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Microphone usage description -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>BusinessOS needs microphone access for voice input and meeting recording features.</string>
+
+    <!-- Screen capture usage description -->
+    <key>NSScreenCaptureUsageDescription</key>
+    <string>BusinessOS needs screen recording permission to capture screenshots and record meetings.</string>
+
+    <!-- Accessibility usage description (for global shortcuts) -->
+    <key>NSAccessibilityUsageDescription</key>
+    <string>BusinessOS needs accessibility permission to enable global keyboard shortcuts that work anywhere on your Mac.</string>
+
+    <!-- Apple Events usage description (for automation) -->
+    <key>NSAppleEventsUsageDescription</key>
+    <string>BusinessOS needs this permission to interact with other applications.</string>
+
+    <!-- Camera usage description (for future video features) -->
+    <key>NSCameraUsageDescription</key>
+    <string>BusinessOS needs camera access for video features.</string>
+</dict>
+</plist>

@@ -1,37 +1,194 @@
+# Dependencies
 node_modules/
-.next/
-.next-*/
-# The whole data dir, not just *.db / *.db-*. Those two patterns missed the
-# point-in-time snapshots (founder-os.db.bak-<sha> contains ".db.bak-", never
-# the literal ".db-"), so all 11 of them read as plain untracked files and
-# `git clean -fd` — the SAFE variant — deleted every backup of the database.
-# See OS-330. This still does nothing against `git clean -fdx`: -x means "also
-# remove ignored files", so gitignoring a database is a no-op against it. The
-# only real fix there is keeping the data outside the repo — see DATA_DIR in
-# lib/paths.ts and .env.example.
-data/
-*.tsbuildinfo
-next-env.d.ts
-.DS_Store
-.worktrees/
-.playwright-mcp/
-claude code images/
-dir-sidebar.jpeg
+.pnpm-store/
 
-# Firecrawl scratch (scraped API docs, tokens) — never commit.
-.firecrawl/
+# Build outputs
+dist/
+build/
+.svelte-kit/
 
-# Secrets — never commit real credentials. Only .env.example is tracked.
+# Environment files
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!.env.production.example
 
-.vercel
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+ENV/
+.eggs/
+*.egg-info/
+*.egg
 
-# local run artifacts and caches, never source
-agents/markets/journal/
-rosters/
-data/candles/
-.sanitize.mjs
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
 
-node_modules
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Desktop artifacts
+*.dmg
+desktop/src/renderer/_app/
+**/downloads/
+**/uploads/
+
+# Testing
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+.nyc_output/
+
+# Go binaries (never commit compiled binaries)
+desktop/backend-go/server
+desktop/backend-go/server.exe
+desktop/backend-go/server.exe~
+desktop/backend-go/main
+desktop/backend-go/migrate.exe
+desktop/backend-go/businessos-*
+desktop/backend-go/bin/
+*.exe
+*.exe~
+
+# Go backend logs and temp files
+desktop/backend-go/server_log.txt
+desktop/backend-go/server_err.txt
+desktop/backend-go/env_temp
+desktop/backend-go/env_temp_redis
+desktop/backend-go/fix_*.go
+
+# Go module cache
+.gomodcache/
+
+# Misc
+.local/
+.cache/
+tmp/
+temp/
+.claude/
+.handoffs/
+.playwright/
+.startup-logs/
+.taskmaster/
+.playwright-mcp/
+.lavish/
+
+# Generated OptimalEngine ingest output. Source workspace docs live under
+# workspaces/*/operating-system/ and indexed context lives in the active engine DB.
+workspaces/*/*/signals/
+
+# Temporary analysis and documentation files (root level)
+ANALYSIS_*.txt
+ANALYSIS_*.md
+COMMIT_*.md
+CREATE_PR_*.md
+DELETION_*.md
+PR_BODY.md
+QUICK_REFERENCE.txt
+START_HERE.txt
+UNTRACKED_*.md
+UNTRACKED_*.txt
+cookies.txt
+API_TEMPLATE_*.ts
+.mcp.json
+
+# Project-specific context files (local only, not for git)
+TASKS.md
+SESSION_*.md
+MERGE_*.txt
+MERGE_*.md
+
+# Temporary test scripts and ad-hoc test outputs (backend root)
+desktop/backend-go/test_*.go
+desktop/backend-go/test_*.sh
+desktop/backend-go/test_*.ps1
+desktop/backend-go/test_*.json
+desktop/backend-go/test_*.txt
+desktop/backend-go/test-summary.txt
+desktop/backend-go/check_*.go
+
+# Frontend test outputs
+frontend/test-results.json
+frontend/test-results/
+frontend/playwright-report/
+
+# Erlang/Elixir crash dumps
+erl_crash.dump
+
+# Frontend temporary docs
+frontend/src/lib/components/chat/ThinkingPanel.*.md
+frontend/src/lib/components/chat/*.test.svelte
+
+# Batch scripts for development (keep in local only)
+/*.bat
+nul
+
+# Compiled binaries
+bin/
+/osa
+
+# Internal/private docs (never commit)
+.internal/
+
+# Merge/backup artifacts
+*.bak
+*.merged
+*.pre-merge-bak
+*.pre-widget-bak
+
+# Personal data — NEVER commit
+desktop/backend-go/.env
+.system/index.db
+.system/*.db
+*.sqlite
+*.sqlite3
+
+# Engine build artifacts
+optimal-engine/_build/
+optimal-engine/deps/
+
+# Engine indexer-generated sidecars (regenerated on every reindex)
+workspaces/*/.optimal/*.db
+workspaces/*/.optimal/*.db-*
+workspaces/*/*/inbox/signals/
+optimal-engine/sample-workspace/**/*.abstract.md
+optimal-engine/sample-workspace/**/*.overview.md
+optimal-engine/sample-workspace/.system/
+
+# Runtime nodes created by BO modules / integration tests
+# (sample-workspace ships seed nodes — these are populated at runtime)
+optimal-engine/sample-workspace/nodes/09-new-stuff/
+optimal-engine/sample-workspace/nodes/10-businessos/
+optimal-engine/sample-workspace/nodes/11-tasks/
+optimal-engine/sample-workspace/nodes/12-projects/
+optimal-engine/sample-workspace/nodes/13-daily-log/
+optimal-engine/sample-workspace/nodes/14-crm/
+optimal-engine/sample-workspace/nodes/15-chat/
+optimal-engine/sample-workspace/nodes/17-team/
+optimal-engine/sample-workspace/nodes/18-clients/
+optimal-engine/sample-workspace/nodes/19-integration-test/
+
+# Local run state (PIDs, ports)
+.run/
+.businessos/
+desktop/.env.signing
+
+# Bundled OptimalEngine release (staged at package time via desktop/scripts/stage-engine.sh)
+desktop/resources/engine/
+.env.dev
+frontend/.vite/
+optimal-engine/CLAUDE.md

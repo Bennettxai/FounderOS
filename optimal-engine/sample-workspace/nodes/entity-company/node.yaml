@@ -1,0 +1,9 @@
+id: entity-company
+workspace_id: sample
+type: entity
+name: Example Company
+status: active
+purpose: Parent company Node for the sample workspace.
+owner: user:operator
+review_cadence: monthly
+

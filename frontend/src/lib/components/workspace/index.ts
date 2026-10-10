@@ -1,0 +1,15 @@
+export { default as WorkspaceSwitcher } from './WorkspaceSwitcher.svelte';
+export { default as WorkspaceCreateModal } from './WorkspaceCreateModal.svelte';
+export { default as WorkspaceMemoryPanel } from './WorkspaceMemoryPanel.svelte';
+export { default as MemoryVisibilitySelector } from './MemoryVisibilitySelector.svelte';
+export { default as MemorySharingModal } from './MemorySharingModal.svelte';
+export { default as WorkspaceGeneralSettings } from './WorkspaceGeneralSettings.svelte';
+export { default as WorkspaceMembersList } from './WorkspaceMembersList.svelte';
+export { default as WorkspaceRolesList } from './WorkspaceRolesList.svelte';
+export { default as WorkspaceInvitesList } from './WorkspaceInvitesList.svelte';
+export { default as InviteMemberModal } from './InviteMemberModal.svelte';
+export { default as ChangeRoleModal } from './ChangeRoleModal.svelte';
+export { default as ConfirmDeleteModal } from './ConfirmDeleteModal.svelte';
+export { default as CreateRoleModal } from './CreateRoleModal.svelte';
+export { default as EditRoleModal } from './EditRoleModal.svelte';
+export { default as PermissionsMatrixEditor } from './PermissionsMatrixEditor.svelte';

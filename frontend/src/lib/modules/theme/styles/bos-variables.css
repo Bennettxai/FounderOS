@@ -1,0 +1,466 @@
+/**
+ * BusinessOS Design System — Unified Token Source of Truth
+ * v3.0 — Consolidated from bos-variables, variables, tokens, app.css
+ *
+ * NAMING: --bos-{category}-{property}
+ * ALIASES: --dbg, --dbd, --dt (shorthand used across modules)
+ *
+ * RULE: Every color in the app should reference a token from this file.
+ *       No hardcoded hex/rgb in .svelte components.
+ */
+
+:root {
+	/* ============================================
+	   FONTS
+	   ============================================ */
+	--bos-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	--bos-font-code-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace;
+	--bos-font-number-family: 'Roboto Mono', 'SF Mono', monospace;
+
+	/* Font Sizes */
+	--bos-font-h1: 28px;
+	--bos-font-h2: 26px;
+	--bos-font-h3: 24px;
+	--bos-font-h4: 22px;
+	--bos-font-h5: 20px;
+	--bos-font-h6: 18px;
+	--bos-font-base: 15px;
+	--bos-font-sm: 14px;
+	--bos-font-xs: 12px;
+	--bos-line-height: 1.6;
+
+	/* ============================================
+	   LIGHT THEME COLORS
+	   ============================================ */
+
+	/* Brand — Monochromatic with blue accent glow */
+	--bos-brand-color: #111111;
+	--bos-primary-color: #111111;
+	--bos-secondary-color: rgba(0, 0, 0, 0.06);
+	--bos-accent-blue: #3B82F6;
+	--bos-accent-blue-rgb: 59, 130, 246;
+
+	/* Text Colors */
+	--bos-text-primary-color: #111111;
+	--bos-text-secondary-color: #6b6b6b;
+	--bos-text-tertiary-color: #a3a3a3;
+	--bos-text-disable-color: #c5c5c5;
+	--bos-text-emphasis-color: #000000;
+
+	/* V2 Text Colors */
+	--bos-v2-text-primary: #111111;
+	--bos-v2-text-secondary: #6b6b6b;
+	--bos-v2-text-tertiary: #a3a3a3;
+	--bos-v2-text-emphasis: #000000;
+	--bos-v2-text-disable: #c5c5c5;
+	--bos-v2-text-link: #111111;
+
+	/* Icon Colors */
+	--bos-v2-icon-primary: #555555;
+	--bos-v2-icon-secondary: #999999;
+	--bos-v2-icon-tertiary: #c5c5c5;
+	--bos-v2-icon-disable: #d4d4d4;
+	--bos-v2-icon-activated: #111111;
+
+	/* Layer/Background Colors */
+	--bos-v2-layer-background-primary: #ffffff;
+	--bos-v2-layer-background-secondary: #f4f4f5;
+	--bos-v2-layer-background-tertiary: #eeeef0;
+	--bos-v2-layer-background-hoverOverlay: rgba(0, 0, 0, 0.04);
+	--bos-v2-layer-background-modal: rgba(0, 0, 0, 0.4);
+	--bos-v2-layer-background-overlayPanel: #fbfbfc;
+	--bos-v2-layer-background-codeBlock: #fafafa;
+
+	/* Layer/Border Colors */
+	--bos-v2-layer-insideBorder-border: rgba(0, 0, 0, 0.08);
+	--bos-v2-layer-insideBorder-blackBorder: rgba(0, 0, 0, 0.08);
+	--bos-v2-layer-insideBorder-primaryBorder: #111111;
+
+	/* Button Colors */
+	--bos-v2-button-primary: #111111;
+	--bos-v2-button-secondary: #f5f5f5;
+	--bos-v2-button-error: #eb4335;
+	--bos-v2-button-success: #10b981;
+	--bos-v2-button-warning: #f59e0b;
+	--bos-v2-button-pureWhiteText: #ffffff;
+	--bos-v2-button-iconButtonSolid: #ffffff;
+
+	/* Status Colors */
+	--bos-success-color: #10b981;
+	--bos-warning-color: #f59e0b;
+	--bos-error-color: #eb4335;
+	--bos-processing-color: #888888;
+
+	/* Background Colors */
+	--bos-background-primary-color: #ffffff;
+	--bos-background-secondary-color: #f4f4f5;
+	--bos-background-tertiary-color: #eeeef0;
+	--bos-background-modal-color: rgba(0, 0, 0, 0.4);
+	--bos-background-code-block: #fafafa;
+	--bos-background-error-color: rgba(235, 67, 53, 0.1);
+	--bos-background-warning-color: rgba(245, 158, 11, 0.1);
+	--bos-background-success-color: rgba(16, 185, 129, 0.1);
+
+	/* Border Colors */
+	--bos-border-color: #e3e2e4;
+	--bos-divider-color: #e3e2e4;
+
+	/* Other Colors */
+	--bos-hover-color: rgba(0, 0, 0, 0.04);
+	--bos-placeholder-color: #b3b3b3;
+	--bos-quote-color: #6b6b6b;
+	--bos-link-color: #111111;
+	--bos-icon-color: #555555;
+	--bos-icon-secondary: #999999;
+	--bos-tooltip: #333333;
+
+	/* Grayscale */
+	--bos-black: #000000;
+	--bos-black-10: rgba(0, 0, 0, 0.1);
+	--bos-black-30: rgba(0, 0, 0, 0.3);
+	--bos-black-50: rgba(0, 0, 0, 0.5);
+	--bos-black-60: rgba(0, 0, 0, 0.6);
+	--bos-black-80: rgba(0, 0, 0, 0.8);
+	--bos-black-90: rgba(0, 0, 0, 0.9);
+	--bos-white: #ffffff;
+	--bos-white-10: rgba(255, 255, 255, 0.1);
+	--bos-white-30: rgba(255, 255, 255, 0.3);
+	--bos-white-50: rgba(255, 255, 255, 0.5);
+	--bos-white-60: rgba(255, 255, 255, 0.6);
+	--bos-white-80: rgba(255, 255, 255, 0.8);
+	--bos-white-90: rgba(255, 255, 255, 0.9);
+
+	/* ============================================
+	   SHADOWS
+	   ============================================ */
+	--bos-shadow-1: 0px 0px 4px rgba(66, 65, 73, 0.14);
+	--bos-shadow-2: 0px 0px 12px rgba(66, 65, 73, 0.18), inset 0px 0px 0px 0.5px rgba(227, 226, 228, 1);
+	--bos-shadow-3: 0px 0px 20px rgba(66, 65, 73, 0.22);
+	--bos-popover-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14), 0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
+	--bos-menu-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14);
+	--bos-float-button-shadow: 0px 2px 10px rgba(0, 0, 0, 0.12);
+
+	/* ============================================
+	   TAGS — Monochromatic with subtle warmth
+	   ============================================ */
+	--bos-tag-blue: #f0f0f0;
+	--bos-tag-green: #eaeaea;
+	--bos-tag-teal: #ededed;
+	--bos-tag-white: #f5f5f5;
+	--bos-tag-purple: #ebebeb;
+	--bos-tag-red: #f0eded;
+	--bos-tag-pink: #f0edef;
+	--bos-tag-yellow: #f0f0ec;
+	--bos-tag-orange: #f0edea;
+	--bos-tag-gray: #f5f5f5;
+
+	/* ============================================
+	   CTA BUTTON — Black + Blue Glow (Signature Element)
+	   The ONE color accent across the entire app.
+	   Used for primary actions: Add, Create, New buttons.
+	   Blue glow = #3B82F6 (rgb 59, 130, 246)
+	   ============================================ */
+	--bos-btn-cta-bg: #111111;
+	--bos-btn-cta-hover: #0a0a0a;
+	--bos-btn-cta-active: #000000;
+	--bos-btn-cta-text: #ffffff;
+	--bos-btn-cta-glow: 0 0 14px rgba(59, 130, 246, 0.35), 0 0 5px rgba(59, 130, 246, 0.25), 0 0 30px rgba(59, 130, 246, 0.1);
+	--bos-btn-cta-glow-hover: 0 0 24px rgba(59, 130, 246, 0.55), 0 0 10px rgba(59, 130, 246, 0.35), 0 0 44px rgba(59, 130, 246, 0.18);
+	--bos-btn-cta-glow-pulse: 0 0 20px rgba(59, 130, 246, 0.45), 0 0 8px rgba(59, 130, 246, 0.3), 0 0 38px rgba(59, 130, 246, 0.15);
+	--bos-btn-cta-radius: 10px;
+	--bos-btn-cta-border: rgba(59, 130, 246, 0.25);
+
+	/* ============================================
+	   MODAL TOKENS (Standardized)
+	   All modals should reference these instead of hardcoding
+	   ============================================ */
+	--bos-modal-backdrop: rgba(0, 0, 0, 0.5);
+	--bos-modal-backdrop-blur: 0px;
+	--bos-modal-bg: var(--bos-v2-layer-background-primary);
+	--bos-modal-border: var(--bos-border-color);
+	--bos-modal-radius: 12px;
+	--bos-modal-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+	--bos-modal-header-bg: var(--bos-v2-layer-background-secondary);
+	--bos-modal-header-border: var(--bos-border-color);
+
+	/* ============================================
+	   Z-INDEX SCALE (Unified)
+	   Replaces chaotic z-50/z-200/z-1000/z-9999/z-20000
+	   ============================================ */
+	--bos-z-base: 0;
+	--bos-z-dropdown: 100;
+	--bos-z-sticky: 200;
+	--bos-z-popover: 300;
+	--bos-z-modal-backdrop: 900;
+	--bos-z-modal: 1000;
+	--bos-z-modal-nested: 1010;
+	--bos-z-toast: 2000;
+	--bos-z-tooltip: 2500;
+
+	/* ============================================
+	   SPACING & SIZING
+	   ============================================ */
+	--bos-paragraph-space: 8px;
+	--bos-popover-radius: 12px;
+	--bos-editor-width: 800px;
+
+	/* ============================================
+	   TRANSITIONS
+	   ============================================ */
+	--bos-transition-fast: 150ms ease-out;
+	--bos-transition-normal: 200ms ease-out;
+	--bos-transition-slow: 300ms ease-out;
+
+	/* ============================================
+	   SETTINGS CARD SYSTEM
+	   Light: subtle gray fill cards
+	   Dark: transparent with border dividers (Apple style)
+	   ============================================ */
+	--bos-settings-card-bg: var(--bos-v2-layer-background-secondary);
+	--bos-settings-card-border: var(--bos-v2-layer-insideBorder-border);
+	--bos-settings-card-radius: 12px;
+	--bos-settings-input-bg: var(--bos-v2-layer-background-primary);
+	--bos-settings-section-gap: 1.5rem;
+
+	/* ============================================
+	   SEMANTIC STATUS COLORS
+	   Status colors remain consistent across themes
+	   but backgrounds adapt for contrast
+	   ============================================ */
+	--bos-status-success: #22c55e;
+	--bos-status-success-bg: rgba(34, 197, 94, 0.08);
+	--bos-status-success-text: #15803d;
+	--bos-status-warning: #f59e0b;
+	--bos-status-warning-bg: rgba(245, 158, 11, 0.08);
+	--bos-status-warning-text: #b45309;
+	--bos-status-error: #ef4444;
+	--bos-status-error-bg: rgba(239, 68, 68, 0.08);
+	--bos-status-error-text: #dc2626;
+	--bos-status-info: #3b82f6;
+	--bos-status-info-bg: rgba(59, 130, 246, 0.08);
+	--bos-status-info-text: #2563eb;
+	--bos-status-neutral: #6b7280;
+	--bos-status-neutral-bg: rgba(107, 114, 128, 0.08);
+	--bos-status-neutral-text: #4b5563;
+	--bos-status-accent: #8b5cf6;
+	--bos-status-accent-bg: rgba(139, 92, 246, 0.08);
+	--bos-status-accent-text: #7c3aed;
+
+	/* ============================================
+	   SEMANTIC PRIORITY COLORS
+	   ============================================ */
+	--bos-priority-critical: #ef4444;
+	--bos-priority-critical-bg: rgba(239, 68, 68, 0.08);
+	--bos-priority-high: #f97316;
+	--bos-priority-high-bg: rgba(249, 115, 22, 0.08);
+	--bos-priority-medium: #eab308;
+	--bos-priority-medium-bg: rgba(234, 179, 8, 0.08);
+	--bos-priority-low: #22c55e;
+	--bos-priority-low-bg: rgba(34, 197, 94, 0.08);
+
+	/* ============================================
+	   SEMANTIC SURFACE COLORS
+	   For text/icons on colored backgrounds
+	   ============================================ */
+	--bos-surface-on-color: #ffffff;
+	--bos-surface-on-color-secondary: rgba(255, 255, 255, 0.8);
+
+	/* ============================================
+	   SEMANTIC CATEGORY COLORS (Module types)
+	   Vivid category colors for icon differentiation
+	   ============================================ */
+	--bos-category-ai: #8b5cf6;
+	--bos-category-automation: #ec4899;
+	--bos-category-integration: #6366f1;
+	--bos-category-analytics: #f97316;
+	--bos-category-communication: #a855f7;
+	--bos-category-security: #14b8a6;
+	--bos-category-productivity: #3b82f6;
+	--bos-category-other: #6b7280;
+
+	/* ============================================
+	   NAVIGATION / INTERACTIVE — Blue Active State
+	   Matches CTA blue glow accent throughout
+	   ============================================ */
+	--bos-nav-active: #3B82F6;
+	--bos-nav-active-bg: rgba(59, 130, 246, 0.06);
+	--bos-nav-active-glow: rgba(59, 130, 246, 0.35);
+
+	/* ============================================
+	   AVATAR DEFAULTS
+	   ============================================ */
+	--bos-avatar-default: #333333;
+	--bos-avatar-default-text: #ffffff;
+
+	/* Theme Mode */
+	--bos-theme-mode: 'light';
+}
+
+/* ============================================
+   DARK THEME
+   ============================================ */
+.dark,
+[data-theme='dark'] {
+	/* Text Colors */
+	--bos-text-primary-color: #e8e8e8;
+	--bos-text-secondary-color: #888888;
+	--bos-text-tertiary-color: #555555;
+	--bos-text-disable-color: #3a3a3a;
+
+	/* V2 Text Colors */
+	--bos-v2-text-primary: #e8e8e8;
+	--bos-v2-text-secondary: #888888;
+	--bos-v2-text-tertiary: #555555;
+	--bos-v2-text-disable: #3a3a3a;
+
+	/* Icon Colors */
+	--bos-v2-icon-primary: #a0a0a0;
+	--bos-v2-icon-secondary: #666666;
+	--bos-v2-icon-tertiary: #4a4a4a;
+	--bos-v2-icon-disable: #333333;
+
+	/* Layer/Background Colors — True blacks, Apple-inspired */
+	--bos-v2-layer-background-primary: #0a0a0a;
+	--bos-v2-layer-background-secondary: #141414;
+	--bos-v2-layer-background-tertiary: #1e1e1e;
+	--bos-v2-layer-background-hoverOverlay: rgba(255, 255, 255, 0.04);
+	--bos-v2-layer-background-modal: rgba(0, 0, 0, 0.8);
+	--bos-v2-layer-background-overlayPanel: #111111;
+	--bos-v2-layer-background-codeBlock: #141414;
+
+	/* Layer/Border Colors */
+	--bos-v2-layer-insideBorder-border: rgba(255, 255, 255, 0.07);
+	--bos-v2-layer-insideBorder-blackBorder: rgba(255, 255, 255, 0.07);
+
+	/* Button Colors */
+	--bos-v2-button-secondary: #1e1e1e;
+	--bos-v2-button-iconButtonSolid: #1e1e1e;
+
+	/* Background Colors */
+	--bos-background-primary-color: #0a0a0a;
+	--bos-background-secondary-color: #141414;
+	--bos-background-tertiary-color: #1e1e1e;
+	--bos-background-modal-color: rgba(0, 0, 0, 0.8);
+	--bos-background-code-block: #141414;
+	--bos-background-error-color: rgba(235, 67, 53, 0.1);
+	--bos-background-warning-color: rgba(245, 158, 11, 0.1);
+	--bos-background-success-color: rgba(16, 185, 129, 0.1);
+
+	/* Border Colors */
+	--bos-border-color: #1e1e1e;
+	--bos-divider-color: #1e1e1e;
+
+	/* Other Colors */
+	--bos-hover-color: rgba(255, 255, 255, 0.04);
+	--bos-placeholder-color: #4a4a4a;
+	--bos-quote-color: #888888;
+	--bos-icon-color: #a0a0a0;
+	--bos-icon-secondary: #666666;
+	--bos-tooltip: #e8e8e8;
+
+	/* Shadows — deeper for true-black surfaces */
+	--bos-shadow-1: 0px 0px 6px rgba(0, 0, 0, 0.5);
+	--bos-shadow-2: 0px 0px 12px rgba(0, 0, 0, 0.6), inset 0px 0px 0px 0.5px rgba(255, 255, 255, 0.05);
+	--bos-shadow-3: 0px 0px 24px rgba(0, 0, 0, 0.7);
+	--bos-popover-shadow: 0px 0px 16px rgba(0, 0, 0, 0.6), 0px 0px 0px 0.5px rgba(255, 255, 255, 0.06);
+	--bos-menu-shadow: 0px 0px 16px rgba(0, 0, 0, 0.6);
+
+	/* Tags — Monochromatic dark variants */
+	--bos-tag-blue: rgba(255, 255, 255, 0.06);
+	--bos-tag-green: rgba(255, 255, 255, 0.05);
+	--bos-tag-teal: rgba(255, 255, 255, 0.055);
+	--bos-tag-white: rgba(255, 255, 255, 0.04);
+	--bos-tag-purple: rgba(255, 255, 255, 0.06);
+	--bos-tag-red: rgba(255, 255, 255, 0.055);
+	--bos-tag-pink: rgba(255, 255, 255, 0.05);
+	--bos-tag-yellow: rgba(255, 255, 255, 0.055);
+	--bos-tag-orange: rgba(255, 255, 255, 0.05);
+	--bos-tag-gray: rgba(255, 255, 255, 0.04);
+
+	/* CTA Button — Dark: BLACK button + strong blue glow that POPS */
+	--bos-btn-cta-bg: #0a0a0a;
+	--bos-btn-cta-hover: #111111;
+	--bos-btn-cta-active: #000000;
+	--bos-btn-cta-text: #ffffff;
+	--bos-btn-cta-glow: 0 0 18px rgba(59, 130, 246, 0.55), 0 0 6px rgba(59, 130, 246, 0.35), 0 0 40px rgba(59, 130, 246, 0.15);
+	--bos-btn-cta-glow-hover: 0 0 30px rgba(59, 130, 246, 0.75), 0 0 12px rgba(59, 130, 246, 0.5), 0 0 50px rgba(59, 130, 246, 0.25);
+	--bos-btn-cta-glow-pulse: 0 0 24px rgba(59, 130, 246, 0.65), 0 0 10px rgba(59, 130, 246, 0.4), 0 0 48px rgba(59, 130, 246, 0.2);
+	--bos-btn-cta-border: rgba(59, 130, 246, 0.45);
+
+	/* Modal — Dark mode adjustments */
+	--bos-modal-backdrop: rgba(0, 0, 0, 0.7);
+	--bos-modal-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+
+	/* Semantic Status Colors — Dark */
+	--bos-status-success: #4ade80;
+	--bos-status-success-bg: rgba(34, 197, 94, 0.12);
+	--bos-status-success-text: #4ade80;
+	--bos-status-warning: #fbbf24;
+	--bos-status-warning-bg: rgba(245, 158, 11, 0.12);
+	--bos-status-warning-text: #fbbf24;
+	--bos-status-error: #f87171;
+	--bos-status-error-bg: rgba(239, 68, 68, 0.12);
+	--bos-status-error-text: #f87171;
+	--bos-status-info: #60a5fa;
+	--bos-status-info-bg: rgba(59, 130, 246, 0.12);
+	--bos-status-info-text: #60a5fa;
+	--bos-status-neutral: #9ca3af;
+	--bos-status-neutral-bg: rgba(107, 114, 128, 0.12);
+	--bos-status-neutral-text: #9ca3af;
+	--bos-status-accent: #a78bfa;
+	--bos-status-accent-bg: rgba(139, 92, 246, 0.12);
+	--bos-status-accent-text: #a78bfa;
+
+	/* Semantic Priority Colors — Dark (brighter for dark backgrounds) */
+	--bos-priority-critical: #f87171;
+	--bos-priority-critical-bg: rgba(239, 68, 68, 0.12);
+	--bos-priority-high: #fb923c;
+	--bos-priority-high-bg: rgba(249, 115, 22, 0.12);
+	--bos-priority-medium: #facc15;
+	--bos-priority-medium-bg: rgba(234, 179, 8, 0.12);
+	--bos-priority-low: #4ade80;
+	--bos-priority-low-bg: rgba(34, 197, 94, 0.12);
+
+	/* Surface Colors — Dark */
+	--bos-surface-on-color: #ffffff;
+	--bos-surface-on-color-secondary: rgba(255, 255, 255, 0.85);
+
+	/* Category Colors — Dark: vivid for icon differentiation */
+	--bos-category-ai: #a78bfa;
+	--bos-category-automation: #f472b6;
+	--bos-category-integration: #818cf8;
+	--bos-category-analytics: #fb923c;
+	--bos-category-communication: #c084fc;
+	--bos-category-security: #2dd4bf;
+	--bos-category-productivity: #60a5fa;
+	--bos-category-other: #9ca3af;
+
+	/* Navigation — Dark: Blue active state, matches CTA blue glow */
+	--bos-nav-active: #60A5FA;
+	--bos-nav-active-bg: rgba(59, 130, 246, 0.1);
+	--bos-nav-active-glow: rgba(59, 130, 246, 0.5);
+
+	/* Avatar — Dark */
+	--bos-avatar-default: #555555;
+	--bos-avatar-default-text: #e8e8e8;
+
+	/* Settings Card System — Dark: transparent, border-separated (no gray boxes) */
+	--bos-settings-card-bg: transparent;
+	--bos-settings-card-border: var(--bos-v2-layer-insideBorder-border);
+	--bos-settings-input-bg: rgba(255, 255, 255, 0.04);
+
+	/* Fill variable gaps */
+	--bos-secondary-color: rgba(255, 255, 255, 0.06);
+	--bos-v2-layer-insideBorder-primaryBorder: #e8e8e8;
+	--bos-v2-button-primary: #e8e8e8;
+	--bos-v2-button-pureWhiteText: #0a0a0a;
+	--bos-text-emphasis-color: #ffffff;
+	--bos-v2-text-emphasis: #ffffff;
+	--bos-v2-text-link: #e8e8e8;
+	--bos-link-color: #e8e8e8;
+	--bos-v2-icon-activated: #e8e8e8;
+	--bos-float-button-shadow: 0px 2px 14px rgba(0, 0, 0, 0.5);
+
+	/* Theme Mode */
+	--bos-theme-mode: 'dark';
+}

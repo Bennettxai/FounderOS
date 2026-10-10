@@ -1,0 +1,40 @@
+{{define "content"}}
+<h1 class="text-center">You're invited! 🎉</h1>
+
+<p>Hi there,</p>
+
+<p><strong>{{.InviterName}}</strong> ({{.InviterEmail}}) has invited you to join <strong class="text-primary">{{.WorkspaceName}}</strong> on OSA.</p>
+
+{{if .PersonalMessage}}
+<div class="info-box">
+    <p class="text-small text-muted" style="margin: 0 0 8px 0;">Message from {{.InviterName}}:</p>
+    <p style="margin: 0; font-style: italic;">"{{.PersonalMessage}}"</p>
+</div>
+{{end}}
+
+<div class="info-box success">
+    <p class="text-center" style="margin: 0;">
+        <span class="text-muted text-small">You've been invited as</span><br>
+        <strong style="font-size: 18px;">{{.Role}}</strong>
+    </p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.InvitationLink}}" class="button bg-success">Join {{.WorkspaceName}}</a>
+</div>
+
+<div class="info-box">
+    <p class="text-small text-muted" style="margin: 0;">
+        ⏰ This invitation expires in <strong>{{.ExpiresIn}}</strong>.
+    </p>
+</div>
+
+<div class="link-fallback">
+    <p>If the button doesn't work, copy and paste this link into your browser:</p>
+    <a href="{{.InvitationLink}}">{{.InvitationLink}}</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>If you don't recognize this invitation, you can safely ignore this email.</p>
+{{end}}

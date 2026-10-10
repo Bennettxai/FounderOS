@@ -1,0 +1,174 @@
+name: "data-pipeline-creation"
+display_name: "Data Pipeline Creation"
+description: "Generate ETL/ELT data pipelines with transformation logic"
+category: "data-engineering"
+version: "1.0.0"
+tags:
+  - "etl"
+  - "data-pipeline"
+  - "analytics"
+
+variables:
+  - name: "SourceType"
+    type: "string"
+    required: true
+    description: "Source system type (e.g., 'API', 'Database', 'File', 'Stream')"
+
+  - name: "DestinationType"
+    type: "string"
+    required: true
+    description: "Destination type (e.g., 'PostgreSQL', 'BigQuery', 'S3', 'Kafka')"
+
+  - name: "TransformationRules"
+    type: "string"
+    required: true
+    description: "Business logic for data transformation"
+
+  - name: "Schedule"
+    type: "string"
+    required: false
+    default: "daily"
+    description: "Pipeline execution schedule (cron format or 'realtime')"
+
+  - name: "DataVolume"
+    type: "string"
+    required: false
+    default: "medium"
+    description: "Expected data volume (small, medium, large)"
+
+template: |
+  # Data Pipeline Generation
+
+  You are creating a data pipeline to extract data from **{{.SourceType}}**, transform it, and load it into **{{.DestinationType}}**.
+
+  ## Pipeline Configuration
+
+  - **Source**: {{.SourceType}}
+  - **Destination**: {{.DestinationType}}
+  - **Schedule**: {{.Schedule}}
+  - **Expected Volume**: {{.DataVolume}}
+
+  ## Transformation Logic
+
+  {{.TransformationRules}}
+
+  ## Implementation Requirements
+
+  ### 1. Extraction Layer
+
+  - Implement source connectors for {{.SourceType}}
+  - Handle pagination, rate limiting, and automatic retries
+  - Support incremental extraction (track watermarks/checkpoints)
+  - Error handling with dead letter queue for failed extractions
+  - Use `slog` for comprehensive logging
+
+  ### 2. Transformation Layer
+
+  - Apply business rules defined above
+  - Data validation and cleansing (nulls, duplicates, invalid formats)
+  - Type casting and normalization
+  - Schema mapping and field transformations
+  - Handle edge cases (empty datasets, schema drift, type mismatches)
+
+  ### 3. Loading Layer
+
+  - Bulk insert optimization for {{.DestinationType}}
+  - Upsert logic (handle updates to existing records)
+  - Transaction management for atomicity
+  - Idempotency (safe to run multiple times)
+  - Connection pooling and resource management
+
+  ### 4. Orchestration
+
+  {{- if eq .Schedule "realtime"}}
+  - Real-time streaming pipeline (use message queue: Kafka, Redis Streams)
+  - Exactly-once delivery semantics
+  - Low-latency processing (<1 second)
+  - Backpressure handling
+  {{- else}}
+  - Batch processing with schedule: {{.Schedule}}
+  - Dependency management (upstream/downstream pipelines)
+  - Parallel processing where possible
+  - Job queuing and prioritization
+  {{- end}}
+
+  ### 5. Monitoring & Observability
+
+  - Pipeline execution logs (using `slog` with structured fields)
+  - Data quality metrics:
+    - Row counts (extracted, transformed, loaded)
+    - Schema drift detection
+    - Data freshness (latency from source to destination)
+  - Alerting on failures, anomalies, or SLA violations
+  - Performance metrics:
+    - Throughput (records/second)
+    - Processing latency
+    - Error rates
+
+  ### 6. Error Handling & Recovery
+
+  - Dead letter queue for unprocessable records
+  - Automatic retry with exponential backoff
+  - Manual intervention workflow for non-recoverable errors
+  - Checkpoint/resume mechanism for large batches
+  - Rollback capability for failed loads
+
+  ## Technical Constraints
+
+  **IMPLEMENTATION:**
+  {{- if eq .DataVolume "large"}}
+  - Optimize for high throughput (parallel processing, batching)
+  - Use connection pooling and caching aggressively
+  - Consider distributed processing (worker pool pattern)
+  - Memory-efficient streaming (avoid loading entire dataset)
+  {{- else}}
+  - Standard implementation, prioritize readability and maintainability
+  - Simple sequential processing acceptable
+  {{- end}}
+
+  **CODE QUALITY:**
+  - Use `slog` for all logging (NO `fmt.Printf`)
+  - Context propagation (context as first parameter)
+  - Wrap errors with context: `fmt.Errorf("step failed: %w", err)`
+  - No `panic` in production code
+  - Graceful shutdown handling
+
+  **TESTING:**
+  - Unit tests for transformation logic
+  - Integration tests with test fixtures
+  - End-to-end pipeline tests (mocked source/destination)
+  - Performance tests for large datasets (if DataVolume=large)
+
+  ## Deliverables
+
+  1. **Pipeline Code** (Go)
+     - Extraction module
+     - Transformation module
+     - Loading module
+     - Orchestration/scheduling logic
+
+  2. **Configuration**
+     - Environment variables for credentials
+     - Pipeline parameters (batch size, retry limits, etc.)
+     - Monitoring thresholds and alert rules
+
+  3. **Documentation**
+     - Setup instructions
+     - Configuration guide
+     - Troubleshooting playbook
+     - Performance tuning guide
+
+  4. **Tests**
+     - Unit tests (80% coverage minimum)
+     - Integration tests
+     - Sample data fixtures
+
+  5. **Monitoring Dashboard**
+     - Pipeline status overview
+     - Data quality metrics
+     - Performance graphs
+     - Alert history
+
+  ---
+
+  **Generate the complete pipeline implementation with all components above.**

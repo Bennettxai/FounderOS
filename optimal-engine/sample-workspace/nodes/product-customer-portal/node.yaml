@@ -1,0 +1,9 @@
+id: product-customer-portal
+workspace_id: sample
+type: product
+name: Customer Portal
+status: active
+purpose: Product Node for the customer-facing portal.
+owner: team:product
+review_cadence: weekly
+

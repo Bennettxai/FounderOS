@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Task List Widget Config",
+  "type": "object",
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 50,
+      "default": 15,
+      "description": "Maximum tasks to show"
+    },
+    "filter": {
+      "type": "string",
+      "enum": ["active", "overdue", "today", "all"],
+      "default": "active",
+      "description": "Which tasks to include"
+    },
+    "show_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show completed tasks"
+    },
+    "project_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Filter to specific project"
+    },
+    "sort_by": {
+      "type": "string",
+      "enum": ["due_date", "priority", "created_at"],
+      "default": "due_date",
+      "description": "Sort order"
+    }
+  },
+  "additionalProperties": false
+}

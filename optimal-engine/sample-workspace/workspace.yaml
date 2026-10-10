@@ -1,0 +1,12 @@
+id: sample
+tenant_id: public-demo
+name: Sample Operating Workspace
+status: active
+purpose: >
+  Demonstrate how a company or operator can organize work into governed Nodes,
+  preserve source Signals, create packages, and run repeatable loops.
+default_policy:
+  visibility: internal
+  source_retention: keep
+  projection_mode: rebuildable
+

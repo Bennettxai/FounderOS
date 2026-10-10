@@ -1,0 +1,53 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 1 — builder
+# Build the SvelteKit static site (adapter-static, fallback: index.html)
+# ─────────────────────────────────────────────────────────────────────────────
+FROM node:20.14.0-alpine3.20 AS builder
+
+WORKDIR /app
+
+# Copy manifests first for layer-cached dep install
+COPY package.json package-lock.json ./
+
+# Install all deps (including devDeps needed for the build)
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --ignore-scripts
+
+# Copy application source
+COPY . .
+
+# Build the static site; output lands in build/
+# VITE_ENGINE_URL is injected at runtime via the Caddyfile proxy — bake in
+# a relative path so the built HTML works with any upstream URL.
+ARG VITE_ENGINE_URL=""
+ENV VITE_ENGINE_URL=${VITE_ENGINE_URL}
+RUN npm run build
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 2 — serve
+# Caddy as a static file server with SPA fallback routing
+# ─────────────────────────────────────────────────────────────────────────────
+FROM caddy:2.8.4-alpine AS serve
+
+# Copy built assets
+COPY --from=builder /app/build /usr/share/caddy
+
+# Caddyfile: serve SPA with try_files fallback so client-side routing works
+RUN printf ':80 {\n\
+    root * /usr/share/caddy\n\
+    encode gzip\n\
+    try_files {path} {path}/ /index.html\n\
+    file_server\n\
+    header {\n\
+        Cache-Control "public, max-age=31536000, immutable" /_app/*\n\
+        Cache-Control "no-cache" /index.html\n\
+        X-Content-Type-Options nosniff\n\
+        X-Frame-Options DENY\n\
+        Referrer-Policy strict-origin-when-cross-origin\n\
+    }\n\
+}\n' > /etc/caddy/Caddyfile
+
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+    CMD wget -qO- http://localhost:80/ || exit 1

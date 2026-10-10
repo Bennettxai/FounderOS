@@ -1,0 +1,163 @@
+name: "crm-app-generation"
+display_name: "CRM Application Generation"
+description: "Generate a full-stack CRM application tailored to the user's business"
+category: "app-generation"
+version: "1.0.0"
+tags:
+  - "crm"
+  - "full-stack"
+  - "business"
+
+variables:
+  # Required variables
+  - name: "AppType"
+    type: "string"
+    required: true
+    description: "Type of application (e.g., 'CRM', 'ERP', 'Dashboard')"
+
+  - name: "UserBusiness"
+    type: "string"
+    required: true
+    description: "User's business domain or industry"
+
+  - name: "UserRequirements"
+    type: "string"
+    required: true
+    description: "Specific user requirements or features"
+
+  # Optional variables with defaults
+  - name: "DatabasePreference"
+    type: "string"
+    required: false
+    default: "PostgreSQL"
+    description: "Preferred database system"
+
+  - name: "AvailableIntegrations"
+    type: "array"
+    required: false
+    default: []
+    description: "List of available third-party integrations"
+
+  - name: "ExistingStack"
+    type: "object"
+    required: false
+    description: "Existing tech stack information"
+
+template: |
+  # CRM Application Generation
+
+  You are generating a **{{.AppType}}** application for the user's business.
+
+  ## User Context
+
+  - **Business Domain**: {{.UserBusiness}}
+  - **Database Preference**: {{.DatabasePreference}}
+  {{- if .ExistingStack}}
+  - **Existing Tech Stack**:
+    {{- range $key, $value := .ExistingStack}}
+    - {{$key}}: {{$value}}
+    {{- end}}
+  {{- end}}
+
+  ## Available Integrations
+
+  {{- if .AvailableIntegrations}}
+  The following third-party integrations are available:
+  {{- range .AvailableIntegrations}}
+  - **{{.Name}}**: {{.Description}} ({{.Status}})
+  {{- end}}
+  {{- else}}
+  No third-party integrations are currently configured. Focus on building a standalone application.
+  {{- end}}
+
+  ## User Requirements
+
+  {{.UserRequirements}}
+
+  ## Your Task
+
+  Generate a production-ready, full-stack {{.AppType}} application with the following:
+
+  ### 1. Database Schema (PostgreSQL)
+
+  - Design normalized tables for core CRM entities (contacts, companies, deals, activities)
+  - Include audit fields (created_at, updated_at, created_by)
+  - Use PostgreSQL-specific features (JSONB, arrays, indexes)
+  - Create migration files following BusinessOS conventions
+
+  ### 2. Backend API (Go + Gin)
+
+  - RESTful endpoints for all CRUD operations
+  - Authentication and authorization middleware
+  - Input validation using struct tags
+  - Repository pattern for data access (Handler → Service → Repository)
+  - Comprehensive error handling with `slog` logging
+  - **NO `panic` calls in production code**
+  - **NO `fmt.Printf` - use `slog` for all logging**
+  - Context propagation throughout (context as first parameter)
+
+  ### 3. Frontend UI (SvelteKit + TypeScript)
+
+  - Dashboard with key metrics and charts
+  - List views with filtering, sorting, and pagination
+  - Detail views with full edit capabilities
+  - Responsive design (mobile-first approach)
+  - Dark mode support
+  - Tailwind CSS styling following BusinessOS theme
+
+  ### 4. Integration Layer
+
+  {{- if .AvailableIntegrations}}
+  - Connect to: {{range $i, $int := .AvailableIntegrations}}{{if $i}}, {{end}}{{$int.Name}}{{end}}
+  - Use OAuth 2.0 for authentication where applicable
+  - Implement retry logic with exponential backoff
+  - Rate limiting and circuit breakers
+  {{- else}}
+  - Prepare integration stubs for future third-party connectivity
+  - Design extensible integration interface
+  {{- end}}
+
+  ### 5. Testing (Minimum 80% Coverage)
+
+  - Unit tests for business logic (Go: `testify`)
+  - Integration tests for API endpoints
+  - E2E tests for critical user flows (Playwright)
+  - Database migration tests
+
+  ### 6. Documentation
+
+  - API documentation (OpenAPI/Swagger format)
+  - Setup instructions in README.md
+  - Architecture decision records (ADRs)
+  - Deployment guide (Docker + Cloud Run)
+
+  ## Technical Constraints
+
+  **MANDATORY PATTERNS:**
+  - Follow BusinessOS architecture patterns (Handler → Service → Repository)
+  - Use `slog` for all logging (NO `fmt.Printf`)
+  - All database queries via sqlc-generated code
+  - Error handling: wrap errors with context using `fmt.Errorf("...: %w", err)`
+  - Context as first parameter in all I/O functions
+  - Graceful shutdown for server processes
+
+  **CODE QUALITY:**
+  - No naked returns
+  - No `panic` in production code
+  - Input validation at handler layer
+  - Business logic in service layer
+  - Data access only in repository layer
+
+  ## Success Criteria
+
+  - ✅ Application builds without errors (`go build ./cmd/server`)
+  - ✅ All tests pass (`go test ./...`)
+  - ✅ Database migrations run cleanly
+  - ✅ Frontend connects to backend successfully
+  - ✅ At least one integration works (if available)
+  - ✅ No security vulnerabilities (`gosec`, `npm audit`)
+  - ✅ Code follows BusinessOS conventions
+
+  ---
+
+  **Begin generation now. Create all necessary files, tests, and documentation.**

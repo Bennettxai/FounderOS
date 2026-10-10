@@ -1,0 +1,266 @@
+//go:build ignore
+
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/exec"
+	"runtime"
+	"time"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+)
+
+const (
+	redirectURL = "http://localhost:8080/oauth/callback"
+)
+
+// OAuth scopes needed for testing
+var googleScopes = []string{
+	"https://www.googleapis.com/auth/gmail.send",
+	"https://www.googleapis.com/auth/gmail.readonly",
+	"https://www.googleapis.com/auth/calendar",
+	"https://www.googleapis.com/auth/calendar.events",
+}
+
+func main() {
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	fmt.Println("  BusinessOS OAuth Setup Helper")
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	fmt.Println()
+	fmt.Println("This helper will guide you through OAuth setup for Google APIs")
+	fmt.Println("(Gmail + Calendar)")
+	fmt.Println()
+
+	// Load client ID and secret from environment
+	clientID := os.Getenv("GOOGLE_OAUTH_CLIENT_ID")
+	clientSecret := os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+
+	if clientID == "" || clientSecret == "" {
+		fmt.Println("❌ Missing Google OAuth credentials")
+		fmt.Println()
+		fmt.Println("Please set these environment variables:")
+		fmt.Println("  GOOGLE_OAUTH_CLIENT_ID")
+		fmt.Println("  GOOGLE_OAUTH_CLIENT_SECRET")
+		fmt.Println()
+		fmt.Println("Get them from: https://console.cloud.google.com/apis/credentials")
+		fmt.Println()
+		fmt.Println("Instructions:")
+		fmt.Println("  1. Create OAuth 2.0 Client ID (type: Web application)")
+		fmt.Println("  2. Add redirect URI: http://localhost:8080/oauth/callback")
+		fmt.Println("  3. Enable Gmail API and Google Calendar API")
+		os.Exit(1)
+	}
+
+	// Configure OAuth2
+	config := &oauth2.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		RedirectURL:  redirectURL,
+		Scopes:       googleScopes,
+		Endpoint:     google.Endpoint,
+	}
+
+	// Generate auth URL
+	authURL := config.AuthCodeURL("state",
+		oauth2.AccessTypeOffline,
+		oauth2.SetAuthURLParam("prompt", "consent"))
+
+	fmt.Println("✓ OAuth credentials found")
+	fmt.Println()
+	fmt.Println("┌─────────────────────────────────────────────────────────────┐")
+	fmt.Println("│ STEP 1: Authorize in Browser                               │")
+	fmt.Println("└─────────────────────────────────────────────────────────────┘")
+	fmt.Println()
+	fmt.Println("Opening browser to authorize...")
+	fmt.Println()
+	fmt.Println("If browser doesn't open automatically, visit this URL:")
+	fmt.Println(authURL)
+	fmt.Println()
+
+	// Open browser
+	_ = openBrowser(authURL)
+
+	// Start local server to receive callback
+	codeChan := make(chan string)
+	errChan := make(chan error)
+
+	server := &http.Server{Addr: ":8080"}
+
+	http.HandleFunc("/oauth/callback", func(w http.ResponseWriter, r *http.Request) {
+		code := r.URL.Query().Get("code")
+		if code == "" {
+			http.Error(w, "Missing code parameter", http.StatusBadRequest)
+			errChan <- fmt.Errorf("missing code parameter")
+			return
+		}
+
+		// Send success response
+		w.Header().Set("Content-Type", "text/html")
+		fmt.Fprintf(w, `
+			<html>
+			<head><title>OAuth Success</title></head>
+			<body style="font-family: sans-serif; text-align: center; padding: 50px;">
+				<h1>✅ Authorization Successful!</h1>
+				<p>You can close this window and return to the terminal.</p>
+			</body>
+			</html>
+		`)
+
+		codeChan <- code
+	})
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			errChan <- err
+		}
+	}()
+
+	fmt.Println("Waiting for authorization...")
+
+	var code string
+	select {
+	case code = <-codeChan:
+		fmt.Println("✓ Authorization received")
+	case err := <-errChan:
+		log.Fatalf("❌ Server error: %v", err)
+	case <-time.After(5 * time.Minute):
+		log.Fatal("❌ Timeout waiting for authorization (5 minutes)")
+	}
+
+	// Shutdown server
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	server.Shutdown(ctx)
+
+	fmt.Println()
+	fmt.Println("┌─────────────────────────────────────────────────────────────┐")
+	fmt.Println("│ STEP 2: Exchange Code for Tokens                           │")
+	fmt.Println("└─────────────────────────────────────────────────────────────┘")
+	fmt.Println()
+
+	// Exchange code for token
+	token, err := config.Exchange(context.Background(), code)
+	if err != nil {
+		log.Fatalf("❌ Failed to exchange code: %v", err)
+	}
+
+	fmt.Println("✓ Tokens received")
+	fmt.Println()
+
+	// Save to .env.test.local
+	fmt.Println("┌─────────────────────────────────────────────────────────────┐")
+	fmt.Println("│ STEP 3: Save Configuration                                 │")
+	fmt.Println("└─────────────────────────────────────────────────────────────┘")
+	fmt.Println()
+
+	envFile := ".env.test.local"
+	f, err := os.OpenFile(envFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("❌ Failed to open %s: %v", envFile, err)
+	}
+	defer f.Close()
+
+	// Write refresh token
+	_, err = fmt.Fprintf(f, "\n# Generated by oauth_setup_helper.go on %s\n", time.Now().Format(time.RFC3339))
+	if err != nil {
+		log.Fatalf("❌ Failed to write to %s: %v", envFile, err)
+	}
+
+	_, err = fmt.Fprintf(f, "GOOGLE_OAUTH_REFRESH_TOKEN=%s\n", token.RefreshToken)
+	if err != nil {
+		log.Fatalf("❌ Failed to write refresh token: %v", err)
+	}
+
+	fmt.Printf("✓ Saved refresh token to %s\n", envFile)
+	fmt.Println()
+
+	// Pretty print token info
+	fmt.Println("Token Information:")
+	fmt.Println("─────────────────────────────────────────────────────────────")
+	fmt.Printf("Access Token:  %s...\n", token.AccessToken[:20])
+	fmt.Printf("Refresh Token: %s...\n", token.RefreshToken[:20])
+	fmt.Printf("Expires:       %s\n", token.Expiry.Format(time.RFC3339))
+	fmt.Println()
+
+	// Test the token
+	fmt.Println("┌─────────────────────────────────────────────────────────────┐")
+	fmt.Println("│ STEP 4: Test Token                                         │")
+	fmt.Println("└─────────────────────────────────────────────────────────────┘")
+	fmt.Println()
+
+	client := config.Client(context.Background(), token)
+
+	// Test Gmail API
+	resp, err := client.Get("https://gmail.googleapis.com/gmail/v1/users/me/profile")
+	if err != nil {
+		log.Printf("⚠ Warning: Failed to test Gmail API: %v", err)
+	} else {
+		defer resp.Body.Close()
+		if resp.StatusCode == 200 {
+			var profile map[string]interface{}
+			json.NewDecoder(resp.Body).Decode(&profile)
+			email := profile["emailAddress"]
+			fmt.Printf("✓ Gmail API: Connected as %s\n", email)
+
+			// Save email to .env.test.local
+			_, err = fmt.Fprintf(f, "GOOGLE_TEST_EMAIL=%s\n", email)
+			if err != nil {
+				log.Printf("⚠ Warning: Failed to save email: %v", err)
+			}
+		} else {
+			fmt.Printf("⚠ Gmail API: Unexpected status %d\n", resp.StatusCode)
+		}
+	}
+
+	// Test Calendar API
+	resp, err = client.Get("https://www.googleapis.com/calendar/v3/users/me/calendarList")
+	if err != nil {
+		log.Printf("⚠ Warning: Failed to test Calendar API: %v", err)
+	} else {
+		defer resp.Body.Close()
+		if resp.StatusCode == 200 {
+			fmt.Println("✓ Calendar API: Connected")
+		} else {
+			fmt.Printf("⚠ Calendar API: Unexpected status %d\n", resp.StatusCode)
+		}
+	}
+
+	fmt.Println()
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	fmt.Println("  ✅ OAuth Setup Complete!")
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	fmt.Println()
+	fmt.Println("Next steps:")
+	fmt.Println("  1. Check .env.test.local for saved credentials")
+	fmt.Println("  2. Fill in other provider credentials (Slack, Notion, etc.)")
+	fmt.Println("  3. Run live tests:")
+	fmt.Println("     go run scripts/test_live_actions.go")
+	fmt.Println()
+}
+
+// openBrowser opens the specified URL in the default browser
+func openBrowser(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "rundll32"
+		args = []string{"url.dll,FileProtocolHandler", url}
+	case "darwin":
+		cmd = "open"
+		args = []string{url}
+	default: // Linux and others
+		cmd = "xdg-open"
+		args = []string{url}
+	}
+
+	return exec.Command(cmd, args...).Start()
+}

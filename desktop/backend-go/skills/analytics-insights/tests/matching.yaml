@@ -1,0 +1,49 @@
+# Skill Matching Tests
+
+skill: analytics-insights
+
+should_match:
+  # Why questions
+  - "why are my tasks overdue"
+  - "why is the project behind"
+  - "why am I not finishing tasks"
+  
+  # Productivity questions
+  - "how am I doing this week"
+  - "how productive have I been"
+  - "am I on track"
+  - "how's my progress"
+  
+  # Trend/analysis requests
+  - "show me my productivity trends"
+  - "analyze my task completion"
+  - "what's my completion rate"
+  
+  # Comparison requests
+  - "compare this week to last week"
+  - "am I doing better than last month"
+  - "how does this sprint compare"
+  
+  # Explanation requests
+  - "explain my metrics"
+  - "what does velocity mean"
+  - "help me understand my stats"
+  
+  # Blocker analysis
+  - "what's blocking progress"
+  - "why is nothing getting done"
+  - "what's slowing us down"
+
+should_not_match:
+  # Task actions
+  - "create a task"
+  - "show me my tasks"
+  - "mark task done"
+  
+  # Dashboard (visualization)
+  - "add a chart to my dashboard"
+  - "show burndown on dashboard"
+  
+  # Simple data retrieval
+  - "what's due today"
+  - "list my projects"

@@ -1,0 +1,15 @@
+{{define "content"}}
+<p class="eyebrow">Workspace update</p>
+<h1>Your role has changed</h1>
+<p>Hi <strong>{{.UserName}}</strong>, {{.ChangedBy}} updated your role in <strong class="text-primary">{{.WorkspaceName}}</strong>.</p>
+<div class="details-list">
+    {{if .OldRole}}<dt>Previous role</dt><dd>{{.OldRole}}</dd>{{end}}
+    <dt>New role</dt><dd><span class="badge badge-accent">{{.NewRole}}</span></dd>
+</div>
+<div class="button-wrapper">
+    <a href="{{if .WorkspaceLink}}{{.WorkspaceLink}}{{else}}{{.AppURL}}{{end}}" class="button">Open workspace</a>
+</div>
+{{end}}
+{{define "footer"}}
+<p>Questions about your access? Contact your workspace admin.</p>
+{{end}}

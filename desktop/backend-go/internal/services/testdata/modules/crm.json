@@ -1,0 +1,33 @@
+{
+  "name": "CRM",
+  "version": "1.0.0",
+  "description": "Customer Relationship Management — contacts, leads, companies, and deals",
+  "category": "business",
+  "actions": [
+    { "name": "create_contact", "type": "api_call", "description": "Create a new contact record" },
+    { "name": "list_contacts", "type": "api_call", "description": "List all contacts with filters" },
+    { "name": "update_contact", "type": "api_call", "description": "Update an existing contact" },
+    { "name": "create_lead", "type": "api_call", "description": "Create a new sales lead" },
+    { "name": "list_leads", "type": "api_call", "description": "List leads with pipeline stage filter" },
+    { "name": "create_company", "type": "api_call", "description": "Create a company record" },
+    { "name": "list_companies", "type": "api_call", "description": "List all companies" },
+    { "name": "create_deal", "type": "api_call", "description": "Create a deal linked to a lead" },
+    { "name": "list_deals", "type": "api_call", "description": "List deals by stage" }
+  ],
+  "protected_schemas": ["crm_contacts", "crm_leads", "crm_companies", "crm_deals"],
+  "protected_routes": ["api/crm/*"],
+  "protected_operations": ["crm.delete_all_contacts", "crm.drop_pipeline"],
+  "migration_up": "CREATE TABLE IF NOT EXISTS crm_contacts (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), workspace_id UUID NOT NULL, name VARCHAR(255) NOT NULL, email VARCHAR(255), phone VARCHAR(50), company_id UUID, notes TEXT, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()); CREATE TABLE IF NOT EXISTS crm_leads (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), workspace_id UUID NOT NULL, contact_id UUID REFERENCES crm_contacts(id) ON DELETE SET NULL, title VARCHAR(255) NOT NULL, stage VARCHAR(50) DEFAULT 'new', value DECIMAL(12,2), created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()); CREATE TABLE IF NOT EXISTS crm_companies (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), workspace_id UUID NOT NULL, name VARCHAR(255) NOT NULL, domain VARCHAR(255), industry VARCHAR(100), size VARCHAR(50), created_at TIMESTAMPTZ DEFAULT NOW()); CREATE TABLE IF NOT EXISTS crm_deals (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), workspace_id UUID NOT NULL, lead_id UUID REFERENCES crm_leads(id) ON DELETE CASCADE, title VARCHAR(255) NOT NULL, amount DECIMAL(12,2), stage VARCHAR(50) DEFAULT 'qualification', close_date DATE, created_at TIMESTAMPTZ DEFAULT NOW());",
+  "migration_down": "DROP TABLE IF EXISTS crm_deals CASCADE; DROP TABLE IF EXISTS crm_leads CASCADE; DROP TABLE IF EXISTS crm_companies CASCADE; DROP TABLE IF EXISTS crm_contacts CASCADE;",
+  "routes": [
+    { "method": "GET", "path": "/api/crm/contacts", "handler": "ListContacts" },
+    { "method": "POST", "path": "/api/crm/contacts", "handler": "CreateContact" },
+    { "method": "PUT", "path": "/api/crm/contacts/:id", "handler": "UpdateContact" },
+    { "method": "GET", "path": "/api/crm/leads", "handler": "ListLeads" },
+    { "method": "POST", "path": "/api/crm/leads", "handler": "CreateLead" },
+    { "method": "GET", "path": "/api/crm/companies", "handler": "ListCompanies" },
+    { "method": "POST", "path": "/api/crm/companies", "handler": "CreateCompany" },
+    { "method": "GET", "path": "/api/crm/deals", "handler": "ListDeals" },
+    { "method": "POST", "path": "/api/crm/deals", "handler": "CreateDeal" }
+  ]
+}

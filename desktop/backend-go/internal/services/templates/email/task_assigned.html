@@ -1,0 +1,60 @@
+{{define "content"}}
+<div class="greeting-badge">📋 New Task</div>
+
+<h1>You've been assigned a task</h1>
+
+<p>Hi <strong>{{.UserName}}</strong>,</p>
+
+<p><strong class="text-primary">{{.AssignerName}}</strong> assigned you a new task. Here are the details:</p>
+
+<div class="info-box" style="border-left-color: {{if eq .Priority "high"}}#ef4444{{else if eq .Priority "medium"}}#f59e0b{{else}}#10b981{{end}};">
+    <div style="display: flex; align-items: flex-start;">
+        <div class="icon-circle small" style="margin-right: 16px; flex-shrink: 0;">📋</div>
+        <div>
+            <h3 style="margin: 0 0 8px 0; color: #0f172a;">{{.TaskTitle}}</h3>
+            {{if .TaskDescription}}
+            <p style="margin: 0; color: #64748b; font-size: 14px;">{{.TaskDescription}}</p>
+            {{end}}
+        </div>
+    </div>
+</div>
+
+<div class="details-list">
+    <table cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td width="50%" style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                <span style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Project</span><br>
+                <strong style="color: #1e293b;">{{.ProjectName}}</strong>
+            </td>
+            <td width="50%" style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                <span style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Priority</span><br>
+                {{if eq .Priority "high"}}
+                <span class="badge badge-danger">🔴 High</span>
+                {{else if eq .Priority "medium"}}
+                <span class="badge badge-warning">🟡 Medium</span>
+                {{else}}
+                <span class="badge badge-success">🟢 Low</span>
+                {{end}}
+            </td>
+        </tr>
+        {{if .DueDate}}
+        <tr>
+            <td colspan="2" style="padding: 12px 0;">
+                <span style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Due Date</span><br>
+                <strong style="color: #1e293b;">📅 {{.DueDate}}</strong>
+            </td>
+        </tr>
+        {{end}}
+    </table>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.TaskLink}}" class="button">View Task →</a>
+</div>
+
+<p class="text-center text-small text-muted">💡 Pro tip: Reply to this email to add a comment to the task.</p>
+{{end}}
+
+{{define "footer"}}
+<p style="color: #64748b;">Stay productive with BusinessOS! 🚀</p>
+{{end}}

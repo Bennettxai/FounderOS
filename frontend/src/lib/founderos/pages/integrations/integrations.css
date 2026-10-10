@@ -1,0 +1,5 @@
+/* /os/integrations: the active filter pill (Brand Deals chipClass(true)). */
+.bn-chip.bn-pill-on {
+	border-color: var(--bn-border-strong);
+	background: var(--bn-surface-2);
+}

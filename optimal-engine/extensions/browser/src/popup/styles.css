@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Foundation tokens ─────────────────────────────────────────────────────── */
+:root {
+  --bg: #0a0a0f;
+  --bg-secondary: #111118;
+  --bg-elevated: #1a1a24;
+  --bg-border: #2a2a38;
+  --text: #e8e8f0;
+  --text-secondary: #9090a8;
+  --text-muted: #606078;
+  --accent: #7ea8ff;
+  --accent-hover: #a0bfff;
+  --accent-muted: rgba(126, 168, 255, 0.15);
+  --success: #4ade80;
+  --error: #f87171;
+  --radius: 6px;
+}
+
+/* ── Base resets ───────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 380px;
+  min-height: 480px;
+  max-height: 600px;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-border);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ── Focus ring ────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* ── Utility classes ───────────────────────────────────────────────────────── */
+@layer components {
+  .btn-primary {
+    @apply flex items-center justify-center gap-2 rounded bg-accent px-3 py-1.5 text-sm font-medium text-bg transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-ghost {
+    @apply flex items-center justify-center gap-2 rounded px-3 py-1.5 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .input {
+    @apply w-full rounded border border-bg-border bg-bg-secondary px-3 py-1.5 text-sm text-text-primary placeholder-text-muted outline-none transition-colors focus:border-accent;
+  }
+
+  .select {
+    @apply w-full rounded border border-bg-border bg-bg-secondary px-3 py-1.5 text-sm text-text-primary outline-none transition-colors focus:border-accent;
+  }
+
+  .card {
+    @apply rounded-md border border-bg-border bg-bg-elevated p-3;
+  }
+
+  .tag {
+    @apply inline-block rounded-sm bg-accent-muted px-1.5 py-0.5 text-xs text-accent;
+  }
+}

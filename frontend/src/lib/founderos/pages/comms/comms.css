@@ -1,0 +1,16 @@
+/* /os/comms page-local: prod's `.os-slab .rounded-tile` rule (globals.css)
+   pads every rounded-tile box 22px all round and brightens its border on
+   hover. Doubled class so it outranks the shared pc-* hairline rules,
+   which sit outside Tailwind's layers. */
+.cm-tile.cm-tile {
+	padding: 22px;
+}
+.cm-tile.cm-tile:hover {
+	border-color: var(--bn-border-strong);
+}
+/* v1's `.os-slab .rounded-tile > div:nth-child(2) { font-size: 34px }` lands
+   on the message list's empty state (its second child), so v1 reads
+   "All is clear." large; the list-empty block inherits it here. */
+.cm-tile.cm-tile > [data-part='list-empty'] {
+	font-size: 34px;
+}

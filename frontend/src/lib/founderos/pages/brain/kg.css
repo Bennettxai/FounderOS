@@ -1,0 +1,110 @@
+/* Page-local styles for the /os/brain knowledge graph: FounderOS v1's
+   KnowledgeGraph gridStyle block and the handful of Tailwind os-* utilities
+   its cards use, on the port's --bn-* tokens. Every class is kg- prefixed. */
+.kg-b { border-color: var(--bn-border); }
+.kg-bs { border-color: var(--bn-border-strong); }
+.kg-bg { background: var(--bn-bg); }
+.kg-bg80 { background: color-mix(in oklab, var(--bn-bg) 80%, transparent); }
+.kg-bg85 { background: color-mix(in oklab, var(--bn-bg) 85%, transparent); }
+.kg-bg90 { background: color-mix(in oklab, var(--bn-bg) 90%, transparent); }
+.kg-bg95 { background: color-mix(in oklab, var(--bn-bg) 95%, transparent); }
+.kg-surf { background: var(--bn-surface); }
+.kg-surf2 { background: var(--bn-surface-2); }
+.kg-blur { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.kg-accent { color: var(--bn-accent); }
+.kg-warn { color: var(--bn-warn); }
+.kg-err { color: var(--bn-err); }
+.kg-h-text:hover { color: var(--bn-text); }
+.kg-h-muted:hover { color: var(--bn-text-2); }
+.kg-h-accent:hover { color: var(--bn-accent); }
+.kg-h-err:hover { color: var(--bn-err); }
+.kg-h-bs:hover { border-color: var(--bn-border-strong); }
+.kg-h-dimb:hover { border-color: var(--bn-text-3); }
+.kg-h-surf:hover { background: var(--bn-surface); }
+.kg-h-surf2:hover { background: var(--bn-surface-2); }
+.kg-h-o70:hover { opacity: 0.7; }
+.kg-h-o80:hover { opacity: 0.8; }
+.group:hover .kg-gh-text { color: var(--bn-text); }
+.group:hover .kg-gh-muted { color: var(--bn-text-2); }
+.group:hover .kg-gh-show { opacity: 1; }
+.kg-fade-state { transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease; }
+.kg-focus-accent:focus { border-color: var(--bn-accent); }
+.kg-input::placeholder { color: var(--bn-text-3); }
+
+/* ── the graph's own animations (KnowledgeGraph gridStyle) ── */
+@keyframes kg-drift { from { background-position: 0 0; } to { background-position: 44px 44px; } }
+.kg-grid {
+	background-image:
+		linear-gradient(to right, var(--bn-border-strong) 1px, transparent 1px),
+		linear-gradient(to bottom, var(--bn-border-strong) 1px, transparent 1px);
+	background-size: 44px 44px;
+	opacity: 0.4;
+	animation: kg-drift 26s linear infinite;
+}
+@keyframes kg-grow { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes kg-dash-move { to { stroke-dashoffset: -8.5; } }
+@keyframes kg-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes kg-leaf-in { from { opacity: 0; transform: scale(0.2); } to { opacity: 0.55; transform: scale(1); } }
+@keyframes kg-glow-in { from { opacity: 0; } to { opacity: 1; } }
+.kg-grow { stroke-dasharray: 1; stroke-dashoffset: 1; animation: kg-grow 1.1s ease forwards; }
+.kg-dash { stroke-dasharray: 1.5 7; stroke-dashoffset: 0; animation: kg-dash-move 1s linear infinite; }
+@keyframes kg-ray-move { to { stroke-dashoffset: -10; } }
+.kg-ray { stroke-dasharray: 5 5; stroke-dashoffset: 0; animation: kg-ray-move 1.6s linear infinite; }
+@keyframes kg-note-drift { from { transform: translate(0, 0); } to { transform: translate(var(--kg-ddx, 0px), var(--kg-ddy, 0px)); } }
+@keyframes kg-breathe { from { opacity: 0.62; } to { opacity: 1; } }
+@keyframes kg-glow-breathe { from { opacity: 0.036; } to { opacity: 0.108; } }
+.kg-core-glow { opacity: 0.06; animation: kg-glow-breathe 7s ease-in-out infinite alternate; }
+@keyframes kg-stir { from { transform: translate(0, 0); } to { transform: translate(var(--kg-sdx, 0px), var(--kg-sdy, 0px)); } }
+.kg-mem-stir { animation-play-state: paused !important; }
+.kg-stirring .kg-mem-stir { animation-play-state: running !important; }
+.kg-core-open .kg-mem-layer { animation: kg-breathe 9s ease-in-out infinite alternate !important; }
+.kg-core-open .kg-mem-stir { animation: none !important; }
+.kg-transitioning .kg-mem-layer, .kg-transitioning .kg-mem-stir, .kg-transitioning .kg-core-glow { animation-play-state: paused !important; }
+.kg-fast-raster, .kg-fast-raster * { shape-rendering: optimizeSpeed; }
+@keyframes kg-mem-in { from { opacity: 0; } to { opacity: 1; } }
+.kg-mem-in { animation: kg-mem-in 600ms ease 150ms both; }
+@keyframes kg-exit-fade { from { opacity: 0.9; } to { opacity: 0; } }
+.kg-tree-exit { animation: kg-exit-fade 240ms ease forwards; }
+@keyframes kg-web-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.kg-web-in { animation: kg-web-fade-in 320ms ease both; }
+.kg-fade { opacity: 0; animation: kg-fade-in 0.7s ease 0.25s forwards; }
+.kg-leaf { transform-box: fill-box; transform-origin: center; opacity: 0; animation: kg-leaf-in 0.6s ease 0.2s forwards; }
+.kg-glow { opacity: 0; animation: kg-glow-in 0.9s ease forwards; }
+@keyframes kg-panel-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.kg-panel { animation: kg-panel-in 340ms cubic-bezier(0.22, 1, 0.36, 1); }
+/* info neurons on the pillar + SOP lines (app/globals.css .kg-synapse) */
+.kg-synapse { stroke-dasharray: 0.14 0.86; animation: kg-synapse-flow 5s linear infinite; animation-delay: var(--kg-syn-delay, 0s); opacity: 0.55; }
+.kg-synapse-sm { stroke-dasharray: 0.07 0.93; animation: kg-synapse-flow 4s linear infinite; animation-delay: var(--kg-syn-delay, 0s); opacity: 0.38; }
+@keyframes kg-synapse-flow { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+/* the node hover card enters on the shared `enter` motion */
+@keyframes kg-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.kg-enter { animation: kg-enter 0.3s var(--bn-ease-lens, ease) both; }
+/* the neural view's idle shimmer */
+@keyframes ng-shimmer { from { opacity: 0.72; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+	.kg-grid { animation: none; }
+	.kg-grow, .kg-dash, .kg-ray, .kg-fade, .kg-leaf, .kg-glow, .kg-panel, .kg-web-in, .kg-enter { animation: none; }
+	.kg-mem-layer, .kg-mem-stir, .kg-core-glow, .kg-mem-in { animation: none !important; }
+	.kg-mem-in { opacity: 1; }
+	.kg-tree-exit { display: none; }
+	.kg-grow { stroke-dashoffset: 0; }
+	.kg-fade { opacity: 1; }
+	.kg-leaf { opacity: 0.55; transform: none; }
+	.kg-glow { opacity: 1; }
+	.kg-synapse, .kg-synapse-sm { animation: none; opacity: 0.3; }
+	[style*='ng-shimmer'] { animation: none !important; }
+}
+
+/* production's graph tokens (app/globals.css): tools burn red on the monolith
+   radial, the vault one ember, people warn, agents the accent. Themes that
+   re-skin the graph override these from theme/monolith.css. */
+.bn-kg {
+	--bn-kg-tool: #ff2d3f;
+	--bn-kg-mem: #e35c35;
+	--bn-kg-person: var(--bn-warn);
+	--bn-kg-employee: var(--bn-accent);
+}
+:root[data-founderos-theme='terminal'] .bn-kg {
+	--bn-kg-tool: var(--bn-brain-2);
+}

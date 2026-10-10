@@ -1,45 +1,73 @@
 # Founder OS
 
-**A personal operating system for a one-person business: a live web command
-center that runs your company as a set of AI-assisted "departments."**
+**A personal operating system for a single person company: a command center
+that runs your business as a set of AI-assisted "departments."**
 
-Founder OS turns the tabs, tools, and mental overhead of running a solo business
+Built for whoever is holding the whole thing together: a freelancer, a
+solopreneur, a solo founder, or a small team where one person still runs point.
+You set the direction, AI agents cover the departments, and any employees you do
+have plug into the same board.
+
+Founder OS turns the tabs, tools and mental overhead of running that business
 into one screen: unified comms, a client funnel, social growth, finances, a
 knowledge graph, and a roster of named AI agents that each own a real job.
 
-This repository is the **open-source demo build**. It ships seeded with
-realistic placeholder data, so every page is alive out of the box with no
-accounts, no API keys, and nothing to configure. It's the same system taught,
-live, in the [Founder OS cohort](https://founderos.sh); this repo lets
-you explore and run it yourself.
-
-> Want to build your own, live, with guidance? That's what the cohort is for.
+> Want to build your own, live, with guidance? That's what the cohort is for:
 > [founderos.sh](https://founderos.sh)
+
+---
+
+## v2: Founder OS on BusinessOS
+
+Founder OS v1 was a Next.js + SQLite app. v2 keeps the same operator UI and runs
+it on the [BusinessOS](https://github.com/Miosa-osa/BusinessOS) stack:
+
+| Layer | v1 | v2 |
+| --- | --- | --- |
+| Frontend | Next.js 14 (React) | SvelteKit 2 (Svelte 5) |
+| Backend | Next.js API routes | Go (Gin) |
+| Operational data | SQLite (better-sqlite3) | PostgreSQL + Redis |
+| Knowledge / memory | G-Brain | [Optimal Engine](https://github.com/Miosa-osa/OptimalEngine) (Elixir/OTP), bundled |
+| Desktop | — | Electron shell (optional) |
+
+The operator views live under `/os`. Everything else BusinessOS provides
+(workspaces, roles, teams, the module desktop, the terminal) comes with it.
+The last v1 release is tagged `v1-nextjs`.
 
 ---
 
 ## Quick start
 
-Requires **Node 22**.
+Prerequisites (macOS shown):
 
 ```bash
-npm install
-cp .env.example .env.local   # optional; only needed to wire live integrations
-npm run dev                  # http://localhost:4100
+brew install node@22 go postgresql@17 pgvector redis elixir python
+corepack enable && corepack prepare pnpm@9.15.4 --activate
 ```
 
-A local SQLite database is **seeded with demo data on first run**, so every page
-is populated immediately. No credentials are required to browse. Navigate with
-the sidebar or the Command Palette (Cmd/Ctrl + K). Five themes ship, including
-the Monolith default (white on black, color means status only); pick it from the
-palette icon in the top bar.
+The schema needs the `vector` extension. Homebrew's `pgvector` bottle builds for
+its current Postgres releases (17/18), so pair it with `postgresql@17`; on another
+Postgres, build pgvector for it, or point the launcher at a matching install
+with `BUSINESSOS_PG_BIN=/path/to/pg/bin`.
+
+Then:
 
 ```bash
-npm run build && npm start   # production build
-npm test                     # vitest suite
-npm run typecheck            # tsc --noEmit
-npm run seed                 # re-seed the demo DB (idempotent)
+BUSINESSOS_HEADLESS=1 make dev-local   # Postgres, Redis, Optimal Engine, backend, frontend
+                                       # (drop BUSINESSOS_HEADLESS=1 to also open the desktop app)
+open http://localhost:5273/register    # create your local account
+make demo OWNER=you@example.com        # Founder OS workspaces + the demo data
+open http://localhost:5273/os          # the operator console
 ```
+
+`make demo` creates four workspaces (HQ, Vantage, Launchpad Cohort, Personal),
+loads the demo's seeded data into Postgres and its knowledge into the Optimal
+Engine. It is idempotent; re-running it refreshes the demo and moves its dates
+to today. No credentials are needed to browse.
+
+Ports live in `.env.dev`; `make dev-local-status` shows what is running and
+`make dev-local-stop` stops it. See [docs/BUSINESSOS.md](docs/BUSINESSOS.md) for
+the platform's own setup notes.
 
 ---
 
@@ -47,192 +75,81 @@ npm run seed                 # re-seed the demo DB (idempotent)
 
 | Route | What it is |
 | --- | --- |
-| `/` | Operator console: pulse row, connections strip, agent list, knowledge core |
-| `/comms` | Unified inbox: email, Slack, WhatsApp, and dictation lanes in one feed |
-| `/funnel` | Living client-journey flow: a left-to-right neural view and a radial acquisition wheel, both fullscreenable |
-| `/social` | Growth dashboard: per-account follower charts, audience share, posting cadence |
-| `/content` | Content pipeline and calendar |
-| `/finances` | Income and expense charts, money-out views, expenses by category |
-| `/agents` | The AI agent roster, each with a real `run()` and last-run state |
-| `/tasks` | Task board fed by the agents |
-| `/skills` | Reusable, schedulable agent skills |
-| `/org` | Org hierarchy: operator, conductor, pillars, workers |
-| `/brain` | The knowledge core and graph (see **Knowledge layer** below) |
-| `/workflows` | Multi-step tool workflows |
-| `/integrations` | Live connections board with honest status for every connector |
-| `/analytics` | Real connector numbers and sparkline history |
-| `/roadmap`, `/reference` | Phases and quarters, and the reference model |
-| `/brand-deals` | Sponsorship pipeline as one slab: hatched funnel, deal volume meters, sortable deals, detail drawer |
-| `/trading` | Brokerage monitor: sleeve value line, agent reasoning, positions, open orders, trade log, guardrail limits with an Autopilot switch |
-| `/chats` | Chat hub: talk to any agent, with the Conductor routing |
-| `/adpilot`, `/blueprint` | Paid-media planner and the system blueprint |
-| `/doctor` | Health checks for the knowledge layer and connectors |
-| `/usage` | Token-burn board across model seats |
-| `/personas` | Persona templates that reskin the OS for other business types |
+| `/os` | Operator console: pulse row, what needs you, operating volume |
+| `/os/comms` | Unified inbox: email, Slack, WhatsApp, calendar and recorder lanes |
+| `/os/funnel` | Living client-journey flow and acquisition wheel |
+| `/os/workflows` | Multi-step tool workflows, as a tree and a builder |
+| `/os/social`, `/os/content` | Growth dashboard; content pipeline, calendar and lead magnets |
+| `/os/brand-deals`, `/os/finances`, `/os/trading`, `/os/adpilot` | Deals, money, brokerage monitor, paid-media planner |
+| `/os/agents`, `/os/chats`, `/os/tasks`, `/os/skills` | The agent roster, chat hub, task board and skills |
+| `/os/org`, `/os/blueprint` | Org hierarchy (operator → Conductor → pillars → workers) and the system blueprint |
+| `/os/brain`, `/os/doctor` | The knowledge core on the Optimal Engine, and its health |
+| `/os/integrations`, `/os/usage`, `/os/analytics` | Connections board, token usage, connector numbers |
+| `/os/roadmap`, `/os/reference`, `/os/personas` | Phases and quarters, the reference model, persona templates |
 
-Every screen runs the same interaction layer: a cursor spotlight across the whole viewport, a hover lens on every control, press-sink buttons, async idle → busy → done affordances, sliding tabs, and slab motion (cards rise in, lines draw, numerals count).
+Navigate with the sidebar or the command palette (Cmd/Ctrl + K; digits 1–9 jump
+to the first nine views).
 
 ---
 
 ## Architecture: demo-first, real-ready
 
-This is the load-bearing design rule. The demo looks alive because of rich
-seeded data, but **every page and API route reads through a repository layer**
-(never a raw query), and **every connector returns an honest status** (it never
-fakes "connected"). Swapping seeded tables for live sources is a repo-level
-change, not a rewrite.
-
-- **`lib/data.ts`**: `getDb()` app singleton; seeds on first touch.
-- **`lib/db.ts`**: `openDb()` plus typed repositories (`agents`, `departments`,
-  `social`, `funnel`, `finances`, and more).
-- **`lib/seed.ts`**: all seeded demo content lives here.
-- **`lib/schemas.ts`**: Zod schemas validate every row on the way **out** of the
-  DB, so bad data fails loud.
-- **`lib/connectors/*`**: 20+ connector groups (email/IMAP, Slack, Stripe,
-  Notion, calendar, CRM, social, and more). Each returns a typed
-  `ConnectorStatus` of `connected`, `not_configured`, or `error`: always the
-  truth, never a fake green light.
-- **`lib/agents/*`**: every seeded agent maps one-to-one to a runtime agent with
-  a real `run()`; runs persist and surface on `/agents`.
-
-New data means a new repo method, a Zod schema, a seed entry, and a test. Keep
-it that way.
-
----
-
-## Knowledge layer: G-Brain and Optimal Engine
-
-The `/brain` graph you see in the demo is the visible surface of a two-part
-knowledge system that powers the production build.
-
-### G-Brain, the knowledge base
-
-Plain **Markdown files are the source of truth**. They're chunked and embedded
-into a vector store, so one store answers both **keyword** and **semantic**
-queries (hybrid retrieval with reciprocal-rank fusion). If the vector backend is
-unreachable, retrieval falls back to a local grep over the markdown: fewer
-smarts, zero downtime. The demo ships a stub provider; the production provider
-reads a live markdown store and a vector index.
-
-### Optimal Engine, the governed memory runtime
-
-Where G-Brain stores documents, **Optimal Engine governs what the OS actually
-"knows."** It's the system of record for memory, organized as a
-**Tenant, Organization, Workspace, Node** topology, with a disciplined truth
-lifecycle:
+The demo looks alive because of seeded data, but every view reads through the
+same path a live install uses, and every connector reports its honest state
+(`connected`, `not_configured` or `error`), never a fake green light.
 
 ```
-Source -> Signal -> Claim -> Fact -> Memory
+frontend/src/routes/(founderos)/os/      SvelteKit routes, one per view
+frontend/src/lib/founderos/              views, kit (slab, charts, motion), chrome
+desktop/backend-go/internal/founderos/
+  api/          GET /api/founderos/pages/<view> and actions
+  pages/        page builders (read Postgres + connectors + the engine)
+  connectors/   24 integrations, honest status, writes behind FOUNDEROS_WRITES
+  agents/       the agent registry; every seeded agent has a real run()
+  memory/       retrieval over the Optimal Engine
+  seed/, etl/   the demo data and the loader behind `make demo`
+config/founderos/engine-topology.yaml    which engine each workspace's memory lives on
+optimal-engine/                          the bundled Elixir engine
 ```
 
-Raw sources produce signals; signals become claims; claims are reviewed and
-promoted into verified facts; facts distill into durable memories the agents
-draw on. Agents may write sources, signals, and pending claims, but **facts are
-promotion-gated**: nothing becomes "known" without passing review. That keeps
-the OS's memory trustworthy as it scales across workspaces.
+Data lives in `founderos_*` Postgres tables, scoped by workspace. Knowledge
+lives in the Optimal Engine: agents write sources, signals and pending claims;
+facts are promotion-gated, so memory stays trustworthy as more agents write to it.
 
-Together: **G-Brain is the library; Optimal Engine is the librarian and the
-system of record.** The agents query both before they act.
-
----
-
-## The full plan (production)
-
-The demo is self-contained (Next.js plus seeded SQLite). The production build
-keeps the same repo-layer contract and swaps in real backends:
-
-- **Hosting: [Railway](https://railway.app).** The Next.js app deploys as a
-  Railway service; the seeded SQLite store is replaced by a managed database,
-  and the knowledge services (G-Brain retrieval and Optimal Engine) run as
-  companion services alongside it. Env vars are managed per environment.
-- **Knowledge: G-Brain and Optimal Engine** become the live knowledge and memory
-  layer behind `/brain` and every agent.
-- **Connectors go live.** Because each connector already reports honest status,
-  wiring a real source (IMAP inboxes, Slack, Stripe, Notion, a CRM, calendar,
-  social) is just supplying credentials. The UI immediately reflects real state
-  instead of seeded data.
-- **Agents run for real.** Each agent's `run()` executes against the live
-  connectors and the knowledge layer, on a schedule, with runs persisted.
-
-Same interface you see in this demo, backed by your real business instead of
-placeholder data.
+**Safety switches.** `FOUNDEROS_WRITES=1` allows outbound writes (sends, posts,
+payments); `FOUNDEROS_CRONS=1` allows scheduled agent runs. Both are off unless
+you turn them on.
 
 ---
 
-## Project structure
+## Credentials
 
-```
-app/                 Next.js App Router; one folder per view plus /api routes
-components/          UI: dashboard sections, graphs, terminal primitives
-lib/
-  data.ts db.ts      repository layer plus app DB singleton
-  seed.ts            all seeded demo content
-  schemas.ts         Zod schemas (validate every DB/API boundary)
-  connectors/        20+ honest-status integrations
-  agents/            agent registry plus runtimes
-  knowledge-graph.ts, memory-core.ts   brain graph plus memory model
-scripts/             seed plus doc-generation scripts
-tests/               vitest suite (one file per module)
-```
+Connectors read keys from the process environment, `~/.founderos/.env`, or keys
+planted through the Connections board. Nothing else on your machine is read.
+Never commit keys. `.env*` files are gitignored.
 
 ---
 
-## Configuration
-
-All configuration is via environment variables. Copy `.env.example` to
-`.env.local` and fill in only what you want to wire up; everything else stays in
-honest "not configured" mode. `.env.local` is gitignored.
-
-**Never commit real keys.** The demo runs fully without any of them.
-
----
-
-## Tech stack
-
-- **Next.js 14** (App Router, server components) plus **TypeScript**
-- **Tailwind CSS**: monochrome "Monolith" theme with pickable colorways
-- **better-sqlite3**: seeded local store (WAL)
-- **Zod**: schema validation at every boundary
-- **Vitest**: test suite
-- **Vercel AI SDK**: agent LLM calls
-- **d3-force**, **lucide-react**, **simple-icons**: graph physics and iconography
-
----
-
-## Testing
+## Tests
 
 ```bash
-npm test          # run the full vitest suite
-npm run typecheck # tsc --noEmit
+make test                                   # Go + frontend suites
+cd frontend && npx vitest run src/lib/founderos
+cd desktop/backend-go && go test ./internal/founderos/...
 ```
 
-Tests live in `tests/`, one file per module, using an in-memory SQLite pattern
-so they never touch the seeded dev DB.
+Go tests create throwaway databases on this checkout's dev Postgres (the
+`POSTGRES_PORT` in `.env.dev`); set `FOUNDEROS_PG_ADMIN_URL` to use another.
+Write the failing test first.
 
 ---
 
-## Deploying to Railway
+## Credits
 
-1. Create a Railway project and point it at this repo.
-2. Set the build command to `npm run build` and the start command to `npm start`
-   (the app serves on the `PORT` Railway provides).
-3. Add a database service and any connector credentials as environment variables
-   in the Railway dashboard.
-4. Deploy. The knowledge services (G-Brain and Optimal Engine) run as companion
-   services and are referenced by URL from the app's environment.
-
----
-
-## Note on the demo data
-
-This is a demo build. All names, companies, clients, financial figures, and
-social numbers are **placeholder data**. Nothing here is real.
+Founder OS v2 is built on [BusinessOS](https://github.com/Miosa-osa/BusinessOS)
+and [Optimal Engine](https://github.com/Miosa-osa/OptimalEngine) by Roberto H.
+Luna and the Miosa team. If you use this stack, star their repos.
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
-
----
-
-Built as the reference implementation for **Founder OS**.
-[founderos.sh](https://founderos.sh)
+MIT, see [LICENSE](LICENSE).

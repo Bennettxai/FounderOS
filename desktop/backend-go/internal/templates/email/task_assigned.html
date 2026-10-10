@@ -1,0 +1,41 @@
+{{define "content"}}
+<h1>New task assigned to you</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p><strong>{{.AssignerName}}</strong> assigned you a new task:</p>
+
+<div class="info-box">
+    <h2 style="margin: 0 0 12px 0;">📋 {{.TaskTitle}}</h2>
+    {{if .TaskDescription}}
+    <p style="margin: 0; color: #6b7280;">{{.TaskDescription}}</p>
+    {{end}}
+</div>
+
+<dl class="details-list">
+    <dt>Project</dt>
+    <dd>{{.ProjectName}}</dd>
+    <dt>Priority</dt>
+    <dd>
+        {{if eq .Priority "high"}}
+        <span class="text-danger">🔴 High</span>
+        {{else if eq .Priority "medium"}}
+        <span class="text-warning">🟡 Medium</span>
+        {{else}}
+        <span class="text-success">🟢 Low</span>
+        {{end}}
+    </dd>
+    {{if .DueDate}}
+    <dt>Due Date</dt>
+    <dd>{{.DueDate}}</dd>
+    {{end}}
+</dl>
+
+<div class="button-wrapper">
+    <a href="{{.TaskLink}}" class="button">View Task</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>Reply to this email to add a comment to the task.</p>
+{{end}}

@@ -1,0 +1,47 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 1 — builder
+# Build the SvelteKit docs site (adapter-static, assumed at apps/docs/)
+#
+# ASSUMPTION: apps/docs/ will be present and contain a standard SvelteKit
+# project with `npm run build` producing output in apps/docs/build/.
+# This Dockerfile is built with `context: ../apps/docs` so all paths are
+# relative to that directory.
+# ─────────────────────────────────────────────────────────────────────────────
+FROM node:20.14.0-alpine3.20 AS builder
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --ignore-scripts
+
+COPY . .
+
+RUN npm run build
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 2 — serve
+# ─────────────────────────────────────────────────────────────────────────────
+FROM caddy:2.8.4-alpine AS serve
+
+COPY --from=builder /app/build /usr/share/caddy
+
+RUN printf ':80 {\n\
+    root * /usr/share/caddy\n\
+    encode gzip\n\
+    try_files {path} {path}/ /index.html\n\
+    file_server\n\
+    header {\n\
+        Cache-Control "public, max-age=31536000, immutable" /_app/*\n\
+        Cache-Control "no-cache" /index.html\n\
+        X-Content-Type-Options nosniff\n\
+        X-Frame-Options SAMEORIGIN\n\
+        Referrer-Policy strict-origin-when-cross-origin\n\
+    }\n\
+}\n' > /etc/caddy/Caddyfile
+
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+    CMD wget -qO- http://localhost:80/ || exit 1

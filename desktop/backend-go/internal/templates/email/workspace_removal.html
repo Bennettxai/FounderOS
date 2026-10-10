@@ -1,0 +1,26 @@
+{{define "content"}}
+<h1>You've been removed from a workspace</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p>You've been removed from <strong>{{.WorkspaceName}}</strong>.</p>
+
+<div class="info-box">
+    <dl class="details-list" style="margin: 0;">
+        <dt>Removed by</dt>
+        <dd>{{.RemovedBy}}</dd>
+        <dt>Time</dt>
+        <dd>{{.RemovalTime}}</dd>
+        {{if .Reason}}
+        <dt>Reason</dt>
+        <dd>{{.Reason}}</dd>
+        {{end}}
+    </dl>
+</div>
+
+<p class="text-muted">You no longer have access to this workspace's projects, tasks, and files.</p>
+{{end}}
+
+{{define "footer"}}
+<p>If you believe this was a mistake, please contact the workspace administrator.</p>
+{{end}}

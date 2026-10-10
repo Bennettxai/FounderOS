@@ -1,0 +1,64 @@
+{
+  "name": "businessos-desktop",
+  "productName": "BusinessOS",
+  "version": "1.0.8",
+  "description": "BusinessOS Desktop Application - Your business command center",
+  "main": ".vite/build/index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "premake": "node scripts/rebuild-dmg-native.cjs",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "tsc --noEmit",
+    "test:engine-key": "tsx --test src/main/engine/credential-key.test.ts",
+    "smoke:primitives": "../scripts/smoke-packaged-primitives.sh",
+    "release:metadata": "node scripts/generate-updater-metadata.mjs",
+    "release:upload-metadata": "node scripts/upload-updater-metadata.mjs",
+    "build:frontend": "./scripts/build-frontend.sh",
+    "build:backend": "./scripts/build-backend.sh",
+    "build:all": "npm run build:frontend && npm run build:backend"
+  },
+  "keywords": [
+    "business",
+    "productivity",
+    "desktop",
+    "electron"
+  ],
+  "author": {
+    "name": "BusinessOS Team"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@electron-forge/cli": "^7.2.0",
+    "@electron-forge/maker-deb": "^7.2.0",
+    "@electron-forge/maker-dmg": "^7.2.0",
+    "@electron-forge/maker-rpm": "^7.2.0",
+    "@electron-forge/maker-squirrel": "^7.2.0",
+    "@electron-forge/maker-zip": "^7.2.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.2.0",
+    "@electron-forge/plugin-vite": "^7.2.0",
+    "@electron-forge/publisher-github": "^7.2.0",
+    "@electron/rebuild": "^3.7.2",
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^20.19.27",
+    "canvas": "^3.2.0",
+    "electron": "^28.3.3",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "vite": "^5.0.11"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.3.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.7",
+    "node-pty": "^1.1.0"
+  },
+  "allowScripts": {
+    "electron@28.3.3": true
+  }
+}

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSA Email Template Preview</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f9fafb;
+            margin: 0;
+            padding: 48px 20px;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Template selector */
+        .template-nav {
+            max-width: 520px;
+            margin: 0 auto 32px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .template-nav button {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+        .template-nav button:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        .template-nav button.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        .preview-title {
+            text-align: center;
+            color: #111827;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .preview-subtitle {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            margin-bottom: 32px;
+        }
+        
+        /* Email container */
+        .email-wrapper {
+            max-width: 520px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px 24px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        .email-container {
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        
+        /* Header with logo */
+        .email-header {
+            text-align: center;
+            padding: 0 0 32px 0;
+        }
+        .email-header img {
+            height: 32px;
+            width: auto;
+        }
+        
+        /* Body */
+        .email-body {
+            background: #ffffff;
+            padding: 40px 32px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        .email-body h1 {
+            color: #111827;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+        .email-body p {
+            color: #6b7280;
+            font-size: 15px;
+            line-height: 1.6;
+            margin: 0 0 16px 0;
+        }
+        
+        /* Components */
+        .accent { color: #6366f1; }
+        strong { color: #374151; font-weight: 600; }
+        .text-muted { color: #9ca3af; }
+        .text-small { font-size: 13px; }
+        .text-xs { font-size: 12px; }
+        .text-center { text-align: center; }
+        
+        /* Button */
+        .button-wrapper { text-align: center; margin: 28px 0; }
+        .button {
+            display: inline-block;
+            background: #6366f1;
+            color: white !important;
+            padding: 12px 28px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .button-success {
+            background: #10b981;
+        }
+        .button-danger {
+            background: #ef4444;
+        }
+        
+        /* Info box */
+        .info-box {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+        .info-box.accent {
+            background: #f5f3ff;
+        }
+        .info-box.warning {
+            background: #fffbeb;
+        }
+        .info-box.danger {
+            background: #fef2f2;
+        }
+        .info-box.success {
+            background: #ecfdf5;
+        }
+        
+        /* Code box */
+        .code-box {
+            background: #f3f4f6;
+            color: #6366f1;
+            font-family: 'SF Mono', 'Fira Code', Monaco, monospace;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 6px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .code-label {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        /* Highlight */
+        .highlight {
+            background: #eef2ff;
+            color: #6366f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .highlight h3 { color: #4f46e5; margin: 0; }
+        .highlight p { color: #6366f1; margin: 6px 0 0 0; font-size: 13px; }
+        
+        /* Step */
+        .step {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 0;
+        }
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #eef2ff;
+            color: #6366f1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+        .step-content h4 { margin: 0 0 2px 0; font-size: 14px; font-weight: 500; color: #374151; }
+        .step-content p { margin: 0; font-size: 13px; color: #9ca3af; }
+        
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-default { background: #f3f4f6; color: #6b7280; }
+        .badge-accent { background: #eef2ff; color: #6366f1; }
+        .badge-success { background: #ecfdf5; color: #059669; }
+        .badge-warning { background: #fffbeb; color: #d97706; }
+        .badge-danger { background: #fef2f2; color: #dc2626; }
+        
+        /* Details */
+        .details-list {
+            margin: 16px 0;
+        }
+        .details-list dt {
+            color: #9ca3af;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 12px;
+        }
+        .details-list dt:first-child {
+            margin-top: 0;
+        }
+        .details-list dd {
+            color: #374151;
+            margin: 4px 0 0 0;
+            font-size: 14px;
+        }
+        
+        /* Link fallback */
+        .link-fallback {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .link-fallback p { color: #9ca3af; font-size: 12px; margin: 0 0 6px 0; }
+        .link-fallback a {
+            color: #6366f1;
+            word-break: break-all;
+            font-size: 12px;
+            text-decoration: none;
+        }
+        
+        /* Divider */
+        .divider { border: none; border-top: 1px solid #e5e7eb; margin: 24px 0; }
+        
+        /* Avatar */
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #eef2ff;
+            color: #6366f1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        
+        /* Footer */
+        .email-footer {
+            text-align: center;
+            padding: 32px 20px 0;
+        }
+        .email-footer p { color: #9ca3af; font-size: 12px; margin: 4px 0; }
+        .email-footer a { color: #6b7280; text-decoration: none; }
+        .email-footer a:hover { color: #6366f1; }
+        .footer-links { margin: 12px 0; }
+        .footer-links a { margin: 0 10px; font-size: 12px; }
+        .footer-divider { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="preview-title">OSA Email Templates</div>
+    <div class="preview-subtitle">Clean • Minimal • Professional</div>
+    
+    <div class="template-nav">
+        <button class="active" onclick="showTemplate('welcome')">Welcome</button>
+        <button onclick="showTemplate('verification')">Verification</button>
+        <button onclick="showTemplate('password-reset')">Password Reset</button>
+        <button onclick="showTemplate('workspace-invite')">Workspace Invite</button>
+        <button onclick="showTemplate('task-assigned')">Task Assigned</button>
+        <button onclick="showTemplate('mention')">Mention</button>
+    </div>
+
+    <div class="email-wrapper">
+        <div class="email-container">
+            <!-- Header with Logo -->
+            <div class="email-header">
+                <img src="https://osa.dev/osa-logo.png" alt="OSA" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                <span style="display:none; font-size: 22px; font-weight: 700; color: #6366f1;">OSA</span>
+            </div>
+
+            <!-- Body -->
+            <div class="email-body" id="email-body">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="email-footer">
+            <p style="color: #6b7280;">Questions? We're here to help.</p>
+            
+            <hr class="footer-divider">
+            
+            <div class="footer-links">
+                <a href="#">Preferences</a>
+                <a href="#">Help</a>
+                <a href="#">Privacy</a>
+            </div>
+            
+            <p>© 2025 OSA</p>
+        </div>
+    </div>
+
+    <script>
+        const templates = {
+            'welcome': `
+                <h1>Welcome to OSA</h1>
+                <p>Hi <strong>John</strong>,</p>
+                <p>We're excited to have you. Your workspace <strong class="accent">Acme Inc</strong> is ready.</p>
+                
+                <div class="highlight">
+                    <h3>Get Started</h3>
+                    <p>Everything you need to run your business</p>
+                </div>
+                
+                <div style="margin: 24px 0;">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h4>Create your first project</h4>
+                            <p>Organize your work into focused projects</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h4>Invite your team</h4>
+                            <p>Collaboration is better together</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <h4>Connect your tools</h4>
+                            <p>Sync Calendar, Slack, Notion & more</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-wrapper">
+                    <a href="#" class="button">Get Started</a>
+                </div>
+            `,
+            'verification': `
+                <h1 class="text-center">Verify Your Email</h1>
+                <p>Hi <strong>John</strong>,</p>
+                <p>Welcome to OSA. Verify your email to get started.</p>
+                
+                <div class="button-wrapper">
+                    <a href="#" class="button">Verify Email</a>
+                </div>
+                
+                <hr class="divider">
+                
+                <div class="code-label">Or enter this code</div>
+                <div class="code-box">847293</div>
+                
+                <div class="info-box accent">
+                    <p style="margin: 0; color: #6366f1; font-size: 13px;">
+                        <strong>Expires in 15 minutes</strong>
+                    </p>
+                </div>
+                
+                <div class="link-fallback">
+                    <p>Button not working? Copy this link:</p>
+                    <a href="#">https://osa.dev/verify?token=abc123xyz...</a>
+                </div>
+            `,
+            'password-reset': `
+                <h1 class="text-center">Reset Password</h1>
+                <p>Hi <strong>John</strong>,</p>
+                <p>We received a request to reset your password. Click below to create a new one.</p>
+                
+                <div class="button-wrapper">
+                    <a href="#" class="button">Reset Password</a>
+                </div>
+                
+                <div class="info-box warning">
+                    <p style="margin: 0; color: #d97706; font-size: 13px;">
+                        <strong>Expires in 1 hour</strong> · This link can only be used once.
+                    </p>
+                </div>
+                
+                <dl class="details-list">
+                    <dt>Time</dt>
+                    <dd>January 13, 2025 at 8:45 PM</dd>
+                    <dt>IP Address</dt>
+                    <dd>192.168.1.1</dd>
+                    <dt>Device</dt>
+                    <dd>Chrome on Windows</dd>
+                </dl>
+                
+                <div class="info-box danger">
+                    <p style="margin: 0; color: #dc2626; font-size: 13px;">
+                        <strong>Didn't request this?</strong> Please ignore this email.
+                    </p>
+                </div>
+            `,
+            'workspace-invite': `
+                <h1 class="text-center">You're Invited</h1>
+                <p><strong class="accent">Sarah Chen</strong> invited you to join their team on OSA.</p>
+                
+                <div class="highlight">
+                    <p style="opacity: 0.8; margin-bottom: 4px; font-size: 12px;">JOIN WORKSPACE</p>
+                    <h3 style="font-size: 20px;">Acme Inc</h3>
+                </div>
+                
+                <div class="info-box">
+                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                        <span class="avatar">S</span>
+                        <div>
+                            <p class="text-small text-muted" style="margin: 0 0 4px 0;">Message from Sarah:</p>
+                            <p style="margin: 0; font-style: italic; color: #374151; font-size: 14px;">"Looking forward to working with you!"</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <dl class="details-list">
+                    <dt>Role</dt>
+                    <dd><span class="badge badge-accent">Editor</span></dd>
+                    <dt>Invited By</dt>
+                    <dd>sarah@acme.com</dd>
+                </dl>
+                
+                <div class="button-wrapper">
+                    <a href="#" class="button button-success">Accept Invitation</a>
+                </div>
+                
+                <p class="text-center text-small text-muted">This invitation expires in 7 days.</p>
+            `,
+            'task-assigned': `
+                <p class="text-small text-muted" style="margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">New Task</p>
+                <h1>You've been assigned a task</h1>
+                <p><strong class="accent">Sarah Chen</strong> assigned you a new task.</p>
+                
+                <div class="info-box">
+                    <h3 style="margin: 0 0 6px 0; color: #374151; font-size: 16px;">Design homepage mockups</h3>
+                    <p style="margin: 0; color: #9ca3af; font-size: 13px;">Create responsive mockups for the new landing page redesign.</p>
+                </div>
+                
+                <dl class="details-list">
+                    <dt>Project</dt>
+                    <dd>Website Redesign</dd>
+                    <dt>Priority</dt>
+                    <dd><span class="badge badge-danger">High</span></dd>
+                    <dt>Due Date</dt>
+                    <dd>January 20, 2025</dd>
+                </dl>
+                
+                <div class="button-wrapper">
+                    <a href="#" class="button">View Task</a>
+                </div>
+            `,
+            'mention': `
+                <p class="text-small text-muted" style="margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Mentioned</p>
+                <h1>You were mentioned</h1>
+                <p><strong class="accent">Sarah Chen</strong> mentioned you in a comment.</p>
+                
+                <div class="info-box">
+                    <p class="text-small text-muted" style="margin: 0 0 12px 0;">On: <strong style="color: #374151;">Design homepage mockups</strong></p>
+                    <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb;">
+                        <div style="display: flex; align-items: flex-start; gap: 10px;">
+                            <span class="avatar">S</span>
+                            <div>
+                                <p style="margin: 0 0 4px 0; font-size: 12px;">
+                                    <strong style="color: #374151;">Sarah Chen</strong>
+                                    <span class="text-muted"> · 2 min ago</span>
+                                </p>
+                                <p style="margin: 0; color: #374151; font-size: 14px;">
+                                    <span style="background: #eef2ff; padding: 2px 6px; border-radius: 4px; color: #6366f1; font-weight: 500;">@John</span>
+                                    can you review this before EOD?
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-wrapper">
+                    <a href="#" class="button">View Comment</a>
+                </div>
+            `
+        };
+
+        function showTemplate(name) {
+            document.getElementById('email-body').innerHTML = templates[name];
+            document.querySelectorAll('.template-nav button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        // Show welcome by default
+        document.getElementById('email-body').innerHTML = templates['welcome'];
+    </script>
+</body>
+</html>

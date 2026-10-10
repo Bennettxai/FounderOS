@@ -1,0 +1,21 @@
+name: onboarding
+title: Onboarding Guide
+audience: onboarding
+genre: runbook
+bandwidth: large
+modalities:
+  - text
+  - image
+  - video
+  - audio
+constraints:
+  tone: "Friendly, encouraging. Explain acronyms on first use. No assumed knowledge."
+  length: "Multi-section — one concept per section. Progress should feel achievable."
+  visuals: "Annotated screenshots, embedded video walkthroughs when source video is available."
+  structure: "Linear progression. Each section builds on the last. Quiz checkpoints between major sections."
+html_hints:
+  style: "Light theme, warm palette. Generous whitespace. Progress bar at top."
+  interactive: true
+  layout: "Single column with step indicators. Collapsible hint boxes."
+  quizzes: "Inline multiple-choice after each section. Show correct answer on submit. Track score in localStorage."
+  progress: "Visual progress bar. Sections auto-mark complete when scrolled past or quiz passed."

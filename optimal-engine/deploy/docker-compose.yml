@@ -1,0 +1,105 @@
+---
+# OptimalEngine — local backend stack
+# Usage: docker compose up --build
+# Starts the engine API and persistent data volume by default.
+# Optional app/site/docs surfaces are available with --profile surfaces.
+# For production overlays see docker-compose.prod.yml.
+
+name: optimal-engine
+
+services:
+
+  # ─── Engine (Elixir/OTP) ────────────────────────────────────────────────
+  engine:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.engine
+      # BuildKit cache mounts are declared inside the Dockerfile via
+      # --mount=type=cache; enable DOCKER_BUILDKIT=1 (default in Compose v2).
+    ports:
+      - "${OPTIMAL_API_PORT:-4200}:4200"
+    volumes:
+      # Persistent data: SQLite DB + cache + any written signal files
+      - optimal_data:/data
+      # Read-only sample workspace — useful for first-run exploration
+      - ../sample-workspace:/data/sample-workspace:ro
+    environment:
+      OPTIMAL_ENGINE_ROOT:     /data
+      OPTIMAL_ENGINE_DB:       /data/.optimal/index.db
+      OPTIMAL_ENGINE_CACHE:    /data/.optimal/cache
+      OPTIMAL_API_ENABLED:     "true"
+      OPTIMAL_API_PORT:        "4200"
+      OPTIMAL_API_INTERFACE:   "0.0.0.0"
+      OPTIMAL_AUTH_REQUIRED:   "${OPTIMAL_AUTH_REQUIRED:-false}"
+      OLLAMA_HOST:             "${OPTIMAL_OLLAMA_URL:-http://host.docker.internal:11434}"
+      # MIX_ENV is already baked into the release; listed here for clarity
+      MIX_ENV:                 prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4200/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  # ─── Optional Desktop UI ────────────────────────────────────────────────
+  desktop:
+    profiles: ["surfaces"]
+    build:
+      context: ../desktop
+      dockerfile: ../deploy/Dockerfile.desktop
+    ports:
+      - "${DESKTOP_PORT:-1420}:80"
+    environment:
+      # Injected at *build* time via ARG — for runtime you would configure
+      # the Caddy reverse proxy or use window.__env__ injection.
+      VITE_ENGINE_URL: "http://localhost:${OPTIMAL_API_PORT:-4200}"
+    depends_on:
+      engine:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+  # ─── Optional Marketing Site ─────────────────────────────────────────────
+  site:
+    profiles: ["surfaces"]
+    build:
+      context: ../site
+      dockerfile: ../deploy/Dockerfile.site
+    ports:
+      - "${SITE_PORT:-1421}:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+  # ─── Optional Docs Site ──────────────────────────────────────────────────
+  docs:
+    profiles: ["surfaces"]
+    build:
+      context: ../apps/docs
+      dockerfile: ../../deploy/Dockerfile.docs
+    ports:
+      - "${DOCS_PORT:-1422}:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+volumes:
+  # Named volume — survives `docker compose down`.
+  # Data lives at the Docker-managed path on the host (see `docker volume inspect`).
+  # Back up with: docker run --rm -v optimal-engine_optimal_data:/data -v $(pwd):/backup \
+  #               alpine tar czf /backup/optimal_data_backup.tar.gz /data
+  optimal_data:

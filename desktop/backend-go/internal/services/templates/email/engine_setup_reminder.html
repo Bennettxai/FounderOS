@@ -1,0 +1,16 @@
+{{define "content"}}
+<p class="eyebrow">Your second brain</p>
+<h1>Connect your Optimal Engine</h1>
+<p>Hi <strong>{{.UserName}}</strong>, your workspace <strong class="text-primary">{{.WorkspaceName}}</strong> doesn't have its Optimal Engine connected yet.</p>
+<p>The Optimal Engine is the second brain at the core of BusinessOS. It runs <strong>local to you at all times</strong> and syncs with the cloud, so your knowledge, context, and decisions stay yours while still powering everything across the workspace.</p>
+<div class="info-box">
+    <p>Until it's connected, BusinessOS can't search your knowledge, assemble context, or learn from what happens in this workspace.</p>
+</div>
+<div class="button-wrapper">
+    <a href="{{.SetupLink}}" class="button">Set up the Optimal Engine</a>
+</div>
+<p class="text-small text-muted">It takes about two minutes: open Settings, go to Optimal Engine, paste your engine URL and key, then Test and Save.</p>
+{{end}}
+{{define "footer"}}
+<p>You're receiving this reminder because your workspace's Optimal Engine isn't connected yet.</p>
+{{end}}

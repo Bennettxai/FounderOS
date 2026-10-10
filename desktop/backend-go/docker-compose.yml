@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # Redis for session storage and pub/sub messaging
+  redis:
+    image: redis:7-alpine
+    container_name: businessos-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    environment:
+      # Redis password from environment variable
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env}
+    command: >
+      sh -c '
+      redis-server
+      --requirepass "$${REDIS_PASSWORD}"
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 60
+      --timeout 0
+      --tcp-backlog 511
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      '
+    volumes:
+      - redis-data:/data
+      # Optionally mount TLS certificates for production
+      # - ./certs/redis:/etc/redis/certs:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - businessos-network
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    container_name: businessos-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-business_os}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - businessos-network
+
+  # BusinessOS Go Backend (optional - for containerized deployment)
+  # backend:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: businessos-backend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8001:8001"
+  #   environment:
+  #     - ENVIRONMENT=production
+  #     - SERVER_PORT=8001
+  #     - DATABASE_URL=postgres://postgres:password@postgres:5432/business_os?sslmode=disable
+  #     - REDIS_URL=redis://redis:6379/0
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #     postgres:
+  #       condition: service_healthy
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   networks:
+  #     - businessos-network
+
+volumes:
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+
+networks:
+  businessos-network:
+    driver: bridge

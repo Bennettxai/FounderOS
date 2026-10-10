@@ -1,0 +1,75 @@
+{
+  "name": "optimal-engine",
+  "title": "Optimal Engine",
+  "description": "Search, ask, and submit context to Optimal Engine from Raycast",
+  "icon": "icon.png",
+  "author": "robertolhuna",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "search-memory",
+      "title": "Search Memory",
+      "description": "Search across your active workspace",
+      "mode": "view"
+    },
+    {
+      "name": "add-memory",
+      "title": "Add Memory",
+      "description": "Add a fact, decision, or observation",
+      "mode": "view"
+    },
+    {
+      "name": "ask-engine",
+      "title": "Ask Engine",
+      "description": "Ask Optimal Engine a workspace-scoped question",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "engineUrl",
+      "title": "Engine URL",
+      "description": "Optimal Engine HTTP API base URL",
+      "type": "textfield",
+      "default": "http://localhost:4200",
+      "required": true
+    },
+    {
+      "name": "workspace",
+      "title": "Default Workspace",
+      "description": "Workspace slug or ID used when a command does not specify one.",
+      "type": "textfield",
+      "default": "default",
+      "required": true
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Optional — required if engine has auth_required=true",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "react": "^19",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "build:raycast": "ray build",
+    "dev": "ray develop",
+    "lint": "tsc --noEmit",
+    "lint:publish": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

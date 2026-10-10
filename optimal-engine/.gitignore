@@ -1,0 +1,63 @@
+# Build artifacts
+/_build/
+/cover/
+/deps/
+/doc/
+/.fetch
+**/node_modules/
+__pycache__/
+*.pyc
+erl_crash.dump
+*.ez
+*.beam
+
+# JavaScript / TypeScript dependencies and builds
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+.svelte-kit/
+**/.svelte-kit/
+coverage/
+**/coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Test scratch + local runtime data
+/tmp/
+/.optimal/
+
+# Generated on crash by the VM
+erl_crash.dump
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Environment
+.env
+.env.local
+
+# Local binaries and generated releases
+/optimal
+/optimal.exe
+/burrito_out/
+
+# Per-workspace runtime data dirs created by Workspace.create / intake
+/engineering/
+/sales/
+/research/
+/nodes/
+/inbox/
+/default-*/
+/team/
+
+# Test artifacts
+/.optimal/index*.db*

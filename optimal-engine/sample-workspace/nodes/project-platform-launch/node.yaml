@@ -1,0 +1,14 @@
+id: project-platform-launch
+workspace_id: sample
+type: project
+name: Platform Launch
+status: active
+purpose: Time-bounded launch project connected to the customer portal product.
+owner: team:delivery
+review_cadence: weekly
+relationships:
+  - type: depends_on
+    target: product-customer-portal
+  - type: reviewed_by
+    target: operation-weekly-review
+

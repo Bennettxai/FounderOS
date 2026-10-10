@@ -1,0 +1,77 @@
+name: Schema Drift Guard
+
+# Builds schema.sql on a throwaway Postgres and asserts it (1) builds clean from
+# empty and (2) re-applies idempotently. This is the team-wide, can't-skip version
+# of scripts/check-schema.sh + the local pre-commit hook — it does not depend on
+# anyone's local database being up. Also reports (non-blocking) any table a
+# numbered migration creates that schema.sql is missing.
+
+on:
+  pull_request:
+    branches:
+      - main
+      - main-dev
+      - 'release/**'
+    paths:
+      - 'desktop/backend-go/internal/database/schema.sql'
+      - 'desktop/backend-go/supabase/migrations/**'
+      - 'scripts/check-schema.sh'
+      - 'scripts/check-migrations-folded.sh'
+      - '.github/workflows/schema-check.yml'
+  push:
+    branches:
+      - main
+      - main-dev
+      - 'release/**'
+    paths:
+      - 'desktop/backend-go/internal/database/schema.sql'
+      - 'desktop/backend-go/supabase/migrations/**'
+
+jobs:
+  schema-check:
+    name: schema.sql builds clean + idempotent
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg15   # provides vector, pgcrypto, pg_trgm
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install postgres client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Drift guard — fresh build + idempotency (blocking)
+        run: ./scripts/check-schema.sh
+
+      - name: Migration coverage (advisory, non-blocking)
+        if: always()
+        run: |
+          echo '## Schema drift guard' >> "$GITHUB_STEP_SUMMARY"
+          echo '`schema.sql` built clean from empty and re-applied idempotently. ✅' >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo '### Migration coverage (advisory)' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          ./scripts/check-migrations-folded.sh >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

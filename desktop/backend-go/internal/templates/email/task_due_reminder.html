@@ -1,0 +1,27 @@
+{{define "content"}}
+<h1>⏰ Task Due Reminder</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p>Friendly reminder: you have a task due <strong>{{.DueRelative}}</strong>.</p>
+
+<div class="info-box warning">
+    <h2 style="margin: 0 0 8px 0;">📋 {{.TaskTitle}}</h2>
+    <p class="text-muted text-small" style="margin: 0;">
+        {{.ProjectName}} • Due: {{.DueDate}}
+    </p>
+    {{if .HoursRemaining}}
+    <p class="text-warning" style="margin: 8px 0 0 0; font-weight: 600;">
+        ⏳ {{.HoursRemaining}} hours remaining
+    </p>
+    {{end}}
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.TaskLink}}" class="button">View Task</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>Update your notification preferences in OSA settings to change reminder frequency.</p>
+{{end}}

@@ -1,0 +1,78 @@
+{
+  "name": "@optimal-engine/client",
+  "version": "0.2.0",
+  "description": "TypeScript client for the Optimal Engine — open-source memory infrastructure",
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./adapters/ai-sdk": {
+      "import": "./dist/adapters/ai-sdk.js",
+      "require": "./dist/adapters/ai-sdk.cjs",
+      "types": "./dist/adapters/ai-sdk.d.ts"
+    },
+    "./adapters/openai-agents": {
+      "import": "./dist/adapters/openai-agents.js",
+      "require": "./dist/adapters/openai-agents.cjs",
+      "types": "./dist/adapters/openai-agents.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ai": "^6.0.170",
+    "tsdown": "^0.12.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "zod": "^4.4.1"
+  },
+  "peerDependencies": {
+    "ai": ">=4.0.0",
+    "openai": ">=4.0.0",
+    "zod": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ai": {
+      "optional": true
+    },
+    "openai": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "memory",
+    "rag",
+    "optimal-engine",
+    "ai",
+    "knowledge-graph",
+    "sdk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OptimalEngine/OptimalEngine"
+  }
+}

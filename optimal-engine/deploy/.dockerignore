@@ -1,0 +1,58 @@
+# ── Source control ───────────────────────────────────────────────────────────
+.git
+.gitignore
+.gitattributes
+.github
+
+# ── Build artifacts ──────────────────────────────────────────────────────────
+_build
+deps
+.elixir_ls
+*.beam
+erl_crash.dump
+
+# ── Frontend build artifacts ─────────────────────────────────────────────────
+# (each Dockerfile uses its own context so these appear at root of context)
+node_modules
+build
+.svelte-kit
+.turbo
+dist
+
+# ── Local development files ──────────────────────────────────────────────────
+.optimal
+tmp
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.*
+!.env.example
+
+# ── Desktop — Tauri native build (not needed for web-only Docker target) ─────
+src-tauri/target
+desktop/src-tauri/target
+
+# ── Test artefacts ───────────────────────────────────────────────────────────
+test/
+cover/
+coverage/
+
+# ── Docs / engineering notes (not required at runtime) ───────────────────────
+docs/
+engineering/
+PLAN.md
+GETTING_STARTED.md
+tasks/
+skills/
+
+# ── IDE / OS noise ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.swp
+*.swo
+
+# ── Deploy dir itself (avoid recursive copy when context is repo root) ────────
+deploy/

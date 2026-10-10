@@ -1,0 +1,663 @@
+/* The operator kit: the shared classes and keyframes behind src/lib/founderos/kit,
+   ported from FounderOS v1 app/globals.css (interaction layer, slab motion,
+   status dots, page furniture, the .os-slab surface, the Deal Volume sweep).
+   Colors come only from the --bn-* theme tokens (theme/monolith.css), radii
+   from its --bn-r-* scale. Every class is bn- prefixed: once /os has loaded
+   this file is global, and BusinessOS must never pick up a stray `.fill`.
+   Every animation stops under prefers-reduced-motion, exactly as in the operator
+   OS: movement goes, colour and opacity stay. */
+
+/* Theme-independent motion constants: every skin shares the same motion. */
+:root {
+	--bn-ease: cubic-bezier(0.32, 0.72, 0, 1);
+	--bn-ease-lens: cubic-bezier(0.22, 0.61, 0.36, 1); /* hover lens in + out */
+	--bn-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* checkmark pop only */
+	--bn-dur-press: 200ms;
+	--bn-dur: 360ms;
+	--bn-dur-lens: calc(var(--bn-dur) * 1.75);
+	--bn-dur-panel: 420ms;
+	--rise-i: 0;
+	/* page-wide spotlight position (viewport px); lens.ts writes these on
+	   :root on every pointer move and parks them off-screen on leave */
+	--bn-px: -999px;
+	--bn-py: -999px;
+}
+
+/* Text and surface roles, so markup never names a color. */
+.bn-text { color: var(--bn-text); }
+.bn-muted { color: var(--bn-text-2); }
+.bn-dim { color: var(--bn-text-3); }
+.bn-accent { color: var(--bn-accent); }
+.bn-border { border-color: var(--bn-border); }
+.bn-surface { background: var(--bn-surface); }
+
+/* ── Interaction layer (FounderOS v1 Interaction Rebrand, 2026-09-07) ──────
+   Hover lens (magnify + magnetic pull via lens.ts), press sink, spotlight.
+   Pair .bn-pressable with data-lens="c" (control) or "r" (row/card). */
+.bn-pressable {
+	position: relative;
+	transition:
+		transform var(--bn-dur-lens) var(--bn-ease-lens),
+		background-color var(--bn-dur-lens) var(--bn-ease-lens),
+		border-color var(--bn-dur-lens) var(--bn-ease-lens),
+		color var(--bn-dur-lens) var(--bn-ease-lens),
+		box-shadow var(--bn-dur-lens) var(--bn-ease-lens),
+		opacity var(--bn-dur-lens) var(--bn-ease-lens);
+	/* radius is never animated */
+}
+/* A pressable placed absolutely or fixed keeps its placement. */
+.bn-pressable.absolute {
+	position: absolute;
+}
+.bn-pressable.fixed {
+	position: fixed;
+}
+.bn-pressable:hover {
+	z-index: 3;
+	box-shadow: var(--bn-shadow-lift);
+	transform: perspective(700px) translate(var(--bn-lx, 0px), var(--bn-ly, 0px))
+		rotateX(var(--bn-rx, 0deg)) rotateY(var(--bn-ry, 0deg)) translateY(-1px) scale(1.05);
+}
+.bn-pressable[data-lens='r']:hover {
+	transform: perspective(700px) translate(var(--bn-lx, 0px), var(--bn-ly, 0px))
+		rotateX(var(--bn-rx, 0deg)) rotateY(var(--bn-ry, 0deg)) translateY(-1px) scale(1.02);
+}
+.bn-pressable.is-dark:hover {
+	color: var(--bn-text);
+	background-color: var(--bn-surface-2);
+	border-color: color-mix(in oklab, var(--bn-text) 38%, var(--bn-bg));
+}
+.bn-pressable.is-row:hover {
+	background-color: color-mix(in oklab, var(--bn-text) 3%, var(--bn-bg));
+	border-color: color-mix(in oklab, var(--bn-text) 38%, var(--bn-bg));
+}
+.bn-pressable.is-primary {
+	background: linear-gradient(90deg, var(--bn-accent) 50%, var(--bn-accent-2) 50%);
+	background-size: 200% 100%;
+	background-position: 100% 0;
+	transition:
+		background-position var(--bn-dur-lens) var(--bn-ease-lens),
+		transform var(--bn-dur-lens) var(--bn-ease-lens),
+		box-shadow var(--bn-dur-lens) var(--bn-ease-lens);
+}
+.bn-pressable.is-primary:hover {
+	background-position: 0 0;
+}
+.bn-pressable:active {
+	transition-duration: var(--bn-dur-press);
+	transform: translateY(1px) scale(0.97);
+	box-shadow: 0 0 0 3px color-mix(in oklab, var(--bn-text) 22%, transparent);
+	border-color: var(--bn-text);
+}
+.bn-pressable[data-lens='r']:active {
+	transform: scale(0.995);
+}
+.bn-pressable.is-primary:active {
+	box-shadow:
+		inset 0 2px 0 color-mix(in oklab, var(--bn-accent-ink) 18%, transparent),
+		0 0 0 3px color-mix(in oklab, var(--bn-text) 22%, transparent);
+}
+.bn-pressable:focus-visible {
+	outline: none;
+	border-color: var(--bn-text);
+	box-shadow: 0 0 0 3px color-mix(in oklab, var(--bn-text) 8%, transparent);
+}
+
+/* Pressable.svelte's tone colors (Pressable.tsx TONE). */
+.bn-pressable[data-tone='primary'] { border-color: var(--bn-text); color: var(--bn-accent-ink); }
+.bn-pressable[data-tone='secondary'] { border-color: var(--bn-border); background-color: var(--bn-bg); color: var(--bn-text-2); }
+.bn-pressable[data-tone='ghost'] { border-color: transparent; background-color: transparent; color: var(--bn-text-3); }
+
+/* ToggleChip (Pressable.tsx Chip): solid when on, dark lens when off. */
+.bn-toggle-chip { border-color: var(--bn-border); background-color: var(--bn-bg); color: var(--bn-text-2); }
+.bn-toggle-chip[data-on='true'] {
+	border-color: var(--bn-text);
+	background: var(--bn-text);
+	color: var(--bn-accent-ink);
+}
+.bn-toggle-chip[data-on='true']:hover { background: var(--bn-insight-ink); }
+.bn-toggle-chip:active { transform: scale(0.94); }
+
+/* The slab's header pills (slab.tsx PILL / PILL_ACCENT / chipClass). */
+.bn-pill { border-color: var(--bn-border); color: var(--bn-text-2); }
+.bn-pill:hover { border-color: var(--bn-border-strong); color: var(--bn-text); }
+.bn-pill-accent {
+	border-color: var(--bn-accent-line);
+	background: var(--bn-accent-soft);
+	color: var(--bn-accent);
+	transition: transform var(--bn-dur-press) var(--bn-ease-lens);
+}
+.bn-pill-accent:hover {
+	transform: translateY(-1px);
+}
+.bn-filter-chip { border-color: var(--bn-border); color: var(--bn-text-2); }
+.bn-filter-chip:hover { color: var(--bn-text); }
+.bn-filter-chip.is-on {
+	background: var(--bn-accent);
+	color: var(--bn-accent-ink);
+}
+
+/* Cursor spotlight: the parent carries data-spot (lens.ts sets --bn-sx/--bn-sy). */
+[data-spot] {
+	position: relative;
+}
+.bn-spotlight {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 2;
+	background: radial-gradient(
+		260px circle at var(--bn-sx, -999px) var(--bn-sy, -999px),
+		color-mix(in oklab, var(--bn-text) 7%, transparent),
+		transparent 70%
+	);
+}
+/* The page-wide glow: fixed to the viewport, moved with a transform
+   (compositor only). z 35: over the sidebar (20) and topbar (30), under the
+   dock (40), palette (50) and notices (60). */
+.bn-spotlight.is-page {
+	position: fixed;
+	inset: 0;
+	overflow: hidden;
+	z-index: 35;
+	background: none;
+}
+.bn-spotlight.is-page::before {
+	content: '';
+	position: absolute;
+	left: -260px;
+	top: -260px;
+	width: 520px;
+	height: 520px;
+	border-radius: 50%;
+	background: radial-gradient(circle closest-side, color-mix(in oklab, var(--bn-text) 7%, transparent), transparent 70%);
+	transform: translate(var(--bn-px, -999px), var(--bn-py, -999px));
+	will-change: transform;
+}
+.bn-skeleton {
+	height: 12px;
+	border-radius: 4px;
+	background: linear-gradient(90deg, var(--bn-surface-2) 0%, var(--bn-surface-3) 50%, var(--bn-surface-2) 100%);
+	background-size: 200% 100%;
+	animation: bn-om-shimmer 1.4s linear infinite;
+}
+
+/* A child of a lens surface (arrow, chevron, icon tile) that brightens under
+   group-hover, easing on the PARENT's clock. */
+.bn-lens-child {
+	transition:
+		color var(--bn-dur-lens) var(--bn-ease-lens),
+		fill var(--bn-dur-lens) var(--bn-ease-lens),
+		background-color var(--bn-dur-lens) var(--bn-ease-lens),
+		border-color var(--bn-dur-lens) var(--bn-ease-lens),
+		opacity var(--bn-dur-lens) var(--bn-ease-lens),
+		transform var(--bn-dur-lens) var(--bn-ease-lens);
+}
+/* A text link: colour + a 1px nudge into the reading direction. */
+.bn-linky {
+	transition:
+		color var(--bn-dur-lens) var(--bn-ease-lens),
+		opacity var(--bn-dur-lens) var(--bn-ease-lens),
+		transform var(--bn-dur-lens) var(--bn-ease-lens);
+}
+.bn-linky:hover {
+	color: var(--bn-accent);
+	transform: translateX(1px);
+}
+/* Not a hover: a state change the app makes on its own; press clock. */
+.bn-state-fade {
+	transition:
+		background-color var(--bn-dur-press) var(--bn-ease-lens),
+		border-color var(--bn-dur-press) var(--bn-ease-lens),
+		color var(--bn-dur-press) var(--bn-ease-lens),
+		opacity var(--bn-dur-press) var(--bn-ease-lens);
+}
+
+@keyframes bn-om-in {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: none; }
+}
+@keyframes bn-om-pop {
+	0% { transform: scale(0.5); opacity: 0; }
+	60% { transform: scale(1.2); opacity: 1; }
+	100% { transform: scale(1); }
+}
+@keyframes bn-om-spin {
+	to { transform: rotate(360deg); }
+}
+@keyframes bn-om-shimmer {
+	from { background-position: 180% 0; }
+	to { background-position: -20% 0; }
+}
+/* tailwind.config.ts animate-blink: an LED on/off, steps() not ease */
+@keyframes bn-om-blink {
+	0%, 70%, 100% { opacity: 1; }
+	85% { opacity: 0.25; }
+}
+/* the command palette's entrance (om-pal). Tailwind 4's -translate-x-1/2
+   centres through the `translate` property, not `transform`, so the -50%
+   stays out of the keyframe here (in it, the offset would double). */
+@keyframes bn-om-pal {
+	from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+	to { opacity: 1; transform: none; }
+}
+.bn-palette-in {
+	animation: bn-om-pal 0.38s var(--bn-ease-lens) both;
+}
+.bn-enter {
+	animation: bn-om-in 0.3s var(--bn-ease-lens) both;
+}
+.bn-pop {
+	animation: bn-om-pop 0.32s var(--bn-ease-spring) both;
+	display: inline-block;
+}
+.bn-blink {
+	animation: bn-om-blink 2.6s steps(1) infinite;
+}
+
+/* ── Slab motion (OS-wide, 2026-09-17) ───────────────────────────────────
+   .bn-rise    rises in, staggered by --rise-i at 90ms a step
+   .bn-draw    an SVG line draws itself (needs pathLength={1})
+   .bn-fill    a horizontal bar fills from the left
+   .bn-grow    a vertical bar grows from the bottom
+   .bn-sweep   a donut slice (duration and delay set inline)
+   .bn-rise-card adds the slab's 1px hover lift on the lens clock. */
+@keyframes bn-rise {
+	from { opacity: 0; transform: translateY(10px) scale(0.992); }
+	to { opacity: 1; transform: none; }
+}
+@keyframes bn-draw { to { stroke-dashoffset: 0; } }
+@keyframes bn-fill {
+	from { transform: scaleX(0); }
+}
+@keyframes bn-grow {
+	from { transform: scaleY(0); }
+}
+@keyframes bn-sweep { to { stroke-dashoffset: 0; } }
+/* the insight card's slow glow drift and the slab charts' late fade-ins */
+@keyframes bn-drift { from { background-position: 0% 0%; } to { background-position: 12% 8%; } }
+@keyframes bn-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bn-vol-meter-in { from { width: 0; } }
+
+.bn-rise {
+	animation: bn-rise 0.6s var(--bn-ease) backwards;
+	animation-delay: calc(var(--rise-i) * 90ms);
+}
+.bn-rise-card {
+	transition:
+		transform var(--bn-dur-lens) var(--bn-ease-lens),
+		border-color var(--bn-dur-lens) var(--bn-ease-lens);
+}
+.bn-rise-card:hover {
+	transform: translateY(-1px);
+	border-color: var(--bn-border-strong);
+}
+.bn-draw {
+	stroke-dasharray: 1;
+	stroke-dashoffset: 1;
+	animation: bn-draw 1.4s var(--bn-ease) 0.3s both;
+}
+.bn-fill {
+	transform-origin: left;
+	animation: bn-fill 1.1s var(--bn-ease) both;
+	animation-delay: calc(var(--rise-i) * 90ms + 300ms);
+}
+.bn-grow {
+	transform-origin: bottom;
+	animation: bn-grow 0.9s var(--bn-ease) both;
+	animation-delay: calc(var(--rise-i) * 90ms + 200ms);
+}
+.bn-sweep {
+	stroke-dasharray: 1;
+	stroke-dashoffset: 1;
+}
+
+/* View entrance: transform-only, so content is never hidden. */
+@keyframes bn-view-in {
+	from { transform: translateY(8px); }
+}
+.bn-view {
+	animation: bn-view-in 0.24s var(--bn-ease);
+}
+/* Pop-out overlays: the scrim fades in and the panel glides up. */
+@keyframes bn-overlay-in {
+	from { opacity: 0; }
+}
+@keyframes bn-panel-in {
+	from { opacity: 0; transform: translateY(16px) scale(0.98); }
+}
+.bn-overlay-in {
+	animation: bn-overlay-in 0.22s ease-out both;
+}
+.bn-panel-in {
+	animation: bn-panel-in 0.3s var(--bn-ease) 0.05s both;
+}
+
+/* ── Agent liveness: a green that travels the border ─────────────────── */
+@property --bn-agent-angle {
+	syntax: '<angle>';
+	initial-value: 0deg;
+	inherits: false;
+}
+.bn-agent-live {
+	position: relative;
+	border-color: color-mix(in oklab, var(--bn-ok) 45%, var(--bn-border));
+}
+.bn-agent-live::before {
+	content: '';
+	position: absolute;
+	inset: -1px;
+	border-radius: inherit;
+	padding: 1px;
+	background: conic-gradient(
+		from var(--bn-agent-angle),
+		transparent 0turn,
+		transparent 0.55turn,
+		color-mix(in oklab, var(--bn-ok) 70%, transparent) 0.78turn,
+		var(--bn-ok) 0.92turn,
+		transparent 1turn
+	);
+	-webkit-mask:
+		linear-gradient(var(--bn-text) 0 0) content-box,
+		linear-gradient(var(--bn-text) 0 0);
+	mask:
+		linear-gradient(var(--bn-text) 0 0) content-box,
+		linear-gradient(var(--bn-text) 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+	animation: bn-agent-orbit 2.4s linear infinite;
+	pointer-events: none;
+}
+@keyframes bn-agent-orbit {
+	to { --bn-agent-angle: 360deg; }
+}
+/* A task actively being worked: the line itself breathes green. */
+.bn-task-live {
+	animation: bn-task-breathe 1.5s ease-in-out infinite;
+}
+@keyframes bn-task-breathe {
+	0%, 100% {
+		border-color: color-mix(in oklab, var(--bn-ok) 30%, var(--bn-border));
+		background-color: transparent;
+	}
+	50% {
+		border-color: var(--bn-ok);
+		background-color: color-mix(in oklab, var(--bn-ok) 9%, transparent);
+	}
+}
+.bn-task-live-dot {
+	animation: bn-task-dot-flash 1.5s ease-in-out infinite;
+}
+@keyframes bn-task-dot-flash {
+	0%, 100% { opacity: 0.35; }
+	50% { opacity: 1; }
+}
+
+/* ── status dots: round LEDs that blink (steps, not ease) ────────────── */
+.bn-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	flex-shrink: 0;
+	position: relative;
+	display: inline-block;
+}
+.bn-dot.ok { background: var(--bn-ok); }
+.bn-dot.ok.pulse { animation: bn-led-blink 2.6s steps(1) infinite; }
+.bn-dot.warn { background: var(--bn-warn); }
+.bn-dot.err { background: var(--bn-err); }
+.bn-dot.off {
+	background: transparent;
+	border: 1px solid var(--bn-text-3);
+}
+@keyframes bn-led-blink {
+	0%, 70%, 100% { opacity: 1; }
+	85% { opacity: 0.25; }
+}
+
+/* ── badges ─────────────────────────────────────────────────────────── */
+.bn-badge { border-color: var(--bn-border-strong); color: var(--bn-text-2); }
+.bn-badge[data-tone='accent'] { border-color: var(--bn-accent-line); background: var(--bn-accent-soft); color: var(--bn-accent); }
+.bn-badge[data-tone='ok'] { border-color: color-mix(in oklab, var(--bn-ok) 35%, transparent); background: color-mix(in oklab, var(--bn-ok) 9%, transparent); color: var(--bn-ok); }
+.bn-badge[data-tone='warn'] { border-color: color-mix(in oklab, var(--bn-warn) 35%, transparent); background: color-mix(in oklab, var(--bn-warn) 9%, transparent); color: var(--bn-warn); }
+.bn-badge[data-tone='err'] { border-color: color-mix(in oklab, var(--bn-err) 35%, transparent); background: color-mix(in oklab, var(--bn-err) 9%, transparent); color: var(--bn-err); }
+
+/* ── page furniture ─────────────────────────────────────────────────── */
+.bn-eyebrow::before {
+	content: '//';
+	font-weight: 700;
+}
+.bn-caret::after {
+	content: '▌';
+	margin-left: 4px;
+	animation: bn-blink 1.1s steps(1) infinite;
+	color: var(--bn-accent);
+}
+@keyframes bn-blink {
+	50% { opacity: 0; }
+}
+/* Kbd (terminal.tsx: rounded-sm-t, 2px floor) */
+.bn-kbd {
+	border: 1px solid var(--bn-border-strong);
+	border-bottom-width: 2px;
+	border-radius: var(--bn-r-chip);
+	background: var(--bn-surface);
+	color: var(--bn-text-2);
+}
+/* the palette's compact key (globals.css .kbd) */
+.bn-kbd-sm {
+	display: inline-grid;
+	place-items: center;
+	min-width: 16px;
+	height: 16px;
+	padding: 0 4px;
+	border-radius: 4px;
+	font: inherit;
+	font-size: 9px;
+}
+
+/* ── the slab surface and its cards ─────────────────────────────────── */
+/* The Brand Deals slab, OS-wide (2026-09-24): every page floats on this one
+   surface (FounderOS v1 .os-slab). */
+.bn-slab {
+	border: 1px solid var(--bn-border);
+	border-radius: var(--bn-r-slab);
+	background: var(--bn-bg-2);
+	padding: clamp(16px, 2.2vw, 28px);
+	box-shadow: var(--bn-shadow-slab);
+}
+.bn-card {
+	border: 1px solid var(--bn-border);
+	border-radius: var(--bn-r-tile);
+	background: var(--bn-surface);
+}
+
+/* Home, all the way down in the Brand Deals look (2026-09-24): pieces carry
+   data-part hooks and only the slab restyles them, so the same components
+   elsewhere keep the console look. */
+.bn-slab [data-part='card'] {
+	border-radius: 12px;
+	background: var(--bn-surface);
+	transition:
+		transform 0.15s ease,
+		border-color 0.15s ease;
+}
+.bn-slab [data-part='card']:hover {
+	transform: translateY(-1px);
+	border-color: var(--bn-border-strong);
+}
+.bn-slab [data-part='card-head'] {
+	border-bottom: 0;
+	padding: 20px 24px 10px;
+	row-gap: 8px;
+}
+.bn-slab [data-part='card-head'] [data-part='label'] {
+	font-size: 19px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	text-transform: none;
+	color: var(--bn-text);
+}
+.bn-slab [data-part='card-head'] > span {
+	font-size: 11px;
+}
+.bn-slab [data-part='card-head'] :is(a, button) {
+	border: 1px solid var(--bn-border);
+	border-radius: 999px;
+	padding: 5px 12px;
+	font-size: 11px;
+	letter-spacing: 0.02em;
+	text-transform: none;
+}
+.bn-slab [data-part='card-head'] :is(a, button):hover {
+	border-color: var(--bn-border-strong);
+	color: var(--bn-text);
+}
+.bn-slab [data-part='row'] {
+	padding: 14px 24px;
+	border-color: var(--bn-hairline);
+}
+.bn-slab li[data-part='row'] {
+	padding: 11px 24px;
+	font-size: 12px;
+}
+.bn-slab [data-part='row'] button {
+	border-radius: 9px;
+}
+.bn-slab [data-part='input'] {
+	border-radius: 12px;
+	padding: 12px 14px;
+	font-size: 13px;
+}
+.bn-slab [data-part='card'] > div:has(> [data-part='input']) {
+	padding: 6px 24px 22px;
+}
+/* the pulse tiles (.os-slab .rounded-tile) */
+.bn-slab [data-part='tile'] {
+	border-radius: 12px;
+	gap: 10px;
+}
+.bn-slab [data-part='tile']:hover {
+	border-color: var(--bn-border-strong);
+}
+.bn-slab [data-part='tile'] > div:nth-child(2) {
+	font-size: 34px;
+	flex-wrap: wrap;
+}
+.bn-slab [data-part='tile'] [data-part='label'] {
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+	color: var(--bn-text-2);
+}
+@media (max-width: 600px) {
+	.bn-slab [data-part='tile'] small {
+		white-space: normal;
+	}
+}
+
+.bn-chip { border: 1px solid var(--bn-border); color: var(--bn-text-2); }
+.bn-chip-dot[data-tone='ok'] { background: var(--bn-ok); }
+.bn-chip-dot[data-tone='warn'] { background: var(--bn-warn); }
+.bn-chip-dot[data-tone='err'] { background: var(--bn-err); }
+.bn-chip-dot[data-tone='accent'] { background: var(--bn-accent); }
+
+/* The Deal Volume track and its hatched sweep (VolumeMeter). */
+.bn-vol-track { background: color-mix(in oklab, var(--bn-text) 8%, transparent); }
+.bn-vol-track[data-unknown] {
+	background: repeating-linear-gradient(90deg, var(--bn-border) 0 4px, transparent 4px 8px);
+}
+
+/* The ONE gradient card: glow off the brain tokens, white ink, a glass shard. */
+.bn-insight {
+	--bn-glow-a: var(--bn-brain-1);
+	--bn-glow-b: var(--bn-brain-2);
+	--bn-glow-c: var(--bn-accent);
+	--bn-insight-base: var(--bn-surface);
+	border: 1px solid transparent;
+	color: var(--bn-insight-ink);
+}
+:root[data-founderos-theme='light'] .bn-insight,
+:root[data-founderos-theme='mono-light'] .bn-insight {
+	--bn-insight-base: color-mix(in oklab, var(--bn-text) 90%, var(--bn-brain-1));
+}
+.bn-insight-pill { background: color-mix(in oklab, var(--bn-insight-ink) 15%, transparent); }
+.bn-insight-body { color: color-mix(in oklab, var(--bn-insight-ink) 75%, transparent); }
+.bn-insight [data-tick='on'] { background: var(--bn-insight-ink); }
+.bn-insight [data-tick='off'] { background: color-mix(in oklab, var(--bn-insight-ink) 25%, transparent); }
+.bn-insight-shard {
+	border: 1px solid color-mix(in oklab, var(--bn-insight-ink) 25%, transparent);
+	background: color-mix(in oklab, var(--bn-insight-ink) 5%, transparent);
+	backdrop-filter: blur(3px);
+}
+
+/* ── reduced motion: movement goes, colour and opacity stay ─────────── */
+@media (prefers-reduced-motion: reduce) {
+	.bn-pressable,
+	.bn-pressable:hover,
+	.bn-pressable:active {
+		transform: none !important;
+		box-shadow: none !important;
+	}
+	.bn-spotlight,
+	.bn-skeleton,
+	.bn-enter,
+	.bn-pop,
+	.bn-blink,
+	.bn-palette-in {
+		animation: none !important;
+	}
+	.bn-linky:hover {
+		transform: none !important;
+	}
+	.bn-pill-accent:hover,
+	.bn-toggle-chip:active {
+		transform: none !important;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	/* prod's list: fades and the insight card still play to full opacity */
+	.bn-rise,
+	.bn-draw,
+	.bn-fill,
+	.bn-grow {
+		animation: none !important;
+	}
+	.bn-sweep {
+		animation: none !important;
+		stroke-dashoffset: 0;
+	}
+	.bn-draw { stroke-dashoffset: 0 !important; }
+	.bn-rise-card:hover,
+	.bn-slab [data-part='card']:hover {
+		transform: none !important;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.bn-view,
+	.bn-overlay-in,
+	.bn-panel-in {
+		animation: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.bn-agent-live::before { animation: none; opacity: 0.9; }
+	.bn-task-live { animation: none; border-color: var(--bn-ok); }
+	.bn-task-live-dot { animation: none; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.bn-dot.ok.pulse {
+		animation: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.bn-caret::after {
+		animation: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.bn-vol-fill {
+		animation: none !important;
+	}
+}

@@ -1,0 +1,17 @@
+node_modules
+.svelte-kit
+build
+.env
+.env.*
+*.log
+.git
+.gitignore
+README.md
+CLAUDE.md
+tests
+*.test.ts
+*.spec.ts
+.playwright
+playwright-report
+coverage
+.DS_Store

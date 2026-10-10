@@ -1,0 +1,17 @@
+id: weekly-review-loop
+node: operation-weekly-review
+cadence: weekly
+owner: user:operator
+goal: Refresh operating state and identify claims that should be promoted.
+steps:
+  - load_current_node_state
+  - inspect_active_project_nodes
+  - list_blockers
+  - list_pending_decisions
+  - assemble_context_package
+  - record_observations
+  - propose_claim_promotions
+validation:
+  - context_package_has_sources
+  - blockers_have_owner_or_next_action
+

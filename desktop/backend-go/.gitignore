@@ -1,0 +1,103 @@
+# ===========================================
+# ENVIRONMENT & SECRETS (CRITICAL - NEVER COMMIT)
+# ===========================================
+# Primary environment files
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+*.env
+
+# Allow the example file (safe template)
+!.env.example
+!.env.production.example
+
+# ===========================================
+# CREDENTIALS & CERTIFICATES
+# ===========================================
+# Private keys and certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+!*.pem.example
+
+# Credential files
+credentials.json
+secrets.yaml
+secrets.yml
+secrets.json
+*.secret
+*.secrets
+
+# Cloud provider credentials
+.aws/credentials
+.gcp/credentials.json
+*.service-account.json
+service-account.json
+
+# SSH keys (if accidentally copied)
+id_rsa
+id_ed25519
+*.pub
+
+# ===========================================
+# SUPABASE LOCAL DEVELOPMENT
+# ===========================================
+.supabase/
+supabase/.branches/
+supabase/.temp/
+
+# ===========================================
+# GO BUILD ARTIFACTS
+# ===========================================
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# ===========================================
+# IDE & EDITOR FILES
+# ===========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ===========================================
+# OS GENERATED FILES
+# ===========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===========================================
+# LOGS & TEMPORARY FILES
+# ===========================================
+*.log
+*.tmp
+tmp/
+temp/

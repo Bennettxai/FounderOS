@@ -1,0 +1,145 @@
+/* AdPilot: the sanctioned RED exception (FounderOS v1 app/globals.css, the
+   "AdPilot" block). Everything here is scoped under [data-adpilot], so no
+   other /os page inherits the red glass. The wrapper also overrides the
+   --bn-accent* tokens for its own subtree only. */
+
+[data-adpilot] .ap-panel {
+	border: 1px solid rgba(255, 69, 87, 0.16);
+	border-radius: 14px;
+	background:
+		linear-gradient(180deg, rgba(255, 69, 87, 0.055), rgba(255, 69, 87, 0.015) 42%, rgba(0, 0, 0, 0) 100%),
+		rgba(8, 5, 7, 0.62);
+	backdrop-filter: blur(14px);
+	-webkit-backdrop-filter: blur(14px);
+	box-shadow: inset 0 1px 0 rgba(255, 120, 132, 0.08);
+}
+[data-adpilot] .ap-chip {
+	border: 1px solid rgba(255, 69, 87, 0.22);
+	border-radius: 999px;
+	background: linear-gradient(180deg, rgba(255, 69, 87, 0.09), rgba(8, 5, 7, 0.55));
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+}
+/* hatched fill for the spend meter bars (one hue, opacity steps) */
+[data-adpilot] .ap-hatch {
+	background-image: repeating-linear-gradient(-55deg, rgba(255, 69, 87, 0.85) 0 3px, rgba(255, 69, 87, 0.28) 3px 6px);
+}
+[data-adpilot] .ap-glow {
+	border-color: rgba(255, 69, 87, 0.3);
+	box-shadow:
+		0 0 34px rgba(255, 69, 87, 0.14),
+		inset 0 1px 0 rgba(255, 120, 132, 0.1);
+}
+/* frosted glass lit from the globe side (left) */
+[data-adpilot] .ap-frost {
+	position: relative;
+	overflow: hidden;
+	border: 1px solid rgba(255, 69, 87, 0.22);
+	border-left-color: rgba(255, 120, 132, 0.45);
+	border-radius: 14px;
+	background: rgba(10, 6, 8, 0.42);
+	backdrop-filter: blur(18px);
+	-webkit-backdrop-filter: blur(18px);
+}
+[data-adpilot] .ap-frost::before {
+	content: '';
+	position: absolute;
+	left: -34px;
+	top: 50%;
+	width: 90px;
+	height: 120%;
+	transform: translateY(-50%);
+	background: radial-gradient(circle, rgba(255, 69, 87, 0.4), transparent 70%);
+	filter: blur(14px);
+	pointer-events: none;
+}
+/* the page's single loud element */
+[data-adpilot] .ap-bright {
+	border: 1px solid rgba(255, 130, 142, 0.55);
+	border-radius: 14px;
+	background: linear-gradient(180deg, #ff4557, #cf2537);
+	box-shadow: 0 8px 34px rgba(255, 69, 87, 0.28);
+}
+[data-adpilot] .ap-bright:hover {
+	background: linear-gradient(180deg, #ff5c6c, #d92c3e);
+}
+/* orbiting light behind frosted glass (the Ask widget) */
+@keyframes ap-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+[data-adpilot] .ap-orbit {
+	position: absolute;
+	inset: -45%;
+	background: conic-gradient(
+		from 0deg,
+		transparent 0deg 250deg,
+		rgba(255, 69, 87, 0.7) 300deg,
+		rgba(255, 130, 142, 1) 322deg,
+		rgba(255, 69, 87, 0.7) 344deg,
+		transparent 360deg
+	);
+	filter: blur(20px);
+	animation: ap-spin 6s linear infinite;
+	pointer-events: none;
+}
+[data-adpilot] .ap-spin {
+	animation: ap-spin 0.9s linear infinite;
+}
+
+/* buttons: production's AdPilot buttons carry `c-btn` / `c-btn-primary`,
+   which FounderOS v1 never defines, so they render as bare controls (no fill,
+   no frame, no padding of their own: just the utilities beside them and the
+   pressable lens). .ap-btn keeps that look, primary included. */
+[data-adpilot] .ap-btn,
+[data-adpilot] .ap-btn-primary {
+	display: inline-flex;
+	align-items: center;
+	border: 0;
+	background: none;
+	color: inherit;
+}
+
+/* hover tints the production markup spells as Tailwind hover utilities
+   (the bn-* colour classes are unlayered here, so they need the scope) */
+[data-adpilot] .ap-hover-muted:hover {
+	color: var(--bn-text-2);
+}
+[data-adpilot] .ap-hover-text:hover {
+	color: var(--bn-text);
+}
+[data-adpilot] .group:hover .ap-group-accent {
+	color: var(--bn-accent);
+}
+[data-adpilot] .group:hover .ap-group-text {
+	color: var(--bn-text);
+}
+[data-adpilot] .ap-ph::placeholder {
+	color: var(--bn-text-3);
+}
+
+/* One face on this page (FounderOS v1 globals.css): anything mono-classed
+   keeps the UI face with normal tracking, so the eyebrow and the section
+   head read tight, as in production. */
+[data-adpilot] .font-mono {
+	font-family: var(--bn-font) !important;
+	letter-spacing: normal;
+}
+
+/* The BusinessOS base sheet ships an unlayered `* { border-color }`, which
+   outranks every Tailwind border-colour utility. Hand those back to the
+   utility layer so the red hairlines production draws actually show. */
+[data-adpilot] :where([class*='border-']) {
+	border-color: revert-layer;
+}
+[data-adpilot] .ap-rail::-webkit-scrollbar {
+	display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-adpilot] .ap-orbit,
+	[data-adpilot] .ap-spin {
+		animation: none;
+	}
+}

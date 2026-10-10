@@ -1,0 +1,15 @@
+{{define "content"}}
+<p class="eyebrow">Team update</p>
+<h1>You've been added to {{.TeamName}}</h1>
+<p>Hi <strong>{{.UserName}}</strong>, {{.AssignedBy}} added you to the <strong class="text-primary">{{.TeamName}}</strong> team in <strong>{{.WorkspaceName}}</strong>.</p>
+<div class="details-list">
+    <dt>Team</dt><dd>{{.TeamName}}</dd>
+    <dt>Workspace</dt><dd>{{.WorkspaceName}}</dd>
+</div>
+<div class="button-wrapper">
+    <a href="{{if .WorkspaceLink}}{{.WorkspaceLink}}{{else}}{{.AppURL}}{{end}}" class="button">Open workspace</a>
+</div>
+{{end}}
+{{define "footer"}}
+<p>You're receiving this because your team membership changed in BusinessOS.</p>
+{{end}}

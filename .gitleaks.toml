@@ -1,0 +1,86 @@
+# Gitleaks configuration for BusinessOS
+# https://github.com/gitleaks/gitleaks
+
+title = "BusinessOS Gitleaks Config"
+
+[extend]
+# Extend the default ruleset — catches most common secrets out of the box
+useDefault = true
+
+# ─── Custom rules for patterns common in this codebase ───────────────────────
+
+[[rules]]
+id          = "anthropic-api-key"
+description = "Anthropic API key"
+regex       = '''sk-ant-[a-zA-Z0-9\-_]{40,}'''
+tags        = ["key", "anthropic", "ai"]
+
+[[rules]]
+id          = "google-service-account-key"
+description = "Google service account key prefix"
+regex       = '''GOCSPX-[a-zA-Z0-9\-_]{28,}'''
+tags        = ["key", "google", "gcp"]
+
+[[rules]]
+id          = "groq-api-key"
+description = "Groq API key"
+regex       = '''gsk_[a-zA-Z0-9]{52}'''
+tags        = ["key", "groq", "ai"]
+
+[[rules]]
+id          = "resend-api-key"
+description = "Resend email API key"
+regex       = '''re_[a-zA-Z0-9]{32,}'''
+tags        = ["key", "resend", "email"]
+
+# ─── Allowlist: files and paths that are safe to contain secret-shaped strings ─
+
+[allowlist]
+description = "Global allowlists for BusinessOS"
+
+# Files explicitly allowed — example env files, test fixtures, mock data
+paths = [
+  # Example environment files (no real secrets)
+  '''.env\.example$''',
+  '''.env\.production\.example$''',
+  '''.env\..*\.example$''',
+
+  # Test fixtures and mock data
+  '''testdata/''',
+  '''fixtures/''',
+  '''mocks/''',
+  '''__mocks__/''',
+  '''.*_test\.go$''',
+  '''.*\.test\.ts$''',
+  '''.*\.spec\.ts$''',
+  '''.*\.test\.svelte$''',
+
+  # Seed / debug SQL scripts (use fake data)
+  '''scripts/seed.*\.sql$''',
+  '''scripts/debug/.*\.sql$''',
+
+  # Documentation (no live credentials)
+  '''docs/''',
+  '''README\.md$''',
+  '''CHANGELOG\.md$''',
+
+  # Go sum / lock files (hashes, not secrets)
+  '''go\.sum$''',
+  '''package-lock\.json$''',
+  '''pnpm-lock\.yaml$''',
+]
+
+# Regex patterns that match known-safe strings (fake/placeholder values)
+regexes = [
+  # Placeholder values used in docs and examples
+  '''your[-_]api[-_]key''',
+  '''<YOUR_.*>''',
+  '''REPLACE_ME''',
+  '''xxx+''',
+  '''example[-_]key''',
+  # Exact deterministic CI-only encryption fixtures
+  '''test-encryption-key-32-chars-long''',
+  '''MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=''',
+  # pgvector extension strings that look like binary blobs
+  '''\\\\x[0-9a-f]{32,}''',
+]

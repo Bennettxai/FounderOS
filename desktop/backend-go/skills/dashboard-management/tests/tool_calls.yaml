@@ -1,0 +1,129 @@
+# Tool Call Tests
+# Validates that user inputs produce correct tool parameters
+
+skill: dashboard-management
+tool: configure_dashboard
+
+test_cases:
+  # Basic add widget
+  - name: "Simple task widget add"
+    user_input: "Add a task summary to my dashboard"
+    expected:
+      action: "add_widget"
+      widget_type: "task_summary"
+
+  - name: "Deadline widget"
+    user_input: "Show me upcoming deadlines"
+    expected:
+      action: "add_widget"
+      widget_type: "upcoming_deadlines"
+
+  # Widget with config
+  - name: "Task summary grouped by project"
+    user_input: "Show my tasks grouped by project"
+    expected:
+      action: "add_widget"
+      widget_type: "task_summary"
+      config:
+        group_by: "project"
+
+  - name: "Task summary grouped by priority"
+    user_input: "I want to see tasks by priority"
+    expected:
+      action: "add_widget"
+      widget_type: "task_summary"
+      config:
+        group_by: "priority"
+
+  - name: "Deadlines with custom range"
+    user_input: "Show me what's due in the next 2 weeks"
+    expected:
+      action: "add_widget"
+      widget_type: "upcoming_deadlines"
+      config:
+        days_ahead: 14
+
+  - name: "Burndown with time range"
+    user_input: "Add a 90-day burndown chart"
+    expected:
+      action: "add_widget"
+      widget_type: "task_burndown"
+      config:
+        days: 90
+
+  # Metric cards
+  - name: "Overdue tasks metric"
+    user_input: "Show me how many tasks are overdue"
+    expected:
+      action: "add_widget"
+      widget_type: "metric_card"
+      config:
+        metric: "tasks_overdue"
+
+  - name: "Due today metric"
+    user_input: "I want to see tasks due today as a number"
+    expected:
+      action: "add_widget"
+      widget_type: "metric_card"
+      config:
+        metric: "tasks_due_today"
+
+  # Multi-widget
+  - name: "Two widgets at once"
+    user_input: "Add tasks and deadlines to my dashboard"
+    expected:
+      action: "add_widgets"
+      widgets:
+        - type: "task_summary"
+        - type: "upcoming_deadlines"
+
+  - name: "Three widgets setup"
+    user_input: "Set up my dashboard with tasks, deadlines, and a burndown chart"
+    expected:
+      action: "add_widgets"
+      widgets:
+        - type: "task_summary"
+        - type: "upcoming_deadlines"
+        - type: "task_burndown"
+
+  # Dashboard management
+  - name: "Create new dashboard"
+    user_input: "Create a new dashboard called Weekly Review"
+    expected:
+      action: "create_dashboard"
+      name: "Weekly Review"
+
+  - name: "Create dashboard with widgets"
+    user_input: "Create a project dashboard with progress and tasks"
+    expected:
+      action: "create_dashboard"
+      name_contains: "project"  # flexible naming
+      widgets:
+        - type: "project_progress"
+        - type_contains: "task"  # task_summary or task_list
+
+  - name: "List dashboards"
+    user_input: "What dashboards do I have?"
+    expected:
+      action: "list_dashboards"
+
+  - name: "Set default dashboard"
+    user_input: "Make My Day my default dashboard"
+    expected:
+      action: "set_default"
+      dashboard_name: "My Day"
+
+  # Widget removal
+  - name: "Remove by type"
+    user_input: "Remove the burndown chart"
+    expected:
+      action: "remove_widget"
+      # widget_id will be resolved from type
+
+  # Widget update
+  - name: "Update config"
+    user_input: "Change my task summary to group by priority"
+    expected:
+      action: "update_widget"
+      config:
+        group_by: "priority"

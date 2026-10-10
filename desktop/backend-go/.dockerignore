@@ -1,0 +1,64 @@
+# Binaries
+*.exe
+*.test
+*.out
+main
+server
+businessos-server
+businessos-backend
+bin/
+uploads/
+
+# Logs
+*.log
+*.log.*
+
+# Test coverage
+coverage*.out
+*.coverprofile
+
+# Development files
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Documentation
+*.md
+
+# Git
+.git/
+.github/
+.gitignore
+
+# Docker
+docker/
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Scripts and examples
+scripts/
+examples/
+supabase/
+
+# SQL files (not needed in image)
+*.sql
+!internal/database/migrations/*.sql
+!internal/database/schema.sql
+
+# Go build cache
+.cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Development artifacts
+test-*.txt
+test-*.log
+*_test.go

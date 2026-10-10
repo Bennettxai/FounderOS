@@ -1,0 +1,182 @@
+/*
+ * Foundation-derived tokens for the Optimal Engine site.
+ *
+ * Vendored from Miosa-osa/foundation per their endorsed copy-paste model:
+ * 9 grayscale tokens for a dark monochrome glassmorphic surface, with a
+ * light-theme inversion for completeness. The desktop app under
+ * /desktop uses a parallel palette (--bg / --text / --accent), so anyone
+ * porting between the two reads similar names.
+ */
+
+:root,
+[data-theme='dark'] {
+  /* Foundation core 9 (--d* = "dark token") */
+  --dt: #f1f1f3;          /* primary text */
+  --dt-muted: #9aa0a8;    /* secondary text */
+  --dt-subtle: #6b7280;   /* tertiary / placeholder */
+  --dbg: #07090c;         /* page background */
+  --dbg-1: #0d1015;       /* surface 1 */
+  --dbg-2: #131820;       /* surface 2 (hover) */
+  --dbd: #1c2230;         /* border */
+  --dbd-soft: #141821;    /* border soft */
+  --daccent: #7ea8ff;     /* accent (link / focus) */
+
+  /* Functional aliases */
+  --bg: var(--dbg);
+  --bg-elevated: var(--dbg-1);
+  --bg-elevated-2: var(--dbg-2);
+  --border: var(--dbd);
+  --border-soft: var(--dbd-soft);
+  --text: var(--dt);
+  --text-muted: var(--dt-muted);
+  --text-subtle: var(--dt-subtle);
+  --accent: var(--daccent);
+  --accent-soft: rgba(126, 168, 255, 0.18);
+  --good: #6f8;
+  --bad: #f88;
+
+  /* Glass surface (Foundation glassmorphism token) */
+  --glass-bg: rgba(20, 24, 32, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 20px;
+
+  /* Radii */
+  --r-pill: 9999px;
+  --r-md: 8px;
+  --r-sm: 6px;
+
+  /* Type stack */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+}
+
+[data-theme='light'] {
+  --dt: #0e1116;
+  --dt-muted: #4b5563;
+  --dt-subtle: #6b7280;
+  --dbg: #fbfbfc;
+  --dbg-1: #ffffff;
+  --dbg-2: #f3f4f8;
+  --dbd: #e4e6ec;
+  --dbd-soft: #eef0f4;
+  --daccent: #2563eb;
+
+  --bg: var(--dbg);
+  --bg-elevated: var(--dbg-1);
+  --bg-elevated-2: var(--dbg-2);
+  --border: var(--dbd);
+  --border-soft: var(--dbd-soft);
+  --text: var(--dt);
+  --text-muted: var(--dt-muted);
+  --text-subtle: var(--dt-subtle);
+  --accent: var(--daccent);
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --good: #067a3a;
+  --bad: #b4241c;
+
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
+/* --- Foundation primitives we actually use ------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s, transform 0.08s;
+}
+.btn:hover {
+  background: var(--bg-elevated-2);
+  border-color: var(--accent);
+  color: var(--text);
+  text-decoration: none;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn--primary {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.btn--primary:hover {
+  background: var(--text);
+  opacity: 0.9;
+  color: var(--bg);
+}
+.btn--ghost {
+  background: transparent;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+}
+
+.eyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.section {
+  padding: 5rem 0;
+}
+
+@media (max-width: 720px) {
+  .section {
+    padding: 3rem 0;
+  }
+}

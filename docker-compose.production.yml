@@ -1,0 +1,100 @@
+# =============================================================================
+# BusinessOS — Self-Hosted Production docker-compose
+# =============================================================================
+# For teams that want to run the backend on their own infrastructure instead
+# of Cloud Run. The database is EXTERNAL (Supabase) — no db service here.
+#
+# Usage:
+#   cp desktop/backend-go/.env.production desktop/backend-go/.env
+#   # Fill in .env with real values
+#   docker compose -f docker-compose.production.yml up -d
+#
+# Rollback:
+#   docker compose -f docker-compose.production.yml down
+#   docker pull gcr.io/YOUR_PROJECT/businessos-backend:PREVIOUS_SHA
+#   # Update IMAGE_TAG below and restart
+
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # Go API backend
+  # ---------------------------------------------------------------------------
+  backend:
+    image: gcr.io/${GCP_PROJECT_ID:-YOUR_PROJECT}/businessos-backend:${IMAGE_TAG:-latest}
+    # To build locally instead of pulling from registry:
+    # build:
+    #   context: ./desktop/backend-go
+    #   dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./desktop/backend-go/.env
+    environment:
+      # These override .env for production-specific values
+      ENVIRONMENT: production
+      DEPLOYMENT_MODE: cloud
+      SERVER_PORT: "8080"
+      REDIS_TLS_ENABLED: "true"
+      # OptimalOS engine is disabled in the API process (runs in Computer VMs)
+      OPTIMAL_ENABLED: "false"
+      CARRIER_ENABLED: "false"
+      NATS_ENABLED: "false"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    # Resource limits — mirror Cloud Run defaults
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Redis (session store, rate limiting, key cache)
+  # Use Upstash in production for managed Redis with TLS.
+  # This local Redis is for self-hosted deployments only.
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass "${REDIS_PASSWORD:?REDIS_PASSWORD required}" --save 60 1 --loglevel warning
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:?REDIS_PASSWORD required}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  redis_data:
+    driver: local
+
+# =============================================================================
+# Notes
+# =============================================================================
+# - Database: Supabase (external). Set DATABASE_URL in .env.
+# - TLS termination: run behind a reverse proxy (nginx, Caddy, Traefik).
+#   The backend only speaks HTTP on :8080.
+# - Custom domains: configure at your reverse proxy layer, not here.
+# - Secrets rotation: update .env and restart with `docker compose restart backend`.

@@ -1,0 +1,251 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ConfigureDashboard Input",
+  "description": "Input schema for the configure_dashboard tool",
+  "type": "object",
+  "required": ["action"],
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": [
+        "create_dashboard",
+        "add_widget",
+        "add_widgets",
+        "remove_widget",
+        "update_widget",
+        "set_default",
+        "list_dashboards",
+        "list_widgets",
+        "get_dashboard"
+      ],
+      "description": "The action to perform"
+    },
+    "dashboard_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Target dashboard UUID. Uses default if not provided."
+    },
+    "dashboard_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Target dashboard by name (alternative to dashboard_id)"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "For create_dashboard: the name of the new dashboard"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "For create_dashboard: optional description"
+    },
+    "widget_type": {
+      "type": "string",
+      "enum": [
+        "task_summary",
+        "task_list",
+        "project_progress",
+        "upcoming_deadlines",
+        "recent_activity",
+        "metric_card",
+        "task_burndown",
+        "workload_heatmap",
+        "client_overview",
+        "notes_pinned",
+        "quick_actions",
+        "agent_shortcuts"
+      ],
+      "description": "For add_widget: the type of widget"
+    },
+    "widget_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "For remove_widget/update_widget: the widget instance ID"
+    },
+    "config": {
+      "type": "object",
+      "description": "Widget configuration options",
+      "properties": {
+        "group_by": {
+          "type": "string",
+          "enum": ["status", "project", "priority"]
+        },
+        "days_ahead": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 90
+        },
+        "days": {
+          "type": "integer",
+          "minimum": 7,
+          "maximum": 365
+        },
+        "show_overdue": {
+          "type": "boolean"
+        },
+        "show_completed": {
+          "type": "boolean"
+        },
+        "show_ideal": {
+          "type": "boolean"
+        },
+        "show_trend": {
+          "type": "boolean"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "filter": {
+          "type": "string",
+          "enum": ["active", "overdue", "today", "all", "tasks", "projects", "comments"]
+        },
+        "user_filter": {
+          "type": "string",
+          "enum": ["all", "me", "others"]
+        },
+        "sort_by": {
+          "type": "string",
+          "enum": ["due_date", "priority", "created_at", "progress", "deadline", "name"]
+        },
+        "metric": {
+          "type": "string",
+          "enum": [
+            "tasks_due_today",
+            "tasks_overdue",
+            "tasks_completed_week",
+            "tasks_completed_today",
+            "active_projects",
+            "projects_at_risk"
+          ]
+        },
+        "date_range": {
+          "type": "string",
+          "enum": ["month", "quarter", "year"]
+        },
+        "pipeline_stage": {
+          "type": "string",
+          "enum": ["lead", "prospect", "active", "churned"]
+        },
+        "tag": {
+          "type": "string"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["new_task", "new_project", "new_note", "new_client", "start_timer"]
+          }
+        },
+        "shortcuts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    "widgets": {
+      "type": "array",
+      "description": "For add_widgets: batch add multiple widgets",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "task_summary",
+              "task_list",
+              "project_progress",
+              "upcoming_deadlines",
+              "recent_activity",
+              "metric_card",
+              "task_burndown",
+              "workload_heatmap",
+              "client_overview",
+              "notes_pinned",
+              "quick_actions",
+              "agent_shortcuts"
+            ]
+          },
+          "config": {
+            "type": "object"
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 12
+    },
+    "clear_existing": {
+      "type": "boolean",
+      "description": "For add_widgets: clear existing widgets first",
+      "default": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "action": { "const": "create_dashboard" } }
+      },
+      "then": {
+        "required": ["name"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "action": { "const": "add_widget" } }
+      },
+      "then": {
+        "required": ["widget_type"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "action": { "const": "add_widgets" } }
+      },
+      "then": {
+        "required": ["widgets"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "action": { "const": "remove_widget" } }
+      },
+      "then": {
+        "anyOf": [
+          { "required": ["widget_id"] },
+          { "required": ["widget_type"] }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": { "action": { "const": "update_widget" } }
+      },
+      "then": {
+        "required": ["widget_id", "config"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "action": { "const": "set_default" } }
+      },
+      "then": {
+        "anyOf": [
+          { "required": ["dashboard_id"] },
+          { "required": ["dashboard_name"] }
+        ]
+      }
+    }
+  ]
+}

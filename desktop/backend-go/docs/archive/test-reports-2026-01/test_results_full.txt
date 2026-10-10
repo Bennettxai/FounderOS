@@ -1,0 +1,1651 @@
+# github.com/rhl/businessos-backend
+.\gen_hash.go:8:6: main redeclared in this block
+	.\check_llm_config.go:7:6: other declaration of main
+.\setup_test_user.go:13:6: main redeclared in this block
+	.\check_llm_config.go:7:6: other declaration of main
+.\test_agent_endpoint.go:10:6: main redeclared in this block
+	.\check_llm_config.go:7:6: other declaration of main
+.\test_cookie_samesite.go:8:6: main redeclared in this block
+	.\check_llm_config.go:7:6: other declaration of main
+.\test_full_api_call.go:10:6: main redeclared in this block
+	.\check_llm_config.go:7:6: other declaration of main
+FAIL	github.com/rhl/businessos-backend [build failed]
+	github.com/rhl/businessos-backend/cmd/migrate		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/cmd/migrate-full		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/cmd/reembed		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/cmd/server		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/cmd/summarize		coverage: 0.0% of statements
+=== RUN   TestDockerClientImport
+    docker_test.go:26: Note: Could not ping Docker daemon (this is expected if Docker isn't running): error during connect: in the default daemon configuration on Windows, the docker client must be run with elevated privileges to connect: Head "http://%2F%2F.%2Fpipe%2Fdocker_engine/_ping": open //./pipe/docker_engine: O sistema não pode encontrar o arquivo especificado.
+--- PASS: TestDockerClientImport (0.00s)
+PASS
+coverage: 0.0% of statements
+ok  	github.com/rhl/businessos-backend/examples	1.086s	coverage: 0.0% of statements
+=== RUN   TestAgentTypeV2Constants
+--- PASS: TestAgentTypeV2Constants (0.00s)
+=== RUN   TestContextRequirements
+--- PASS: TestContextRequirements (0.00s)
+=== RUN   TestBaseAgentV2Config
+--- PASS: TestBaseAgentV2Config (0.00s)
+=== RUN   TestNewBaseAgentV2
+--- PASS: TestNewBaseAgentV2 (0.00s)
+=== RUN   TestAgentV2SetModel
+--- PASS: TestAgentV2SetModel (0.00s)
+=== RUN   TestShouldDelegateForFocusMode
+--- PASS: TestShouldDelegateForFocusMode (0.00s)
+=== RUN   TestAgentToolAccessMatrix
+=== RUN   TestAgentToolAccessMatrix/client
+=== RUN   TestAgentToolAccessMatrix/analyst
+=== RUN   TestAgentToolAccessMatrix/orchestrator
+=== RUN   TestAgentToolAccessMatrix/document
+=== RUN   TestAgentToolAccessMatrix/project
+=== RUN   TestAgentToolAccessMatrix/task
+--- PASS: TestAgentToolAccessMatrix (0.00s)
+    --- PASS: TestAgentToolAccessMatrix/client (0.00s)
+    --- PASS: TestAgentToolAccessMatrix/analyst (0.00s)
+    --- PASS: TestAgentToolAccessMatrix/orchestrator (0.00s)
+    --- PASS: TestAgentToolAccessMatrix/document (0.00s)
+    --- PASS: TestAgentToolAccessMatrix/project (0.00s)
+    --- PASS: TestAgentToolAccessMatrix/task (0.00s)
+=== RUN   TestAgentCannotCallUnauthorizedTools
+=== RUN   TestAgentCannotCallUnauthorizedTools/client_unauthorized
+=== RUN   TestAgentCannotCallUnauthorizedTools/document_unauthorized
+=== RUN   TestAgentCannotCallUnauthorizedTools/analyst_unauthorized
+--- PASS: TestAgentCannotCallUnauthorizedTools (0.00s)
+    --- PASS: TestAgentCannotCallUnauthorizedTools/client_unauthorized (0.00s)
+    --- PASS: TestAgentCannotCallUnauthorizedTools/document_unauthorized (0.00s)
+    --- PASS: TestAgentCannotCallUnauthorizedTools/analyst_unauthorized (0.00s)
+=== RUN   TestExecuteToolAccessControl
+--- PASS: TestExecuteToolAccessControl (0.00s)
+=== RUN   TestLargeContextHandling
+--- PASS: TestLargeContextHandling (0.00s)
+=== RUN   TestContextRequirementsPerAgent
+=== RUN   TestContextRequirementsPerAgent/orchestrator
+=== RUN   TestContextRequirementsPerAgent/document
+=== RUN   TestContextRequirementsPerAgent/project
+=== RUN   TestContextRequirementsPerAgent/task
+=== RUN   TestContextRequirementsPerAgent/client
+=== RUN   TestContextRequirementsPerAgent/analyst
+--- PASS: TestContextRequirementsPerAgent (0.00s)
+    --- PASS: TestContextRequirementsPerAgent/orchestrator (0.00s)
+    --- PASS: TestContextRequirementsPerAgent/document (0.00s)
+    --- PASS: TestContextRequirementsPerAgent/project (0.00s)
+    --- PASS: TestContextRequirementsPerAgent/task (0.00s)
+    --- PASS: TestContextRequirementsPerAgent/client (0.00s)
+    --- PASS: TestContextRequirementsPerAgent/analyst (0.00s)
+=== RUN   TestMaxContextTokensHandling
+--- PASS: TestMaxContextTokensHandling (0.00s)
+=== RUN   TestStreamEventTypes
+    agent_v2_test.go:452: Event type 'token' should be supported by frontend
+    agent_v2_test.go:452: Event type 'artifact_start' should be supported by frontend
+    agent_v2_test.go:452: Event type 'artifact_complete' should be supported by frontend
+    agent_v2_test.go:452: Event type 'done' should be supported by frontend
+    agent_v2_test.go:452: Event type 'error' should be supported by frontend
+    agent_v2_test.go:452: Event type 'thinking' should be supported by frontend
+--- PASS: TestStreamEventTypes (0.00s)
+=== RUN   TestAgentInputStructure
+--- PASS: TestAgentInputStructure (0.00s)
+=== RUN   TestUserSelectionsStructure
+--- PASS: TestUserSelectionsStructure (0.00s)
+=== RUN   TestIntentStructure
+--- PASS: TestIntentStructure (0.00s)
+=== RUN   TestAllAgentTypesHaveSystemPrompt
+--- PASS: TestAllAgentTypesHaveSystemPrompt (0.00s)
+=== RUN   TestAllAgentTypesHaveNameAndDescription
+--- PASS: TestAllAgentTypesHaveNameAndDescription (0.00s)
+=== RUN   TestSmartIntentRouterClassifyIntent
+=== RUN   TestSmartIntentRouterClassifyIntent/Document_request_-_proposal
+=== RUN   TestSmartIntentRouterClassifyIntent/Document_request_-_write_proposal
+=== RUN   TestSmartIntentRouterClassifyIntent/Document_request_-_draft_report
+=== RUN   TestSmartIntentRouterClassifyIntent/Analysis_request_-_analyze
+=== RUN   TestSmartIntentRouterClassifyIntent/General_greeting_-_should_stay_with_orchestrator
+--- PASS: TestSmartIntentRouterClassifyIntent (0.00s)
+    --- PASS: TestSmartIntentRouterClassifyIntent/Document_request_-_proposal (0.00s)
+    --- PASS: TestSmartIntentRouterClassifyIntent/Document_request_-_write_proposal (0.00s)
+    --- PASS: TestSmartIntentRouterClassifyIntent/Document_request_-_draft_report (0.00s)
+    --- PASS: TestSmartIntentRouterClassifyIntent/Analysis_request_-_analyze (0.00s)
+    --- PASS: TestSmartIntentRouterClassifyIntent/General_greeting_-_should_stay_with_orchestrator (0.00s)
+=== RUN   TestSmartIntentRouterPatternMatching
+    intent_router_v2_test.go:91: Message: 'write a proposal' -> Agent: document (confidence: 1.00)
+    intent_router_v2_test.go:91: Message: 'draft a report' -> Agent: document (confidence: 1.00)
+    intent_router_v2_test.go:91: Message: 'analyze the data' -> Agent: analyst (confidence: 1.00)
+--- PASS: TestSmartIntentRouterPatternMatching (0.00s)
+=== RUN   TestIntentStruct
+--- PASS: TestIntentStruct (0.00s)
+=== RUN   TestAgentPersonaValidation
+=== RUN   TestAgentPersonaValidation/Orchestrator_persona
+    persona_validation_test.go:86: Agent orchestrator: prompt length=723 chars
+=== RUN   TestAgentPersonaValidation/Document_agent_persona
+    persona_validation_test.go:86: Agent document: prompt length=2570 chars
+=== RUN   TestAgentPersonaValidation/Analyst_agent_persona
+    persona_validation_test.go:86: Agent analysis: prompt length=1532 chars
+--- PASS: TestAgentPersonaValidation (0.00s)
+    --- PASS: TestAgentPersonaValidation/Orchestrator_persona (0.00s)
+    --- PASS: TestAgentPersonaValidation/Document_agent_persona (0.00s)
+    --- PASS: TestAgentPersonaValidation/Analyst_agent_persona (0.00s)
+=== RUN   TestAgentSystemPromptUniqueness
+--- PASS: TestAgentSystemPromptUniqueness (0.00s)
+=== RUN   TestAgentNameConsistency
+=== RUN   TestAgentNameConsistency/orchestrator
+=== RUN   TestAgentNameConsistency/document
+=== RUN   TestAgentNameConsistency/analysis
+=== RUN   TestAgentNameConsistency/planning
+--- PASS: TestAgentNameConsistency (0.00s)
+    --- PASS: TestAgentNameConsistency/orchestrator (0.00s)
+    --- PASS: TestAgentNameConsistency/document (0.00s)
+    --- PASS: TestAgentNameConsistency/analysis (0.00s)
+    --- PASS: TestAgentNameConsistency/planning (0.00s)
+=== RUN   TestAgentDescriptions
+=== RUN   TestAgentDescriptions/document
+    persona_validation_test.go:165: Agent document: 'Creates professional business documents'
+=== RUN   TestAgentDescriptions/analysis
+    persona_validation_test.go:165: Agent analysis: 'Analyzes data and provides insights'
+=== RUN   TestAgentDescriptions/planning
+    persona_validation_test.go:165: Agent planning: 'Helps with planning and prioritization'
+=== RUN   TestAgentDescriptions/orchestrator
+    persona_validation_test.go:165: Agent orchestrator: 'Main coordinator that handles requests and delegates to sub-agents'
+--- PASS: TestAgentDescriptions (0.00s)
+    --- PASS: TestAgentDescriptions/document (0.00s)
+    --- PASS: TestAgentDescriptions/analysis (0.00s)
+    --- PASS: TestAgentDescriptions/planning (0.00s)
+    --- PASS: TestAgentDescriptions/orchestrator (0.00s)
+=== RUN   TestFocusModeAgentMapping
+=== RUN   TestFocusModeAgentMapping/research
+=== RUN   TestFocusModeAgentMapping/analyze
+=== RUN   TestFocusModeAgentMapping/write
+=== RUN   TestFocusModeAgentMapping/build
+=== RUN   TestFocusModeAgentMapping/general
+=== RUN   TestFocusModeAgentMapping/quick
+=== RUN   TestFocusModeAgentMapping/unknown_mode
+--- PASS: TestFocusModeAgentMapping (0.00s)
+    --- PASS: TestFocusModeAgentMapping/research (0.00s)
+    --- PASS: TestFocusModeAgentMapping/analyze (0.00s)
+    --- PASS: TestFocusModeAgentMapping/write (0.00s)
+    --- PASS: TestFocusModeAgentMapping/build (0.00s)
+    --- PASS: TestFocusModeAgentMapping/general (0.00s)
+    --- PASS: TestFocusModeAgentMapping/quick (0.00s)
+    --- PASS: TestFocusModeAgentMapping/unknown_mode (0.00s)
+=== RUN   TestDelegationParsing
+=== RUN   TestDelegationParsing/Valid_delegation
+=== RUN   TestDelegationParsing/No_delegation
+=== RUN   TestDelegationParsing/Delegation_mid-text
+=== RUN   TestDelegationParsing/Invalid_format
+=== RUN   TestDelegationParsing/Analysis_agent_delegation
+--- PASS: TestDelegationParsing (0.00s)
+    --- PASS: TestDelegationParsing/Valid_delegation (0.00s)
+    --- PASS: TestDelegationParsing/No_delegation (0.00s)
+    --- PASS: TestDelegationParsing/Delegation_mid-text (0.00s)
+    --- PASS: TestDelegationParsing/Invalid_format (0.00s)
+    --- PASS: TestDelegationParsing/Analysis_agent_delegation (0.00s)
+=== RUN   TestOrchestratorPromptWithContext
+=== RUN   TestOrchestratorPromptWithContext/Full_context
+    persona_validation_test.go:286: Generated prompt length: 2548 chars
+=== RUN   TestOrchestratorPromptWithContext/No_project
+    persona_validation_test.go:286: Generated prompt length: 2390 chars
+=== RUN   TestOrchestratorPromptWithContext/Empty_user
+    persona_validation_test.go:286: Generated prompt length: 2505 chars
+--- PASS: TestOrchestratorPromptWithContext (0.00s)
+    --- PASS: TestOrchestratorPromptWithContext/Full_context (0.00s)
+    --- PASS: TestOrchestratorPromptWithContext/No_project (0.00s)
+    --- PASS: TestOrchestratorPromptWithContext/Empty_user (0.00s)
+=== RUN   TestAgentTypeV2Mapping
+=== RUN   TestAgentTypeV2Mapping/orchestrator
+=== RUN   TestAgentTypeV2Mapping/document
+=== RUN   TestAgentTypeV2Mapping/analyst
+=== RUN   TestAgentTypeV2Mapping/project
+=== RUN   TestAgentTypeV2Mapping/task
+=== RUN   TestAgentTypeV2Mapping/client
+--- PASS: TestAgentTypeV2Mapping (0.00s)
+    --- PASS: TestAgentTypeV2Mapping/orchestrator (0.00s)
+    --- PASS: TestAgentTypeV2Mapping/document (0.00s)
+    --- PASS: TestAgentTypeV2Mapping/analyst (0.00s)
+    --- PASS: TestAgentTypeV2Mapping/project (0.00s)
+    --- PASS: TestAgentTypeV2Mapping/task (0.00s)
+    --- PASS: TestAgentTypeV2Mapping/client (0.00s)
+PASS
+coverage: 11.5% of statements
+ok  	github.com/rhl/businessos-backend/internal/agents	0.293s	coverage: 11.5% of statements
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestAnalystAgentType
+--- PASS: TestAnalystAgentType (0.00s)
+=== RUN   TestAnalystAgentName
+--- PASS: TestAnalystAgentName (0.00s)
+=== RUN   TestAnalystAgentDescription
+--- PASS: TestAnalystAgentDescription (0.00s)
+=== RUN   TestAnalystAgentSystemPrompt
+--- PASS: TestAnalystAgentSystemPrompt (0.00s)
+=== RUN   TestAnalystAgentContextRequirements
+--- PASS: TestAnalystAgentContextRequirements (0.00s)
+=== RUN   TestAnalystAgentEnabledTools
+--- PASS: TestAnalystAgentEnabledTools (0.00s)
+=== RUN   TestAnalystAgentNoUnauthorizedTools
+--- PASS: TestAnalystAgentNoUnauthorizedTools (0.00s)
+PASS
+coverage: 80.0% of statements
+ok  	github.com/rhl/businessos-backend/internal/agents/analyst	0.271s	coverage: 80.0% of statements
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestClientAgentType
+--- PASS: TestClientAgentType (0.00s)
+=== RUN   TestClientAgentName
+--- PASS: TestClientAgentName (0.00s)
+=== RUN   TestClientAgentDescription
+--- PASS: TestClientAgentDescription (0.00s)
+=== RUN   TestClientAgentSystemPrompt
+--- PASS: TestClientAgentSystemPrompt (0.00s)
+=== RUN   TestClientAgentContextRequirements
+--- PASS: TestClientAgentContextRequirements (0.00s)
+=== RUN   TestClientAgentEnabledTools
+--- PASS: TestClientAgentEnabledTools (0.00s)
+=== RUN   TestClientAgentNoUnauthorizedTools
+--- PASS: TestClientAgentNoUnauthorizedTools (0.00s)
+PASS
+coverage: 80.0% of statements
+ok  	github.com/rhl/businessos-backend/internal/agents/client	0.506s	coverage: 80.0% of statements
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestDocumentAgentType
+--- PASS: TestDocumentAgentType (0.00s)
+=== RUN   TestDocumentAgentName
+--- PASS: TestDocumentAgentName (0.00s)
+=== RUN   TestDocumentAgentDescription
+--- PASS: TestDocumentAgentDescription (0.00s)
+=== RUN   TestDocumentAgentSystemPrompt
+--- PASS: TestDocumentAgentSystemPrompt (0.00s)
+=== RUN   TestDocumentAgentContextRequirements
+--- PASS: TestDocumentAgentContextRequirements (0.00s)
+=== RUN   TestDocumentAgentEnabledTools
+--- PASS: TestDocumentAgentEnabledTools (0.00s)
+=== RUN   TestDocumentAgentNoUnauthorizedTools
+--- PASS: TestDocumentAgentNoUnauthorizedTools (0.00s)
+PASS
+coverage: 80.0% of statements
+ok  	github.com/rhl/businessos-backend/internal/agents/document	0.508s	coverage: 80.0% of statements
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestProjectAgentType
+--- PASS: TestProjectAgentType (0.00s)
+=== RUN   TestProjectAgentName
+--- PASS: TestProjectAgentName (0.00s)
+=== RUN   TestProjectAgentDescription
+--- PASS: TestProjectAgentDescription (0.00s)
+=== RUN   TestProjectAgentSystemPrompt
+--- PASS: TestProjectAgentSystemPrompt (0.00s)
+=== RUN   TestProjectAgentContextRequirements
+--- PASS: TestProjectAgentContextRequirements (0.00s)
+=== RUN   TestProjectAgentEnabledTools
+--- PASS: TestProjectAgentEnabledTools (0.00s)
+=== RUN   TestProjectAgentNoUnauthorizedTools
+--- PASS: TestProjectAgentNoUnauthorizedTools (0.00s)
+PASS
+coverage: 80.0% of statements
+ok  	github.com/rhl/businessos-backend/internal/agents/project	0.517s	coverage: 80.0% of statements
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestTaskAgentType
+--- PASS: TestTaskAgentType (0.00s)
+=== RUN   TestTaskAgentName
+--- PASS: TestTaskAgentName (0.00s)
+=== RUN   TestTaskAgentDescription
+--- PASS: TestTaskAgentDescription (0.00s)
+=== RUN   TestTaskAgentSystemPrompt
+--- PASS: TestTaskAgentSystemPrompt (0.00s)
+=== RUN   TestTaskAgentContextRequirements
+--- PASS: TestTaskAgentContextRequirements (0.00s)
+=== RUN   TestTaskAgentEnabledTools
+--- PASS: TestTaskAgentEnabledTools (0.00s)
+=== RUN   TestTaskAgentNoUnauthorizedTools
+--- PASS: TestTaskAgentNoUnauthorizedTools (0.00s)
+=== RUN   TestTaskAgentPrioritySections
+--- PASS: TestTaskAgentPrioritySections (0.00s)
+PASS
+coverage: 80.0% of statements
+ok  	github.com/rhl/businessos-backend/internal/agents/task	0.221s	coverage: 80.0% of statements
+	github.com/rhl/businessos-backend/internal/config		coverage: 0.0% of statements
+=== RUN   TestNewContainerManager
+2026/01/15 16:12:37 [Container] Creating new container manager with image: 
+    manager_test.go:15: Docker not available: Docker daemon not available: error during connect: in the default daemon configuration on Windows, the docker client must be run with elevated privileges to connect: Head "http://%2F%2F.%2Fpipe%2Fdocker_engine/_ping": open //./pipe/docker_engine: O sistema não pode encontrar o arquivo especificado.
+--- SKIP: TestNewContainerManager (0.02s)
+=== RUN   TestNewContainerManagerWithCustomImage
+2026/01/15 16:12:37 [Container] Creating new container manager with image: alpine:latest
+    manager_test.go:45: Docker not available: Docker daemon not available: error during connect: in the default daemon configuration on Windows, the docker client must be run with elevated privileges to connect: Head "http://%2F%2F.%2Fpipe%2Fdocker_engine/_ping": open //./pipe/docker_engine: O sistema não pode encontrar o arquivo especificado.
+--- SKIP: TestNewContainerManagerWithCustomImage (0.00s)
+=== RUN   TestContainerManagerClose
+2026/01/15 16:12:37 [Container] Creating new container manager with image: 
+    manager_test.go:60: Docker not available: Docker daemon not available: error during connect: in the default daemon configuration on Windows, the docker client must be run with elevated privileges to connect: Head "http://%2F%2F.%2Fpipe%2Fdocker_engine/_ping": open //./pipe/docker_engine: O sistema não pode encontrar o arquivo especificado.
+--- SKIP: TestContainerManagerClose (0.00s)
+=== RUN   TestListContainers
+2026/01/15 16:12:37 [Container] Creating new container manager with image: 
+    manager_test.go:78: Docker not available: Docker daemon not available: error during connect: in the default daemon configuration on Windows, the docker client must be run with elevated privileges to connect: Head "http://%2F%2F.%2Fpipe%2Fdocker_engine/_ping": open //./pipe/docker_engine: O sistema não pode encontrar o arquivo especificado.
+--- SKIP: TestListContainers (0.00s)
+=== RUN   TestUpdateActivity
+2026/01/15 16:12:37 [Container] Creating new container manager with image: 
+    manager_test.go:125: Docker not available: Docker daemon not available: error during connect: in the default daemon configuration on Windows, the docker client must be run with elevated privileges to connect: Head "http://%2F%2F.%2Fpipe%2Fdocker_engine/_ping": open //./pipe/docker_engine: O sistema não pode encontrar o arquivo especificado.
+--- SKIP: TestUpdateActivity (0.00s)
+=== RUN   TestCleanupOrphans_RaceCondition
+2026/01/15 16:12:37 [Container] Creating new container manager with image: ubuntu:22.04
+    monitor_race_test.go:27: Failed to create container manager: Docker daemon not available: error during connect: in the default daemon configuration on Windows, the docker client must be run with elevated privileges to connect: Head "http://%2F%2F.%2Fpipe%2Fdocker_engine/_ping": open //./pipe/docker_engine: O sistema não pode encontrar o arquivo especificado.
+--- FAIL: TestCleanupOrphans_RaceCondition (0.00s)
+=== RUN   TestMonitor_ConcurrentStatsAccess
+    monitor_race_test.go:173: Final container count: 22
+    monitor_race_test.go:179: Total started: 2000, Total stopped: 1000
+--- PASS: TestMonitor_ConcurrentStatsAccess (0.17s)
+=== RUN   TestMonitor_CleanupLoopRaceCondition
+2026/01/15 16:12:37 [Container] Creating new container manager with image: ubuntu:22.04
+    monitor_race_test.go:200: Failed to create container manager: Docker daemon not available: error during connect: in the default daemon configuration on Windows, the docker client must be run with elevated privileges to connect: Head "http://%2F%2F.%2Fpipe%2Fdocker_engine/_ping": open //./pipe/docker_engine: O sistema não pode encontrar o arquivo especificado.
+--- FAIL: TestMonitor_CleanupLoopRaceCondition (0.00s)
+=== RUN   TestMonitor_MetricsAtomicity
+    monitor_race_test.go:316: Atomicity test passed: 100000 operations per metric type
+--- PASS: TestMonitor_MetricsAtomicity (0.00s)
+=== RUN   TestMonitor_UpdateContainerStats_Concurrency
+    monitor_race_test.go:364: Concurrent updateContainerStats completed successfully
+--- PASS: TestMonitor_UpdateContainerStats_Concurrency (0.00s)
+=== RUN   TestCleanupOrphans_UnlockRelockPattern
+2026/01/15 16:12:37 [Container] Creating new container manager with image: ubuntu:22.04
+    monitor_race_test.go:384: Failed to create container manager: Docker daemon not available: error during connect: in the default daemon configuration on Windows, the docker client must be run with elevated privileges to connect: Head "http://%2F%2F.%2Fpipe%2Fdocker_engine/_ping": open //./pipe/docker_engine: O sistema não pode encontrar o arquivo especificado.
+--- FAIL: TestCleanupOrphans_UnlockRelockPattern (0.00s)
+=== RUN   TestDefaultMonitorConfig
+--- PASS: TestDefaultMonitorConfig (0.00s)
+=== RUN   TestNewContainerMetrics
+--- PASS: TestNewContainerMetrics (0.00s)
+=== RUN   TestContainerMetrics_AtomicOperations
+--- PASS: TestContainerMetrics_AtomicOperations (0.00s)
+=== RUN   TestContainerMetrics_ToJSON
+--- PASS: TestContainerMetrics_ToJSON (0.00s)
+=== RUN   TestContainerStats_Creation
+--- PASS: TestContainerStats_Creation (0.00s)
+=== RUN   TestContainerMonitor_RegisterUnregister
+--- PASS: TestContainerMonitor_RegisterUnregister (0.00s)
+=== RUN   TestContainerMonitor_UpdateActivity
+--- PASS: TestContainerMonitor_UpdateActivity (0.00s)
+=== RUN   TestContainerMonitor_GetAllContainerStats
+--- PASS: TestContainerMonitor_GetAllContainerStats (0.00s)
+=== RUN   TestContainerMonitor_GetContainerStats
+--- PASS: TestContainerMonitor_GetContainerStats (0.00s)
+=== RUN   TestContainerMonitor_IdleDetection
+--- PASS: TestContainerMonitor_IdleDetection (0.00s)
+=== RUN   TestGetVolumeName
+=== RUN   TestGetVolumeName/standard_user_ID
+=== RUN   TestGetVolumeName/UUID_user_ID
+=== RUN   TestGetVolumeName/numeric_user_ID
+--- PASS: TestGetVolumeName (0.00s)
+    --- PASS: TestGetVolumeName/standard_user_ID (0.00s)
+    --- PASS: TestGetVolumeName/UUID_user_ID (0.00s)
+    --- PASS: TestGetVolumeName/numeric_user_ID (0.00s)
+=== RUN   TestCreateVolumeValidation
+--- PASS: TestCreateVolumeValidation (0.00s)
+=== RUN   TestRemoveVolumeValidation
+--- PASS: TestRemoveVolumeValidation (0.00s)
+=== RUN   TestVolumeExistsValidation
+--- PASS: TestVolumeExistsValidation (0.00s)
+=== RUN   TestListUserVolumesValidation
+--- PASS: TestListUserVolumesValidation (0.00s)
+=== RUN   TestGetVolumeInfoValidation
+--- PASS: TestGetVolumeInfoValidation (0.00s)
+FAIL
+coverage: 7.8% of statements
+FAIL	github.com/rhl/businessos-backend/internal/container	1.529s
+	github.com/rhl/businessos-backend/internal/database		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/database/sqlc		coverage: 0.0% of statements
+# github.com/rhl/businessos-backend/internal/handlers
+# [github.com/rhl/businessos-backend/internal/handlers]
+internal\handlers\osa_voice.go:57:29: conversion from int to string yields a string of one rune, not a string of digits
+FAIL	github.com/rhl/businessos-backend/internal/handlers [build failed]
+	github.com/rhl/businessos-backend/internal/integrations		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/integrations/airtable		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/integrations/clickup		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/integrations/fathom		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/integrations/google		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/integrations/hubspot		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/integrations/linear		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/integrations/microsoft		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/integrations/notion		coverage: 0.0% of statements
+=== RUN   TestGenerateAuthToken
+=== RUN   TestGenerateAuthToken/with_workspace_ID
+=== RUN   TestGenerateAuthToken/without_workspace_ID
+--- PASS: TestGenerateAuthToken (0.00s)
+    --- PASS: TestGenerateAuthToken/with_workspace_ID (0.00s)
+    --- PASS: TestGenerateAuthToken/without_workspace_ID (0.00s)
+=== RUN   TestValidateAuthToken
+=== RUN   TestValidateAuthToken/valid_token
+=== RUN   TestValidateAuthToken/invalid_token_-_wrong_secret
+=== RUN   TestValidateAuthToken/invalid_token_-_malformed
+=== RUN   TestValidateAuthToken/invalid_token_-_expired
+=== RUN   TestValidateAuthToken/invalid_token_-_wrong_signing_method
+--- PASS: TestValidateAuthToken (0.00s)
+    --- PASS: TestValidateAuthToken/valid_token (0.00s)
+    --- PASS: TestValidateAuthToken/invalid_token_-_wrong_secret (0.00s)
+    --- PASS: TestValidateAuthToken/invalid_token_-_malformed (0.00s)
+    --- PASS: TestValidateAuthToken/invalid_token_-_expired (0.00s)
+    --- PASS: TestValidateAuthToken/invalid_token_-_wrong_signing_method (0.00s)
+=== RUN   TestTokenExpiration
+--- PASS: TestTokenExpiration (0.00s)
+=== RUN   TestTokenIssuerAndSubject
+--- PASS: TestTokenIssuerAndSubject (0.00s)
+=== RUN   TestNewClient
+=== RUN   TestNewClient/valid_config
+=== RUN   TestNewClient/missing_base_URL
+=== RUN   TestNewClient/missing_shared_secret
+--- PASS: TestNewClient (0.00s)
+    --- PASS: TestNewClient/valid_config (0.00s)
+    --- PASS: TestNewClient/missing_base_URL (0.00s)
+    --- PASS: TestNewClient/missing_shared_secret (0.00s)
+=== RUN   TestClient_HealthCheck
+--- PASS: TestClient_HealthCheck (0.06s)
+=== RUN   TestClient_GenerateApp
+    client_test.go:107: 
+        	Error Trace:	C:/Users/Pichau/Desktop/BusinessOS-main-dev/desktop/backend-go/internal/integrations/osa/client_test.go:107
+        	            				C:/Program Files/Go/src/net/http/server.go:2322
+        	            				C:/Program Files/Go/src/net/http/server.go:3340
+        	            				C:/Program Files/Go/src/net/http/server.go:2109
+        	            				C:/Program Files/Go/src/runtime/asm_amd64.s:1693
+        	Error:      	Not equal: 
+        	            	expected: "/api/apps/generate"
+        	            	actual  : "/api/orchestrate"
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -1 +1 @@
+        	            	-/api/apps/generate
+        	            	+/api/orchestrate
+        	Test:       	TestClient_GenerateApp
+    client_test.go:118: 
+        	Error Trace:	C:/Users/Pichau/Desktop/BusinessOS-main-dev/desktop/backend-go/internal/integrations/osa/client_test.go:118
+        	            				C:/Program Files/Go/src/net/http/server.go:2322
+        	            				C:/Program Files/Go/src/net/http/server.go:3340
+        	            				C:/Program Files/Go/src/net/http/server.go:2109
+        	            				C:/Program Files/Go/src/runtime/asm_amd64.s:1693
+        	Error:      	Not equal: 
+        	            	expected: uuid.UUID{0xc9, 0xd9, 0x51, 0x47, 0x34, 0xbb, 0x47, 0x22, 0xbb, 0xdb, 0x23, 0xcc, 0xbc, 0xaf, 0xf1, 0x18}
+        	            	actual  : uuid.UUID{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -1,3 +1,3 @@
+        	            	 (uuid.UUID) (len=16) {
+        	            	- 00000000  c9 d9 51 47 34 bb 47 22  bb db 23 cc bc af f1 18  |..QG4.G"..#.....|
+        	            	+ 00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+        	            	 }
+        	Test:       	TestClient_GenerateApp
+    client_test.go:119: 
+        	Error Trace:	C:/Users/Pichau/Desktop/BusinessOS-main-dev/desktop/backend-go/internal/integrations/osa/client_test.go:119
+        	            				C:/Program Files/Go/src/net/http/server.go:2322
+        	            				C:/Program Files/Go/src/net/http/server.go:3340
+        	            				C:/Program Files/Go/src/net/http/server.go:2109
+        	            				C:/Program Files/Go/src/runtime/asm_amd64.s:1693
+        	Error:      	Not equal: 
+        	            	expected: uuid.UUID{0x57, 0x6b, 0xf5, 0x56, 0x27, 0xb3, 0x4c, 0xfb, 0xb1, 0x9b, 0x14, 0xcc, 0xbd, 0x24, 0x65, 0x16}
+        	            	actual  : uuid.UUID{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -1,3 +1,3 @@
+        	            	 (uuid.UUID) (len=16) {
+        	            	- 00000000  57 6b f5 56 27 b3 4c fb  b1 9b 14 cc bd 24 65 16  |Wk.V'.L......$e.|
+        	            	+ 00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+        	            	 }
+        	Test:       	TestClient_GenerateApp
+    client_test.go:120: 
+        	Error Trace:	C:/Users/Pichau/Desktop/BusinessOS-main-dev/desktop/backend-go/internal/integrations/osa/client_test.go:120
+        	            				C:/Program Files/Go/src/net/http/server.go:2322
+        	            				C:/Program Files/Go/src/net/http/server.go:3340
+        	            				C:/Program Files/Go/src/net/http/server.go:2109
+        	            				C:/Program Files/Go/src/runtime/asm_amd64.s:1693
+        	Error:      	Not equal: 
+        	            	expected: "Test App"
+        	            	actual  : ""
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -1 +1 @@
+        	            	-Test App
+        	            	+
+        	Test:       	TestClient_GenerateApp
+    client_test.go:159: 
+        	Error Trace:	C:/Users/Pichau/Desktop/BusinessOS-main-dev/desktop/backend-go/internal/integrations/osa/client_test.go:159
+        	Error:      	Not equal: 
+        	            	expected: "090f388a-4eaf-4498-9da3-8008257c2970"
+        	            	actual  : "00000000-0000-0000-0000-000000000000"
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -1 +1 @@
+        	            	-090f388a-4eaf-4498-9da3-8008257c2970
+        	            	+00000000-0000-0000-0000-000000000000
+        	Test:       	TestClient_GenerateApp
+    client_test.go:160: 
+        	Error Trace:	C:/Users/Pichau/Desktop/BusinessOS-main-dev/desktop/backend-go/internal/integrations/osa/client_test.go:160
+        	Error:      	Not equal: 
+        	            	expected: "pending"
+        	            	actual  : "failed"
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -1 +1 @@
+        	            	-pending
+        	            	+failed
+        	Test:       	TestClient_GenerateApp
+--- FAIL: TestClient_GenerateApp (0.00s)
+=== RUN   TestClient_GetAppStatus
+--- PASS: TestClient_GetAppStatus (0.00s)
+=== RUN   TestClient_Orchestrate
+--- PASS: TestClient_Orchestrate (0.00s)
+=== RUN   TestClient_GetWorkspaces
+--- PASS: TestClient_GetWorkspaces (0.00s)
+=== RUN   TestClient_ErrorHandling
+--- PASS: TestClient_ErrorHandling (0.00s)
+=== RUN   TestClient_HTTPErrorNoRetry
+--- PASS: TestClient_HTTPErrorNoRetry (0.00s)
+=== RUN   TestCircuitBreaker
+=== RUN   TestCircuitBreaker/starts_in_closed_state
+=== RUN   TestCircuitBreaker/opens_after_max_failures
+2026/01/15 16:12:50 INFO circuit breaker state change old_state=closed new_state=open failures=3 consecutive_successes=0
+=== RUN   TestCircuitBreaker/rejects_requests_when_open
+2026/01/15 16:12:50 INFO circuit breaker state change old_state=closed new_state=open failures=2 consecutive_successes=0
+=== RUN   TestCircuitBreaker/transitions_to_half-open_after_timeout
+2026/01/15 16:12:50 INFO circuit breaker state change old_state=closed new_state=open failures=2 consecutive_successes=0
+2026/01/15 16:12:50 INFO circuit breaker state change old_state=open new_state=half-open failures=2 consecutive_successes=0
+=== RUN   TestCircuitBreaker/closes_after_successful_half-open_requests
+2026/01/15 16:12:50 INFO circuit breaker state change old_state=closed new_state=open failures=2 consecutive_successes=0
+2026/01/15 16:12:51 INFO circuit breaker state change old_state=open new_state=half-open failures=2 consecutive_successes=0
+2026/01/15 16:12:51 INFO circuit breaker state change old_state=half-open new_state=closed failures=2 consecutive_successes=2
+=== RUN   TestCircuitBreaker/reopens_on_failure_in_half-open_state
+2026/01/15 16:12:51 INFO circuit breaker state change old_state=closed new_state=open failures=2 consecutive_successes=0
+2026/01/15 16:12:51 INFO circuit breaker state change old_state=open new_state=half-open failures=2 consecutive_successes=0
+2026/01/15 16:12:51 INFO circuit breaker state change old_state=half-open new_state=open failures=3 consecutive_successes=0
+=== RUN   TestCircuitBreaker/tracks_metrics_correctly
+--- PASS: TestCircuitBreaker (0.18s)
+    --- PASS: TestCircuitBreaker/starts_in_closed_state (0.00s)
+    --- PASS: TestCircuitBreaker/opens_after_max_failures (0.00s)
+    --- PASS: TestCircuitBreaker/rejects_requests_when_open (0.00s)
+    --- PASS: TestCircuitBreaker/transitions_to_half-open_after_timeout (0.06s)
+    --- PASS: TestCircuitBreaker/closes_after_successful_half-open_requests (0.06s)
+    --- PASS: TestCircuitBreaker/reopens_on_failure_in_half-open_state (0.06s)
+    --- PASS: TestCircuitBreaker/tracks_metrics_correctly (0.00s)
+=== RUN   TestRetryWithBackoff
+=== RUN   TestRetryWithBackoff/succeeds_on_first_try
+=== RUN   TestRetryWithBackoff/retries_on_retryable_errors
+=== RUN   TestRetryWithBackoff/stops_on_non-retryable_errors
+=== RUN   TestRetryWithBackoff/respects_context_cancellation
+--- PASS: TestRetryWithBackoff (1.38s)
+    --- PASS: TestRetryWithBackoff/succeeds_on_first_try (0.00s)
+    --- PASS: TestRetryWithBackoff/retries_on_retryable_errors (1.38s)
+    --- PASS: TestRetryWithBackoff/stops_on_non-retryable_errors (0.00s)
+    --- PASS: TestRetryWithBackoff/respects_context_cancellation (0.00s)
+=== RUN   TestIsRetryableError
+=== RUN   TestIsRetryableError/nil_error
+=== RUN   TestIsRetryableError/timeout_error
+=== RUN   TestIsRetryableError/503_error
+=== RUN   TestIsRetryableError/500_error
+=== RUN   TestIsRetryableError/429_rate_limit
+=== RUN   TestIsRetryableError/connection_refused
+=== RUN   TestIsRetryableError/400_bad_request
+=== RUN   TestIsRetryableError/404_not_found
+=== RUN   TestIsRetryableError/generic_error
+--- PASS: TestIsRetryableError (0.00s)
+    --- PASS: TestIsRetryableError/nil_error (0.00s)
+    --- PASS: TestIsRetryableError/timeout_error (0.00s)
+    --- PASS: TestIsRetryableError/503_error (0.00s)
+    --- PASS: TestIsRetryableError/500_error (0.00s)
+    --- PASS: TestIsRetryableError/429_rate_limit (0.00s)
+    --- PASS: TestIsRetryableError/connection_refused (0.00s)
+    --- PASS: TestIsRetryableError/400_bad_request (0.00s)
+    --- PASS: TestIsRetryableError/404_not_found (0.00s)
+    --- PASS: TestIsRetryableError/generic_error (0.00s)
+=== RUN   TestHealthCheckCache
+=== RUN   TestHealthCheckCache/caches_health_check_results
+=== RUN   TestHealthCheckCache/refreshes_after_TTL_expires
+=== RUN   TestHealthCheckCache/invalidate_clears_cache
+--- PASS: TestHealthCheckCache (0.06s)
+    --- PASS: TestHealthCheckCache/caches_health_check_results (0.00s)
+    --- PASS: TestHealthCheckCache/refreshes_after_TTL_expires (0.06s)
+    --- PASS: TestHealthCheckCache/invalidate_clears_cache (0.00s)
+FAIL
+coverage: 44.1% of statements
+FAIL	github.com/rhl/businessos-backend/internal/integrations/osa	2.843s
+	github.com/rhl/businessos-backend/internal/integrations/providers		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/integrations/slack		coverage: 0.0% of statements
+=== RUN   TestMaskEmail
+=== RUN   TestMaskEmail/Normal_email
+=== RUN   TestMaskEmail/Single_char_email
+=== RUN   TestMaskEmail/Empty_email
+=== RUN   TestMaskEmail/Invalid_email
+=== RUN   TestMaskEmail/Long_email
+--- PASS: TestMaskEmail (0.00s)
+    --- PASS: TestMaskEmail/Normal_email (0.00s)
+    --- PASS: TestMaskEmail/Single_char_email (0.00s)
+    --- PASS: TestMaskEmail/Empty_email (0.00s)
+    --- PASS: TestMaskEmail/Invalid_email (0.00s)
+    --- PASS: TestMaskEmail/Long_email (0.00s)
+=== RUN   TestMaskToken
+=== RUN   TestMaskToken/JWT_token
+=== RUN   TestMaskToken/Bearer_token
+=== RUN   TestMaskToken/Long_token
+=== RUN   TestMaskToken/Short_token
+=== RUN   TestMaskToken/Empty_token
+--- PASS: TestMaskToken (0.00s)
+    --- PASS: TestMaskToken/JWT_token (0.00s)
+    --- PASS: TestMaskToken/Bearer_token (0.00s)
+    --- PASS: TestMaskToken/Long_token (0.00s)
+    --- PASS: TestMaskToken/Short_token (0.00s)
+    --- PASS: TestMaskToken/Empty_token (0.00s)
+=== RUN   TestDetectAndRedactSecrets
+=== RUN   TestDetectAndRedactSecrets/AWS_access_key
+=== RUN   TestDetectAndRedactSecrets/GitHub_PAT
+=== RUN   TestDetectAndRedactSecrets/JWT_in_text
+=== RUN   TestDetectAndRedactSecrets/API_key_in_assignment
+=== RUN   TestDetectAndRedactSecrets/Normal_text
+=== RUN   TestDetectAndRedactSecrets/Private_key_header
+--- PASS: TestDetectAndRedactSecrets (0.00s)
+    --- PASS: TestDetectAndRedactSecrets/AWS_access_key (0.00s)
+    --- PASS: TestDetectAndRedactSecrets/GitHub_PAT (0.00s)
+    --- PASS: TestDetectAndRedactSecrets/JWT_in_text (0.00s)
+    --- PASS: TestDetectAndRedactSecrets/API_key_in_assignment (0.00s)
+    --- PASS: TestDetectAndRedactSecrets/Normal_text (0.00s)
+    --- PASS: TestDetectAndRedactSecrets/Private_key_header (0.00s)
+=== RUN   TestSanitizeSQL
+=== RUN   TestSanitizeSQL/String_literal
+=== RUN   TestSanitizeSQL/Token_in_WHERE
+=== RUN   TestSanitizeSQL/Safe_query
+--- PASS: TestSanitizeSQL (0.00s)
+    --- PASS: TestSanitizeSQL/String_literal (0.00s)
+    --- PASS: TestSanitizeSQL/Token_in_WHERE (0.00s)
+    --- PASS: TestSanitizeSQL/Safe_query (0.00s)
+=== RUN   TestSanitizeURL
+=== RUN   TestSanitizeURL/URL_with_query_params
+=== RUN   TestSanitizeURL/URL_with_session_in_path
+=== RUN   TestSanitizeURL/Safe_URL
+--- PASS: TestSanitizeURL (0.00s)
+    --- PASS: TestSanitizeURL/URL_with_query_params (0.00s)
+    --- PASS: TestSanitizeURL/URL_with_session_in_path (0.00s)
+    --- PASS: TestSanitizeURL/Safe_URL (0.00s)
+=== RUN   TestSanitizeCookies
+=== RUN   TestSanitizeCookies/Session_cookie
+=== RUN   TestSanitizeCookies/Multiple_cookies
+=== RUN   TestSanitizeCookies/Empty_cookies
+--- PASS: TestSanitizeCookies (0.00s)
+    --- PASS: TestSanitizeCookies/Session_cookie (0.00s)
+    --- PASS: TestSanitizeCookies/Multiple_cookies (0.00s)
+    --- PASS: TestSanitizeCookies/Empty_cookies (0.00s)
+=== RUN   TestStructuredLog
+--- PASS: TestStructuredLog (0.01s)
+=== RUN   TestMaskUserID
+--- PASS: TestMaskUserID (0.00s)
+=== RUN   TestMaskSessionID
+--- PASS: TestMaskSessionID (0.00s)
+=== RUN   TestMaskIP
+--- PASS: TestMaskIP (0.00s)
+=== RUN   TestSafeLogFields
+--- PASS: TestSafeLogFields (0.00s)
+=== RUN   TestSanitizerMasking
+--- PASS: TestSanitizerMasking (0.00s)
+=== RUN   TestTerminalContentFiltering
+--- PASS: TestTerminalContentFiltering (0.00s)
+=== RUN   TestLogLevels
+2026/01/15 16:12:53 [WARN] This should appear
+2026/01/15 16:12:53 [ERROR] This should appear
+--- PASS: TestLogLevels (0.00s)
+=== RUN   TestConcurrentLogging
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 0
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 0
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 1
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 1
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 21
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 21
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 2
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 3
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 2
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 3
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 4
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 22
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 4
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 37
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 22
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 23
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 37
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 23
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 5
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 5
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 24
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 25
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 24
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 25
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 6
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 7
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 6
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 7
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 26
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 8
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 8
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 26
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 9
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 46
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 9
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 28
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 27
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 28
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 46
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 27
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 11
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 12
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 30
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 12
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 29
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 30
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 29
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 32
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 13
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 70
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 32
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 39
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 70
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 14
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 68
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 39
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 14
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 71
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 35
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 40
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 15
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 47
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 35
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 71
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 15
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 45
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 72
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 20
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 58
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 72
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 18
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 20
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 58
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 73
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 19
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 18
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 13
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 62
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 51
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 40
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 47
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 17
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 51
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 74
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 41
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 64
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 74
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 41
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 42
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 87
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 75
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 61
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 54
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 42
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 61
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 53
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 75
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 59
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 67
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 94
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 31
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 76
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 94
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 91
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 76
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 57
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 91
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 92
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 59
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 82
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 98
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 77
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 82
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 85
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 84
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 93
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 77
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 78
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 79
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 80
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 93
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 43
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 78
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 84
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 44
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 43
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 80
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 63
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 44
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 64
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 89
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 63
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 87
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 81
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 89
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 53
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 97
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 81
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 56
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 90
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 56
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 68
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 34
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 90
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 57
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 52
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 34
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 31
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 55
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 52
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 97
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 33
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 62
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 49
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 33
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 69
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 49
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 45
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 36
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 69
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 38
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 36
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 55
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 48
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 38
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 48
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 16
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 11
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 16
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 60
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 50
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 60
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 73
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 19
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 50
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 99
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 86
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 99
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 17
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 65
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 86
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 66
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 65
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 54
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 88
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 95
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 88
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 67
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 96
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 95
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 92
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 83
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 96
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 98
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 85
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 83
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 79
+2026/01/15 16:12:53 [INFO] Concurrent log from goroutine 10
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 66
+2026/01/15 16:12:53 [SECURITY] Security event from goroutine 10
+--- PASS: TestConcurrentLogging (0.00s)
+=== RUN   TestConfigUpdate
+--- PASS: TestConfigUpdate (0.00s)
+PASS
+coverage: 72.7% of statements
+ok  	github.com/rhl/businessos-backend/internal/logging	0.783s	coverage: 72.7% of statements
+# github.com/rhl/businessos-backend/internal/services_test [github.com/rhl/businessos-backend/internal/services.test]
+internal\services\background_jobs_integration_test.go:6:2: "time" imported and not used
+internal\services\background_jobs_integration_test.go:19:2: declared and not used: ctx
+internal\services\background_jobs_integration_test.go:28:2: declared and not used: payload
+internal\services\background_jobs_integration_test.go:65:2: declared and not used: ctx
+internal\services\background_jobs_integration_test.go:74:2: declared and not used: handlerCalled
+internal\services\background_jobs_integration_test.go:75:2: declared and not used: testHandler
+internal\services\background_jobs_integration_test.go:111:2: declared and not used: ctx
+internal\services\background_jobs_integration_test.go:120:2: declared and not used: req
+internal\services\background_jobs_integration_test.go:157:2: declared and not used: ctx
+internal\services\background_jobs_integration_test.go:167:2: declared and not used: failingHandler
+internal\services\background_jobs_integration_test.go:6:2: too many errors
+# github.com/rhl/businessos-backend/internal/sync [github.com/rhl/businessos-backend/internal/sync.test]
+internal\sync\outbox_processor_test.go:98:18: cannot use userID (variable of array type uuid.UUID) as pgtype.UUID value in struct literal
+internal\sync\outbox_processor_test.go:141:18: cannot use taskID (variable of array type uuid.UUID) as pgtype.UUID value in struct literal
+internal\sync\outbox_processor_test.go:181:18: cannot use userID (variable of array type uuid.UUID) as pgtype.UUID value in struct literal
+internal\sync\outbox_processor_test.go:202:40: updatedEvent.LastError.Valid undefined (type *string has no field or method Valid)
+internal\sync\outbox_processor_test.go:228:18: cannot use userID (variable of array type uuid.UUID) as pgtype.UUID value in struct literal
+internal\sync\outbox_processor_test.go:284:18: cannot use uuid.New() (value of array type uuid.UUID) as pgtype.UUID value in struct literal
+internal\sync\outbox_processor_test.go:295:18: cannot use uuid.New() (value of array type uuid.UUID) as pgtype.UUID value in struct literal
+internal\sync\outbox_processor_test.go:364:19: cannot use uuid.New() (value of array type uuid.UUID) as pgtype.UUID value in struct literal
+# github.com/rhl/businessos-backend/internal/tools
+# [github.com/rhl/businessos-backend/internal/tools]
+internal\tools\dashboard_tool.go:440:73: fmt.Sprintf format %s has arg wt.Category of wrong type *string
+# github.com/rhl/businessos-backend/scripts/debug
+scripts\debug\check_db_status.go:13:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_function.go:12:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_function_def.go:12:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_function_signature.go:12:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_is_active.go:13:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_members_schema.go:13:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_membership.go:13:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_memory_details.go:13:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_project_members.go:12:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_projects_table.go:12:6: main redeclared in this block
+	scripts\debug\add_function_debugging.go:14:6: other declaration of main
+scripts\debug\check_projects_table.go:12:6: too many errors
+=== RUN   TestNewHTTPRateLimiter
+--- PASS: TestNewHTTPRateLimiter (0.00s)
+=== RUN   TestHTTPRateLimiter_IPBasedLimiting
+--- PASS: TestHTTPRateLimiter_IPBasedLimiting (0.15s)
+=== RUN   TestHTTPRateLimiter_UserBasedLimiting
+--- PASS: TestHTTPRateLimiter_UserBasedLimiting (0.10s)
+=== RUN   TestHTTPRateLimiter_MultipleIPs
+--- PASS: TestHTTPRateLimiter_MultipleIPs (0.00s)
+=== RUN   TestHTTPRateLimiter_ConcurrentAccess
+--- PASS: TestHTTPRateLimiter_ConcurrentAccess (0.00s)
+=== RUN   TestHTTPRateLimiter_Cleanup
+--- PASS: TestHTTPRateLimiter_Cleanup (0.20s)
+=== RUN   TestHTTPRateLimiter_UpdateConfig
+--- PASS: TestHTTPRateLimiter_UpdateConfig (0.00s)
+=== RUN   TestRateLimitMiddleware_Allow
+--- PASS: TestRateLimitMiddleware_Allow (0.00s)
+=== RUN   TestRateLimitMiddleware_Block
+--- PASS: TestRateLimitMiddleware_Block (0.00s)
+=== RUN   TestRateLimitMiddleware_ExcludedPath
+--- PASS: TestRateLimitMiddleware_ExcludedPath (0.00s)
+=== RUN   TestStrictRateLimitMiddleware
+--- PASS: TestStrictRateLimitMiddleware (0.00s)
+=== RUN   TestGetGlobalHTTPRateLimiter_Singleton
+--- PASS: TestGetGlobalHTTPRateLimiter_Singleton (0.00s)
+=== RUN   TestGetClientIP
+=== RUN   TestGetClientIP/RemoteAddr_only
+=== RUN   TestGetClientIP/X-Real-IP_header
+=== RUN   TestGetClientIP/X-Forwarded-For_single_IP
+=== RUN   TestGetClientIP/X-Forwarded-For_multiple_IPs
+--- PASS: TestGetClientIP (0.00s)
+    --- PASS: TestGetClientIP/RemoteAddr_only (0.00s)
+    --- PASS: TestGetClientIP/X-Real-IP_header (0.00s)
+    --- PASS: TestGetClientIP/X-Forwarded-For_single_IP (0.00s)
+    --- PASS: TestGetClientIP/X-Forwarded-For_multiple_IPs (0.00s)
+=== RUN   TestSessionCache_Set
+redis: 2026/01/15 16:12:56 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:12:56 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:12:57 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:12:58 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+    redis_auth_test.go:23: Redis not available: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+--- SKIP: TestSessionCache_Set (2.30s)
+=== RUN   TestSessionCache_Invalidate
+redis: 2026/01/15 16:12:58 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:12:59 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:12:59 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:00 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+    redis_auth_test.go:86: Redis not available: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+--- SKIP: TestSessionCache_Invalidate (2.13s)
+=== RUN   TestSessionCache_InvalidateUserSessions
+redis: 2026/01/15 16:13:00 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:01 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:01 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:02 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+    redis_auth_test.go:151: Redis not available: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+--- SKIP: TestSessionCache_InvalidateUserSessions (2.22s)
+=== RUN   TestSessionCache_InvalidateUserSessions_NoSessions
+redis: 2026/01/15 16:13:02 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:03 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:03 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:04 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+    redis_auth_test.go:218: Redis not available: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+--- SKIP: TestSessionCache_InvalidateUserSessions_NoSessions (2.07s)
+=== RUN   TestSessionCache_MultipleUsers
+redis: 2026/01/15 16:13:04 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:05 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:06 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+redis: 2026/01/15 16:13:06 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+    redis_auth_test.go:242: Redis not available: dial tcp [::1]:6379: connectex: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.
+--- SKIP: TestSessionCache_MultipleUsers (2.13s)
+=== RUN   TestSessionCache_HMACConsistency
+2026/01/15 16:13:06 WARNING: HMAC secret is shorter than recommended 32 bytes. Current: 21 bytes
+--- PASS: TestSessionCache_HMACConsistency (0.00s)
+=== RUN   TestSessionCache_HMACSecretRequired
+2026/01/15 16:13:06 WARNING: Using auto-generated HMAC secret for session keys. Set REDIS_KEY_HMAC_SECRET environment variable for production!
+--- PASS: TestSessionCache_HMACSecretRequired (0.00s)
+PASS
+coverage: 21.5% of statements
+ok  	github.com/rhl/businessos-backend/internal/middleware	11.578s	coverage: 21.5% of statements
+	github.com/rhl/businessos-backend/internal/orchestration		coverage: 0.0% of statements
+=== RUN   TestPromptLayerConstants
+--- PASS: TestPromptLayerConstants (0.00s)
+=== RUN   TestNewPromptComposer
+--- PASS: TestNewPromptComposer (0.00s)
+=== RUN   TestComposePromptWithAllLayers
+--- PASS: TestComposePromptWithAllLayers (0.00s)
+=== RUN   TestComposePromptWithSpecificLayers
+--- PASS: TestComposePromptWithSpecificLayers (0.00s)
+=== RUN   TestComposePromptEmptyAgent
+--- PASS: TestComposePromptEmptyAgent (0.00s)
+=== RUN   TestComposeWithContext
+--- PASS: TestComposeWithContext (0.00s)
+=== RUN   TestComposeWithContextPartialInfo
+--- PASS: TestComposeWithContextPartialInfo (0.00s)
+=== RUN   TestComposeWithContextEmpty
+--- PASS: TestComposeWithContextEmpty (0.00s)
+=== RUN   TestComposeMinimal
+--- PASS: TestComposeMinimal (0.00s)
+=== RUN   TestComposeForDocument
+--- PASS: TestComposeForDocument (0.00s)
+=== RUN   TestComposeForAnalysis
+--- PASS: TestComposeForAnalysis (0.00s)
+=== RUN   TestComposeForProject
+--- PASS: TestComposeForProject (0.00s)
+=== RUN   TestComposeForClient
+--- PASS: TestComposeForClient (0.00s)
+=== RUN   TestGetLayer
+--- PASS: TestGetLayer (0.00s)
+=== RUN   TestSetLayer
+--- PASS: TestSetLayer (0.00s)
+=== RUN   TestSetLayerAffectsCompose
+--- PASS: TestSetLayerAffectsCompose (0.00s)
+=== RUN   TestDefaultComposer
+--- PASS: TestDefaultComposer (0.00s)
+=== RUN   TestComposeConvenienceFunction
+--- PASS: TestComposeConvenienceFunction (0.00s)
+=== RUN   TestComposeWithLayers
+--- PASS: TestComposeWithLayers (0.00s)
+=== RUN   TestComposeWithUserContextConvenience
+--- PASS: TestComposeWithUserContextConvenience (0.00s)
+=== RUN   TestCoreIdentityNotEmpty
+--- PASS: TestCoreIdentityNotEmpty (0.00s)
+=== RUN   TestOutputFormattingNotEmpty
+--- PASS: TestOutputFormattingNotEmpty (0.00s)
+=== RUN   TestArtifactSystemNotEmpty
+--- PASS: TestArtifactSystemNotEmpty (0.00s)
+=== RUN   TestContextIntegrationNotEmpty
+--- PASS: TestContextIntegrationNotEmpty (0.00s)
+=== RUN   TestToolUsagePatternsNotEmpty
+--- PASS: TestToolUsagePatternsNotEmpty (0.00s)
+=== RUN   TestErrorHandlingNotEmpty
+--- PASS: TestErrorHandlingNotEmpty (0.00s)
+=== RUN   TestPromptNotTooLong
+--- PASS: TestPromptNotTooLong (0.00s)
+=== RUN   TestPromptHasProperStructure
+--- PASS: TestPromptHasProperStructure (0.00s)
+=== RUN   TestDifferentComposerModes
+--- PASS: TestDifferentComposerModes (0.00s)
+PASS
+coverage: 26.7% of statements
+ok  	github.com/rhl/businessos-backend/internal/prompts	0.737s	coverage: 26.7% of statements
+?   	github.com/rhl/businessos-backend/internal/prompts/agents	[no test files]
+?   	github.com/rhl/businessos-backend/internal/prompts/core	[no test files]
+	github.com/rhl/businessos-backend/internal/redis		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/security		coverage: 0.0% of statements
+FAIL	github.com/rhl/businessos-backend/internal/services [build failed]
+	github.com/rhl/businessos-backend/internal/services/templates		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/sorx		coverage: 0.0% of statements
+=== RUN   TestSSEWriterBasicFunctionality
+--- PASS: TestSSEWriterBasicFunctionality (0.00s)
+=== RUN   TestSSEWriterMultipleEvents
+--- PASS: TestSSEWriterMultipleEvents (0.00s)
+=== RUN   TestSSEWriterSpecialCharacters
+=== RUN   TestSSEWriterSpecialCharacters/Unicode
+=== RUN   TestSSEWriterSpecialCharacters/Newlines
+=== RUN   TestSSEWriterSpecialCharacters/Quotes
+=== RUN   TestSSEWriterSpecialCharacters/Backslashes
+=== RUN   TestSSEWriterSpecialCharacters/JSON_content
+=== RUN   TestSSEWriterSpecialCharacters/HTML_content
+=== RUN   TestSSEWriterSpecialCharacters/Code_snippet
+--- PASS: TestSSEWriterSpecialCharacters (0.00s)
+    --- PASS: TestSSEWriterSpecialCharacters/Unicode (0.00s)
+    --- PASS: TestSSEWriterSpecialCharacters/Newlines (0.00s)
+    --- PASS: TestSSEWriterSpecialCharacters/Quotes (0.00s)
+    --- PASS: TestSSEWriterSpecialCharacters/Backslashes (0.00s)
+    --- PASS: TestSSEWriterSpecialCharacters/JSON_content (0.00s)
+    --- PASS: TestSSEWriterSpecialCharacters/HTML_content (0.00s)
+    --- PASS: TestSSEWriterSpecialCharacters/Code_snippet (0.00s)
+=== RUN   TestStreamProcessorArtifactDetection
+=== RUN   TestStreamProcessorArtifactDetection/Plain_text
+    sse_reliability_test.go:156: Output for Plain text: event: token
+        data: {"type":"token","content":"Hello World"}
+        
+=== RUN   TestStreamProcessorArtifactDetection/Complete_artifact
+    sse_reliability_test.go:156: Output for Complete artifact: event: token
+        data: {"type":"token","content":"\u003cartifac"}
+        
+        event: token
+        data: {"type":"token","c
+--- PASS: TestStreamProcessorArtifactDetection (0.00s)
+    --- PASS: TestStreamProcessorArtifactDetection/Plain_text (0.00s)
+    --- PASS: TestStreamProcessorArtifactDetection/Complete_artifact (0.00s)
+=== RUN   TestSSEWriterConcurrency
+    sse_reliability_test.go:196: Wrote 1000 events concurrently
+--- PASS: TestSSEWriterConcurrency (0.00s)
+=== RUN   TestSSEWriterLargePayload
+=== RUN   TestSSEWriterLargePayload/1KB
+    sse_reliability_test.go:228: Wrote 1024 bytes in 0s
+=== RUN   TestSSEWriterLargePayload/:KB
+    sse_reliability_test.go:228: Wrote 10240 bytes in 0s
+=== RUN   TestSSEWriterLargePayload/\u0094KB
+    sse_reliability_test.go:228: Wrote 102400 bytes in 0s
+--- PASS: TestSSEWriterLargePayload (0.00s)
+    --- PASS: TestSSEWriterLargePayload/1KB (0.00s)
+    --- PASS: TestSSEWriterLargePayload/:KB (0.00s)
+    --- PASS: TestSSEWriterLargePayload/\u0094KB (0.00s)
+=== RUN   TestSSEWriterContextCancellation
+--- PASS: TestSSEWriterContextCancellation (0.00s)
+=== RUN   TestSSEWriterErrorRecovery
+--- PASS: TestSSEWriterErrorRecovery (0.00s)
+=== RUN   TestStreamProcessorFlushBehavior
+    sse_reliability_test.go:311: Before flush: 0 chars, After flush: 61 chars
+--- PASS: TestStreamProcessorFlushBehavior (0.00s)
+=== RUN   TestSSEEventTypes
+=== RUN   TestSSEEventTypes/token
+=== RUN   TestSSEEventTypes/thinking
+=== RUN   TestSSEEventTypes/thinking_start
+=== RUN   TestSSEEventTypes/thinking_chunk
+=== RUN   TestSSEEventTypes/thinking_end
+=== RUN   TestSSEEventTypes/artifact_start
+=== RUN   TestSSEEventTypes/artifact_complete
+=== RUN   TestSSEEventTypes/artifact_error
+=== RUN   TestSSEEventTypes/tool_call
+=== RUN   TestSSEEventTypes/tool_result
+=== RUN   TestSSEEventTypes/content_start
+=== RUN   TestSSEEventTypes/content_end
+=== RUN   TestSSEEventTypes/delegating
+=== RUN   TestSSEEventTypes/done
+=== RUN   TestSSEEventTypes/error
+--- PASS: TestSSEEventTypes (0.00s)
+    --- PASS: TestSSEEventTypes/token (0.00s)
+    --- PASS: TestSSEEventTypes/thinking (0.00s)
+    --- PASS: TestSSEEventTypes/thinking_start (0.00s)
+    --- PASS: TestSSEEventTypes/thinking_chunk (0.00s)
+    --- PASS: TestSSEEventTypes/thinking_end (0.00s)
+    --- PASS: TestSSEEventTypes/artifact_start (0.00s)
+    --- PASS: TestSSEEventTypes/artifact_complete (0.00s)
+    --- PASS: TestSSEEventTypes/artifact_error (0.00s)
+    --- PASS: TestSSEEventTypes/tool_call (0.00s)
+    --- PASS: TestSSEEventTypes/tool_result (0.00s)
+    --- PASS: TestSSEEventTypes/content_start (0.00s)
+    --- PASS: TestSSEEventTypes/content_end (0.00s)
+    --- PASS: TestSSEEventTypes/delegating (0.00s)
+    --- PASS: TestSSEEventTypes/done (0.00s)
+    --- PASS: TestSSEEventTypes/error (0.00s)
+=== RUN   TestEventTypeConstants
+--- PASS: TestEventTypeConstants (0.00s)
+=== RUN   TestStreamEventJSON
+--- PASS: TestStreamEventJSON (0.00s)
+=== RUN   TestStreamEventWithData
+--- PASS: TestStreamEventWithData (0.00s)
+=== RUN   TestThinkingStepJSON
+--- PASS: TestThinkingStepJSON (0.00s)
+=== RUN   TestToolCallEventJSON
+--- PASS: TestToolCallEventJSON (0.00s)
+=== RUN   TestArtifactJSON
+--- PASS: TestArtifactJSON (0.00s)
+=== RUN   TestNewArtifactDetector
+--- PASS: TestNewArtifactDetector (0.00s)
+=== RUN   TestArtifactDetectorSimpleText
+--- PASS: TestArtifactDetectorSimpleText (0.00s)
+=== RUN   TestArtifactDetectorArtifactStart
+--- PASS: TestArtifactDetectorArtifactStart (0.00s)
+=== RUN   TestArtifactDetectorCompleteArtifact
+--- PASS: TestArtifactDetectorCompleteArtifact (0.00s)
+=== RUN   TestArtifactDetectorInvalidJSON
+--- PASS: TestArtifactDetectorInvalidJSON (0.00s)
+=== RUN   TestArtifactDetectorUnclosedArtifact
+--- PASS: TestArtifactDetectorUnclosedArtifact (0.00s)
+=== RUN   TestArtifactDetectorReset
+--- PASS: TestArtifactDetectorReset (0.00s)
+=== RUN   TestArtifactDetectorChunkedInput
+--- PASS: TestArtifactDetectorChunkedInput (0.00s)
+=== RUN   TestNewSSEWriter
+--- PASS: TestNewSSEWriter (0.00s)
+=== RUN   TestSSEWriterWriteEvent
+--- PASS: TestSSEWriterWriteEvent (0.00s)
+=== RUN   TestSSEWriterWriteToken
+--- PASS: TestSSEWriterWriteToken (0.00s)
+=== RUN   TestSSEWriterWriteRaw
+--- PASS: TestSSEWriterWriteRaw (0.00s)
+=== RUN   TestSSEWriterSSEFormat
+--- PASS: TestSSEWriterSSEFormat (0.00s)
+=== RUN   TestNewStreamProcessor
+--- PASS: TestNewStreamProcessor (0.00s)
+=== RUN   TestStreamProcessorProcessChunk
+--- PASS: TestStreamProcessorProcessChunk (0.00s)
+=== RUN   TestStreamProcessorWithArtifact
+--- PASS: TestStreamProcessorWithArtifact (0.00s)
+=== RUN   TestStreamProcessorWriteRaw
+--- PASS: TestStreamProcessorWriteRaw (0.00s)
+=== RUN   TestStreamProcessorIsInArtifact
+--- PASS: TestStreamProcessorIsInArtifact (0.00s)
+=== RUN   TestEmptyInput
+--- PASS: TestEmptyInput (0.00s)
+=== RUN   TestMultipleArtifacts
+--- PASS: TestMultipleArtifacts (0.00s)
+=== RUN   TestSpecialCharactersInContent
+--- PASS: TestSpecialCharactersInContent (0.00s)
+=== RUN   TestUnicodeContent
+--- PASS: TestUnicodeContent (0.00s)
+PASS
+coverage: 69.0% of statements
+ok  	github.com/rhl/businessos-backend/internal/streaming	0.894s	coverage: 69.0% of statements
+FAIL	github.com/rhl/businessos-backend/internal/sync [build failed]
+?   	github.com/rhl/businessos-backend/internal/sync/conflicts	[no test files]
+=== RUN   TestNATSClient_Connection
+    nats_client_test.go:21: NATS_URL not set, skipping integration test
+--- SKIP: TestNATSClient_Connection (0.00s)
+=== RUN   TestNATSClient_CreateStreams
+    nats_client_test.go:44: NATS_URL not set, skipping integration test
+--- SKIP: TestNATSClient_CreateStreams (0.00s)
+=== RUN   TestNATSClient_PublishSubscribe
+    nats_client_test.go:68: NATS_URL not set, skipping integration test
+--- SKIP: TestNATSClient_PublishSubscribe (0.00s)
+=== RUN   TestNATSClient_Idempotency
+    nats_client_test.go:153: NATS_URL not set, skipping integration test
+--- SKIP: TestNATSClient_Idempotency (0.00s)
+=== RUN   TestNATSClient_WorkspaceEvents
+    nats_client_test.go:188: NATS_URL not set, skipping integration test
+--- SKIP: TestNATSClient_WorkspaceEvents (0.00s)
+=== RUN   TestNATSClient_BuildEvents
+    nats_client_test.go:257: NATS_URL not set, skipping integration test
+--- SKIP: TestNATSClient_BuildEvents (0.00s)
+=== RUN   TestNATSClient_ErrorHandling
+time=2026-01-15T16:13:01.528-03:00 level=INFO msg="connecting to NATS" url=nats://invalid:4222
+--- PASS: TestNATSClient_ErrorHandling (8.87s)
+=== RUN   TestNATSClient_Close
+    nats_client_test.go:348: NATS_URL not set, skipping integration test
+--- SKIP: TestNATSClient_Close (0.00s)
+=== RUN   TestNATSClient_Stats
+    nats_client_test.go:390: NATS_URL not set, skipping integration test
+--- SKIP: TestNATSClient_Stats (0.00s)
+PASS
+coverage: 4.0% of statements
+ok  	github.com/rhl/businessos-backend/internal/sync/messaging	9.966s	coverage: 4.0% of statements
+=== RUN   TestGetMetrics
+--- PASS: TestGetMetrics (0.00s)
+=== RUN   TestPendingEventsCounter
+--- PASS: TestPendingEventsCounter (0.00s)
+=== RUN   TestProcessingEventsCounter
+--- PASS: TestProcessingEventsCounter (0.00s)
+=== RUN   TestCompletedEventsCounter
+--- PASS: TestCompletedEventsCounter (0.00s)
+=== RUN   TestFailedEventsCounter
+--- PASS: TestFailedEventsCounter (0.00s)
+=== RUN   TestProcessingDuration
+--- PASS: TestProcessingDuration (0.00s)
+=== RUN   TestProcessingDurationSlidingWindow
+--- PASS: TestProcessingDurationSlidingWindow (0.00s)
+=== RUN   TestErrorCounter
+--- PASS: TestErrorCounter (0.00s)
+=== RUN   TestConflictCounter
+--- PASS: TestConflictCounter (0.00s)
+=== RUN   TestGetSnapshot
+--- PASS: TestGetSnapshot (0.00s)
+=== RUN   TestReset
+--- PASS: TestReset (0.00s)
+PASS
+coverage: 95.4% of statements
+ok  	github.com/rhl/businessos-backend/internal/sync/metrics	0.870s	coverage: 95.4% of statements
+=== RUN   TestDefaultProcessorConfig
+--- PASS: TestDefaultProcessorConfig (0.00s)
+=== RUN   TestCalculateBackoff
+=== RUN   TestCalculateBackoff/Attempt_0:_Immediate
+=== RUN   TestCalculateBackoff/Attempt_1:_1s_±_25%
+=== RUN   TestCalculateBackoff/Attempt_2:_2s_±_25%
+=== RUN   TestCalculateBackoff/Attempt_3:_4s_±_25%
+=== RUN   TestCalculateBackoff/Attempt_4:_8s_±_25%
+=== RUN   TestCalculateBackoff/Attempt_5:_16s_±_25%
+--- PASS: TestCalculateBackoff (0.00s)
+    --- PASS: TestCalculateBackoff/Attempt_0:_Immediate (0.00s)
+    --- PASS: TestCalculateBackoff/Attempt_1:_1s_±_25% (0.00s)
+    --- PASS: TestCalculateBackoff/Attempt_2:_2s_±_25% (0.00s)
+    --- PASS: TestCalculateBackoff/Attempt_3:_4s_±_25% (0.00s)
+    --- PASS: TestCalculateBackoff/Attempt_4:_8s_±_25% (0.00s)
+    --- PASS: TestCalculateBackoff/Attempt_5:_16s_±_25% (0.00s)
+=== RUN   TestCalculateBackoff_MaxCap
+--- PASS: TestCalculateBackoff_MaxCap (0.00s)
+=== RUN   TestPublishToNATS_SubjectFormat
+=== RUN   TestPublishToNATS_SubjectFormat/businessos.user.created
+=== RUN   TestPublishToNATS_SubjectFormat/businessos.workspace.updated
+=== RUN   TestPublishToNATS_SubjectFormat/businessos.app.deleted
+--- PASS: TestPublishToNATS_SubjectFormat (0.00s)
+    --- PASS: TestPublishToNATS_SubjectFormat/businessos.user.created (0.00s)
+    --- PASS: TestPublishToNATS_SubjectFormat/businessos.workspace.updated (0.00s)
+    --- PASS: TestPublishToNATS_SubjectFormat/businessos.app.deleted (0.00s)
+=== RUN   TestPublishToNATS_Timeout
+--- PASS: TestPublishToNATS_Timeout (5.00s)
+=== RUN   TestProcessorConfig_Validation
+=== RUN   TestProcessorConfig_Validation/Valid_default_config
+=== RUN   TestProcessorConfig_Validation/Custom_valid_config
+--- PASS: TestProcessorConfig_Validation (0.00s)
+    --- PASS: TestProcessorConfig_Validation/Valid_default_config (0.00s)
+    --- PASS: TestProcessorConfig_Validation/Custom_valid_config (0.00s)
+=== RUN   TestProcessorRetrySequence
+--- PASS: TestProcessorRetrySequence (0.00s)
+PASS
+coverage: 10.3% of statements
+ok  	github.com/rhl/businessos-backend/internal/sync/outbox	6.014s	coverage: 10.3% of statements
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestIncrement
+--- PASS: TestIncrement (0.00s)
+=== RUN   TestGet
+--- PASS: TestGet (0.00s)
+=== RUN   TestMerge
+--- PASS: TestMerge (0.00s)
+=== RUN   TestCompare
+=== RUN   TestCompare/clock1_before_clock2
+=== RUN   TestCompare/clock1_after_clock2
+=== RUN   TestCompare/concurrent_clocks
+=== RUN   TestCompare/equal_clocks
+=== RUN   TestCompare/empty_clocks
+=== RUN   TestCompare/one_empty_clock
+--- PASS: TestCompare (0.00s)
+    --- PASS: TestCompare/clock1_before_clock2 (0.00s)
+    --- PASS: TestCompare/clock1_after_clock2 (0.00s)
+    --- PASS: TestCompare/concurrent_clocks (0.00s)
+    --- PASS: TestCompare/equal_clocks (0.00s)
+    --- PASS: TestCompare/empty_clocks (0.00s)
+    --- PASS: TestCompare/one_empty_clock (0.00s)
+=== RUN   TestIsBefore
+--- PASS: TestIsBefore (0.00s)
+=== RUN   TestIsAfter
+--- PASS: TestIsAfter (0.00s)
+=== RUN   TestIsConcurrent
+--- PASS: TestIsConcurrent (0.00s)
+=== RUN   TestFromMap
+--- PASS: TestFromMap (0.00s)
+=== RUN   TestToMap
+--- PASS: TestToMap (0.00s)
+=== RUN   TestJSON
+--- PASS: TestJSON (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestString
+--- PASS: TestString (0.00s)
+PASS
+coverage: 97.9% of statements
+ok  	github.com/rhl/businessos-backend/internal/sync/vectorclock	0.829s	coverage: 97.9% of statements
+=== RUN   TestDefaultRateLimitConfig
+    ratelimit_test.go:15: Expected MessagesPerSecond=100, got 1000.000000
+    ratelimit_test.go:18: Expected BurstSize=20, got 200
+--- FAIL: TestDefaultRateLimitConfig (0.00s)
+=== RUN   TestRateLimiter_AllowMessage
+--- PASS: TestRateLimiter_AllowMessage (0.00s)
+=== RUN   TestRateLimiter_ConnectionLimit
+2026/01/15 16:13:02 [SECURITY] Rate limit: max connections exceeded for user test-use****** (current: 3, max: 3)
+--- PASS: TestRateLimiter_ConnectionLimit (0.01s)
+=== RUN   TestRateLimiter_NoConnectionLimit
+--- PASS: TestRateLimiter_NoConnectionLimit (0.00s)
+=== RUN   TestRateLimiter_CheckMessageSize
+--- PASS: TestRateLimiter_CheckMessageSize (0.00s)
+=== RUN   TestRateLimiter_NoSizeLimit
+--- PASS: TestRateLimiter_NoSizeLimit (0.00s)
+=== RUN   TestRateLimiter_MultipleUsers
+--- PASS: TestRateLimiter_MultipleUsers (0.00s)
+=== RUN   TestRateLimiter_ConcurrentAccess
+--- PASS: TestRateLimiter_ConcurrentAccess (0.00s)
+=== RUN   TestRateLimiter_Cleanup
+--- PASS: TestRateLimiter_Cleanup (0.25s)
+=== RUN   TestRateLimiter_NoCleanupWithActiveConnections
+--- PASS: TestRateLimiter_NoCleanupWithActiveConnections (0.25s)
+=== RUN   TestRateLimiter_UpdateConfig
+--- PASS: TestRateLimiter_UpdateConfig (0.00s)
+=== RUN   TestHTTP429Handler
+--- PASS: TestHTTP429Handler (0.00s)
+=== RUN   TestRateLimitMiddleware
+--- PASS: TestRateLimitMiddleware (0.00s)
+=== RUN   TestGetRateLimiter_Singleton
+--- PASS: TestGetRateLimiter_Singleton (0.00s)
+=== RUN   TestRateLimiter_Reserve
+--- PASS: TestRateLimiter_Reserve (0.00s)
+=== RUN   TestDangerousCommandDetection
+2026/01/15 16:13:03 [Sanitizer] Initialized with 25 command patterns and 13 escape patterns
+=== RUN   TestDangerousCommandDetection/rm_-rf_/
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Recursive delete from root/home"
+=== RUN   TestDangerousCommandDetection/rm_-rf_root
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Recursive delete from root/home"
+=== RUN   TestDangerousCommandDetection/rm_recursive_home
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Recursive delete from root/home"
+=== RUN   TestDangerousCommandDetection/rm_with_wildcard
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=95 detail="Wildcard delete"
+=== RUN   TestDangerousCommandDetection/fork_bomb
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Fork bomb"
+=== RUN   TestDangerousCommandDetection/dd_to_disk
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Direct disk write"
+=== RUN   TestDangerousCommandDetection/mkfs_format
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Filesystem format"
+=== RUN   TestDangerousCommandDetection/proc_escape
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Proc filesystem escape attempt"
+=== RUN   TestDangerousCommandDetection/nsenter_escape
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Namespace escape attempt"
+=== RUN   TestDangerousCommandDetection/docker_socket
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Docker socket access"
+=== RUN   TestDangerousCommandDetection/privileged_container
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=critical risk=100 detail="Privileged container spawn"
+=== RUN   TestDangerousCommandDetection/chmod_777
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=80 detail="Insecure permissions"
+=== RUN   TestDangerousCommandDetection/chmod_recursive_777
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=80 detail="Insecure permissions"
+=== RUN   TestDangerousCommandDetection/curl_pipe_bash
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=85 detail="Curl pipe to shell"
+=== RUN   TestDangerousCommandDetection/wget_pipe_sh
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=85 detail="Wget pipe to shell"
+=== RUN   TestDangerousCommandDetection/cat_ssh_key
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=80 detail="Sensitive file read"
+=== RUN   TestDangerousCommandDetection/cat_passwd
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=80 detail="Sensitive file read"
+=== RUN   TestDangerousCommandDetection/cat_shadow
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=80 detail="Sensitive file read"
+=== RUN   TestDangerousCommandDetection/cat_env_file
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=80 detail="Sensitive file read"
+=== RUN   TestDangerousCommandDetection/export_secret
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=75 detail="Secret export"
+=== RUN   TestDangerousCommandDetection/export_password
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command severity=high risk=75 detail="Secret export"
+=== RUN   TestDangerousCommandDetection/netcat_listener
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command_warn severity=medium risk=60 detail="Netcat listener"
+=== RUN   TestDangerousCommandDetection/netcat_exec
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command_warn severity=medium risk=60 detail="Netcat listener"
+=== RUN   TestDangerousCommandDetection/python_socket
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command_warn severity=medium risk=65 detail="Python reverse shell pattern"
+=== RUN   TestDangerousCommandDetection/base64_decode
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command_warn severity=medium risk=50 detail="Base64 decode (obfuscation)"
+=== RUN   TestDangerousCommandDetection/history_clear
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=dangerous_command_warn severity=medium risk=55 detail="History clear attempt"
+=== RUN   TestDangerousCommandDetection/simple_ls
+=== RUN   TestDangerousCommandDetection/cat_regular_file
+=== RUN   TestDangerousCommandDetection/echo_hello
+=== RUN   TestDangerousCommandDetection/pwd
+=== RUN   TestDangerousCommandDetection/date
+=== RUN   TestDangerousCommandDetection/whoami
+=== RUN   TestDangerousCommandDetection/cd_directory
+=== RUN   TestDangerousCommandDetection/mkdir
+=== RUN   TestDangerousCommandDetection/grep_pattern
+=== RUN   TestDangerousCommandDetection/curl_get_json
+=== RUN   TestDangerousCommandDetection/npm_install
+=== RUN   TestDangerousCommandDetection/git_status
+=== RUN   TestDangerousCommandDetection/python_script
+--- PASS: TestDangerousCommandDetection (0.00s)
+    --- PASS: TestDangerousCommandDetection/rm_-rf_/ (0.00s)
+    --- PASS: TestDangerousCommandDetection/rm_-rf_root (0.00s)
+    --- PASS: TestDangerousCommandDetection/rm_recursive_home (0.00s)
+    --- PASS: TestDangerousCommandDetection/rm_with_wildcard (0.00s)
+    --- PASS: TestDangerousCommandDetection/fork_bomb (0.00s)
+    --- PASS: TestDangerousCommandDetection/dd_to_disk (0.00s)
+    --- PASS: TestDangerousCommandDetection/mkfs_format (0.00s)
+    --- PASS: TestDangerousCommandDetection/proc_escape (0.00s)
+    --- PASS: TestDangerousCommandDetection/nsenter_escape (0.00s)
+    --- PASS: TestDangerousCommandDetection/docker_socket (0.00s)
+    --- PASS: TestDangerousCommandDetection/privileged_container (0.00s)
+    --- PASS: TestDangerousCommandDetection/chmod_777 (0.00s)
+    --- PASS: TestDangerousCommandDetection/chmod_recursive_777 (0.00s)
+    --- PASS: TestDangerousCommandDetection/curl_pipe_bash (0.00s)
+    --- PASS: TestDangerousCommandDetection/wget_pipe_sh (0.00s)
+    --- PASS: TestDangerousCommandDetection/cat_ssh_key (0.00s)
+    --- PASS: TestDangerousCommandDetection/cat_passwd (0.00s)
+    --- PASS: TestDangerousCommandDetection/cat_shadow (0.00s)
+    --- PASS: TestDangerousCommandDetection/cat_env_file (0.00s)
+    --- PASS: TestDangerousCommandDetection/export_secret (0.00s)
+    --- PASS: TestDangerousCommandDetection/export_password (0.00s)
+    --- PASS: TestDangerousCommandDetection/netcat_listener (0.00s)
+    --- PASS: TestDangerousCommandDetection/netcat_exec (0.00s)
+    --- PASS: TestDangerousCommandDetection/python_socket (0.00s)
+    --- PASS: TestDangerousCommandDetection/base64_decode (0.00s)
+    --- PASS: TestDangerousCommandDetection/history_clear (0.00s)
+    --- PASS: TestDangerousCommandDetection/simple_ls (0.00s)
+    --- PASS: TestDangerousCommandDetection/cat_regular_file (0.00s)
+    --- PASS: TestDangerousCommandDetection/echo_hello (0.00s)
+    --- PASS: TestDangerousCommandDetection/pwd (0.00s)
+    --- PASS: TestDangerousCommandDetection/date (0.00s)
+    --- PASS: TestDangerousCommandDetection/whoami (0.00s)
+    --- PASS: TestDangerousCommandDetection/cd_directory (0.00s)
+    --- PASS: TestDangerousCommandDetection/mkdir (0.00s)
+    --- PASS: TestDangerousCommandDetection/grep_pattern (0.00s)
+    --- PASS: TestDangerousCommandDetection/curl_get_json (0.00s)
+    --- PASS: TestDangerousCommandDetection/npm_install (0.00s)
+    --- PASS: TestDangerousCommandDetection/git_status (0.00s)
+    --- PASS: TestDangerousCommandDetection/python_script (0.00s)
+=== RUN   TestEscapeSequenceFiltering
+2026/01/15 16:13:03 [Sanitizer] Initialized with 25 command patterns and 13 escape patterns
+=== RUN   TestEscapeSequenceFiltering/OSC_title_change
+=== RUN   TestEscapeSequenceFiltering/OSC_clipboard
+=== RUN   TestEscapeSequenceFiltering/cursor_position
+=== RUN   TestEscapeSequenceFiltering/clear_screen
+=== RUN   TestEscapeSequenceFiltering/alternate_buffer
+=== RUN   TestEscapeSequenceFiltering/hide_cursor
+=== RUN   TestEscapeSequenceFiltering/plain_text
+=== RUN   TestEscapeSequenceFiltering/with_newlines
+=== RUN   TestEscapeSequenceFiltering/with_tabs
+=== RUN   TestEscapeSequenceFiltering/json_data
+=== RUN   TestEscapeSequenceFiltering/path
+--- PASS: TestEscapeSequenceFiltering (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/OSC_title_change (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/OSC_clipboard (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/cursor_position (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/clear_screen (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/alternate_buffer (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/hide_cursor (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/plain_text (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/with_newlines (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/with_tabs (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/json_data (0.00s)
+    --- PASS: TestEscapeSequenceFiltering/path (0.00s)
+=== RUN   TestNullByteInjection
+2026/01/15 16:13:03 [Sanitizer] Initialized with 25 command patterns and 13 escape patterns
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=null_byte_injection severity=critical risk=90 detail=""
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=null_byte_injection severity=critical risk=90 detail=""
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=null_byte_injection severity=critical risk=90 detail=""
+2026/01/15 16:13:03 [Security] Input blocked: user=test-use*** reason=null_byte_injection severity=critical risk=90 detail=""
+--- PASS: TestNullByteInjection (0.00s)
+=== RUN   TestInputLengthLimit
+2026/01/15 16:13:03 [Sanitizer] Initialized with 25 command patterns and 13 escape patterns
+2026/01/15 16:13:03 [Security] Input blocked: user=user reason=length_exceeded severity=warning risk=40 detail="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..."
+--- PASS: TestInputLengthLimit (0.00s)
+=== RUN   TestQuickValidate
+--- PASS: TestQuickValidate (0.00s)
+=== RUN   TestPassthroughMode
+2026/01/15 16:13:03 [Sanitizer] Initialized with 25 command patterns and 13 escape patterns
+--- PASS: TestPassthroughMode (0.00s)
+=== RUN   TestConcurrency
+2026/01/15 16:13:03 [Sanitizer] Initialized with 25 command patterns and 13 escape patterns
+2026/01/15 16:13:03 [Security] Input blocked: user=user reason=null_byte_injection severity=critical risk=90 detail=""
+--- PASS: TestConcurrency (0.00s)
+=== RUN   TestContainerEscapePatterns
+2026/01/15 16:13:03 [Sanitizer] Initialized with 25 command patterns and 13 escape patterns
+2026/01/15 16:13:03 [Security] Input blocked: user=user reason=dangerous_command severity=critical risk=100 detail="Proc filesystem escape attempt"
+2026/01/15 16:13:03 [Security] Input blocked: user=user reason=dangerous_command severity=critical risk=100 detail="Namespace escape attempt"
+2026/01/15 16:13:03 [Security] Input blocked: user=user reason=dangerous_command severity=critical risk=100 detail="Docker volume mount escape"
+2026/01/15 16:13:03 [Security] Input blocked: user=user reason=dangerous_command severity=critical risk=100 detail="Docker socket access"
+2026/01/15 16:13:03 [Security] Input blocked: user=user reason=dangerous_command severity=critical risk=100 detail="Mount escape attempt"
+--- PASS: TestContainerEscapePatterns (0.00s)
+=== RUN   TestDefaultSessionSecurityConfig
+--- PASS: TestDefaultSessionSecurityConfig (0.00s)
+=== RUN   TestSession_IsExpired
+=== RUN   TestSession_IsExpired/zero_expiration
+=== RUN   TestSession_IsExpired/future_expiration
+=== RUN   TestSession_IsExpired/past_expiration
+--- PASS: TestSession_IsExpired (0.00s)
+    --- PASS: TestSession_IsExpired/zero_expiration (0.00s)
+    --- PASS: TestSession_IsExpired/future_expiration (0.00s)
+    --- PASS: TestSession_IsExpired/past_expiration (0.00s)
+=== RUN   TestSession_IsIdle
+=== RUN   TestSession_IsIdle/recent_activity
+=== RUN   TestSession_IsIdle/old_activity
+=== RUN   TestSession_IsIdle/just_before_timeout
+=== RUN   TestSession_IsIdle/past_timeout
+--- PASS: TestSession_IsIdle (0.00s)
+    --- PASS: TestSession_IsIdle/recent_activity (0.00s)
+    --- PASS: TestSession_IsIdle/old_activity (0.00s)
+    --- PASS: TestSession_IsIdle/just_before_timeout (0.00s)
+    --- PASS: TestSession_IsIdle/past_timeout (0.00s)
+=== RUN   TestSession_ValidateIP
+=== RUN   TestSession_ValidateIP/ip_binding_disabled
+=== RUN   TestSession_ValidateIP/exact_ip_match
+=== RUN   TestSession_ValidateIP/ip_mismatch_-_strict_mode
+=== RUN   TestSession_ValidateIP/subnet_match_-_migration_enabled
+=== RUN   TestSession_ValidateIP/different_subnet_-_migration_enabled
+=== RUN   TestSession_ValidateIP/completely_different_network
+=== RUN   TestSession_ValidateIP/empty_session_IP
+--- PASS: TestSession_ValidateIP (0.00s)
+    --- PASS: TestSession_ValidateIP/ip_binding_disabled (0.00s)
+    --- PASS: TestSession_ValidateIP/exact_ip_match (0.00s)
+    --- PASS: TestSession_ValidateIP/ip_mismatch_-_strict_mode (0.00s)
+    --- PASS: TestSession_ValidateIP/subnet_match_-_migration_enabled (0.00s)
+    --- PASS: TestSession_ValidateIP/different_subnet_-_migration_enabled (0.00s)
+    --- PASS: TestSession_ValidateIP/completely_different_network (0.00s)
+    --- PASS: TestSession_ValidateIP/empty_session_IP (0.00s)
+=== RUN   TestExtractSubnet
+=== RUN   TestExtractSubnet/192.168.1.100
+=== RUN   TestExtractSubnet/10.0.0.1
+=== RUN   TestExtractSubnet/172.16.0.1
+=== RUN   TestExtractSubnet/127.0.0.1
+=== RUN   TestExtractSubnet/2001:db8:85a3:0000:0000:8a2e:0370:7334
+=== RUN   TestExtractSubnet/::1
+=== RUN   TestExtractSubnet/short
+--- PASS: TestExtractSubnet (0.00s)
+    --- PASS: TestExtractSubnet/192.168.1.100 (0.00s)
+    --- PASS: TestExtractSubnet/10.0.0.1 (0.00s)
+    --- PASS: TestExtractSubnet/172.16.0.1 (0.00s)
+    --- PASS: TestExtractSubnet/127.0.0.1 (0.00s)
+    --- PASS: TestExtractSubnet/2001:db8:85a3:0000:0000:8a2e:0370:7334 (0.00s)
+    --- PASS: TestExtractSubnet/::1 (0.00s)
+    --- PASS: TestExtractSubnet/short (0.00s)
+=== RUN   TestSplitIP
+=== RUN   TestSplitIP/192.168.1.100
+=== RUN   TestSplitIP/10.0.0.1
+=== RUN   TestSplitIP/2001:db8::1
+=== RUN   TestSplitIP/localhost
+--- PASS: TestSplitIP (0.00s)
+    --- PASS: TestSplitIP/192.168.1.100 (0.00s)
+    --- PASS: TestSplitIP/10.0.0.1 (0.00s)
+    --- PASS: TestSplitIP/2001:db8::1 (0.00s)
+    --- PASS: TestSplitIP/localhost (0.00s)
+=== RUN   TestSession_IsContainerized
+=== RUN   TestSession_IsContainerized/with_container
+=== RUN   TestSession_IsContainerized/without_container
+--- PASS: TestSession_IsContainerized (0.00s)
+    --- PASS: TestSession_IsContainerized/with_container (0.00s)
+    --- PASS: TestSession_IsContainerized/without_container (0.00s)
+=== RUN   TestSession_SecurityFields
+--- PASS: TestSession_SecurityFields (0.00s)
+FAIL
+coverage: 27.2% of statements
+FAIL	github.com/rhl/businessos-backend/internal/terminal	1.788s
+FAIL	github.com/rhl/businessos-backend/internal/tools [build failed]
+	github.com/rhl/businessos-backend/internal/utils		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/webhooks		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/internal/workers		coverage: 0.0% of statements
+	github.com/rhl/businessos-backend/scripts		coverage: 0.0% of statements
+FAIL	github.com/rhl/businessos-backend/scripts/debug [build failed]
+	github.com/rhl/businessos-backend/scripts/migrations		coverage: 0.0% of statements
+FAIL

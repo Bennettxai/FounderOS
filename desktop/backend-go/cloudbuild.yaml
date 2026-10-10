@@ -1,0 +1,96 @@
+# Cloud Build configuration for deploying to Cloud Run
+# Trigger this with: gcloud builds submit --config cloudbuild.yaml
+#
+# Prerequisites:
+# 1. Create secrets in Secret Manager. Production config.Validate() REQUIRES all of
+#    these — the service crashes at boot if any of the four crypto keys is missing:
+#    gcloud secrets create DATABASE_URL --data-file=-
+#    gcloud secrets create GOOGLE_CLIENT_ID --data-file=-
+#    gcloud secrets create GOOGLE_CLIENT_SECRET --data-file=-
+#    gcloud secrets create SECRET_KEY --data-file=-              # >= 32 chars (64 recommended)
+#    gcloud secrets create ANTHROPIC_API_KEY --data-file=-
+#    gcloud secrets create TOKEN_ENCRYPTION_KEY --data-file=-    # >= 32 chars, REQUIRED in prod
+#    gcloud secrets create REDIS_KEY_HMAC_SECRET --data-file=-   # >= 32 chars, REQUIRED in prod
+#    gcloud secrets create INTERNAL_API_SECRET --data-file=-     # >= 32 chars, REQUIRED in prod
+#    gcloud secrets create WEBHOOK_SIGNING_SECRET --data-file=-  # >= 16 chars, REQUIRED in prod
+#    Generate each: openssl rand -base64 48
+#
+# 2. Grant Cloud Run access to secrets (repeat per secret, or loop):
+#    gcloud secrets add-iam-policy-binding DATABASE_URL \
+#      --member="serviceAccount:PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+#      --role="roles/secretmanager.secretAccessor"
+
+substitutions:
+  _SERVICE_NAME: businessos-api
+  _REGION: us-central1
+  _CLOUD_SQL_INSTANCE: ${PROJECT_ID}:us-central1:businessos-db
+
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/businessos/${_SERVICE_NAME}:${BUILD_ID}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/businessos/${_SERVICE_NAME}:latest'
+      - '.'
+    dir: 'desktop/backend-go'
+
+  # Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/businessos/${_SERVICE_NAME}:${BUILD_ID}'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/businessos/${_SERVICE_NAME}:latest'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/businessos/${_SERVICE_NAME}:${BUILD_ID}'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--add-cloudsql-instances'
+      - '${_CLOUD_SQL_INSTANCE}'
+      - '--update-env-vars'
+      # SERVER_PORT must stay 8080 to match the Dockerfile EXPOSE. Cloud Run injects
+      # PORT (not SERVER_PORT); the backend reads SERVER_PORT, so we set it explicitly.
+      # COOKIE_DOMAIN=.businessos.dev is REQUIRED so the session cookie is shared
+      # across app.businessos.dev (frontend) and api.businessos.dev (backend);
+      # without it login does not stick.
+      # The alternate delimiter keeps the comma-separated origin allowlist as
+      # one value. Cloud Run accepts only one env mutation flag per deploy.
+      - '^@^ENVIRONMENT=production@SERVER_PORT=8080@AI_PROVIDER=anthropic@ENABLE_LOCAL_MODELS=false@COOKIE_DOMAIN=.businessos.dev@GOOGLE_REDIRECT_URI=https://businessos.dev/api/v1/auth/oauth/google/callback@ALLOWED_ORIGINS=https://businessos.dev,https://app.businessos.dev,app://localhost,http://localhost:5173@APP_URL=https://app.businessos.dev@RESEND_FROM_EMAIL=noreply@team.businessos.dev@RESEND_FROM_NAME=BusinessOS'
+      - '--set-secrets'
+      # All four crypto keys (TOKEN_ENCRYPTION_KEY, REDIS_KEY_HMAC_SECRET,
+      # INTERNAL_API_SECRET, WEBHOOK_SIGNING_SECRET) are REQUIRED in production by
+      # config.Validate(); omitting any of them crashes the service at boot.
+      - 'DATABASE_URL=DATABASE_URL:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GOOGLE_CLIENT_SECRET=GOOGLE_CLIENT_SECRET:latest,SECRET_KEY=SECRET_KEY:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,TOKEN_ENCRYPTION_KEY=TOKEN_ENCRYPTION_KEY:latest,REDIS_KEY_HMAC_SECRET=REDIS_KEY_HMAC_SECRET:latest,INTERNAL_API_SECRET=INTERNAL_API_SECRET:latest,WEBHOOK_SIGNING_SECRET=WEBHOOK_SIGNING_SECRET:latest,RESEND_API_KEY=RESEND_API_KEY:latest'
+      - '--memory'
+      - '512Mi'
+      - '--cpu'
+      - '1'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '10'
+      - '--concurrency'
+      - '80'
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/businessos/${_SERVICE_NAME}:${BUILD_ID}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/businessos/${_SERVICE_NAME}:latest'
+
+timeout: '1200s'

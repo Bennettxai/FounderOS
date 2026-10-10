@@ -1,0 +1,25 @@
+{
+  "name": "Notifications",
+  "version": "1.0.0",
+  "description": "Notification system — send, list, and manage user notifications with preferences",
+  "category": "system",
+  "actions": [
+    { "name": "send_notification", "type": "api_call", "description": "Send a notification to a user" },
+    { "name": "list_notifications", "type": "api_call", "description": "List notifications for current user" },
+    { "name": "mark_read", "type": "api_call", "description": "Mark a notification as read" },
+    { "name": "mark_all_read", "type": "api_call", "description": "Mark all notifications as read" },
+    { "name": "update_preferences", "type": "api_call", "description": "Update notification preferences" }
+  ],
+  "protected_schemas": ["notifications", "notification_preferences"],
+  "protected_routes": ["api/notifications/*"],
+  "protected_operations": ["notifications.purge_all"],
+  "migration_up": "CREATE TABLE IF NOT EXISTS notifications (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), workspace_id UUID NOT NULL, user_id UUID NOT NULL, title VARCHAR(255) NOT NULL, body TEXT, notification_type VARCHAR(50) DEFAULT 'info', is_read BOOLEAN DEFAULT FALSE, source_type VARCHAR(50), source_id UUID, created_at TIMESTAMPTZ DEFAULT NOW()); CREATE TABLE IF NOT EXISTS notification_preferences (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL, workspace_id UUID NOT NULL, channel VARCHAR(50) NOT NULL DEFAULT 'in_app', notification_type VARCHAR(50) NOT NULL, is_enabled BOOLEAN DEFAULT TRUE, updated_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(user_id, workspace_id, channel, notification_type));",
+  "migration_down": "DROP TABLE IF EXISTS notification_preferences CASCADE; DROP TABLE IF EXISTS notifications CASCADE;",
+  "routes": [
+    { "method": "GET", "path": "/api/notifications", "handler": "ListNotifications" },
+    { "method": "POST", "path": "/api/notifications", "handler": "SendNotification" },
+    { "method": "PUT", "path": "/api/notifications/:id/read", "handler": "MarkRead" },
+    { "method": "PUT", "path": "/api/notifications/read-all", "handler": "MarkAllRead" },
+    { "method": "PUT", "path": "/api/notifications/preferences", "handler": "UpdatePreferences" }
+  ]
+}

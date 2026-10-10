@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Task Summary Widget Config",
+  "type": "object",
+  "properties": {
+    "group_by": {
+      "type": "string",
+      "enum": ["status", "project", "priority"],
+      "default": "status",
+      "description": "How to group the tasks"
+    },
+    "show_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include completed tasks in counts"
+    },
+    "project_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Filter to a specific project"
+    }
+  },
+  "additionalProperties": false
+}

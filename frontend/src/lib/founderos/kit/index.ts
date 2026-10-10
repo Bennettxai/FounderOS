@@ -1,0 +1,32 @@
+// The operator kit: Svelte ports of FounderOS v1 components/terminal.tsx, PageHeader,
+// slab.tsx and slab-charts.tsx. Build every /os page from these.
+export { default as Dot } from './Dot.svelte';
+export { default as Badge } from './Badge.svelte';
+export { default as Label } from './Label.svelte';
+export { default as SectionHead } from './SectionHead.svelte';
+export { default as Kbd } from './Kbd.svelte';
+export { default as Spark } from './Spark.svelte';
+export { default as PageHeader } from './PageHeader.svelte';
+export { default as Slab } from './Slab.svelte';
+export { default as SlabTitle } from './SlabTitle.svelte';
+export { default as SlabCard } from './SlabCard.svelte';
+export { default as Chip } from './Chip.svelte';
+export { default as BigStat } from './BigStat.svelte';
+export { default as CountUp } from './CountUp.svelte';
+export { default as VolumeMeter } from './VolumeMeter.svelte';
+export { default as MeterStack } from './MeterStack.svelte';
+export { default as InsightCard } from './InsightCard.svelte';
+export { default as StepLine } from './StepLine.svelte';
+export { default as DotMatrix } from './DotMatrix.svelte';
+export * from './format';
+export { default as ConductorEmblem } from './ConductorEmblem.svelte';
+export { default as SparkIcon } from './SparkIcon.svelte';
+export * from './emblem';
+export { default as Rise } from './Rise.svelte';
+export { default as Pressable } from './Pressable.svelte';
+export { default as ToggleChip } from './ToggleChip.svelte';
+export { default as Spotlight } from './Spotlight.svelte';
+export { default as PageSpotlight } from './PageSpotlight.svelte';
+export { default as OsMark } from './OsMark.svelte';
+export * from './slab-classes';
+export * from './lens';

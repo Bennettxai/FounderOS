@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Metric Card Widget Config",
+  "type": "object",
+  "required": ["metric"],
+  "properties": {
+    "metric": {
+      "type": "string",
+      "enum": [
+        "tasks_due_today",
+        "tasks_overdue",
+        "tasks_completed_week",
+        "tasks_completed_today",
+        "active_projects",
+        "projects_at_risk"
+      ],
+      "description": "Which metric to display"
+    },
+    "show_trend": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show comparison to last period"
+    }
+  },
+  "additionalProperties": false
+}

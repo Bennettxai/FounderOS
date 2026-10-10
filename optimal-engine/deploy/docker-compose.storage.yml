@@ -1,0 +1,108 @@
+# Optional self-hosted storage providers for Optimal Engine.
+#
+# Local engine only:
+#   docker compose -f deploy/docker-compose.yml up
+#
+# Team and scale providers:
+#   docker compose -f deploy/docker-compose.yml \
+#     -f deploy/docker-compose.storage.yml --profile storage up -d
+#
+# Fractal is an enterprise partner service and is configured through its
+# endpoint and credential reference. It is not started by this compose file.
+
+name: optimal-engine
+
+services:
+  engine:
+    environment:
+      OPTIMAL_POSTGRES_URL: ${OPTIMAL_POSTGRES_URL:-postgres://optimal:optimal@postgres:5432/optimal}
+      OPTIMAL_S3_ENDPOINT: ${OPTIMAL_S3_ENDPOINT:-http://garage:3900}
+      OPTIMAL_S3_BUCKET: ${OPTIMAL_S3_BUCKET:-optimal-artifacts}
+      OPTIMAL_S3_ACCESS_KEY_ID: ${OPTIMAL_S3_ACCESS_KEY_ID:-GK00000000000000000000000000000000}
+      OPTIMAL_S3_SECRET_ACCESS_KEY: ${OPTIMAL_S3_SECRET_ACCESS_KEY:-local-development-secret}
+      OPTIMAL_NATS_URL: ${OPTIMAL_NATS_URL:-nats://nats:4222}
+      OPTIMAL_VALKEY_URL: ${OPTIMAL_VALKEY_URL:-redis://valkey:6379}
+      OPTIMAL_QDRANT_URL: ${OPTIMAL_QDRANT_URL:-http://qdrant:6333}
+      OPTIMAL_OPENBAO_ADDR: ${OPTIMAL_OPENBAO_ADDR:-http://openbao:8200}
+      OPTIMAL_OPENBAO_TOKEN: ${OPTIMAL_OPENBAO_TOKEN:-local-development-root-token}
+
+  postgres:
+    profiles: ["storage"]
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-optimal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-optimal}
+      POSTGRES_DB: ${POSTGRES_DB:-optimal}
+    volumes:
+      - optimal_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  garage:
+    profiles: ["storage"]
+    image: ${GARAGE_IMAGE:-dxflrs/garage:v2.3.0}
+    command: ["/garage", "server", "--single-node", "--default-bucket"]
+    environment:
+      GARAGE_CONFIG_FILE: /etc/garage.toml
+      GARAGE_DEFAULT_ACCESS_KEY: ${OPTIMAL_S3_ACCESS_KEY_ID:-GK00000000000000000000000000000000}
+      GARAGE_DEFAULT_SECRET_KEY: ${OPTIMAL_S3_SECRET_ACCESS_KEY:-local-development-secret}
+      GARAGE_DEFAULT_BUCKET: ${OPTIMAL_S3_BUCKET:-optimal-artifacts}
+    volumes:
+      - ./storage/garage.toml:/etc/garage.toml:ro
+      - optimal_garage_meta:/var/lib/garage/meta
+      - optimal_garage_data:/var/lib/garage/data
+
+  nats:
+    profiles: ["storage"]
+    image: ${NATS_IMAGE:-nats:2.11-alpine}
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    volumes:
+      - optimal_nats:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  valkey:
+    profiles: ["storage"]
+    image: ${VALKEY_IMAGE:-valkey/valkey:8-alpine}
+    command: ["valkey-server", "--appendonly", "yes"]
+    volumes:
+      - optimal_valkey:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  qdrant:
+    profiles: ["storage"]
+    image: ${QDRANT_IMAGE:-qdrant/qdrant:latest}
+    volumes:
+      - optimal_qdrant:/qdrant/storage
+
+  openbao:
+    profiles: ["storage"]
+    image: ${OPENBAO_IMAGE:-openbao/openbao:2.6}
+    cap_add: ["IPC_LOCK"]
+    environment:
+      BAO_DEV_ROOT_TOKEN_ID: ${OPTIMAL_OPENBAO_TOKEN:-local-development-root-token}
+      BAO_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    command: ["server", "-dev"]
+    healthcheck:
+      test: ["CMD", "bao", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  optimal_postgres:
+  optimal_garage_meta:
+  optimal_garage_data:
+  optimal_nats:
+  optimal_valkey:
+  optimal_qdrant:

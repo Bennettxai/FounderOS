@@ -1,0 +1,50 @@
+/* /os/social* local styles over the --bn-* tokens. Color means status. */
+.soc-ok { color: var(--bn-ok); }
+.soc-err { color: var(--bn-err); }
+.soc-warn { color: var(--bn-warn); }
+.soc-tile {
+	/* prod: rounded-[12px] border border-os-border bg-os-surface; hover and
+	   press come from .bn-pressable.is-row with data-lens="r" */
+	border: 1px solid var(--bn-border);
+	background: var(--bn-surface);
+}
+/* v1 account / post boxes sit on the canvas colour inside their card. */
+.soc-tile.soc-tile-bg { background: var(--bn-bg); }
+/* Share-donut slice hues: FounderOS v1's mono --funnel-s0..s6 (app/globals.css),
+   scoped to the social pages so the shared theme stays untouched. */
+.soc-root {
+	--soc-s0: #f2f2f2;
+	--soc-s1: #bdbdbd;
+	--soc-s2: #8a8a8a;
+	--soc-s3: #6e6e6e;
+	--soc-s5: #575757;
+	--soc-s6: #474747;
+}
+/* Recent posts' "view →" (prod rounded-sm-t border, accent text). */
+.soc-view { border: 1px solid var(--bn-border); color: var(--bn-accent); }
+.soc-view:hover { border-color: var(--bn-border-strong); }
+.soc-track { background: var(--bn-surface-2); }
+.soc-fill { background: var(--bn-accent); opacity: 0.6; }
+.soc-chip {
+	border: 1px solid var(--bn-border);
+	color: var(--bn-text-3);
+}
+.soc-chip:hover { border-color: var(--bn-border-strong); color: var(--bn-text-2); }
+.soc-chip[data-on='true'] {
+	border-color: color-mix(in oklab, var(--bn-accent) 25%, transparent);
+	background: var(--bn-accent-soft);
+	color: var(--bn-accent);
+}
+.soc-modal-back { background: color-mix(in oklab, var(--bn-bg) 70%, transparent); backdrop-filter: blur(4px); }
+.soc-modal { border: 1px solid var(--bn-border-strong); background: var(--bn-surface); }
+.soc-bubble-in { border: 1px solid var(--bn-border); background: var(--bn-surface-2); color: var(--bn-text); }
+.soc-bubble-out { background: var(--bn-accent); color: var(--bn-accent-ink); }
+.soc-primary { background: var(--bn-accent); color: var(--bn-accent-ink); border: 1px solid var(--bn-accent); }
+.soc-primary:disabled { opacity: 0.45; }
+.soc-sel { background: var(--bn-surface-2); }
+/* The newsletter card's right half (recipients line): a hairline split that
+   turns horizontal when the halves stack. */
+.soc-split { border-left: 1px solid var(--bn-border); }
+@media (max-width: 900px) {
+	.soc-split { border-left: 0; border-top: 1px solid var(--bn-border); }
+}

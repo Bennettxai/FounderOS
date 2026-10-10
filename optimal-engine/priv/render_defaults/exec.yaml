@@ -1,0 +1,17 @@
+name: exec
+title: Executive Summary
+audience: exec
+genre: brief
+bandwidth: large
+modalities:
+  - text
+  - image
+constraints:
+  tone: "No jargon, plain language. A non-technical executive should understand every sentence."
+  length: "Single page — fits in one browser viewport without scrolling."
+  visuals: "Use charts or diagrams only if they replace paragraphs of explanation. No decorative graphics."
+  structure: "Lead with the bottom line. Supporting detail follows, not precedes."
+html_hints:
+  style: "Clean, corporate. Neutral palette. Large readable font (18px+ body)."
+  interactive: false
+  layout: "Single column, max-width 720px, centered."

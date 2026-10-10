@@ -1,0 +1,241 @@
+name: Backend Integration Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - main-dev
+      - pedro-dev
+      - feature/multi-agent-app-generation
+      - release/mvp-stabilization
+      - 'release/**'
+    paths:
+      - 'desktop/backend-go/**'
+      - '.github/workflows/backend-integration-tests.yml'
+  push:
+    branches:
+      - main
+      - main-dev
+      - release/mvp-stabilization
+      - 'release/**'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write  # Required to comment on PRs
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: businessos_test
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.2'
+          cache-dependency-path: desktop/backend-go/go.sum
+
+      - name: Install dependencies
+        working-directory: desktop/backend-go
+        run: go mod download
+
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U postgres; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
+
+      - name: Verify pgvector extension
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d businessos_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -d businessos_test -c "SELECT * FROM pg_extension WHERE extname = 'vector';"
+
+      - name: Prepare and verify database schema
+        working-directory: desktop/backend-go
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/businessos_test?sslmode=disable
+          PGPASSWORD: postgres
+        run: |
+          ./scripts/db/prepare_runtime_schema.sh
+
+      - name: Run integration tests
+        working-directory: desktop/backend-go
+        env:
+          # Database configuration
+          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/businessos_test?sslmode=disable
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/businessos_test?sslmode=disable
+
+          # Redis configuration
+          REDIS_URL: redis://localhost:6379
+
+          # Test environment config
+          ENVIRONMENT: test
+          JWT_SECRET: test-jwt-secret-for-ci-only
+          TOKEN_ENCRYPTION_KEY: test-encryption-key-32-chars-long
+          SECRET_KEY: test-secret-key-for-ci
+
+          # AI provider config (mock for tests)
+          AI_PROVIDER: ollama_local
+          OLLAMA_LOCAL_URL: http://localhost:11434
+
+          # Disable background jobs
+          CONVERSATION_SUMMARY_JOB_ENABLED: "false"
+          BEHAVIOR_PATTERNS_JOB_ENABLED: "false"
+          APP_PROFILER_SYNC_JOB_ENABLED: "false"
+
+          # OSA test configuration
+          OSA_API_URL: http://localhost:8081
+          OSA_API_KEY: test-osa-key
+        run: |
+          echo "🧪 Running Go integration tests..."
+          echo "📊 Database: PostgreSQL with pgvector"
+          echo "📊 Redis: Available for session tests"
+
+          # Run all tests (including integration tests)
+          # Exclude scripts directory to avoid multiple main() conflicts
+          go test -v -race -timeout=20m -coverprofile=coverage-integration.out -covermode=atomic \
+            $(go list ./... | grep -v '/scripts/') 2>&1 | tee integration-test-output.log
+
+          echo ""
+          echo "📊 Integration Test Coverage:"
+          go tool cover -func=coverage-integration.out -o=coverage-integration.txt
+          tail -n 1 coverage-integration.txt
+
+      - name: Generate integration test report
+        if: always()
+        working-directory: desktop/backend-go
+        run: |
+          echo "## 🧪 Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Count test results
+          TOTAL_TESTS=$(grep -c "=== RUN" integration-test-output.log || echo "0")
+          PASSED_TESTS=$(grep -c -- "--- PASS:" integration-test-output.log || echo "0")
+          FAILED_TESTS=$(grep -c -- "--- FAIL:" integration-test-output.log || echo "0")
+          SKIPPED_TESTS=$(grep -c -- "--- SKIP:" integration-test-output.log || echo "0")
+
+          echo "### Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Total: $TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Passed: ✅ $PASSED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Failed: ❌ $FAILED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Skipped: ⏭️  $SKIPPED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Coverage" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 1 coverage-integration.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          # Show failed tests if any
+          if [ $FAILED_TESTS -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Failed Tests" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep -A 10 -- "--- FAIL:" integration-test-output.log | head -50 >> $GITHUB_STEP_SUMMARY || true
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check integration test coverage
+        working-directory: desktop/backend-go
+        run: |
+          COVERAGE=$(go tool cover -func=coverage-integration.out | grep total | awk '{print $3}' | sed 's/%//')
+          THRESHOLD=60.0
+
+          echo "📊 Integration Coverage: $COVERAGE%"
+          echo "🎯 Threshold: $THRESHOLD%"
+
+          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "⚠️  Coverage $COVERAGE% is below threshold $THRESHOLD%"
+            echo "Note: Integration tests are being developed, threshold may be adjusted"
+            # Don't fail the build yet
+            exit 0
+          else
+            echo "✅ Coverage $COVERAGE% meets threshold $THRESHOLD%"
+          fi
+
+      - name: Upload integration test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: |
+            desktop/backend-go/integration-test-output.log
+            desktop/backend-go/coverage-integration.out
+            desktop/backend-go/coverage-integration.txt
+          retention-days: 7
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        continue-on-error: true  # Don't fail if commenting fails
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const testOutput = fs.readFileSync('desktop/backend-go/integration-test-output.log', 'utf8');
+
+            // Parse test results
+            const totalTests = (testOutput.match(/=== RUN/g) || []).length;
+            const passedTests = (testOutput.match(/--- PASS:/g) || []).length;
+            const failedTests = (testOutput.match(/--- FAIL:/g) || []).length;
+            const skippedTests = (testOutput.match(/--- SKIP:/g) || []).length;
+
+            const coverage = fs.readFileSync('desktop/backend-go/coverage-integration.txt', 'utf8');
+            const coverageLine = coverage.split('\n').pop();
+
+            const body = `## 🧪 Integration Test Results
+
+            ### Summary
+            - Total: ${totalTests}
+            - Passed: ✅ ${passedTests}
+            - Failed: ❌ ${failedTests}
+            - Skipped: ⏭️  ${skippedTests}
+
+            ### Coverage
+            \`\`\`
+            ${coverageLine}
+            \`\`\`
+
+            ${failedTests > 0 ? '⚠️  Some integration tests failed. Please review the logs.' : '✅ All integration tests passed!'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

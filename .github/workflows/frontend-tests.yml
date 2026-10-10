@@ -1,0 +1,99 @@
+name: Frontend Tests & Build
+
+on:
+  pull_request:
+    branches:
+      - main
+      - main-dev
+      - pedro-dev
+      - feature/multi-agent-app-generation
+      - release/mvp-stabilization
+      - 'release/**'
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-tests.yml'
+  push:
+    branches:
+      - main
+      - main-dev
+      - pedro-dev
+      - release/mvp-stabilization
+      - 'release/**'
+
+jobs:
+  test:
+    name: Run Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: |
+          echo "Installing dependencies..."
+          pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: cd frontend && pnpm check
+
+      - name: Run linter
+        working-directory: frontend
+        run: pnpm lint
+
+      - name: Run tests
+        working-directory: frontend
+        run: |
+          echo "Running Vitest tests..."
+          pnpm test:ci
+
+      - name: Build application
+        working-directory: frontend
+        env:
+          NODE_OPTIONS: '--max-old-space-size=6144'
+        run: |
+          echo "Building SvelteKit application..."
+          echo "Node version: $(node --version)"
+          echo "pnpm version: $(pnpm --version)"
+          pnpm build
+
+      - name: Check build output
+        working-directory: frontend
+        run: |
+          echo "Verifying build output..."
+          ls -la .svelte-kit/output/
+          echo "Build completed successfully"
+
+      - name: Generate test report
+        if: always()
+        run: |
+          echo "## Frontend Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- TypeScript Check: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Build Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "Build completed for SvelteKit application" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/.svelte-kit/output/
+          retention-days: 7

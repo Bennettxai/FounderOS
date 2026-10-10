@@ -1,0 +1,275 @@
+name: "feature-addition"
+display_name: "Feature Addition to Existing App"
+description: "Add new features to an existing OSA-generated application"
+category: "app-enhancement"
+version: "1.0.0"
+tags:
+  - "feature"
+  - "enhancement"
+  - "iterative"
+
+variables:
+  # Required variables
+  - name: "AppName"
+    type: "string"
+    required: true
+    description: "Name of the existing application"
+
+  - name: "FeatureDescription"
+    type: "string"
+    required: true
+    description: "Description of the feature to add"
+
+  - name: "ExistingContext"
+    type: "object"
+    required: true
+    description: "Context about the existing application (structure, tech stack, patterns)"
+
+  # Optional variables
+  - name: "AffectedModules"
+    type: "array"
+    required: false
+    default: []
+    description: "List of modules that will be affected by this feature"
+
+  - name: "DatabaseChanges"
+    type: "boolean"
+    required: false
+    default: false
+    description: "Whether this feature requires database schema changes"
+
+  - name: "BreakingChanges"
+    type: "boolean"
+    required: false
+    default: false
+    description: "Whether this feature introduces breaking changes"
+
+  - name: "RelatedIntegrations"
+    type: "array"
+    required: false
+    default: []
+    description: "Third-party integrations needed for this feature"
+
+template: |
+  # Feature Addition to {{.AppName}}
+
+  You are adding a new feature to an existing application: **{{.AppName}}**.
+
+  ## Feature Description
+
+  {{.FeatureDescription}}
+
+  ## Existing Application Context
+
+  - **Application Name**: {{.AppName}}
+  - **Tech Stack**: {{.ExistingContext.TechStack}}
+  - **Architecture Pattern**: {{.ExistingContext.ArchitecturePattern}}
+  {{- if .ExistingContext.CurrentVersion}}
+  - **Current Version**: {{.ExistingContext.CurrentVersion}}
+  {{- end}}
+
+  ### Existing Structure
+
+  {{- if .ExistingContext.Modules}}
+  **Current Modules:**
+  {{- range .ExistingContext.Modules}}
+  - **{{.Name}}**: {{.Description}} ({{.Status}})
+  {{- end}}
+  {{- end}}
+
+  {{- if .AffectedModules}}
+  ### Modules Affected by This Feature
+
+  The following modules will be modified:
+  {{- range .AffectedModules}}
+  - **{{.}}**
+  {{- end}}
+  {{- end}}
+
+  ## Implementation Requirements
+
+  ### 1. Database Changes ({{if .DatabaseChanges}}REQUIRED{{else}}NOT NEEDED{{end}})
+
+  {{- if .DatabaseChanges}}
+  - Create new migration file following BusinessOS naming convention
+  - Use sequential migration number (check existing migrations)
+  - Include both UP and DOWN migrations
+  - Test migration rollback before committing
+  - Update sqlc queries if needed
+  - Run `sqlc generate` after schema changes
+  {{- else}}
+  - No database schema changes required for this feature
+  {{- end}}
+
+  ### 2. Backend Changes (Go + Gin)
+
+  - **Handler Layer**:
+    - Add new endpoints or modify existing ones
+    - Input validation using struct tags
+    - Extract user context from middleware
+    - Use `slog` for all logging (NO `fmt.Printf`)
+    - Context propagation (context as first parameter)
+
+  - **Service Layer**:
+    - Implement business logic for new feature
+    - Call repository methods for data access
+    - Wrap errors with context: `fmt.Errorf("...: %w", err)`
+    - NO `panic` calls in production code
+
+  - **Repository Layer** (if database access needed):
+    - Add sqlc queries to `internal/database/queries/`
+    - Use prepared statements
+    - Handle NULL values properly
+    - Return domain errors (not database errors)
+
+  ### 3. Frontend Changes (SvelteKit + TypeScript)
+
+  {{- if .ExistingContext.FrontendComponents}}
+  - **Components to Modify/Add**:
+    {{- range .ExistingContext.FrontendComponents}}
+    - {{.Path}}: {{.Description}}
+    {{- end}}
+  {{- end}}
+
+  - **UI Requirements**:
+    - Follow existing design patterns and component structure
+    - Maintain responsive design (mobile-first)
+    - Dark mode support
+    - Accessibility (ARIA labels, keyboard navigation)
+    - Loading states and error handling
+    - Tailwind CSS for styling
+
+  - **State Management**:
+    - Use Svelte stores for shared state
+    - Form actions for mutations
+    - `+page.server.ts` for server-side data loading
+    - `+page.ts` for client-side data
+
+  ### 4. Integration Layer
+
+  {{- if .RelatedIntegrations}}
+  This feature requires integration with:
+  {{- range .RelatedIntegrations}}
+  - **{{.Name}}** ({{.Provider}}): {{.Purpose}}
+  {{- end}}
+
+  - Use existing integration patterns from `internal/integrations/`
+  - OAuth 2.0 for authentication where applicable
+  - Circuit breaker and retry logic
+  - Rate limiting
+  {{- else}}
+  - No external integrations required
+  {{- end}}
+
+  ### 5. Testing (MANDATORY)
+
+  - **Unit Tests**:
+    - Test new service layer logic (Go: `testify`)
+    - Test frontend component behavior
+    - Minimum 80% coverage for new code
+
+  - **Integration Tests**:
+    - Test new API endpoints with real database
+    - Test data flow from frontend to backend
+    {{- if .DatabaseChanges}}
+    - Test database migration up and down
+    {{- end}}
+
+  - **E2E Tests** (if user-facing changes):
+    - Test complete user flows (Playwright)
+    - Test on different screen sizes
+    - Test error scenarios
+
+  ### 6. Backward Compatibility
+
+  {{- if .BreakingChanges}}
+  ⚠️ **BREAKING CHANGES DETECTED**
+
+  This feature introduces breaking changes. You MUST:
+  - Document all breaking changes in CHANGELOG.md
+  - Provide migration guide for existing users
+  - Update API version if endpoints changed
+  - Add deprecation warnings where appropriate
+  {{- else}}
+  ✅ **NO BREAKING CHANGES**
+
+  This feature is backward compatible:
+  - Existing endpoints continue to work
+  - No changes to public API contracts
+  - No database schema changes that break existing queries
+  {{- end}}
+
+  ### 7. Documentation Updates
+
+  - Update API documentation (OpenAPI/Swagger)
+  - Update README if setup process changes
+  - Add feature documentation in `docs/features/`
+  - Update CHANGELOG.md with feature description
+  - Add inline code comments for complex logic
+
+  ## Technical Constraints
+
+  **MANDATORY PATTERNS:**
+  - Follow existing code patterns in the application
+  - Use BusinessOS architecture (Handler → Service → Repository)
+  - Use `slog` for all logging (NO `fmt.Printf`)
+  - Error handling: wrap errors with context
+  - Context as first parameter in all I/O functions
+  {{- if .DatabaseChanges}}
+  - All database queries via sqlc-generated code
+  {{- end}}
+
+  **CODE QUALITY:**
+  - No naked returns
+  - No `panic` in production code
+  - Input validation at handler layer
+  - Business logic in service layer
+  - Data access only in repository layer
+  - Maintain or improve test coverage
+
+  ## Success Criteria
+
+  - ✅ Feature works as described
+  - ✅ Application builds without errors (`go build ./cmd/server`)
+  - ✅ All tests pass (existing + new)
+  {{- if .DatabaseChanges}}
+  - ✅ Database migrations run cleanly (up and down)
+  {{- end}}
+  - ✅ No regressions in existing functionality
+  - ✅ Code follows existing patterns and conventions
+  - ✅ Documentation updated
+  {{- if .BreakingChanges}}
+  - ✅ Breaking changes documented
+  - ✅ Migration guide provided
+  {{- end}}
+
+  ## Implementation Strategy
+
+  1. **Analysis Phase**:
+     - Review existing code in affected modules
+     - Identify integration points
+     - Plan minimal changes required
+
+  2. **Implementation Phase**:
+     {{- if .DatabaseChanges}}
+     - Create and test database migration FIRST
+     - Generate sqlc code
+     {{- end}}
+     - Implement backend changes (handler → service → repository)
+     - Implement frontend changes
+     - Add/update integration layer if needed
+
+  3. **Testing Phase**:
+     - Write unit tests for new code
+     - Update integration tests
+     - Run E2E tests for affected flows
+     - Verify no regressions
+
+  4. **Documentation Phase**:
+     - Update API docs
+     - Update feature documentation
+     - Update CHANGELOG
+
+  ---
+
+  **Begin feature implementation now. Make minimal, focused changes that integrate seamlessly with existing code.**

@@ -1,0 +1,254 @@
+/*
+ * Foundation tokens — same set used in site/src/app.css.
+ *
+ * One palette across the marketing site and the desktop UI.
+ * Light + dark themes switched by `data-theme` on <html>.
+ */
+
+:root,
+[data-theme='dark'] {
+  /* Foundation core 9 (--d* = "dark token") */
+  --dt: #f1f1f3;
+  --dt-muted: #9aa0a8;
+  --dt-subtle: #6b7280;
+  --dbg: #07090c;
+  --dbg-1: #0d1015;
+  --dbg-2: #131820;
+  --dbd: #1c2230;
+  --dbd-soft: #141821;
+  --daccent: #7ea8ff;
+
+  /* Functional aliases */
+  --bg: var(--dbg);
+  --bg-elevated: var(--dbg-1);
+  --bg-elevated-2: var(--dbg-2);
+  --border: var(--dbd);
+  --border-soft: var(--dbd-soft);
+  --text: var(--dt);
+  --text-muted: var(--dt-muted);
+  --text-subtle: var(--dt-subtle);
+  --accent: var(--daccent);
+  --accent-soft: rgba(126, 168, 255, 0.18);
+
+  /* Status palette */
+  --good: #7be3a3;
+  --good-bg: rgba(123, 227, 163, 0.10);
+  --warn: #fc9e6c;
+  --warn-bg: rgba(252, 158, 108, 0.10);
+  --bad:  #f88;
+  --bad-bg: rgba(248, 136, 136, 0.10);
+
+  /* Visual differentiators */
+  --link: #7ea8ff;
+  --link-hover: #cdf;
+  --purple: #bb7eff;
+  --cyan: #5fcfd4;
+  --pink: #f08acd;
+  --amber: #fc9e6c;
+
+  /* Glass surface */
+  --glass-bg: rgba(20, 24, 32, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 20px;
+
+  /* Canvas background (graph viz) */
+  --canvas-bg: #07090c;
+  --canvas-fog: 0x07090c;
+
+  /* Radii */
+  --r-pill: 9999px;
+  --r-md: 8px;
+  --r-sm: 6px;
+
+  /* Type stack */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+}
+
+[data-theme='light'] {
+  --dt: #0e1116;
+  --dt-muted: #4b5563;
+  --dt-subtle: #6b7280;
+  --dbg: #fbfbfc;
+  --dbg-1: #ffffff;
+  --dbg-2: #f3f4f8;
+  --dbd: #e4e6ec;
+  --dbd-soft: #eef0f4;
+  --daccent: #2563eb;
+
+  --bg: var(--dbg);
+  --bg-elevated: var(--dbg-1);
+  --bg-elevated-2: var(--dbg-2);
+  --border: var(--dbd);
+  --border-soft: var(--dbd-soft);
+  --text: var(--dt);
+  --text-muted: var(--dt-muted);
+  --text-subtle: var(--dt-subtle);
+  --accent: var(--daccent);
+  --accent-soft: rgba(37, 99, 235, 0.12);
+
+  --good: #067a3a;
+  --good-bg: #d4f7e2;
+  --warn: #b4580a;
+  --warn-bg: #faeccf;
+  --bad:  #b4241c;
+  --bad-bg: #fad9d4;
+
+  --link: #2563eb;
+  --link-hover: #1e40af;
+  --purple: #7e3af2;
+  --cyan:   #0891b2;
+  --pink:   #db2777;
+  --amber:  #c25b00;
+
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.06);
+
+  --canvas-bg: #f8f8fa;
+  --canvas-fog: 0xf8f8fa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+code, pre { font-family: var(--font-mono); }
+
+/* --- shared primitives ------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s, transform 0.08s;
+}
+.btn:hover {
+  background: var(--bg-elevated-2);
+  border-color: var(--accent);
+  text-decoration: none;
+}
+.btn:active { transform: translateY(1px); }
+.btn--primary {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.btn--primary:hover { opacity: 0.92; color: var(--bg); }
+.btn--ghost { background: transparent; }
+.btn--sm { padding: 0.3rem 0.7rem; font-size: 0.78rem; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+.eyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: lowercase;
+  background: var(--bg-elevated-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.chip--good   { background: var(--good-bg); color: var(--good); border-color: transparent; }
+.chip--warn   { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+.chip--bad    { background: var(--bad-bg);  color: var(--bad);  border-color: transparent; }
+.chip--accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+
+.muted  { color: var(--text-muted); }
+.subtle { color: var(--text-subtle); }
+
+.error {
+  color: var(--bad);
+  background: var(--bad-bg);
+  border: 1px solid color-mix(in srgb, var(--bad) 25%, transparent);
+  border-radius: var(--r-md);
+  padding: 0.7rem 0.9rem;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+
+/* Page-level layout for inner routes */
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.page--wide  { max-width: 1120px; }
+.page--full  {
+  max-width: none;
+  padding: 0;
+  margin: 0;
+  height: calc(100vh - 56px);
+  width: 100%;
+}
+
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.page-header h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.page-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}

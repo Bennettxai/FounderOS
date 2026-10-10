@@ -1,0 +1,23 @@
+# Cloudflare Pages configuration for BusinessOS frontend
+# Deploy: npx wrangler pages deploy build --project-name=businessos
+#
+# Build command (set in Cloudflare Pages dashboard or CI):
+#   CLOUDFLARE_BUILD=true npm run build
+#
+# Environment variables to set in Cloudflare Pages dashboard:
+#   VITE_API_URL = https://api.businessos.dev/api/v1
+#   VITE_BACKEND_URL = https://api.businessos.dev
+
+name = "businessos"
+compatibility_date = "2024-01-01"
+
+# Pages-specific config
+pages_build_output_dir = "build"
+
+[env.production]
+# Non-secret build-time vars (secrets go in the Cloudflare Pages dashboard)
+vars = { PUBLIC_ENVIRONMENT = "production" }
+
+# Custom domain: app.businessos.dev
+# Set via: Cloudflare Pages dashboard > Custom domains > Add custom domain
+# DNS: CNAME app -> businessos.pages.dev (Cloudflare manages the cert)

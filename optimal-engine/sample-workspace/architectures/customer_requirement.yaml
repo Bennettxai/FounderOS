@@ -1,0 +1,17 @@
+id: customer_requirement.v1
+name: customer_requirement
+description: Normalized shape for imported customer requirements.
+fields:
+  - name: customer_name
+    type: string
+    required: true
+  - name: requirement
+    type: string
+    required: true
+  - name: priority
+    type: enum
+    values: [low, medium, high, urgent]
+  - name: source_uri
+    type: string
+    required: true
+

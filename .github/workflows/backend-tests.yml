@@ -1,0 +1,113 @@
+name: Backend Tests (Unit Tests)
+
+on:
+  pull_request:
+    branches:
+      - main
+      - main-dev
+      - pedro-dev
+      - feature/multi-agent-app-generation
+      - release/mvp-stabilization
+      - 'release/**'
+    paths:
+      - 'desktop/backend-go/**'
+      - '.github/workflows/backend-tests.yml'
+  push:
+    branches:
+      - main
+      - main-dev
+      - release/mvp-stabilization
+      - 'release/**'
+
+jobs:
+  test:
+    name: Run Go Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.2'
+          cache-dependency-path: desktop/backend-go/go.sum
+
+      - name: Install dependencies
+        working-directory: desktop/backend-go
+        run: go mod download
+
+      - name: Run tests with coverage (unit tests only)
+        working-directory: desktop/backend-go
+        env:
+          # Skip integration tests that require database
+          SKIP_INTEGRATION_TESTS: "true"
+
+          # Test environment config
+          ENVIRONMENT: test
+          JWT_SECRET: test-jwt-secret-for-ci-only
+          TOKEN_ENCRYPTION_KEY: test-encryption-key-32-chars-long
+          SECRET_KEY: test-secret-key-for-ci
+
+          # AI provider config (use local mock for tests)
+          AI_PROVIDER: ollama_local
+          OLLAMA_LOCAL_URL: http://localhost:11434
+
+          # Disable background jobs in tests
+          CONVERSATION_SUMMARY_JOB_ENABLED: "false"
+          BEHAVIOR_PATTERNS_JOB_ENABLED: "false"
+          APP_PROFILER_SYNC_JOB_ENABLED: "false"
+        run: |
+          echo "🧪 Running Go unit tests with race detection and coverage..."
+          echo "ℹ️  Integration tests requiring database are skipped in CI"
+          # Exclude all scripts from tests to avoid multiple main() conflicts
+          # Use -short flag to skip integration tests marked with testing.Short()
+          go test -short -v -race -timeout=10m -coverprofile=coverage.out -covermode=atomic $(go list ./... | grep -v '/scripts') 2>&1 | tee test-output.log
+
+          echo ""
+          echo "📊 Generating coverage report..."
+          go tool cover -func=coverage.out -o=coverage.txt
+
+          echo ""
+          echo "📈 Coverage Summary:"
+          tail -n 1 coverage.txt
+
+      - name: Generate coverage report
+        working-directory: desktop/backend-go
+        run: |
+          echo "## 📊 Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 1 coverage.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          # Show coverage by package
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Coverage by Package" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          grep -E '^(github\.com|total)' coverage.txt | tail -20 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Check coverage threshold
+        working-directory: desktop/backend-go
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+          THRESHOLD=40.0
+
+          echo "📊 Coverage: $COVERAGE%"
+          echo "🎯 Threshold: $THRESHOLD%"
+
+          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "::warning::Coverage $COVERAGE% is below threshold $THRESHOLD%"
+          else
+            echo "Coverage $COVERAGE% meets threshold $THRESHOLD%"
+          fi
+
+      - name: Upload coverage to Codecov (optional)
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          file: desktop/backend-go/coverage.out
+          flags: backend
+          fail_ci_if_error: false

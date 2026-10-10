@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "site/**"
+      - "apps/docs/**"
+      - "skills/**"
+      - "deploy/**"
+      - "extensions/**"
+      - "sdks/**"
+      - "desktop/**"
+      - ".gitignore"
+      - "LICENSE"
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "site/**"
+      - "apps/docs/**"
+      - "skills/**"
+      - "deploy/**"
+      - "extensions/**"
+      - "sdks/**"
+      - "desktop/**"
+
+# Cancel any in-progress CI run for the same branch when a new push lands.
+# Saves Actions minutes on rapid-fire commits.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  test:
+    name: test (Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          # Single supported version pair — matches the project's documented
+          # requirement (`mix.exs` → elixir: "~> 1.17"). Halves minute usage
+          # vs the previous 2-version matrix. Add OTP 27 here later once the
+          # project officially supports it.
+          - otp: "26.2"
+            elixir: "1.17.3"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Erlang/OTP and Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+
+      - name: Install native build dependencies
+        run: sudo apt-get update && sudo apt-get install --yes libsnappy-dev
+
+      - name: Cache deps and _build
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ matrix.otp }}-${{ matrix.elixir }}-
+
+      - name: Install deps
+        run: mix deps.get
+
+      - name: Compile
+        run: mix compile
+
+      - name: Check formatting
+        run: mix format --check-formatted
+
+      - name: Run tests
+        run: mix test
+        env:
+          MIX_ENV: test

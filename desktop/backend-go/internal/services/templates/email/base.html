@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="color-scheme" content="dark">
+    <meta name="supported-color-schemes" content="dark">
+    <title>{{.Subject}}</title>
+    <!--[if mso]>
+    <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+    <![endif]-->
+    <style type="text/css">
+        /* Reference: Resend + Warp design systems (Refero) — pure-black canvas,
+           hairline borders, no shadows, mono labels, single high-contrast CTA. */
+        body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        :root { color-scheme: dark; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            color: #a1a4a5;
+            background-color: #000000;
+            margin: 0; padding: 0; width: 100% !important; min-width: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+        .mono { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', 'JetBrains Mono', Menlo, Consolas, monospace; }
+        .canvas { background-color: #000000; }
+        .wrapper { width: 100%; max-width: 532px; margin: 0 auto; padding: 48px 24px; }
+
+        /* Header — chrome sphere mark + BUSINESSOS wordmark, centered */
+        .header { text-align: center; padding: 0 2px 26px 2px; }
+        .brand-mark { display: inline-block; width: 50px; height: 50px; border-radius: 13px; }
+        .brand-word { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, monospace; font-size: 14px; font-weight: 700; letter-spacing: 0.20em; color: #f0f0f0; text-decoration: none; }
+        .brand-suffix { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, monospace; font-size: 12px; font-weight: 400; letter-spacing: 0.14em; color: #6c6c6c; }
+
+        /* Card — hairline on black, no shadow */
+        .card { background: #000000; border-radius: 16px; padding: 40px 36px; border: 1px solid #292d30; }
+
+        /* Eyebrow — mono, sage accent, wide tracking (Warp) */
+        .eyebrow { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: #799c92; margin: 0 0 16px 0; }
+
+        /* Typography */
+        h1 { color: #ffffff; font-size: 26px; font-weight: 600; margin: 0 0 16px 0; line-height: 1.2; letter-spacing: -0.5px; }
+        h2 { color: #f0f0f0; font-size: 19px; font-weight: 600; margin: 0 0 12px 0; letter-spacing: -0.3px; }
+        h3 { color: #f0f0f0; font-size: 15px; font-weight: 600; margin: 0 0 8px 0; }
+        p { color: #a1a4a5; font-size: 15px; margin: 0 0 16px 0; line-height: 1.62; }
+        .text-muted { color: #6c6c6c; }
+        .text-small { font-size: 13px; }
+        .text-xs { font-size: 12px; }
+        .text-center { text-align: center; }
+        .text-primary, .accent { color: #ffffff; font-weight: 600; }
+        strong { color: #f0f0f0; font-weight: 600; }
+        a { color: #f0f0f0; }
+
+        /* Button — single high-contrast white CTA (Resend/Warp) */
+        .button-wrapper { text-align: center; margin: 32px 0; }
+        .button { display: inline-block; background: #ffffff; color: #000000 !important; padding: 13px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; line-height: 1; letter-spacing: -0.1px; }
+        .button-secondary { background: transparent; color: #f0f0f0 !important; border: 1px solid #3a3f43; }
+        .button-success { background: #3ad389; color: #00150c !important; }
+        .button-danger { background: #ff9592; color: #1a0606 !important; }
+
+        /* Info Box — hairline, near-black */
+        .info-box { background: #08090b; border: 1px solid #292d30; border-radius: 12px; padding: 16px 18px; margin: 22px 0; }
+        .info-box p { margin: 0; color: #a1a4a5; }
+        .info-box.warning { border-color: #5c4a16; } .info-box.warning p { color: #ffca16; }
+        .info-box.danger { border-color: #5c2a29; } .info-box.danger p { color: #ff9592; }
+        .info-box.success { border-color: #1f5c43; } .info-box.success p { color: #3ad389; }
+        .info-box.accent, .info-box.purple { border-color: #292d30; } .info-box.accent p, .info-box.purple p { color: #a1a4a5; }
+
+        /* Code / verification box — mono */
+        .code-box { background: #08090b; color: #ffffff; font-family: 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, monospace; font-size: 30px; font-weight: 600; letter-spacing: 10px; padding: 22px; border-radius: 12px; text-align: center; margin: 22px 0; border: 1px solid #292d30; }
+        .code-label { font-family: 'SF Mono', ui-monospace, Menlo, monospace; text-align: center; color: #6c6c6c; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+
+        /* Badge */
+        .badge { display: inline-block; padding: 4px 11px; border-radius: 6px; font-size: 12px; font-weight: 500; font-family: 'SF Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.03em; }
+        .badge-default { background: transparent; border: 1px solid #292d30; color: #a1a4a5; }
+        .badge-accent { background: transparent; border: 1px solid #3a3f43; color: #f0f0f0; }
+        .badge-success { background: transparent; border: 1px solid #1f5c43; color: #3ad389; }
+        .badge-warning { background: transparent; border: 1px solid #5c4a16; color: #ffca16; }
+        .badge-danger { background: transparent; border: 1px solid #5c2a29; color: #ff9592; }
+
+        /* Link fallback */
+        .link-fallback { margin-top: 26px; padding-top: 20px; border-top: 1px solid #292d30; }
+        .link-fallback p { color: #6c6c6c; font-size: 12px; margin: 0 0 6px 0; }
+        .link-fallback a { color: #a1a4a5; word-break: break-all; font-size: 12px; font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+
+        /* Details */
+        .details-list { margin: 20px 0; }
+        .details-list dt { color: #6c6c6c; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 14px; font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+        .details-list dt:first-child { margin-top: 0; }
+        .details-list dd { color: #f0f0f0; margin: 5px 0 0 0; font-size: 14px; }
+
+        /* Step */
+        .step-number { width: 26px; height: 26px; background: #08090b; border: 1px solid #292d30; color: #f0f0f0; border-radius: 50%; display: inline-block; text-align: center; line-height: 26px; font-weight: 600; font-size: 12px; font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+
+        /* Divider */
+        .divider { border: none; border-top: 1px solid #292d30; margin: 26px 0; }
+
+        /* Highlight */
+        .highlight, .highlight-box { background: #08090b; border: 1px solid #292d30; padding: 22px; border-radius: 12px; margin: 22px 0; text-align: center; }
+        .highlight h3, .highlight-box h3 { color: #ffffff; margin: 0; }
+        .highlight p, .highlight-box p { color: #a1a4a5; margin: 6px 0 0 0; font-size: 13px; }
+
+        /* Avatar */
+        .avatar { width: 38px; height: 38px; border-radius: 50%; background: #08090b; border: 1px solid #292d30; color: #f0f0f0; display: inline-block; text-align: center; line-height: 38px; font-weight: 600; font-size: 14px; font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 28px 20px 0; }
+        .footer p { color: #6c6c6c; font-size: 12px; margin: 4px 0; }
+        .footer a { color: #a1a4a5; text-decoration: none; }
+        .footer a:hover { color: #ffffff; }
+        .footer-links { margin: 14px 0; }
+        .footer-links a { margin: 0 10px; font-size: 12px; }
+        .footer-divider { border: none; border-top: 1px solid #292d30; margin: 22px 0; }
+        .footer-brand { font-family: 'SF Mono', ui-monospace, 'Cascadia Code', Menlo, monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.18em; color: #6c6c6c; margin-bottom: 2px; }
+
+        @media only screen and (max-width: 600px) {
+            .wrapper { padding: 30px 14px; }
+            .card { padding: 30px 22px; }
+            h1 { font-size: 23px; }
+            .button { padding: 13px 26px; }
+            .code-box { font-size: 26px; letter-spacing: 6px; }
+        }
+    </style>
+</head>
+<body>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" class="canvas" bgcolor="#000000">
+        <tr>
+            <td align="center" bgcolor="#000000">
+                <div class="wrapper">
+                    <div class="header">
+                        <a href="{{.AppURL}}" style="text-decoration:none;">
+                            <img src="https://storage.googleapis.com/businessos-downloads/email-icon.png" width="50" height="50" alt="BusinessOS" class="brand-mark" style="border-radius:13px;" />
+                            <div style="margin-top:11px;">
+                                <span class="brand-word">BUSINESS<span class="brand-suffix">OS</span></span>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="card">
+                        {{template "content" .}}
+                    </div>
+
+                    <div class="footer">
+                        {{template "footer" .}}
+                        <hr class="footer-divider">
+                        <p class="footer-brand">BUSINESSOS</p>
+                        <div class="footer-links">
+                            <a href="{{.AppURL}}/settings">Preferences</a>
+                            <a href="{{.AppURL}}/help">Help</a>
+                            <a href="{{.AppURL}}/privacy">Privacy</a>
+                        </div>
+                        <p>© {{.Year}} BusinessOS. All rights reserved.</p>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

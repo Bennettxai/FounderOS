@@ -1,0 +1,28 @@
+{
+  "name": "Projects",
+  "version": "1.0.0",
+  "description": "Project management — projects, tasks, and team members",
+  "category": "productivity",
+  "actions": [
+    { "name": "create_project", "type": "api_call", "description": "Create a new project" },
+    { "name": "list_projects", "type": "api_call", "description": "List all projects in workspace" },
+    { "name": "create_task", "type": "api_call", "description": "Create a task within a project" },
+    { "name": "list_tasks", "type": "api_call", "description": "List tasks with status filter" },
+    { "name": "assign_task", "type": "api_call", "description": "Assign a task to a member" },
+    { "name": "update_task_status", "type": "api_call", "description": "Move task between statuses" },
+    { "name": "add_member", "type": "api_call", "description": "Add a member to a project" }
+  ],
+  "protected_schemas": ["projects", "project_tasks", "project_members"],
+  "protected_routes": ["api/projects/*"],
+  "protected_operations": ["projects.delete_all"],
+  "migration_up": "CREATE TABLE IF NOT EXISTS projects (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), workspace_id UUID NOT NULL, name VARCHAR(255) NOT NULL, description TEXT, status VARCHAR(50) DEFAULT 'active', created_by UUID, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()); CREATE TABLE IF NOT EXISTS project_tasks (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE, title VARCHAR(255) NOT NULL, description TEXT, status VARCHAR(50) DEFAULT 'todo', priority VARCHAR(20) DEFAULT 'medium', assigned_to UUID, due_date DATE, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()); CREATE TABLE IF NOT EXISTS project_members (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE, user_id UUID NOT NULL, role VARCHAR(50) DEFAULT 'member', joined_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(project_id, user_id));",
+  "migration_down": "DROP TABLE IF EXISTS project_members CASCADE; DROP TABLE IF EXISTS project_tasks CASCADE; DROP TABLE IF EXISTS projects CASCADE;",
+  "routes": [
+    { "method": "GET", "path": "/api/projects", "handler": "ListProjects" },
+    { "method": "POST", "path": "/api/projects", "handler": "CreateProject" },
+    { "method": "GET", "path": "/api/projects/:id/tasks", "handler": "ListTasks" },
+    { "method": "POST", "path": "/api/projects/:id/tasks", "handler": "CreateTask" },
+    { "method": "PUT", "path": "/api/projects/:id/tasks/:taskId", "handler": "UpdateTask" },
+    { "method": "POST", "path": "/api/projects/:id/members", "handler": "AddMember" }
+  ]
+}

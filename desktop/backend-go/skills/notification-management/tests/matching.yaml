@@ -1,0 +1,43 @@
+# Skill Matching Tests
+
+skill: notification-management
+
+should_match:
+  # Mute/unmute
+  - "mute notifications"
+  - "turn off notifications"
+  - "silence alerts"
+  - "unmute everything"
+  - "turn notifications back on"
+  
+  # Quiet hours
+  - "set quiet hours"
+  - "do not disturb from 6pm"
+  - "no notifications after 10pm"
+  
+  # Preferences
+  - "notification settings"
+  - "change my notification preferences"
+  - "only important notifications"
+  - "turn off email notifications"
+  
+  # Project-specific
+  - "mute the Marketing project"
+  - "stop notifications for Alpha"
+  
+  # Snooze
+  - "snooze notifications for an hour"
+  - "pause alerts"
+
+should_not_match:
+  # Viewing notifications (UI action)
+  - "show my notifications"
+  - "what notifications do I have"
+  
+  # Task reminders
+  - "remind me about this task"
+  - "set a reminder"
+  
+  # Mentions
+  - "mention Sarah"
+  - "@john"

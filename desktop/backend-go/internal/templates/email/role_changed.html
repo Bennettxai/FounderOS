@@ -1,0 +1,33 @@
+{{define "content"}}
+<h1>Your role has been updated</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p>Your role in <strong class="text-primary">{{.WorkspaceName}}</strong> has been updated by {{.ChangedBy}}.</p>
+
+<div class="info-box">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td style="padding: 8px; text-align: center; width: 45%;">
+                <p class="text-muted text-small" style="margin: 0 0 4px 0;">Previous Role</p>
+                <p style="margin: 0; text-decoration: line-through; color: #9ca3af;">{{.OldRole}}</p>
+            </td>
+            <td style="padding: 8px; text-align: center; width: 10%;">
+                <span style="font-size: 20px;">→</span>
+            </td>
+            <td style="padding: 8px; text-align: center; width: 45%;">
+                <p class="text-muted text-small" style="margin: 0 0 4px 0;">New Role</p>
+                <p style="margin: 0; font-weight: 600; color: #10b981;">{{.NewRole}}</p>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.WorkspaceLink}}" class="button">Go to {{.WorkspaceName}}</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>If you have questions about this change, please contact your workspace admin.</p>
+{{end}}

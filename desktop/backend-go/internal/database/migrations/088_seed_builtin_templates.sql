@@ -1,0 +1,98 @@
+-- Migration 088: Seed Built-in App Templates
+-- Inserts the 5 default templates: SaaS Dashboard, API Backend, Landing Page, CRM Module, Task Manager
+
+INSERT INTO app_templates (template_name, category, display_name, description, icon_type, target_business_types, target_challenges, target_team_sizes, priority_score, template_config, required_modules, optional_features, generation_prompt, scaffold_type)
+VALUES
+(
+    'saas_dashboard',
+    'operations',
+    'SaaS Dashboard',
+    'Full-featured SaaS dashboard with charts, user management, and analytics. Includes stats cards, revenue charts, activity feed, and user table.',
+    'chart',
+    ARRAY['saas', 'startup', 'enterprise'],
+    ARRAY['analytics', 'user_management', 'reporting'],
+    ARRAY['small', 'medium', 'large'],
+    90,
+    '{"stack": "svelte", "features": ["charts", "user_table", "activity_feed", "stats_cards"]}'::jsonb,
+    ARRAY['dashboard', 'analytics'],
+    ARRAY['dark_mode', 'export_reports', 'real_time_updates'],
+    'Generate a SaaS dashboard with revenue charts, user management table, activity feed, and stats overview cards.',
+    'svelte'
+),
+(
+    'api_backend',
+    'operations',
+    'API Backend',
+    'Go REST API with CRUD operations, authentication, middleware, and graceful shutdown. Ready for production deployment with Docker.',
+    'server',
+    ARRAY['saas', 'startup', 'enterprise', 'agency'],
+    ARRAY['api_development', 'backend_architecture', 'scalability'],
+    ARRAY['solo', 'small', 'medium', 'large'],
+    85,
+    '{"stack": "go", "features": ["crud", "auth", "middleware", "docker"]}'::jsonb,
+    ARRAY['api', 'database'],
+    ARRAY['rate_limiting', 'swagger_docs', 'websockets'],
+    'Generate a Go REST API backend with CRUD endpoints, authentication middleware, structured logging, and Docker deployment.',
+    'go'
+),
+(
+    'landing_page',
+    'marketing',
+    'Landing Page',
+    'Modern landing page with hero section, features grid, pricing table, contact form, and footer. Fully responsive and conversion-optimized.',
+    'globe',
+    ARRAY['startup', 'saas', 'ecommerce', 'agency', 'consulting'],
+    ARRAY['marketing', 'lead_generation', 'brand_awareness'],
+    ARRAY['solo', 'small', 'medium'],
+    80,
+    '{"stack": "svelte", "features": ["hero", "features", "pricing", "contact_form", "footer"]}'::jsonb,
+    ARRAY['marketing'],
+    ARRAY['animations', 'testimonials', 'blog_section'],
+    'Generate a modern landing page with hero, features, pricing, contact form, and footer sections.',
+    'svelte'
+),
+(
+    'crm_module',
+    'crm',
+    'CRM Module',
+    'Contact and deal management with pipeline view, activity tracking, and sales reporting. Kanban-style deal pipeline with drag and drop.',
+    'users',
+    ARRAY['small_business', 'agency', 'consulting', 'enterprise'],
+    ARRAY['sales_management', 'client_relationships', 'pipeline_tracking'],
+    ARRAY['small', 'medium', 'large'],
+    85,
+    '{"stack": "svelte", "features": ["pipeline", "contacts", "deals", "stats"]}'::jsonb,
+    ARRAY['crm', 'contacts'],
+    ARRAY['email_integration', 'call_logging', 'forecasting'],
+    'Generate a CRM module with deal pipeline, contact management, and sales statistics.',
+    'svelte'
+),
+(
+    'task_manager',
+    'project_management',
+    'Task Manager',
+    'Kanban-style task board with columns, labels, due dates, priority levels, and team assignment. Perfect for agile project management.',
+    'kanban',
+    ARRAY['startup', 'saas', 'agency', 'small_business'],
+    ARRAY['project_management', 'team_coordination', 'task_tracking'],
+    ARRAY['solo', 'small', 'medium'],
+    80,
+    '{"stack": "svelte", "features": ["kanban", "labels", "due_dates", "assignments", "priorities"]}'::jsonb,
+    ARRAY['project_management', 'tasks'],
+    ARRAY['subtasks', 'time_tracking', 'recurring_tasks'],
+    'Generate a Kanban-style task manager with configurable columns, labels, priorities, and team assignment.',
+    'svelte'
+)
+ON CONFLICT (template_name) DO UPDATE SET
+    display_name = EXCLUDED.display_name,
+    description = EXCLUDED.description,
+    target_business_types = EXCLUDED.target_business_types,
+    target_challenges = EXCLUDED.target_challenges,
+    target_team_sizes = EXCLUDED.target_team_sizes,
+    priority_score = EXCLUDED.priority_score,
+    template_config = EXCLUDED.template_config,
+    required_modules = EXCLUDED.required_modules,
+    optional_features = EXCLUDED.optional_features,
+    generation_prompt = EXCLUDED.generation_prompt,
+    scaffold_type = EXCLUDED.scaffold_type,
+    updated_at = NOW();

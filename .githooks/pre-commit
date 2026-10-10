@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Schema drift guard (pre-commit). Enable once with:
+#     git config core.hooksPath .githooks
+#
+# When schema.sql is part of the commit, verify it still builds clean from empty
+# AND re-applies idempotently (scripts/check-schema.sh). This is what stops the
+# three drift classes that broke the module pages from ever being committed again
+# (missing tables/columns, statement-ordering bugs, un-folded migrations).
+#
+# It only runs when schema.sql is staged AND Postgres is reachable, so it never
+# blocks an unrelated commit or a commit made while the DB is down.
+set -euo pipefail
+
+SCHEMA_PATH="desktop/backend-go/internal/database/schema.sql"
+
+# Only care when the schema is actually part of this commit.
+if ! git diff --cached --name-only | grep -qx "$SCHEMA_PATH"; then
+  exit 0
+fi
+
+REPO="$(git rev-parse --show-toplevel)"
+PGHOST="${PGHOST:-localhost}"; PGPORT="${PGPORT:-25432}"; PGUSER="${PGUSER:-postgres}"
+
+# Locate psql (toolchain first, then PATH) just to probe reachability.
+TC="$HOME/.local-toolchain"; PGBIN="$(cat "$TC/.pgbin" 2>/dev/null || true)"
+if [ -n "$PGBIN" ] && [ -x "$PGBIN/pg_isready" ]; then
+  export DYLD_LIBRARY_PATH="$(dirname "$PGBIN")/lib:${DYLD_LIBRARY_PATH:-}"
+  READY="$PGBIN/pg_isready"
+else
+  READY="pg_isready"
+fi
+
+if ! command -v "$READY" >/dev/null 2>&1 && [ ! -x "$READY" ]; then
+  echo "⚠ pre-commit: no pg_isready found — skipping schema drift check"; exit 0
+fi
+if ! "$READY" -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" >/dev/null 2>&1; then
+  echo "⚠ pre-commit: Postgres not reachable on $PGHOST:$PGPORT — skipping schema drift check"
+  echo "  (run 'make check-schema' manually before pushing)"
+  exit 0
+fi
+
+echo "→ pre-commit: schema.sql changed — running drift guard"
+if ! "$REPO/scripts/check-schema.sh"; then
+  echo ""
+  echo "✗ commit blocked: schema.sql failed the drift guard. Fix it or run"
+  echo "  'make check-schema' to see the error. To bypass (not recommended):"
+  echo "  git commit --no-verify"
+  exit 1
+fi

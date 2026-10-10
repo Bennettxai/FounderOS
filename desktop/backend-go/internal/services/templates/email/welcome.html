@@ -1,0 +1,61 @@
+{{define "content"}}
+<p class="eyebrow">Welcome aboard</p>
+<h1>Your workspace is ready, {{.UserName}}.</h1>
+
+<p>Thanks for joining BusinessOS. <strong class="text-primary">{{.WorkspaceName}}</strong> is set up and ready &mdash; here's how to get the most out of it.</p>
+
+{{if .BusinessType}}
+<div class="info-box accent">
+    <p>Tuned for <strong>{{.BusinessType}}</strong> &mdash; your workspace is pre-configured for how you work.</p>
+</div>
+{{end}}
+
+<div style="margin: 30px 0 24px 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr><td style="padding: 11px 0;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr>
+                <td width="38" valign="top"><span class="step-number">1</span></td>
+                <td style="padding-left: 6px;">
+                    <h4 style="margin:0 0 2px 0; color:#fafafa; font-size:14px; font-weight:600;">Create your first project</h4>
+                    <p style="margin:0; font-size:13px; color:rgba(255,255,255,0.42);">Organize work into focused projects</p>
+                </td>
+            </tr></table>
+        </td></tr>
+        <tr><td style="padding: 11px 0;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr>
+                <td width="38" valign="top"><span class="step-number">2</span></td>
+                <td style="padding-left: 6px;">
+                    <h4 style="margin:0 0 2px 0; color:#fafafa; font-size:14px; font-weight:600;">Invite your team</h4>
+                    <p style="margin:0; font-size:13px; color:rgba(255,255,255,0.42);">Share the workspace and work together</p>
+                </td>
+            </tr></table>
+        </td></tr>
+        <tr><td style="padding: 11px 0;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr>
+                <td width="38" valign="top"><span class="step-number">3</span></td>
+                <td style="padding-left: 6px;">
+                    <h4 style="margin:0 0 2px 0; color:#fafafa; font-size:14px; font-weight:600;">Connect your Optimal Engine</h4>
+                    <p style="margin:0; font-size:13px; color:rgba(255,255,255,0.42);">Wire up the shared brain in Settings</p>
+                </td>
+            </tr></table>
+        </td></tr>
+        <tr><td style="padding: 11px 0;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr>
+                <td width="38" valign="top"><span class="step-number">4</span></td>
+                <td style="padding-left: 6px;">
+                    <h4 style="margin:0 0 2px 0; color:#fafafa; font-size:14px; font-weight:600;">Put the AI to work</h4>
+                    <p style="margin:0; font-size:13px; color:rgba(255,255,255,0.42);">Let agents handle the busywork</p>
+                </td>
+            </tr></table>
+        </td></tr>
+    </table>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.GettingStartedURL}}" class="button">Open BusinessOS</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>Questions? Reply to this email or visit the <a href="{{.HelpCenterURL}}">Help Center</a>.</p>
+{{end}}

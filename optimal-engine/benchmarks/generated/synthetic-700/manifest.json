@@ -1,0 +1,18 @@
+{
+  "name": "synthetic-700",
+  "workspace": "bench-synthetic-700",
+  "conversations": 35,
+  "questions": 700,
+  "questions_per_conversation": 20,
+  "filler_tokens_per_conversation": 0,
+  "approx_total_filler_tokens": 0,
+  "corpus": "corpus.jsonl",
+  "questions_file": "questions.jsonl",
+  "categories": [
+    "decision",
+    "numeric",
+    "open-question",
+    "owner",
+    "why"
+  ]
+}

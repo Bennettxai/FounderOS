@@ -1,0 +1,32 @@
+{{define "content"}}
+<h1 class="text-center">Verify your email address</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p>Welcome to OSA! To get started, please verify your email address by clicking the button below:</p>
+
+<div class="button-wrapper">
+    <a href="{{.VerificationLink}}" class="button">Verify Email Address</a>
+</div>
+
+{{if .VerificationCode}}
+<p class="text-center text-muted">Or enter this verification code:</p>
+
+<div class="code-box">{{.VerificationCode}}</div>
+{{end}}
+
+<div class="info-box">
+    <p class="text-small text-muted" style="margin: 0;">
+        ⏰ This link expires in <strong>{{.ExpiresIn}}</strong>.
+    </p>
+</div>
+
+<div class="link-fallback">
+    <p>If the button doesn't work, copy and paste this link into your browser:</p>
+    <a href="{{.VerificationLink}}">{{.VerificationLink}}</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>If you didn't create an account with OSA, you can safely ignore this email.</p>
+{{end}}

@@ -1,0 +1,17 @@
+.git
+.DS_Store
+**/node_modules
+**/.svelte-kit
+**/build
+**/dist
+**/coverage
+**/.env
+**/.env.*
+**/*.log
+optimal-engine/_build
+optimal-engine/deps
+optimal-engine/.elixir_ls
+desktop/backend-go/tmp
+desktop/backend-go/bin
+frontend/playwright-report
+frontend/.playwright

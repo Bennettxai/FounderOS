@@ -1,0 +1,39 @@
+# Where each FounderOS workspace's memory lives. One workspace, one home engine.
+# Enforced by desktop/backend-go/internal/founderos/topology.
+#
+# A fresh install runs everything on the Optimal Engine that BusinessOS bundles
+# (OPTIMAL_ENGINE_URL in desktop/backend-go/.env). To split a workspace onto
+# another engine later (a shared hub, a cloud engine), add the engine below and
+# change that workspace's home.
+version: 1
+
+engines:
+  local:
+    tier: device
+    url_env: OPTIMAL_ENGINE_URL
+    key_env: OPTIMAL_ENGINE_API_KEY
+    note: The bundled Optimal Engine started by scripts/dev-local.sh (:4200 by default).
+
+workspaces:
+  - {slug: founderos, name: HQ, home: local, class: business, holds: "HQ: the command center across every venture; tools, agents, skills, general SOPs"}
+  - {slug: vantage, name: Vantage, home: local, class: business, holds: "Vantage agency: clients, calls, proposals, delivery"}
+  - {slug: launchpad-cohort, name: Launchpad Cohort, home: local, class: business, holds: "Launchpad Cohort mentorship: students, curriculum, community"}
+  - {slug: personal, name: Personal, home: local, class: personal, holds: "personal notes, content drafts and chat transcripts"}
+
+# Brain-store import routing, by top-level folder. Root pages and any folder
+# not listed go to the default.
+brain_store:
+  default: founderos
+  routes:
+    vantage: vantage
+    launchpad-cohort: launchpad-cohort
+    conversations: personal
+    memories: personal
+
+# meetings/ pages: first matching rule wins, else the folder route above.
+meeting_rules:
+  - {field: title, contains: launchpad, workspace: launchpad-cohort}
+  - {field: title, contains: vantage, workspace: vantage}
+  - {field: participants, contains: "@vantage.example", workspace: vantage}
+
+retired: {}

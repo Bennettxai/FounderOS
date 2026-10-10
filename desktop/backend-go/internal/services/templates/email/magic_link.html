@@ -1,0 +1,16 @@
+{{define "content"}}
+<p class="eyebrow">Sign in</p>
+<h1>Your sign-in link</h1>
+<p>Hi <strong>{{.UserName}}</strong>, click below to sign in to BusinessOS. No password needed.</p>
+<div class="button-wrapper">
+    <a href="{{.MagicLink}}" class="button">Sign in to BusinessOS</a>
+</div>
+<div class="info-box"><p>This link expires in {{.ExpiresIn}} and can only be used once.</p></div>
+<div class="link-fallback">
+    <p>Button not working? Paste this link into your browser:</p>
+    <a href="{{.MagicLink}}">{{.MagicLink}}</a>
+</div>
+{{end}}
+{{define "footer"}}
+<p>Didn't request this link? You can safely ignore this email.</p>
+{{end}}

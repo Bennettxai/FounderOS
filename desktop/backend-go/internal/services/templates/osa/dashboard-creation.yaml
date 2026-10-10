@@ -1,0 +1,208 @@
+name: "dashboard-creation"
+display_name: "Analytics Dashboard Creation"
+description: "Generate interactive analytics dashboards with charts and KPIs"
+category: "data-visualization"
+version: "1.0.0"
+tags:
+  - "dashboard"
+  - "analytics"
+  - "charts"
+  - "kpi"
+
+variables:
+  - name: "DashboardPurpose"
+    type: "string"
+    required: true
+    description: "Purpose of the dashboard (e.g., 'Sales Performance', 'User Analytics')"
+
+  - name: "DataSources"
+    type: "array"
+    required: true
+    description: "List of data sources to connect (databases, APIs, etc.)"
+
+  - name: "KPIs"
+    type: "array"
+    required: true
+    description: "Key Performance Indicators to display"
+
+  - name: "ChartTypes"
+    type: "array"
+    required: false
+    default: ["line", "bar", "pie"]
+    description: "Types of charts to include"
+
+  - name: "RefreshInterval"
+    type: "string"
+    required: false
+    default: "5 minutes"
+    description: "Data refresh interval (realtime, 1 minute, 5 minutes, hourly)"
+
+  - name: "UserRoles"
+    type: "array"
+    required: false
+    default: []
+    description: "User roles with different access levels"
+
+template: |
+  # Analytics Dashboard Generation
+
+  You are creating an analytics dashboard for **{{.DashboardPurpose}}**.
+
+  ## Dashboard Configuration
+
+  - **Purpose**: {{.DashboardPurpose}}
+  - **Refresh Interval**: {{.RefreshInterval}}
+  - **Target User Roles**: {{if .UserRoles}}{{range .UserRoles}}{{.}}, {{end}}{{else}}All users{{end}}
+
+  ## Data Sources
+
+  Connect to the following data sources:
+  {{- range .DataSources}}
+  - **{{.Name}}** ({{.Type}}): {{.Description}}
+  {{- end}}
+
+  ## Key Performance Indicators (KPIs)
+
+  Display the following KPIs prominently:
+  {{- range .KPIs}}
+  - **{{.Name}}**: {{.Description}} ({{.Format}})
+  {{- end}}
+
+  ## Chart Types
+
+  Include the following visualizations:
+  {{- range .ChartTypes}}
+  - {{.}}
+  {{- end}}
+
+  ## Implementation Requirements
+
+  ### 1. Backend Data API (Go + Gin)
+
+  - **Endpoints**:
+    - `GET /api/dashboard/kpis` - Fetch all KPI values
+    - `GET /api/dashboard/charts/:chartId` - Fetch chart data
+    - `GET /api/dashboard/filters` - Get available filter options
+    - `POST /api/dashboard/export` - Export dashboard as PDF/Excel
+
+  - **Data Aggregation**:
+    - Query optimization (indexes, materialized views)
+    - Caching layer (Redis) for frequently accessed data
+    - Pre-computed aggregations for heavy queries
+
+  - **Real-time Updates** (if RefreshInterval < 5 minutes):
+    - Server-Sent Events (SSE) for live data push
+    - WebSocket connection for bi-directional updates
+    - Efficient differential updates (send only changed data)
+
+  ### 2. Frontend Dashboard (SvelteKit + TypeScript)
+
+  - **Layout**:
+    - Grid-based responsive layout (adjusts to screen size)
+    - KPI cards at the top (big numbers with trend indicators)
+    - Charts in rows/columns below
+    - Sidebar for filters and date range selection
+
+  - **Chart Library**:
+    - Use Chart.js or Apache ECharts for interactive charts
+    - Support drill-down (click chart to see details)
+    - Export individual charts as PNG/SVG
+
+  - **Interactivity**:
+    - Date range picker (last 7 days, 30 days, custom range)
+    - Filters (dropdowns, multi-select) for segmentation
+    - Search functionality for specific data points
+    - Tooltips with detailed information on hover
+
+  - **Performance**:
+    - Lazy loading for charts (load as user scrolls)
+    - Virtual scrolling for large datasets
+    - Debounced filter updates (avoid excessive API calls)
+
+  ### 3. Data Processing Layer
+
+  - **Aggregation Queries**:
+    - Use PostgreSQL window functions for running totals
+    - CTEs (Common Table Expressions) for complex queries
+    - Efficient GROUP BY with appropriate indexes
+
+  - **Caching Strategy**:
+    {{- if eq .RefreshInterval "realtime"}}
+    - Minimal caching (data changes frequently)
+    - Use short TTL (10-30 seconds)
+    {{- else}}
+    - Cache aggregated results in Redis (TTL: {{.RefreshInterval}})
+    - Invalidate cache on data updates
+    {{- end}}
+
+  ### 4. Access Control
+
+  {{- if .UserRoles}}
+  Implement role-based access:
+  {{- range .UserRoles}}
+  - **{{.Role}}**: {{.Permissions}}
+  {{- end}}
+
+  Use middleware to check permissions before serving dashboard data.
+  {{- else}}
+  - Dashboard accessible to all authenticated users
+  - No role-based restrictions
+  {{- end}}
+
+  ### 5. Export Functionality
+
+  - **PDF Export**:
+    - Server-side rendering of charts (headless browser)
+    - Include all KPIs and charts in PDF
+    - Add timestamp and user info
+
+  - **Excel Export**:
+    - Export raw data behind charts
+    - Multiple sheets for different data views
+    - Formatted tables with headers
+
+  ### 6. Testing
+
+  - **Unit Tests**:
+    - Test aggregation logic
+    - Test filter combinations
+    - Test date range calculations
+
+  - **Integration Tests**:
+    - Test API endpoint contracts and persisted fixtures
+    - Verify caching behavior
+    - Test export generation
+
+  - **E2E Tests**:
+    - Load dashboard and verify all charts render
+    - Test filter interactions
+    - Test export downloads
+
+  ## Technical Constraints
+
+  **BACKEND:**
+  - Use `slog` for logging (NO `fmt.Printf`)
+  - Context propagation (context as first parameter)
+  - Error handling with wrapped errors
+  - Database queries via sqlc
+  - No `panic` in production code
+
+  **FRONTEND:**
+  - Responsive design (mobile-first)
+  - Dark mode support
+  - Accessibility (ARIA labels, keyboard navigation)
+  - Loading states and error boundaries
+
+  ## Success Criteria
+
+  - ✅ Dashboard loads in <2 seconds
+  - ✅ All KPIs display correctly
+  - ✅ Charts are interactive and responsive
+  - ✅ Filters work correctly and update charts
+  - ✅ Export functionality works (PDF & Excel)
+  - ✅ Real-time updates work (if applicable)
+  - ✅ Tests pass with 80% coverage
+
+  ---
+
+  **Generate the complete dashboard implementation with backend API, frontend UI, and tests.**

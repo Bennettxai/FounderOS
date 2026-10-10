@@ -1,0 +1,11 @@
+{{define "content"}}
+<p class="eyebrow">Workspace update</p>
+<h1>You've been removed from {{.WorkspaceName}}</h1>
+<p>Hi <strong>{{.UserName}}</strong>, {{.RemovedBy}} removed you from the <strong>{{.WorkspaceName}}</strong> workspace.</p>
+{{if .Reason}}<div class="info-box"><p><strong>Reason:</strong> {{.Reason}}</p></div>{{end}}
+<p class="text-muted text-small">{{.RemovalTime}}</p>
+<p>You no longer have access to this workspace's data. If you think this was a mistake, reach out to the workspace admin.</p>
+{{end}}
+{{define "footer"}}
+<p>You can still access any other workspaces you belong to.</p>
+{{end}}

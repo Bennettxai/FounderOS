@@ -1,0 +1,1128 @@
+openapi: 3.0.3
+info:
+  title: BusinessOS API
+  description: |
+    AI-powered business operating system with multi-agent orchestration,
+    RAG-based context management, and real-time collaboration.
+  version: 1.0.0
+  contact:
+    name: BusinessOS Team
+    email: support@businessos.dev
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server
+  - url: https://api.businessos.dev
+    description: Production server
+
+security:
+  - BearerAuth: []
+  - SessionCookie: []
+
+tags:
+  - name: Auth
+    description: Authentication and session management
+  - name: Chat
+    description: Conversational AI with streaming responses
+  - name: Workspaces
+    description: Team collaboration and workspace management
+  - name: Projects
+    description: Project management with CRM integration
+  - name: OSA
+    description: AI agent orchestration and app generation
+  - name: Templates
+    description: App template gallery
+  - name: Integrations
+    description: Third-party service integrations
+  - name: Context
+    description: RAG context and memory management
+  - name: Notifications
+    description: Real-time notifications and push
+  - name: Settings
+    description: User preferences and configuration
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: JWT bearer token for API requests
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: better-auth.session_token
+      description: Session cookie set after login
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type: string
+          description: Additional error details
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        message_count:
+          type: integer
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversation_id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        owner_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        member_count:
+          type: integer
+
+    WorkspaceMember:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        workspace_id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [owner, admin, manager, member, guest]
+        joined_at:
+          type: string
+          format: date-time
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        workspace_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [planning, active, paused, completed, archived]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        start_date:
+          type: string
+          format: date
+        due_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+
+    OSAApp:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspace_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        display_name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, generating, build_in_progress, build_completed, build_failed, deployed]
+        osa_workflow_id:
+          type: string
+        deployment_url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+        generated_at:
+          type: string
+          format: date-time
+        deployed_at:
+          type: string
+          format: date-time
+
+    AppTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        display_name:
+          type: string
+        category:
+          type: string
+          enum: [productivity, crm, analytics, communication, custom]
+        description:
+          type: string
+        icon:
+          type: string
+        preview_image:
+          type: string
+          format: uri
+        tech_stack:
+          type: array
+          items:
+            type: string
+        features:
+          type: array
+          items:
+            type: string
+        estimated_build_time:
+          type: integer
+          description: Estimated build time in seconds
+
+    StreamEvent:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [token, thinking, thinking_start, thinking_end, artifact_start, artifact_complete, done, error]
+        content:
+          type: string
+        data:
+          type: object
+
+paths:
+  # ============================================================================
+  # AUTH ENDPOINTS
+  # ============================================================================
+  /auth/sign-up/email:
+    post:
+      tags:
+        - Auth
+      summary: Register with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                name:
+                  type: string
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/sign-in/email:
+    post:
+      tags:
+        - Auth
+      summary: Login with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: better-auth.session_token=abc123; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/google:
+    get:
+      tags:
+        - Auth
+      summary: Initiate Google OAuth login
+      security: []
+      responses:
+        '302':
+          description: Redirect to Google OAuth consent screen
+
+  /auth/session:
+    get:
+      tags:
+        - Auth
+      summary: Get current session
+      security: []
+      responses:
+        '200':
+          description: Current session details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  session:
+                    type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout current session
+      responses:
+        '200':
+          description: Logout successful
+
+  # ============================================================================
+  # CHAT ENDPOINTS
+  # ============================================================================
+  /chat/conversations:
+    get:
+      tags:
+        - Chat
+      summary: List user conversations
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
+                  total:
+                    type: integer
+
+    post:
+      tags:
+        - Chat
+      summary: Create new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                context_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+
+  /chat/v2/message:
+    post:
+      tags:
+        - Chat
+      summary: Send message with streaming response
+      description: |
+        Send a chat message and receive a streaming SSE response.
+        Supports Chain of Thought (COT), artifact generation, and workspace context.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: User message
+                conversation_id:
+                  type: string
+                  format: uuid
+                  description: Existing conversation ID (optional)
+                workspace_id:
+                  type: string
+                  format: uuid
+                  description: Workspace context for role-based permissions
+                context_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Context documents to include
+                project_id:
+                  type: string
+                  format: uuid
+                model:
+                  type: string
+                  example: llama-3.3-70b-versatile
+                use_cot:
+                  type: boolean
+                  description: Enable Chain of Thought multi-agent orchestration
+                focus_mode:
+                  type: string
+                  enum: [general, research, write, analyze, build]
+                temperature:
+                  type: number
+                  minimum: 0
+                  maximum: 2
+                  default: 0.7
+                max_tokens:
+                  type: integer
+                  default: 4096
+      responses:
+        '200':
+          description: SSE streaming response
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/event-stream
+            X-Conversation-Id:
+              schema:
+                type: string
+                format: uuid
+            X-Agent-Type:
+              schema:
+                type: string
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Server-Sent Events stream
+              example: |
+                event: token
+                data: {"type":"token","content":"Hello"}
+
+                event: thinking_start
+                data: {"type":"thinking_start","step":1}
+
+                event: token
+                data: {"type":"token","content":" there!"}
+
+                event: done
+                data: {"type":"done","data":{"total_tokens":15}}
+
+  # ============================================================================
+  # WORKSPACE ENDPOINTS
+  # ============================================================================
+  /workspaces:
+    get:
+      tags:
+        - Workspaces
+      summary: List user workspaces
+      responses:
+        '200':
+          description: List of workspaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workspace'
+
+    post:
+      tags:
+        - Workspaces
+      summary: Create new workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Workspace created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+
+  /workspaces/{id}:
+    get:
+      tags:
+        - Workspaces
+      summary: Get workspace details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Workspace details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Workspaces
+      summary: Update workspace (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Workspace updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    delete:
+      tags:
+        - Workspaces
+      summary: Delete workspace (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Workspace deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /workspaces/{id}/members:
+    get:
+      tags:
+        - Workspaces
+      summary: List workspace members
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceMember'
+
+  # ============================================================================
+  # OSA ENDPOINTS (AI Agent Orchestration)
+  # ============================================================================
+  /osa/generate:
+    post:
+      tags:
+        - OSA
+      summary: Generate application from natural language
+      description: |
+        Triggers the OSA-5 21-agent orchestration system to generate
+        a complete application from a natural language description.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+                - workspace_id
+              properties:
+                prompt:
+                  type: string
+                  description: Natural language app description
+                  example: Create a CRM dashboard with client tracking
+                workspace_id:
+                  type: string
+                  format: uuid
+                template_id:
+                  type: string
+                  format: uuid
+                  description: Optional template to use as base
+      responses:
+        '202':
+          description: Generation started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  app_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    example: generating
+                  message:
+                    type: string
+
+  /osa/generate/{app_id}/stream:
+    get:
+      tags:
+        - OSA
+      summary: Stream app generation progress (SSE)
+      description: |
+        Server-Sent Events endpoint for real-time build progress.
+        Use EventSource API in browser to consume events.
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: SSE stream of build events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example: |
+                event: build_started
+                data: {"app_id":"...","progress_percent":0}
+
+                event: progress
+                data: {"progress_percent":25,"status_message":"Analyzing requirements..."}
+
+                event: build_completed
+                data: {"app_id":"...","deployment_url":"https://..."}
+
+  /osa/apps:
+    get:
+      tags:
+        - OSA
+      summary: List generated apps
+      parameters:
+        - name: workspace_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, generating, build_completed, deployed]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of apps
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apps:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OSAApp'
+                  total_count:
+                    type: integer
+
+  /osa/apps/{id}:
+    get:
+      tags:
+        - OSA
+      summary: Get app details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: App details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OSAApp'
+
+    patch:
+      tags:
+        - OSA
+      summary: Update app metadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: App updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OSAApp'
+
+    delete:
+      tags:
+        - OSA
+      summary: Delete app
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: App deleted
+
+  /osa/apps/{id}/deploy:
+    post:
+      tags:
+        - OSA
+      summary: Deploy app to production
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deployment started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deployment_url:
+                    type: string
+                    format: uri
+
+  # ============================================================================
+  # APP TEMPLATES
+  # ============================================================================
+  /app-templates:
+    get:
+      tags:
+        - Templates
+      summary: List app templates
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [productivity, crm, analytics, communication, custom]
+      responses:
+        '200':
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppTemplate'
+
+  /app-templates/{id}:
+    get:
+      tags:
+        - Templates
+      summary: Get template details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppTemplate'
+
+  /app-templates/{id}/generate:
+    post:
+      tags:
+        - Templates
+      summary: Generate app from template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - workspace_id
+              properties:
+                workspace_id:
+                  type: string
+                  format: uuid
+                customization_prompt:
+                  type: string
+                  description: Optional customization instructions
+      responses:
+        '202':
+          description: Generation started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  app_id:
+                    type: string
+                    format: uuid
+
+  # ============================================================================
+  # PROJECTS
+  # ============================================================================
+  /projects:
+    get:
+      tags:
+        - Projects
+      summary: List projects
+      parameters:
+        - name: workspace_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+
+    post:
+      tags:
+        - Projects
+      summary: Create project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                workspace_id:
+                  type: string
+                  format: uuid
+                priority:
+                  type: string
+                  enum: [low, medium, high, urgent]
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+  # ============================================================================
+  # NOTIFICATIONS
+  # ============================================================================
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: List notifications
+      parameters:
+        - name: unread_only
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /notifications/stream:
+    get:
+      tags:
+        - Notifications
+      summary: Real-time notification stream (SSE)
+      responses:
+        '200':
+          description: SSE stream of notifications
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  # ============================================================================
+  # SETTINGS
+  # ============================================================================
+  /settings:
+    get:
+      tags:
+        - Settings
+      summary: Get user settings
+      responses:
+        '200':
+          description: User settings
+          content:
+            application/json:
+              schema:
+                type: object
+
+    put:
+      tags:
+        - Settings
+      summary: Update user settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Settings updated
+
+  # Common response schemas
+  components:
+    responses:
+      BadRequest:
+        description: Invalid request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+      Unauthorized:
+        description: Not authenticated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+      Forbidden:
+        description: Insufficient permissions
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+      NotFound:
+        description: Resource not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'

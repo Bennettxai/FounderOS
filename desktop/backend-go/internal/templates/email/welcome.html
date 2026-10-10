@@ -1,0 +1,92 @@
+{{define "content"}}
+<h1 class="text-center">Welcome to OSA! 🎉</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p>We're thrilled to have you on board! Your workspace <strong class="text-primary">{{.WorkspaceName}}</strong> is all set up and ready to go.</p>
+
+{{if .BusinessType}}
+<p class="text-muted">We've tailored your experience for <strong>{{.BusinessType}}</strong> businesses.</p>
+{{end}}
+
+<hr class="divider">
+
+<h2 style="text-align: center;">🚀 Get Started in 4 Steps</h2>
+
+<div style="margin: 24px 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td style="padding: 12px 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="background: #6366f1; color: white; width: 32px; height: 32px; text-align: center; border-radius: 50%; font-weight: 600;">1</td>
+                        <td style="padding-left: 12px;">
+                            <strong>Create your first project</strong>
+                            <p class="text-muted text-small" style="margin: 4px 0 0 0;">Organize work by project</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 12px 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="background: #6366f1; color: white; width: 32px; height: 32px; text-align: center; border-radius: 50%; font-weight: 600;">2</td>
+                        <td style="padding-left: 12px;">
+                            <strong>Invite your team members</strong>
+                            <p class="text-muted text-small" style="margin: 4px 0 0 0;">Collaborate in real-time</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 12px 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="background: #6366f1; color: white; width: 32px; height: 32px; text-align: center; border-radius: 50%; font-weight: 600;">3</td>
+                        <td style="padding-left: 12px;">
+                            <strong>Set up integrations</strong>
+                            <p class="text-muted text-small" style="margin: 4px 0 0 0;">Calendar, Slack, and more</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 12px 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="background: #6366f1; color: white; width: 32px; height: 32px; text-align: center; border-radius: 50%; font-weight: 600;">4</td>
+                        <td style="padding-left: 12px;">
+                            <strong>Explore AI-powered features</strong>
+                            <p class="text-muted text-small" style="margin: 4px 0 0 0;">Let AI help you work smarter</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.GettingStartedURL}}" class="button">Get Started</a>
+</div>
+
+<hr class="divider">
+
+<p class="text-center text-muted">Need help? We've got you covered:</p>
+
+<p class="text-center">
+    <a href="{{.HelpCenterURL}}" style="color: #6366f1; text-decoration: none; margin: 0 12px;">📚 Help Center</a>
+    {{if .CommunityURL}}
+    <a href="{{.CommunityURL}}" style="color: #6366f1; text-decoration: none; margin: 0 12px;">💬 Community</a>
+    {{end}}
+</p>
+{{end}}
+
+{{define "footer"}}
+<p>We're here to help you build something great!</p>
+<p><strong>— The OSA Team</strong></p>
+{{end}}

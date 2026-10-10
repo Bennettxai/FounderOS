@@ -1,0 +1,13 @@
+id: partner-update
+node: project-platform-launch
+type: outbound_package
+name: Partner Update
+purpose: Send a concise launch status bundle to an external partner or channel.
+contents:
+  - launch summary
+  - accepted requirements
+  - open blockers
+  - source links
+  - next review date
+status: draft
+

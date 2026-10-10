@@ -1,0 +1,132 @@
+/*
+ * BusinessOS Theme Variables — Compatibility Layer
+ * These HSL-based tokens are consumed by Tailwind utilities (hsl(var(--border)) etc.)
+ * Source of truth for colors: bos-variables.css
+ *
+ * NOTE: Sidebar, z-index, transitions, and shadows are defined here for
+ * components that use the hsl(var(--X)) pattern. New code should prefer
+ * --bos-* tokens from bos-variables.css directly.
+ */
+
+:root {
+	/* Colors - Light Mode (HSL for Tailwind compatibility) */
+	--background: 0 0% 100%;
+	--foreground: 240 10% 3.9%;
+
+	--card: 0 0% 100%;
+	--card-foreground: 240 10% 3.9%;
+
+	--popover: 0 0% 100%;
+	--popover-foreground: 240 10% 3.9%;
+
+	--primary: 240 5.9% 10%;
+	--primary-foreground: 0 0% 98%;
+
+	--secondary: 240 4.8% 95.9%;
+	--secondary-foreground: 240 5.9% 10%;
+
+	--muted: 240 4.8% 95.9%;
+	--muted-foreground: 240 3.8% 46.1%;
+
+	--accent: 240 4.8% 95.9%;
+	--accent-foreground: 240 5.9% 10%;
+
+	--destructive: 0 84.2% 60.2%;
+	--destructive-foreground: 0 0% 98%;
+
+	--success: 142 76% 36%;
+	--success-foreground: 0 0% 98%;
+
+	--warning: 38 92% 50%;
+	--warning-foreground: 0 0% 98%;
+
+	--border: 240 5.9% 90%;
+	--input: 240 5.9% 90%;
+	--ring: 240 5.9% 10%;
+
+	/* Sidebar — Pure neutral */
+	--sidebar-background: 0 0% 98%;
+	--sidebar-foreground: 0 0% 20%;
+	--sidebar-primary: 0 0% 7%;
+	--sidebar-primary-foreground: 0 0% 98%;
+	--sidebar-accent: 0 0% 96%;
+	--sidebar-accent-foreground: 0 0% 7%;
+	--sidebar-border: 0 0% 91%;
+	--sidebar-ring: 263 70% 58%;
+
+	/* Radius */
+	--radius: 0.5rem;
+
+	/* Transitions (reference values — prefer --bos-transition-* for new code) */
+	--transition-fast: 150ms;
+	--transition-normal: 200ms;
+	--transition-slow: 300ms;
+
+	/* Shadows (reference — prefer --bos-shadow-* for new code) */
+	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Dark Mode */
+.dark,
+[data-theme='dark'] {
+	--background: 240 10% 3.9%;
+	--foreground: 0 0% 98%;
+
+	--card: 240 10% 3.9%;
+	--card-foreground: 0 0% 98%;
+
+	--popover: 240 10% 3.9%;
+	--popover-foreground: 0 0% 98%;
+
+	--primary: 0 0% 98%;
+	--primary-foreground: 240 5.9% 10%;
+
+	--secondary: 240 3.7% 15.9%;
+	--secondary-foreground: 0 0% 98%;
+
+	--muted: 240 3.7% 15.9%;
+	--muted-foreground: 240 5% 64.9%;
+
+	--accent: 240 3.7% 15.9%;
+	--accent-foreground: 0 0% 98%;
+
+	--destructive: 0 62.8% 30.6%;
+	--destructive-foreground: 0 0% 98%;
+
+	--success: 142 71% 29%;
+	--success-foreground: 0 0% 98%;
+
+	--warning: 38 92% 40%;
+	--warning-foreground: 0 0% 98%;
+
+	--border: 240 3.7% 15.9%;
+	--input: 240 3.7% 15.9%;
+	--ring: 240 4.9% 83.9%;
+
+	/* Sidebar - Dark — Pure neutral */
+	--sidebar-background: 0 0% 4%;
+	--sidebar-foreground: 0 0% 91%;
+	--sidebar-primary: 0 0% 91%;
+	--sidebar-primary-foreground: 0 0% 4%;
+	--sidebar-accent: 0 0% 8%;
+	--sidebar-accent-foreground: 0 0% 91%;
+	--sidebar-border: 0 0% 12%;
+	--sidebar-ring: 263 70% 58%;
+
+	/* Dark shadows */
+	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+}
+
+/* Base styles */
+* {
+	border-color: hsl(var(--border));
+}
+
+body {
+	background-color: hsl(var(--background));
+	color: hsl(var(--foreground));
+}

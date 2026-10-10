@@ -1,0 +1,20 @@
+{{define "content"}}
+<p class="eyebrow">Verify your email</p>
+<h1>Confirm your email address</h1>
+<p>Hi <strong>{{.UserName}}</strong>, you're one step from your BusinessOS account. Confirm this is you to get started.</p>
+<div class="button-wrapper">
+    <a href="{{.VerificationLink}}" class="button">Verify email</a>
+</div>
+{{if .VerificationCode}}
+<p class="code-label">Or enter this code</p>
+<div class="code-box">{{.VerificationCode}}</div>
+{{end}}
+<div class="info-box"><p>This link expires in {{.ExpiresIn}}.</p></div>
+<div class="link-fallback">
+    <p>Button not working? Paste this link into your browser:</p>
+    <a href="{{.VerificationLink}}">{{.VerificationLink}}</a>
+</div>
+{{end}}
+{{define "footer"}}
+<p>Didn't create a BusinessOS account? You can safely ignore this email.</p>
+{{end}}

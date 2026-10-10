@@ -1,0 +1,9 @@
+id: learning-research-library
+workspace_id: sample
+type: learning
+name: Research Library
+status: active
+purpose: Learning Node for imported research, videos, books, transcripts, and notes.
+owner: user:operator
+review_cadence: monthly
+

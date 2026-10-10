@@ -1,0 +1,25 @@
+{{define "content"}}
+<h1>{{.ReplierName}} replied to your comment</h1>
+
+<p>Hi {{.UserName}},</p>
+
+<p><strong>{{.ReplierName}}</strong> replied to your comment on <strong>{{.EntityTitle}}</strong>:</p>
+
+<div class="info-box" style="background: #f3f4f6; border-left: 3px solid #d1d5db;">
+    <p class="text-muted text-small" style="margin: 0 0 4px 0;">Your comment:</p>
+    <p style="margin: 0; color: #6b7280; font-style: italic;">"{{.OriginalSnippet}}"</p>
+</div>
+
+<div class="info-box" style="background: #eef2ff; border-left: 3px solid #6366f1;">
+    <p class="text-primary text-small" style="margin: 0 0 4px 0;">{{.ReplierName}}'s reply:</p>
+    <p style="margin: 0; color: #374151;">"{{.ReplySnippet}}"</p>
+</div>
+
+<div class="button-wrapper">
+    <a href="{{.CommentLink}}" class="button">View Conversation</a>
+</div>
+{{end}}
+
+{{define "footer"}}
+<p>Reply to this email to continue the conversation.</p>
+{{end}}
