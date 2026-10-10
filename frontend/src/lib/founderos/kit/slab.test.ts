@@ -143,10 +143,18 @@ describe('BigStat', () => {
 	});
 	it('counts up from 0 and lands exactly on the target', async () => {
 		reducedMotion(false);
-		const { container } = render(BigStat, { value: 47501 });
-		const v = () => container.querySelector('[data-part="bigstat-value"]')!.textContent!.trim();
-		expect(v()).toBe('0');
-		await waitFor(() => expect(v()).toBe('47,501'), { timeout: 3000 });
+		// Drive animation frames with fake timers: real rAF timing is not
+		// guaranteed on a loaded CI runner.
+		vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'cancelAnimationFrame', 'performance', 'Date'] });
+		try {
+			const { container } = render(BigStat, { value: 47501 });
+			const v = () => container.querySelector('[data-part="bigstat-value"]')!.textContent!.trim();
+			expect(v()).toBe('0');
+			await vi.advanceTimersByTimeAsync(5000);
+			expect(v()).toBe('47,501');
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 	it('reduced motion lands instantly', () => {
 		reducedMotion(true);

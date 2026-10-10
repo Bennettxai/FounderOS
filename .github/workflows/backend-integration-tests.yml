@@ -1,25 +1,9 @@
 name: Backend Integration Tests
 
+# Backend integration tests are manual for now: inherited from BusinessOS, where they
+# also time out on every push (upstream main, 2026-10). Run from the Actions tab.
 on:
-  pull_request:
-    branches:
-      - main
-      - main-dev
-      - pedro-dev
-      - feature/multi-agent-app-generation
-      - release/mvp-stabilization
-      - 'release/**'
-    paths:
-      - 'desktop/backend-go/**'
-      - '.github/workflows/backend-integration-tests.yml'
-  push:
-    branches:
-      - main
-      - main-dev
-      - release/mvp-stabilization
-      - 'release/**'
-  workflow_dispatch: # Allow manual trigger
-
+  workflow_dispatch:
 jobs:
   integration-tests:
     name: Run Integration Tests
