@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/rhl/businessos-backend/internal/config"
 )
 
 // OnboardingAIService handles AI-powered onboarding conversations.
@@ -134,7 +136,7 @@ func NewOnboardingAIService() *OnboardingAIService {
 	} else if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey != "" {
 		service.provider = "anthropic"
 		service.apiKey = apiKey
-		service.model = getEnvOrDefault("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
+		service.model = getEnvOrDefault("ANTHROPIC_MODEL", config.DefaultAnthropicModel)
 		service.baseURL = "https://api.anthropic.com/v1"
 	} else if apiKey := os.Getenv("GROQ_API_KEY"); apiKey != "" {
 		service.provider = "groq"

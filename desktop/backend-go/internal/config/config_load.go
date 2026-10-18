@@ -54,7 +54,7 @@ func Load() (*Config, error) {
 
 	// Anthropic
 	viper.SetDefault("ANTHROPIC_API_KEY", "")
-	viper.SetDefault("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
+	viper.SetDefault("ANTHROPIC_MODEL", DefaultAnthropicModel)
 	viper.SetDefault("ANTHROPIC_BASE_URL", "")
 
 	// Groq

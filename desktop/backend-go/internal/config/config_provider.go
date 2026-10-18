@@ -57,7 +57,7 @@ func (c *Config) GetActiveModel() string {
 		if c.AnthropicModel != "" {
 			return c.AnthropicModel
 		}
-		return "claude-sonnet-4-20250514"
+		return DefaultAnthropicModel
 	case "ollama_local":
 		fallthrough
 	default:

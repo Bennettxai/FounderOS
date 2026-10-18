@@ -12,6 +12,9 @@ const (
 	DeploymentCloud DeploymentMode = "cloud"
 )
 
+// DefaultAnthropicModel is used when ANTHROPIC_MODEL is not set.
+const DefaultAnthropicModel = "claude-sonnet-5"
+
 // Config holds all application configuration loaded from environment variables.
 type Config struct {
 	// Environment (development, production)

@@ -94,7 +94,7 @@ func NewAnthropicService(cfg *config.Config, model string) *AnthropicService {
 		model = cfg.AnthropicModel
 	}
 	if model == "" {
-		model = "claude-sonnet-4-20250514" // Default to Claude Sonnet
+		model = config.DefaultAnthropicModel
 	}
 
 	baseURL := strings.TrimRight(cfg.AnthropicBaseURL, "/")

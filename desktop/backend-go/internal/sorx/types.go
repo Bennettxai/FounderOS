@@ -60,13 +60,13 @@ func TierToModel(tier SkillTier) string {
 	case TierDeterministic:
 		return "" // No model needed
 	case TierStructuredAI:
-		return "claude-3-haiku-20240307"
+		return "claude-haiku-4-5"
 	case TierReasoningAI:
-		return "claude-sonnet-4-20250514"
+		return "claude-sonnet-5"
 	case TierGenerativeAI:
-		return "claude-opus-4-1-20250805"
+		return "claude-opus-5"
 	default:
-		return "claude-sonnet-4-20250514"
+		return "claude-sonnet-5"
 	}
 }
 
