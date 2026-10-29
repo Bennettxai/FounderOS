@@ -35,6 +35,7 @@ import { OPERATOR_NAME } from '@/lib/operator';
 import { isFilming } from '@/lib/demo-mode';
 import { runtimeEnv } from '@/lib/creds';
 import { demoIncomeCategories } from '@/lib/finance-demo';
+import { previewSandboxTasks, sandboxSpeed } from '@/lib/home-sandbox';
 
 // The operator console in the Example-6 skin (Control AI dashboard) — the
 // real home page since 2026-08-23. Teal glass gradient cards, gold chrome,
@@ -81,6 +82,50 @@ function DottedRow({ k, v, children }: { k: string; v: string; children?: React.
         {children ?? v}
       </span>
     </div>
+  );
+}
+
+function SandboxPreview({ tasks }: { tasks: ReturnType<typeof previewSandboxTasks> }) {
+  const speed = sandboxSpeed();
+  return (
+    <section className="h6-card mt-4 p-4" aria-labelledby="h6-sandbox-title" data-sandbox-preview="">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h2 id="h6-sandbox-title" className="text-[14px] font-medium" style={{ color: 'var(--text)' }}>Sandbox activity*</h2>
+          <p className="mt-1 text-[11px]" style={{ color: 'var(--text-3)' }}>Simulated sandbox activity · sample timings</p>
+        </div>
+        <Link href="/org" className="text-[11px] hover:underline" style={{ color: GOLD }}>Team map <ArrowUpRight className="ml-0.5 inline h-3 w-3" aria-hidden="true" /></Link>
+      </div>
+
+      <div className="mt-4 grid gap-x-5 gap-y-2 sm:grid-cols-3" aria-label="Relative sandbox speed, simulated sample">
+        {speed.map((sample) => (
+          <div key={sample.name} className="grid grid-cols-[44px_minmax(0,1fr)_48px] items-center gap-2 text-[11px]">
+            <span style={{ color: 'var(--text-2)' }}>{sample.name}</span>
+            <div className="h-2 overflow-hidden rounded-full" style={{ background: 'rgb(var(--mist-rgb) / 0.1)' }}>
+              <div className="h-full rounded-full" style={{ width: `${sample.widthPct}%`, background: GOLD }} />
+            </div>
+            <span className="text-right font-mono tabular-nums" style={{ color: 'var(--text)' }}>{sample.latencyMs} ms</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3" aria-label="Simulated team tasks">
+        {tasks.length ? tasks.map((item, index) => (
+          <article key={`${item.agent}-${item.task}`} className="flex min-h-[112px] flex-col justify-between rounded-xl border p-3" style={{ borderColor: 'rgb(var(--mist-rgb) / 0.13)', background: 'rgb(var(--mist-rgb) / 0.025)' }}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[10px] uppercase tracking-wide" style={{ color: GOLD }}>Sandbox {index + 1}*</span>
+              <span className="rounded-full border px-1.5 py-0.5 text-[9px]" style={{ borderColor: 'rgb(var(--mist-rgb) / 0.16)', color: 'var(--text-3)' }}>Simulated</span>
+            </div>
+            <p className="my-3 line-clamp-2 text-[12px] leading-snug" style={{ color: 'var(--text)' }}>{item.task}</p>
+            <p className="truncate text-[10px]" style={{ color: 'var(--text-3)' }}>{item.department} · {item.agent}</p>
+          </article>
+        )) : (
+          <p className="text-[11px]" style={{ color: 'var(--text-3)' }}>No team-map tasks are available for the preview.</p>
+        )}
+      </div>
+
+      <p className="mt-3 border-t pt-2.5 text-[10px]" style={{ borderColor: 'rgb(var(--mist-rgb) / 0.1)', color: 'var(--text-3)' }}>* Simulated demo data · Powered by Miosa.</p>
+    </section>
   );
 }
 
@@ -314,6 +359,7 @@ export async function Home6Console() {
   const brain = loadObservatoryData();
 
   const agents = db.agents.all();
+  const sandboxTasks = previewSandboxTasks(db.sopTasks.all(), agents, db.departments.all());
   const recentRuns = db.agentRuns.recent(400);
   const connected = connections.filter((c) => c.state === 'connected').length;
   const activeAgents = agents.filter((a) => a.status === 'active').length;
@@ -864,6 +910,7 @@ export async function Home6Console() {
             )}
           </div>
         </div>
+        <SandboxPreview tasks={sandboxTasks} />
       </div>
     </div>
   );
