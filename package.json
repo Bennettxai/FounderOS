@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@miosa/sdk": "^3.2.5",
+    "@modelcontextprotocol/sdk": "1.32.2",
     "@notionhq/client": "^5.22.0",
     "@slack/web-api": "^7.16.0",
     "@types/d3-force": "^3.0.10",
