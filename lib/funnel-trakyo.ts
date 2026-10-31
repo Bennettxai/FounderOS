@@ -1,6 +1,6 @@
 /**
- * Trakyo seam — organic content attribution for the funnel (mainly Agency
- * Accelerant: which post/reel actually produced a lead). `trakyoTouches()`
+ * Trakyo seam: organic content attribution for the funnel (which post or
+ * reel actually produced a lead). `trakyoTouches()`
  * reads Trakyo API v1 `GET /v1/leads` (lib/connectors/trakyo.ts) and turns each
  * lead's first touch into one attributed event (FounderOS merge F7). No key:
  * no request and no events. A failed read also yields no events, so the funnel
