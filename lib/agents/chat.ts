@@ -12,6 +12,7 @@ import type { GladosDb } from '@/lib/db';
 import type { RuntimeAgent } from '@/lib/agents/runtime';
 import type { AgentMessage } from '@/lib/schemas';
 import { chatModelFor } from '@/lib/agent-review';
+import { webSearchTools } from '@/lib/connectors/parallel-search';
 
 export type ChatResult = { reply: string; messages: AgentMessage[] };
 
@@ -37,8 +38,9 @@ export async function chatWithAgent(
   agents: RuntimeAgent[],
   agentId: string,
   message: string,
-  opts: { screenContext?: string } = {},
+  opts: { screenContext?: string; signal?: AbortSignal } = {},
 ): Promise<ChatResult> {
+  opts.signal?.throwIfAborted();
   const agent = agents.find((a) => a.id === agentId);
   if (!agent) throw new Error(`unknown agent: ${agentId}`);
 
@@ -53,12 +55,15 @@ export async function chatWithAgent(
   // Fine for v1 read-only chat; revisit if multi-turn tool reasoning is needed.
   const history = db.agentMessages.byAgent(agentId);
   const llmMessages: LlmMessage[] = history.map((m) => ({ role: m.role, content: m.content }));
-  const tools = agent.chatTools?.();
+  const tools = [
+    ...(agent.chatTools?.() ?? []),
+    ...webSearchTools(() => db.agentMessages.sessionId(agentId), opts.signal),
+  ];
 
   // Failover (F9): the stored model id, when the operator moved this agent
   // onto one, is the model the chat calls; otherwise the gateway default.
   const model = chatModelFor(db.agents.get(agentId)?.model);
-  const result = await llmChat({ system: systemPromptFor(agent, opts.screenContext), messages: llmMessages, tools, ...(model ? { model } : {}) });
+  const result = await llmChat({ system: systemPromptFor(agent, opts.screenContext), messages: llmMessages, tools, abortSignal: opts.signal, ...(model ? { model } : {}) });
 
   if (result.toolCalls.length) {
     db.agentMessages.insert({

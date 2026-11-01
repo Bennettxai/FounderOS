@@ -31,8 +31,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   try {
     const result = isConductor
-      ? await routeConductorMessage(getDb(), realAgents, message, { screenContext })
-      : await chatWithAgent(getDb(), realAgents, params.id, message, { screenContext });
+      ? await routeConductorMessage(getDb(), realAgents, message, { screenContext, signal: req.signal })
+      : await chatWithAgent(getDb(), realAgents, params.id, message, { screenContext, signal: req.signal });
     return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });

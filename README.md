@@ -124,6 +124,23 @@ reachable from your computer. Before accessing it from another device, open
 **Settings → Security** and set an operator password. FounderOS will then
 require that password for app pages and API routes.
 
+## Agent web research
+
+Agent chat includes web search and page reading through
+[Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp).
+Search uses Fast mode and works without a Parallel account or API key.
+Ask an agent to research a current topic or read a public URL; the model can
+use `webSearch` and `webFetch` alongside that agent's existing tools.
+Agent chat still needs its configured LLM provider.
+
+Queries and requested URLs are sent to Parallel. Keep private company details
+out of web research requests. To disable both web tools, set
+`WEB_SEARCH_PROVIDER=none` in `.env.local` (a blank value also disables them).
+The default is `parallel`; other values are rejected without a fallback.
+An optional `PARALLEL_API_KEY` uses your account's limits; leaving it unset
+uses the anonymous free tier. Free usage is limited, and service errors are
+reported rather than replaced with invented results.
+
 ## Optional knowledge search
 
 FounderOS can search a local markdown knowledge base with the G-Brain CLI:
