@@ -7,14 +7,60 @@ comms, social growth, finances, knowledge, and a roster of AI-assisted agents.
 You set the direction; your departments and team work from the same operating
 picture.
 
+## Tech stack
+
+FounderOS is a single Node.js app. There is no separate backend, database
+server, or Docker setup to run.
+
+| Layer | What it uses |
+| --- | --- |
+| Runtime | Node.js 22 LTS (what CI runs), npm |
+| Framework | Next.js 14 (App Router), React 18, TypeScript 5 |
+| Styling | Tailwind CSS 3, PostCSS, Geist and Geist Mono (bundled locally), lucide-react, simple-icons |
+| Storage | SQLite through `better-sqlite3`, kept in local files under `data/` (your workspace) and `demo-data/` (the demo company) |
+| Validation | zod |
+| Visuals | d3-force for the knowledge graph |
+| AI | Vercel AI Gateway (`AI_GATEWAY_API_KEY`) for agent chat; `LLM_PROVIDER=stub` runs offline |
+| Integrations | IMAP/SMTP (imapflow, nodemailer), Slack, Notion, Stripe, iCal, plus HTTP connectors for the rest |
+| Tests and tooling | Vitest, `tsc --noEmit`, tsx for scripts, GitHub Actions CI (typecheck and tests on every push) |
+
+### What you need to run and build it
+
+**Required**
+
+- **Node.js 22 LTS** and **npm** (bundled with Node). CI runs on Node 22.
+  Newer releases can crash `better-sqlite3` inside the test runner (seen on
+  Node 24.20 as `Assertion failed: (env) != nullptr`), so use 22 if `npm test`
+  fails that way.
+- **Git**, to clone the repo.
+- **A C/C++ toolchain**, only if `better-sqlite3` has no prebuilt binary for
+  your platform and has to compile during `npm ci`:
+  - macOS: `xcode-select --install`
+  - Debian/Ubuntu: `sudo apt install build-essential python3`
+  - Windows: Visual Studio Build Tools with the "Desktop development with C++"
+    workload
+
+That is all the demo needs. No API keys, accounts, or database server.
+
+**Optional**
+
+- **Vercel AI Gateway key** (`AI_GATEWAY_API_KEY`), to talk to agents.
+- **Credentials for the tools you connect** (email, Slack, Notion, Stripe, and
+  others). See [Connect your tools](#connect-your-tools) and
+  [`.env.example`](.env.example).
+- **Bun and the G-Brain CLI**, for local knowledge search. See
+  [Optional knowledge search](#optional-knowledge-search).
+
 ## Getting started
 
 ### Prerequisites
 
-- Node.js 22 or newer
+- Node.js 22 LTS
 - npm
 
-You do not need API keys or external accounts to try the demo.
+You do not need API keys or external accounts to try the demo. See
+[What you need to run and build it](#what-you-need-to-run-and-build-it) for the
+full list.
 
 ### Clone the repo
 
