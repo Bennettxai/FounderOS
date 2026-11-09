@@ -26,7 +26,7 @@ function matchAgent(agents: RuntimeAgent[], token: string): RuntimeAgent | undef
 }
 
 /** Ask the model for the single best-fit agent id; fall back to the first agent. */
-async function pickAgent(routable: RuntimeAgent[], message: string): Promise<string> {
+async function pickAgent(routable: RuntimeAgent[], message: string, signal?: AbortSignal): Promise<string> {
   const roster = routable.map((a) => `- ${a.id}: ${a.name} — ${a.description}`).join('\n');
   const system = [
     `You are the Wizard, the router for ${BRAND.name} operator agents.`,
@@ -34,7 +34,7 @@ async function pickAgent(routable: RuntimeAgent[], message: string): Promise<str
     'Reply with ONLY that agent id and nothing else. Options:',
     roster,
   ].join('\n');
-  const res = await llmChat({ system, messages: [{ role: 'user', content: message }] });
+  const res = await llmChat({ system, abortSignal: signal, messages: [{ role: 'user', content: message }] });
   const picked = (res.text.trim().split(/\s+/)[0] ?? '').replace(/[^a-zA-Z0-9_-]/g, '');
   const found = routable.find((a) => a.id === picked);
   if (found) return found.id;
@@ -58,7 +58,7 @@ export async function routeConductorMessage(
   db: GladosDb,
   agents: RuntimeAgent[],
   message: string,
-  opts: { screenContext?: string } = {},
+  opts: { screenContext?: string; signal?: AbortSignal } = {},
 ): Promise<ConductorResult> {
   const routable = agents.filter((a) => a.id !== 'conductor');
   let targetId: string | undefined;
@@ -74,7 +74,7 @@ export async function routeConductorMessage(
     // unknown @name → fall through to model routing (never throw)
   }
 
-  if (!targetId) targetId = await pickAgent(routable, message);
+  if (!targetId) targetId = await pickAgent(routable, message, opts.signal);
 
   const result = await chatWithAgent(db, agents, targetId, delivered, opts);
   return { routedTo: targetId, ...result };

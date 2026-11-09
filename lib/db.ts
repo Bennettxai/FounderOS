@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import { dirname, join } from 'node:path';
 import { isValidCron } from '@/lib/cron';
@@ -145,6 +146,11 @@ CREATE TABLE IF NOT EXISTS agent_messages (
   content TEXT NOT NULL DEFAULT '',
   tool_calls TEXT NOT NULL DEFAULT '[]',
   created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS agent_chat_sessions (
+  agent_id TEXT PRIMARY KEY,
+  first_message_id TEXT NOT NULL,
+  session_id TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS broadcasts (
   id TEXT PRIMARY KEY,
@@ -1635,6 +1641,21 @@ export function openDb(path: string) {
     });
 
   const agentMessages = {
+    /** One opaque ID per persisted rolling thread, independent of MCP clients.
+     * Clearing/replacing the history starts a new conversation; reopening this
+     * database or retrying a failed turn keeps the same ID.
+     */
+    sessionId(agentId: string): string {
+      return db.transaction(() => {
+        const first = db.prepare('SELECT id FROM agent_messages WHERE agent_id = ? ORDER BY created_at ASC, rowid ASC LIMIT 1').get(agentId) as { id: string } | undefined;
+        if (!first) throw new Error('A chat session needs a conversation');
+        const saved = db.prepare('SELECT first_message_id, session_id FROM agent_chat_sessions WHERE agent_id = ?').get(agentId) as { first_message_id: string; session_id: string } | undefined;
+        if (saved?.first_message_id === first.id) return saved.session_id;
+        const id = randomUUID();
+        db.prepare('INSERT OR REPLACE INTO agent_chat_sessions (agent_id, first_message_id, session_id) VALUES (?, ?, ?)').run(agentId, first.id, id);
+        return id;
+      }).immediate();
+    },
     insert(m: AgentMessage): void {
       const parsed = AgentMessageSchema.parse(m);
       db.prepare(
