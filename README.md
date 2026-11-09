@@ -14,15 +14,15 @@ server, or Docker setup to run.
 
 | Layer | What it uses |
 | --- | --- |
-| Runtime | Node.js 22 LTS (what CI runs), npm |
-| Framework | Next.js 14 (App Router), React 18, TypeScript 5 |
-| Styling | Tailwind CSS 3, PostCSS, Geist and Geist Mono (bundled locally), lucide-react, simple-icons |
-| Storage | SQLite through `better-sqlite3`, kept in local files under `data/` (your workspace) and `demo-data/` (the demo company) |
-| Validation | zod |
-| Visuals | d3-force for the knowledge graph |
-| AI | Vercel AI Gateway (`AI_GATEWAY_API_KEY`) for agent chat; `LLM_PROVIDER=stub` runs offline |
-| Integrations | IMAP/SMTP (imapflow, nodemailer), Slack, Notion, Stripe, iCal, plus HTTP connectors for the rest |
-| Tests and tooling | Vitest, `tsc --noEmit`, tsx for scripts, GitHub Actions CI (typecheck and tests on every push) |
+| Runtime | [Node.js](https://nodejs.org/en/download) 22 LTS (what CI runs), [npm](https://docs.npmjs.com) |
+| Framework | [Next.js 14](https://nextjs.org/docs/14) (App Router), [React 18](https://react.dev), [TypeScript 5](https://www.typescriptlang.org) |
+| Styling | [Tailwind CSS 3](https://v3.tailwindcss.com), [PostCSS](https://postcss.org), [Geist and Geist Mono](https://vercel.com/font) (bundled locally), [lucide-react](https://lucide.dev), [simple-icons](https://simpleicons.org) |
+| Storage | [SQLite](https://sqlite.org) through [`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3), kept in local files under `data/` (your workspace) and `demo-data/` (the demo company) |
+| Validation | [zod](https://zod.dev) |
+| Visuals | [d3-force](https://d3js.org/d3-force) for the knowledge graph |
+| AI | [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) (`AI_GATEWAY_API_KEY`) for agent chat; `LLM_PROVIDER=stub` runs offline |
+| Integrations | IMAP/SMTP ([imapflow](https://github.com/postalsys/imapflow), [nodemailer](https://nodemailer.com)), [Slack](https://docs.slack.dev), [Notion](https://developers.notion.com), [Stripe](https://docs.stripe.com), iCal ([node-ical](https://github.com/jens-maus/node-ical)), plus HTTP connectors for the rest |
+| Tests and tooling | [Vitest](https://vitest.dev), [`tsc --noEmit`](https://www.typescriptlang.org/docs/handbook/compiler-options.html), [tsx](https://tsx.is) for scripts, [GitHub Actions](https://docs.github.com/actions) CI (typecheck and tests on every push) |
 
 ### Tools it works with
 
@@ -31,13 +31,13 @@ it from **Integrations**, and until you do it shows as not configured.
 
 | Area | Tools |
 | --- | --- |
-| AI and agents | Vercel AI Gateway (agent and Wizard chat, Claude models by default), Superset (opens a coding or writing agent in its own workspace) |
-| Memory | Optimal Engine through the G-Brain CLI (searchable knowledge base), Obsidian |
-| Inbox and calendar | Any IMAP/SMTP mailbox (Gmail app passwords work), Google Calendar over CalDAV, Slack, WhatsApp |
-| Clients | Notion |
-| Money | Stripe, PayPal, FanBasis, Wise |
-| Audience and growth | Zernio (social accounts and posting), Beehiiv (newsletter), ManyChat (Instagram DMs), Meta Ads |
-| Calls and voice | Fathom (call notes), Plaud (voice recorder), Wispr Flow (dictation) |
+| AI and agents | [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) (agent and Wizard chat, [Claude](https://claude.com) models by default), [Superset, now Paradev](https://paradev.com) (opens a coding or writing agent in its own workspace) |
+| Memory | [Optimal Engine](https://github.com/Miosa-osa/OptimalEngine) through the [G-Brain CLI](https://github.com/garrytan/gbrain) (searchable knowledge base), [Obsidian](https://obsidian.md) |
+| Inbox and calendar | Any IMAP/SMTP mailbox ([Gmail app passwords](https://support.google.com/accounts/answer/185833) work), [Google Calendar over CalDAV](https://developers.google.com/workspace/calendar/caldav/v2/guide), [Slack](https://slack.com), [WhatsApp](https://www.whatsapp.com) |
+| Clients | [Notion](https://www.notion.com) |
+| Money | [Stripe](https://stripe.com), [PayPal](https://www.paypal.com), [FanBasis, now Commas](https://commas.com), [Wise](https://wise.com) |
+| Audience and growth | [Zernio](https://zernio.com) (social accounts and posting), [Beehiiv](https://www.beehiiv.com) (newsletter), [ManyChat](https://manychat.com) (Instagram DMs), [Meta Ads](https://www.facebook.com/business/ads) |
+| Calls and voice | [Fathom](https://www.fathom.ai) (call notes), [Plaud](https://www.plaud.ai) (voice recorder), [Wispr Flow](https://wisprflow.ai) (dictation) |
 
 WhatsApp and Wispr Flow read the apps' local data, so they need macOS.
 
@@ -45,35 +45,36 @@ WhatsApp and Wispr Flow read the apps' local data, so they need macOS.
 
 **Required**
 
-- **Node.js 22 LTS** and **npm** (bundled with Node). CI runs on Node 22.
+- **[Node.js 22 LTS](https://nodejs.org/en/download)** and **[npm](https://docs.npmjs.com)** (bundled with Node). CI runs on Node 22.
   Newer releases can crash `better-sqlite3` inside the test runner (seen on
   Node 24.20 as `Assertion failed: (env) != nullptr`), so use 22 if `npm test`
   fails that way.
-- **Git**, to clone the repo.
+- **[Git](https://git-scm.com)**, to clone the repo.
 - **A C/C++ toolchain**, only if `better-sqlite3` has no prebuilt binary for
-  your platform and has to compile during `npm ci`:
-  - macOS: `xcode-select --install`
+  your platform and has to compile during `npm ci` (see
+  [node-gyp's setup notes](https://github.com/nodejs/node-gyp#installation)):
+  - macOS: `xcode-select --install` ([Xcode Command Line Tools](https://developer.apple.com/xcode/resources/))
   - Debian/Ubuntu: `sudo apt install build-essential python3`
-  - Windows: Visual Studio Build Tools with the "Desktop development with C++"
+  - Windows: [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/) with the "Desktop development with C++"
     workload
 
 That is all the demo needs. No API keys, accounts, or database server.
 
 **Optional**
 
-- **Vercel AI Gateway key** (`AI_GATEWAY_API_KEY`), to talk to agents.
+- **[Vercel AI Gateway](https://vercel.com/docs/ai-gateway) key** (`AI_GATEWAY_API_KEY`), to talk to agents.
 - **Credentials for the tools you connect** (email, Slack, Notion, Stripe, and
   others). See [Connect your tools](#connect-your-tools) and
   [`.env.example`](.env.example).
-- **Bun and the G-Brain CLI**, for local knowledge search. See
+- **[Bun](https://bun.sh) and the [G-Brain CLI](https://github.com/garrytan/gbrain)**, for local knowledge search. See
   [Optional knowledge search](#optional-knowledge-search).
 
 ## Getting started
 
 ### Prerequisites
 
-- Node.js 22 LTS
-- npm
+- [Node.js 22 LTS](https://nodejs.org/en/download)
+- [npm](https://docs.npmjs.com)
 
 You do not need API keys or external accounts to try the demo. See
 [What you need to run and build it](#what-you-need-to-run-and-build-it) for the
@@ -120,7 +121,10 @@ marked until you add credentials; the app does not pretend they are connected.
 ## Connect your tools
 
 Open **Integrations** to configure the services you want to use, such as email,
-Slack, Notion, WhatsApp, Stripe, PayPal, Beehiiv, or Zernio. Keep keys in
+[Slack](https://slack.com), [Notion](https://www.notion.com),
+[WhatsApp](https://www.whatsapp.com), [Stripe](https://stripe.com),
+[PayPal](https://www.paypal.com), [Beehiiv](https://www.beehiiv.com), or
+[Zernio](https://zernio.com). Keep keys in
 your local `.env.local` file; see [`.env.example`](.env.example) for supported
 environment variables. Never commit credentials.
 
@@ -143,7 +147,9 @@ require that password for app pages and API routes.
 
 ## Optional knowledge search
 
-FounderOS can search a local markdown knowledge base with the G-Brain CLI:
+FounderOS can search a local markdown knowledge base with the
+[G-Brain CLI](https://github.com/garrytan/gbrain). It installs with
+[Bun](https://bun.sh):
 
 ```bash
 bun install -g github:garrytan/gbrain
