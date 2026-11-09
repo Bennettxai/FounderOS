@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   ProvenanceRef,
 } from '@/lib/brain/core-schema';
 
@@ -24,6 +24,10 @@ import type {
 } from '@/lib/control-plane/brain-context-provider';
 
 import {
+  summarizeAgentKnowledgeContext,
+} from '@/lib/control-plane/knowledge-context-observability';
+
+import {
   normalizeAgentModelExecutionResult,
   type AgentModelAdapter,
 } from '@/lib/control-plane/agent-model-adapter';
@@ -34,8 +38,15 @@ import type {
 
 type RuntimeEvidence = {
   brainNodeIds: string[];
+
+  knowledgeContext:
+    ReturnType<
+      typeof summarizeAgentKnowledgeContext
+    >;
+
   externalProvenance:
     ProvenanceRef[];
+
   toolCalls:
     AgentToolCallTrace[];
 };
@@ -336,6 +347,11 @@ export class BoundedModelAgentExecutor
               result.node.id,
           ),
 
+        knowledgeContext:
+          summarizeAgentKnowledgeContext(
+            brain,
+          ),
+
         externalProvenance:
           tools
             .getProvenance(),
@@ -382,6 +398,10 @@ export class BoundedModelAgentExecutor
               evidence
                 .brainNodeIds,
 
+            knowledgeContext:
+              evidence
+                .knowledgeContext,
+
             externalProvenance:
               evidence
                 .externalProvenance,
@@ -406,3 +426,5 @@ export class BoundedModelAgentExecutor
     }
   }
 }
+
+

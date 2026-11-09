@@ -1,4 +1,4 @@
-import {
+﻿import {
   BrainGateway,
 } from '@/lib/brain/gateway/gateway';
 
@@ -21,13 +21,28 @@ import {
 
 import {
   BrainGatewayAgentContextProvider,
-  EmptyAgentBrainContextProvider,
   type AgentBrainContextProvider,
 } from '@/lib/control-plane/brain-context-provider';
 
 import {
   EnvironmentRuntimeSecretSource,
 } from '@/lib/control-plane/runtime-secret-source';
+
+import {
+  getDb,
+} from '@/lib/data';
+
+import {
+  CanonicalStartupMemoryRetrievalBackend,
+} from '@/lib/brain/memory/canonical-memory-retrieval-backend';
+
+import {
+  DualStartupKnowledgeRetrievalBackend,
+} from '@/lib/brain/gateway/dual-startup-knowledge-retrieval-backend';
+
+import type {
+  BrainRetrievalBackend,
+} from '@/lib/brain/gateway/retrieval-backend';
 
 
 type StartupBrainRuntimeMode =
@@ -80,6 +95,47 @@ function runtimeMode(
 }
 
 
+function createGatewayProvider(
+  retrievalBackend:
+    BrainRetrievalBackend,
+): AgentBrainContextProvider {
+  const graphStore =
+    new InMemoryBrainGraphStore(
+      createEmptyBrainGraph(
+        'startup-brain-runtime',
+        new Date()
+          .toISOString(),
+      ),
+    );
+
+
+  const auditStore =
+    new InMemoryBrainAuditStore();
+
+
+  const gateway =
+    new BrainGateway(
+      graphStore,
+      auditStore,
+      undefined,
+      retrievalBackend,
+    );
+
+
+  return new BrainGatewayAgentContextProvider(
+    gateway,
+  );
+}
+
+
+function createCanonicalMemoryBackend() {
+  return new CanonicalStartupMemoryRetrievalBackend({
+    db:
+      getDb(),
+  });
+}
+
+
 export function getStartupBrainContextProvider(
   env:
     Readonly<
@@ -103,12 +159,39 @@ export function getStartupBrainContextProvider(
     );
 
 
+  const memoryRetrievalBackend =
+    createCanonicalMemoryBackend();
+
+
+  /*
+   * "disabled" disables the experiential
+   * Startup Brain backend only.
+   *
+   * Canonical Startup Memory remains
+   * available because company identity,
+   * governance, roles and procedures are
+   * foundational runtime knowledge rather
+   * than optional experiential memory.
+   */
   if (
     mode ===
     'disabled'
   ) {
+    const retrievalBackend =
+      new DualStartupKnowledgeRetrievalBackend({
+        memoryBackend:
+          memoryRetrievalBackend,
+
+        memoryShare:
+          1,
+      });
+
+
     cachedProvider =
-      new EmptyAgentBrainContextProvider();
+      createGatewayProvider(
+        retrievalBackend,
+      );
+
 
     return cachedProvider;
   }
@@ -170,7 +253,7 @@ export function getStartupBrainContextProvider(
     });
 
 
-  const retrievalBackend =
+  const brainRetrievalBackend =
     new CogneeBrainRetrievalBackend({
       client:
         cogneeClient,
@@ -178,7 +261,8 @@ export function getStartupBrainContextProvider(
       dataset,
 
       /*
-       * Temporary V2K.2 smoke scope.
+       * Temporary experiential Brain
+       * smoke scope.
        *
        * Production Cognee memories will
        * carry their own governed scope.
@@ -189,32 +273,22 @@ export function getStartupBrainContextProvider(
     });
 
 
-  const graphStore =
-    new InMemoryBrainGraphStore(
-      createEmptyBrainGraph(
-        'startup-brain-runtime',
-        new Date()
-          .toISOString(),
-      ),
-    );
+  const retrievalBackend =
+    new DualStartupKnowledgeRetrievalBackend({
+      memoryBackend:
+        memoryRetrievalBackend,
 
+      brainBackend:
+        brainRetrievalBackend,
 
-  const auditStore =
-    new InMemoryBrainAuditStore();
-
-
-  const gateway =
-    new BrainGateway(
-      graphStore,
-      auditStore,
-      undefined,
-      retrievalBackend,
-    );
+      memoryShare:
+        0.25,
+    });
 
 
   cachedProvider =
-    new BrainGatewayAgentContextProvider(
-      gateway,
+    createGatewayProvider(
+      retrievalBackend,
     );
 
 
@@ -227,3 +301,4 @@ export function resetStartupBrainRuntimeForTests():
   cachedProvider =
     null;
 }
+
