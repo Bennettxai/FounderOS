@@ -24,6 +24,23 @@ server, or Docker setup to run.
 | Integrations | IMAP/SMTP (imapflow, nodemailer), Slack, Notion, Stripe, iCal, plus HTTP connectors for the rest |
 | Tests and tooling | Vitest, `tsc --noEmit`, tsx for scripts, GitHub Actions CI (typecheck and tests on every push) |
 
+### Tools it works with
+
+These are the services FounderOS is built around. Every one is optional: connect
+it from **Integrations**, and until you do it shows as not configured.
+
+| Area | Tools |
+| --- | --- |
+| AI and agents | Vercel AI Gateway (agent and Wizard chat, Claude models by default), Superset (opens a coding or writing agent in its own workspace) |
+| Memory | Optimal Engine through the G-Brain CLI (searchable knowledge base), Obsidian |
+| Inbox and calendar | Any IMAP/SMTP mailbox (Gmail app passwords work), Google Calendar over CalDAV, Slack, WhatsApp |
+| Clients | Attio (CRM), Notion |
+| Money | Stripe, PayPal, FanBasis, Wise |
+| Audience and growth | Zernio (social accounts and posting), Beehiiv (newsletter), ManyChat (Instagram DMs), Meta Ads |
+| Calls and voice | Fathom (call notes), Plaud (voice recorder), Wispr Flow (dictation) |
+
+WhatsApp and Wispr Flow read the apps' local data, so they need macOS.
+
 ### What you need to run and build it
 
 **Required**
