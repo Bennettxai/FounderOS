@@ -34,7 +34,7 @@ it from **Integrations**, and until you do it shows as not configured.
 | AI and agents | Vercel AI Gateway (agent and Wizard chat, Claude models by default), Superset (opens a coding or writing agent in its own workspace) |
 | Memory | Optimal Engine through the G-Brain CLI (searchable knowledge base), Obsidian |
 | Inbox and calendar | Any IMAP/SMTP mailbox (Gmail app passwords work), Google Calendar over CalDAV, Slack, WhatsApp |
-| Clients | Attio (CRM), Notion |
+| Clients | Notion |
 | Money | Stripe, PayPal, FanBasis, Wise |
 | Audience and growth | Zernio (social accounts and posting), Beehiiv (newsletter), ManyChat (Instagram DMs), Meta Ads |
 | Calls and voice | Fathom (call notes), Plaud (voice recorder), Wispr Flow (dictation) |
@@ -120,7 +120,7 @@ marked until you add credentials; the app does not pretend they are connected.
 ## Connect your tools
 
 Open **Integrations** to configure the services you want to use, such as email,
-Slack, Notion, Attio, WhatsApp, Stripe, PayPal, Beehiiv, or Zernio. Keep keys in
+Slack, Notion, WhatsApp, Stripe, PayPal, Beehiiv, or Zernio. Keep keys in
 your local `.env.local` file; see [`.env.example`](.env.example) for supported
 environment variables. Never commit credentials.
 
