@@ -14,6 +14,11 @@ CREATE TABLE IF NOT EXISTS cp_agent_runtime_tasks (
   retry_policy_json TEXT NOT NULL, lease_owner TEXT, lease_until TEXT, completed_at TEXT, last_error TEXT,
   policy_evidence_json TEXT NOT NULL, payload_json TEXT NOT NULL, result_json TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS cp_agent_runtime_plans (
+  task_id TEXT PRIMARY KEY,
+  plan_json TEXT NOT NULL,
+  saved_at TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS cp_agent_runtime_tasks_queue_idx ON cp_agent_runtime_tasks(agent_id, status, available_at, lease_until);
 CREATE INDEX IF NOT EXISTS cp_agent_runtime_tasks_workflow_idx ON cp_agent_runtime_tasks(workflow_id, created_at);
 CREATE TABLE IF NOT EXISTS cp_ceo_inbox (
@@ -50,9 +55,35 @@ export class SqliteInternalRuntimeStore extends SqliteGovernedHandoffStore imple
   listWorkflowSnapshots():InvestmentWorkflow[]{ const rows=this.db.prepare(`SELECT snapshot_json FROM cp_workflows ORDER BY updated_at DESC, rowid DESC`).all() as WorkflowRow[]; return rows.map(r=>InvestmentWorkflowSchema.parse(parseJson(r.snapshot_json))); }
   upsertAgentRuntimeTask(input:AgentRuntimeTaskInput):AgentRuntimeTask { const t=AgentRuntimeTaskSchema.parse(input); this.db.prepare(`INSERT OR IGNORE INTO cp_agent_runtime_tasks (task_id,handoff_id,workflow_id,agent_id,action,summary,state_at_assignment,priority,status,attempts,created_at,available_at,updated_at,retry_policy_json,lease_owner,lease_until,completed_at,last_error,policy_evidence_json,payload_json,result_json) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(t.taskId,t.handoffId,t.workflowId??null,t.agentId,t.action,t.summary,t.stateAtAssignment??null,t.priority,t.status,t.attempts,t.createdAt,t.availableAt,t.updatedAt,JSON.stringify(t.retryPolicy),t.leaseOwner??null,t.leaseUntil??null,t.completedAt??null,t.lastError??null,JSON.stringify(t.policyEvidence),JSON.stringify(t.payload),JSON.stringify(t.result)); return this.readAgentTask(t.taskId); }
   listAgentRuntimeTasks(input:{agentId?:string;workflowId?:string;status?:AgentRuntimeTask['status']}={}):AgentRuntimeTask[]{ const c:string[]=[]; const p:string[]=[]; if(input.agentId){c.push('agent_id = ?');p.push(input.agentId)} if(input.workflowId){c.push('workflow_id = ?');p.push(input.workflowId)} if(input.status){c.push('status = ?');p.push(input.status)} const where=c.length?`WHERE ${c.join(' AND ')}`:''; const rows=this.db.prepare(`SELECT * FROM cp_agent_runtime_tasks ${where} ORDER BY CASE priority WHEN 'critical' THEN 0 WHEN 'high' THEN 1 ELSE 2 END, created_at DESC, rowid DESC`).all(...p) as AgentTaskRow[]; return rows.map(rowToAgentTask); }
+  getAgentRuntimePlan(taskId: string): unknown | null {
+    const row = this.db.prepare('SELECT plan_json FROM cp_agent_runtime_plans WHERE task_id = ?')
+      .get(taskId) as { plan_json: string } | undefined;
+    return row ? parseJson<unknown>(row.plan_json) : null;
+  }
+
+  saveAgentRuntimePlan(input: { taskId: string; workerId: string; savedAt: string; plan: unknown; }): void {
+    const transaction = this.db.transaction(() => {
+      const current = this.readAgentTask(input.taskId);
+      if (current.status !== 'running' || current.leaseOwner !== input.workerId) {
+        throw new Error('agent_task_plan_lease_mismatch:' + input.taskId);
+      }
+      const encoded = JSON.stringify(input.plan);
+      if (typeof encoded !== 'string') throw new Error('agent_task_plan_not_serializable');
+      const prior = this.db.prepare('SELECT plan_json FROM cp_agent_runtime_plans WHERE task_id = ?')
+        .get(input.taskId) as { plan_json: string } | undefined;
+      if (prior) {
+        if (prior.plan_json !== encoded) throw new Error('agent_task_plan_conflict:' + input.taskId);
+        return;
+      }
+      this.db.prepare('INSERT INTO cp_agent_runtime_plans (task_id, plan_json, saved_at) VALUES (?, ?, ?)')
+        .run(input.taskId, encoded, input.savedAt);
+    });
+    transaction();
+  }
+
   claimAgentRuntimeTasks(input:{agentId:string;workerId:string;now:string;limit:number;leaseMs:number}):AgentRuntimeTask[]{ if(input.limit<=0) throw new Error('agent_task_claim_limit_must_be_positive'); if(input.leaseMs<=0) throw new Error('agent_task_claim_lease_must_be_positive'); const leaseUntil=addMs(input.now,input.leaseMs); const tx=this.db.transaction(()=>{ const candidates=this.db.prepare(`SELECT task_id FROM cp_agent_runtime_tasks WHERE agent_id = ? AND available_at <= ? AND (status='queued' OR (status='running' AND lease_until IS NOT NULL AND lease_until <= ?)) ORDER BY CASE priority WHEN 'critical' THEN 0 WHEN 'high' THEN 1 ELSE 2 END, available_at, created_at, rowid LIMIT ?`).all(input.agentId,input.now,input.now,input.limit) as {task_id:string}[]; const claim=this.db.prepare(`UPDATE cp_agent_runtime_tasks SET status='running',attempts=attempts+1,updated_at=?,lease_owner=?,lease_until=? WHERE task_id=? AND agent_id=? AND (status='queued' OR (status='running' AND lease_until IS NOT NULL AND lease_until <= ?))`); const out:AgentRuntimeTask[]=[]; for(const x of candidates){ const r=claim.run(input.now,input.workerId,leaseUntil,x.task_id,input.agentId,input.now); if(r.changes===1) out.push(this.readAgentTask(x.task_id)); } return out; }); return tx(); }
   completeAgentRuntimeTask(input:{taskId:string;workerId:string;completedAt:string;result?:Record<string,unknown>}):AgentRuntimeTask { const r=this.db.prepare(`UPDATE cp_agent_runtime_tasks SET status='completed',completed_at=?,updated_at=?,lease_owner=NULL,lease_until=NULL,last_error=NULL,result_json=? WHERE task_id=? AND status='running' AND lease_owner=?`).run(input.completedAt,input.completedAt,JSON.stringify(input.result??{}),input.taskId,input.workerId); if(r.changes!==1) throw new Error(`agent_task_complete_lease_mismatch:${input.taskId}`); return this.readAgentTask(input.taskId); }
-  failAgentRuntimeTask(input:{taskId:string;workerId:string;failedAt:string;error:string}):AgentRuntimeTask { const tx=this.db.transaction(()=>{ const cur=this.readAgentTask(input.taskId); if(cur.status!=='running'||cur.leaseOwner!==input.workerId) throw new Error(`agent_task_fail_lease_mismatch:${input.taskId}`); const exhausted=cur.attempts>=cur.retryPolicy.maxAttempts; const next=addMs(input.failedAt,computeRetryDelayMs(cur.retryPolicy,cur.attempts)); this.db.prepare(`UPDATE cp_agent_runtime_tasks SET status=?,available_at=?,updated_at=?,lease_owner=NULL,lease_until=NULL,last_error=? WHERE task_id=?`).run(exhausted?'dead_letter':'queued',exhausted?cur.availableAt:next,input.failedAt,input.error,input.taskId); return this.readAgentTask(input.taskId); }); return tx(); }
+  failAgentRuntimeTask(input:{taskId:string;workerId:string;failedAt:string;error:string;retryable?:boolean}):AgentRuntimeTask { const tx=this.db.transaction(()=>{ const cur=this.readAgentTask(input.taskId); if(cur.status!=='running'||cur.leaseOwner!==input.workerId) throw new Error(`agent_task_fail_lease_mismatch:${input.taskId}`); const exhausted=input.retryable===false||cur.attempts>=cur.retryPolicy.maxAttempts; const next=addMs(input.failedAt,computeRetryDelayMs(cur.retryPolicy,cur.attempts)); this.db.prepare(`UPDATE cp_agent_runtime_tasks SET status=?,available_at=?,updated_at=?,lease_owner=NULL,lease_until=NULL,last_error=? WHERE task_id=?`).run(exhausted?'dead_letter':'queued',exhausted?cur.availableAt:next,input.failedAt,input.error,input.taskId); return this.readAgentTask(input.taskId); }); return tx(); }
   redriveAgentRuntimeTask(input:{taskId:string;requestedAt:string;reason:string}):AgentRuntimeTask { const tx=this.db.transaction(()=>{ const cur=this.readAgentTask(input.taskId); if(cur.status!=='dead_letter') throw new Error(`agent_task_not_dead_letter:${input.taskId}`); this.db.prepare(`INSERT INTO cp_runtime_redrives (redrive_id,kind,target_id,requested_at,reason,previous_attempts) VALUES (?,'agent_task',?,?,?,?)`).run(redriveId('agent_task',input.taskId,input.requestedAt),input.taskId,input.requestedAt,input.reason,cur.attempts); this.db.prepare(`UPDATE cp_agent_runtime_tasks SET status='queued',attempts=0,available_at=?,updated_at=?,lease_owner=NULL,lease_until=NULL,last_error=NULL WHERE task_id=? AND status='dead_letter'`).run(input.requestedAt,input.requestedAt,input.taskId); return this.readAgentTask(input.taskId); }); return tx(); }
   redriveHandoff(input:{handoffId:string;requestedAt:string;reason:string}):GovernedHandoff { const tx=this.db.transaction(()=>{ const row=this.db.prepare(`SELECT * FROM cp_handoffs WHERE handoff_id=?`).get(input.handoffId) as HandoffRow|undefined; if(!row) throw new Error(`handoff_not_found:${input.handoffId}`); const cur=rowToHandoff(row); if(cur.status!=='dead_letter') throw new Error(`handoff_not_dead_letter:${input.handoffId}`); this.db.prepare(`INSERT INTO cp_runtime_redrives (redrive_id,kind,target_id,requested_at,reason,previous_attempts) VALUES (?,'handoff',?,?,?,?)`).run(redriveId('handoff',input.handoffId,input.requestedAt),input.handoffId,input.requestedAt,input.reason,cur.attempts); this.db.prepare(`UPDATE cp_handoffs SET status='pending',attempts=0,available_at=?,lease_owner=NULL,lease_until=NULL,last_error=NULL WHERE handoff_id=? AND status='dead_letter'`).run(input.requestedAt,input.handoffId); return rowToHandoff(this.db.prepare(`SELECT * FROM cp_handoffs WHERE handoff_id=?`).get(input.handoffId) as HandoffRow); }); return tx(); }
   listRuntimeRedrives():RuntimeRedriveRecord[]{ return (this.db.prepare(`SELECT * FROM cp_runtime_redrives ORDER BY requested_at DESC, rowid DESC`).all() as RuntimeRedriveRow[]).map(rowToRedrive); }

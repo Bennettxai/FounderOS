@@ -7,6 +7,13 @@ export type StartupKnowledgeSource =
   | 'startup-brain'
   | 'unknown';
 
+export type StartupBrainStatus =
+  | 'available'
+  | 'empty'
+  | 'unavailable'
+  | 'disabled'
+  | 'unknown';
+
 export type StartupKnowledgeContextTrace = {
   nodeId: string;
   source: StartupKnowledgeSource;
@@ -14,6 +21,11 @@ export type StartupKnowledgeContextTrace = {
   score: number;
   reasons: string[];
 };
+
+
+const BRAIN_STATUS_REASON_PREFIX =
+  'dual_retrieval:startup-brain-status:';
+
 
 function metadataRecord(
   value: unknown,
@@ -26,6 +38,55 @@ function metadataRecord(
     ? value as Record<string, unknown>
     : {};
 }
+
+
+function startupBrainStatus(
+  context:
+    AgentBrainContext,
+): StartupBrainStatus {
+  for (
+    const item
+    of context.results
+  ) {
+    for (
+      const reason
+      of item.reasons
+    ) {
+      if (
+        !reason.startsWith(
+          BRAIN_STATUS_REASON_PREFIX,
+        )
+      ) {
+        continue;
+      }
+
+
+      const status =
+        reason.slice(
+          BRAIN_STATUS_REASON_PREFIX
+            .length,
+        );
+
+
+      if (
+        status ===
+          'available' ||
+        status ===
+          'empty' ||
+        status ===
+          'unavailable' ||
+        status ===
+          'disabled'
+      ) {
+        return status;
+      }
+    }
+  }
+
+
+  return 'unknown';
+}
+
 
 export function classifyStartupKnowledgeSource(
   item: AgentBrainContext['results'][number],
@@ -63,6 +124,7 @@ export function classifyStartupKnowledgeSource(
 
   return 'unknown';
 }
+
 
 export function summarizeAgentKnowledgeContext(
   context: AgentBrainContext,
@@ -108,6 +170,11 @@ export function summarizeAgentKnowledgeContext(
           'startup-brain',
       ).length,
 
+    startupBrainStatus:
+      startupBrainStatus(
+        context,
+      ),
+
     unknownResults:
       nodes.filter(
         (node) =>
@@ -127,6 +194,7 @@ export function summarizeAgentKnowledgeContext(
     nodes,
   };
 }
+
 
 export function projectAgentKnowledgeContextForModel(
   context: AgentBrainContext,
@@ -157,8 +225,12 @@ export function projectAgentKnowledgeContextForModel(
         item.score,
 
       reasons:
-        item.reasons,
+        item.reasons.filter(
+          (reason) =>
+            !reason.startsWith(
+              BRAIN_STATUS_REASON_PREFIX,
+            ),
+        ),
     }),
   );
 }
-

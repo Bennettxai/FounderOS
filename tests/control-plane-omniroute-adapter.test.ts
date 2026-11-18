@@ -1,3 +1,4 @@
+import { WorkflowArtifactKindSchema, InvestmentWorkflowStateSchema, InvalidationKindSchema } from '@/lib/control-plane/schema';
 import {
   describe,
   expect,
@@ -524,6 +525,44 @@ describe(
         ).toBe(
           'auto',
         );
+
+        const finalOutputDefinition =
+          firstBody.tools.find(
+            (tool: { function?: { name?: string } }) =>
+              tool.function?.name === 'submit_company_output',
+          );
+
+        expect(finalOutputDefinition).toBeDefined();
+
+        const finalOutputSchemaVariants =
+          finalOutputDefinition.function.parameters
+            .properties.operations.items.oneOf;
+
+        const variant = (type: string) =>
+          finalOutputSchemaVariants.find(
+            (item: { properties: { type: { const: string } } }) =>
+              item.properties.type.const === type,
+          );
+
+        expect(
+          variant('register_artifact').properties.artifactKind.enum,
+        ).toEqual(WorkflowArtifactKindSchema.options);
+
+        expect(
+          variant('request_transition').properties.fromState.enum,
+        ).toEqual(InvestmentWorkflowStateSchema.options);
+
+        expect(
+          variant('request_transition').properties.toState.enum,
+        ).toEqual(InvestmentWorkflowStateSchema.options);
+
+        expect(
+          variant('record_invalidation').properties.kind.enum,
+        ).toEqual(InvalidationKindSchema.options);
+
+        expect(
+          variant('register_artifact').properties.artifactKind.enum,
+        ).not.toContain('research_data_request');
 
 
         expect(

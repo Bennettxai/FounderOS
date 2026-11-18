@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 
 import {
   InvalidationKindSchema,
@@ -123,6 +123,26 @@ function errorMessage(
     : String(error);
 }
 
+function isPermanentControlPlaneError(error: unknown): boolean {
+  if (error instanceof ZodError) return true;
+  const message = errorMessage(error);
+  return [
+    'workflow_gates_not_satisfied',
+    'transition_shape_denied',
+    'request_id_reuse_conflict:',
+    'ceo_required_for_transition',
+    'artifact_author_denied:',
+    'principal_not_authorized',
+    'principal_department_not_authorized',
+    'non_agent_principal_not_authorized',
+    'artifact_workflow_id_mismatch',
+    'artifact_creator_must_match_request_principal',
+    'agent_task_workflow_required:',
+    'transition_not_allowed:',
+    'workflow_state_is_',
+  ].some((prefix) => message.startsWith(prefix));
+}
+
 function operationRequestId(
   taskId: string,
   operationIndex: number,
@@ -224,15 +244,26 @@ export class GovernedAgentExecutorRunner {
               )
             : null;
 
-        const output =
-          AgentExecutorOutputSchema.parse(
-            await this.executor.execute({
-              task,
-              workflow,
-              idempotencyKey:
-                `agent-execution:${task.taskId}`,
-            }),
-          );
+        const savedPlan = this.store.getAgentRuntimePlan(task.taskId);
+        const output = AgentExecutorOutputSchema.parse(
+          savedPlan === null
+            ? await this.executor.execute({
+                task,
+                workflow,
+                idempotencyKey: `agent-execution:${task.taskId}`,
+              })
+            : savedPlan,
+        );
+        // Persist the exact normalized model output before CP mutation.
+        // On retry, replay this plan rather than querying the model again.
+        if (savedPlan === null) {
+          this.store.saveAgentRuntimePlan({
+            taskId: task.taskId,
+            workerId: this.options.workerId,
+            savedAt: this.clock(),
+            plan: output,
+          });
+        }
 
         const appliedOperations:
           Array<{
@@ -293,6 +324,7 @@ export class GovernedAgentExecutorRunner {
             this.clock(),
           error:
             errorMessage(error),
+          retryable: !isPermanentControlPlaneError(error),
         });
 
         result.failed += 1;

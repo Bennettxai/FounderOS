@@ -17,9 +17,11 @@ export interface InternalRuntimeStore
   listWorkflowSnapshots(): InvestmentWorkflow[];
   upsertAgentRuntimeTask(input: AgentRuntimeTaskInput): AgentRuntimeTask;
   listAgentRuntimeTasks(input?: { agentId?: string; workflowId?: string; status?: AgentRuntimeTask['status']; }): AgentRuntimeTask[];
+  getAgentRuntimePlan(taskId: string): unknown | null;
+  saveAgentRuntimePlan(input: { taskId: string; workerId: string; savedAt: string; plan: unknown; }): void;
   claimAgentRuntimeTasks(input: { agentId: string; workerId: string; now: string; limit: number; leaseMs: number; }): AgentRuntimeTask[];
   completeAgentRuntimeTask(input: { taskId: string; workerId: string; completedAt: string; result?: Record<string, unknown>; }): AgentRuntimeTask;
-  failAgentRuntimeTask(input: { taskId: string; workerId: string; failedAt: string; error: string; }): AgentRuntimeTask;
+  failAgentRuntimeTask(input: { taskId: string; workerId: string; failedAt: string; error: string; retryable?: boolean; }): AgentRuntimeTask;
   redriveAgentRuntimeTask(input: { taskId: string; requestedAt: string; reason: string; }): AgentRuntimeTask;
   redriveHandoff(input: { handoffId: string; requestedAt: string; reason: string; }): GovernedHandoff;
   listRuntimeRedrives(): RuntimeRedriveRecord[];

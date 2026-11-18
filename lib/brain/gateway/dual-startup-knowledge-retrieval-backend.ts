@@ -17,6 +17,17 @@ type TaggedResult = {
 };
 
 
+type StartupBrainBackendStatus =
+  | 'available'
+  | 'empty'
+  | 'unavailable'
+  | 'disabled';
+
+
+const BRAIN_STATUS_REASON_PREFIX =
+  'dual_retrieval:startup-brain-status:';
+
+
 function descending(
   a:
     BrainRetrievalResult,
@@ -69,6 +80,34 @@ function dedupe(
         return true;
       },
     );
+}
+
+
+function tagResult(
+  result:
+    BrainRetrievalResult,
+
+  source:
+    'memory' |
+    'brain',
+
+  brainStatus:
+    StartupBrainBackendStatus,
+): BrainRetrievalResult {
+  return {
+    ...result,
+
+    reasons: [
+      ...result.reasons,
+
+      source ===
+        'memory'
+        ? 'dual_retrieval:startup-memory'
+        : 'dual_retrieval:startup-brain',
+
+      `${BRAIN_STATUS_REASON_PREFIX}${brainStatus}`,
+    ],
+  };
 }
 
 
@@ -136,17 +175,6 @@ export class DualStartupKnowledgeRetrievalBackend
           );
 
 
-    /*
-     * Startup Memory is foundational and
-     * local. If it fails, the request
-     * should fail visibly.
-     *
-     * Experiential Brain retrieval may
-     * degrade temporarily (for example
-     * Cognee being offline) without
-     * depriving the employee of canonical
-     * company knowledge.
-     */
     const memory =
       dedupe(
         await memoryPromise,
@@ -158,14 +186,35 @@ export class DualStartupKnowledgeRetrievalBackend
         [];
 
 
+    let brainStatus:
+      StartupBrainBackendStatus =
+        this.input
+          .brainBackend
+          ? 'empty'
+          : 'disabled';
+
+
     try {
       brain =
         dedupe(
           await brainPromise,
         );
+
+
+      brainStatus =
+        brain.length >
+          0
+          ? 'available'
+          : this.input
+              .brainBackend
+              ? 'empty'
+              : 'disabled';
     } catch {
       brain =
         [];
+
+      brainStatus =
+        'unavailable';
     }
 
 
@@ -189,14 +238,12 @@ export class DualStartupKnowledgeRetrievalBackend
         .map(
           (
             result,
-          ) => ({
-            ...result,
-
-            reasons: [
-              ...result.reasons,
-              'dual_retrieval:startup-memory',
-            ],
-          }),
+          ) =>
+            tagResult(
+              result,
+              'memory',
+              brainStatus,
+            ),
         );
     }
 
@@ -213,14 +260,12 @@ export class DualStartupKnowledgeRetrievalBackend
         .map(
           (
             result,
-          ) => ({
-            ...result,
-
-            reasons: [
-              ...result.reasons,
-              'dual_retrieval:startup-brain',
-            ],
-          }),
+          ) =>
+            tagResult(
+              result,
+              'brain',
+              brainStatus,
+            ),
         );
     }
 
@@ -389,20 +434,12 @@ export class DualStartupKnowledgeRetrievalBackend
     return selected.map(
       (
         item,
-      ) => ({
-        ...item.result,
-
-        reasons: [
-          ...item.result
-            .reasons,
-
-          item.source ===
-            'memory'
-            ? 'dual_retrieval:startup-memory'
-            : 'dual_retrieval:startup-brain',
-        ],
-      }),
+      ) =>
+        tagResult(
+          item.result,
+          item.source,
+          brainStatus,
+        ),
     );
   }
 }
-

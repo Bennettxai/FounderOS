@@ -1,4 +1,5 @@
-﻿import { z } from 'zod';
+import { z } from 'zod';
+import { WorkflowArtifactKindSchema, InvestmentWorkflowStateSchema, InvalidationKindSchema } from '@/lib/control-plane/schema';
 
 import {
   AgentExecutorOutputSchema,
@@ -198,6 +199,7 @@ const FINAL_OUTPUT_PARAMETERS = {
               artifactKind: {
                 type:
                   'string',
+                enum: WorkflowArtifactKindSchema.options,
               },
 
               summary: {
@@ -237,11 +239,13 @@ const FINAL_OUTPUT_PARAMETERS = {
               fromState: {
                 type:
                   'string',
+                enum: InvestmentWorkflowStateSchema.options,
               },
 
               toState: {
                 type:
                   'string',
+                enum: InvestmentWorkflowStateSchema.options,
               },
 
               reason: {
@@ -274,6 +278,7 @@ const FINAL_OUTPUT_PARAMETERS = {
               kind: {
                 type:
                   'string',
+                enum: InvalidationKindSchema.options,
               },
 
               reason: {
@@ -482,7 +487,11 @@ function systemPrompt(
     '- Never request, reveal or reproduce credentials, API keys or credential handles.',
     '- Do not provide or persist hidden chain-of-thought. Return only concise governed rationale.',
     '- Workflow mutations are proposals only and must go through submit_company_output.',
+    '- Never request a stage transition unless required artifacts already exist or are registered earlier in the same operations list with sufficient evidence.',
+    '- If reliable research evidence is missing, disclose the gap; do not invent a proposal or advance the workflow.',
     '- When the task is complete, call submit_company_output exactly once.',
+    '- Only use artifact kinds explicitly allowed by the output schema.',
+    '- If necessary live evidence is unavailable, explain the limitation in summary and return operations: []. Never fabricate a research proposal or advance the workflow.',
     '',
     'Research efficiency rules:',
     '- Use relevant Startup Memory and Startup Brain context already supplied before seeking equivalent information externally.',
