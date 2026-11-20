@@ -1,7 +1,8 @@
 'use client';
 /**
- * Glass surface and the glass budget (02 section 4). At most GLASS_BUDGET blurred surfaces are in view;
- * the rest paint --lab-glass-solid. Small controls use tone 'tint' and never blur.
+ * Glass surface and the glass budget (02 section 4). At most GLASS_BUDGET blurred surfaces are in view
+ * (24: page glass takes the glass pack's 3px light frost, see tokens.ts); the rest paint the solid face.
+ * Small controls use tone 'tint' and never blur.
  */
 import {
   createContext, forwardRef, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState,

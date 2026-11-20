@@ -1,0 +1,77 @@
+/**
+ * The Chrome audit scripts on the glass pack (they drive Chrome over CDP, so they never run here;
+ * their pure parts do).
+ *
+ * - scripts/ground-check.mjs: a glass face is transparent by design (its frost and its light cover
+ *   the ground), so a pixel on one is "covered", not a cut-off ground.
+ * - The Content Lab blur budget (components/lab/v2/shared/tokens.ts GLASS_BUDGET) rose from 12 now
+ *   that page glass takes the 3px light frost; g-audit's lab-glass-budget check reads the same cap.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, test } from 'vitest';
+import { GLASS_FACE_SELECTOR, coversPoint } from '../scripts/ground-lib.mjs';
+import { LAB_GLASS_BUDGET } from '../scripts/g-audit/_lab.mjs';
+import { GLASS_BUDGET } from '@/components/lab/v2/shared/tokens';
+import { FACE_CLASSES } from './helpers/glass-lint';
+
+const read = (rel: string) => fs.readFileSync(path.join(__dirname, '..', rel), 'utf8');
+const CLEAR = { backgroundColor: 'rgba(0, 0, 0, 0)', backgroundImage: 'none', backdropFilter: 'none', tagName: 'DIV', isFace: false };
+
+describe('ground-check: what covers a sampled point', () => {
+  test('an opaque background, a background image or media covers it', () => {
+    expect(coversPoint({ ...CLEAR, backgroundColor: 'rgb(12, 12, 12)' })).toBe(true);
+    expect(coversPoint({ ...CLEAR, backgroundImage: 'linear-gradient(red, blue)' })).toBe(true);
+    for (const tagName of ['IMG', 'VIDEO', 'CANVAS', 'svg']) expect(coversPoint({ ...CLEAR, tagName }), tagName).toBe(true);
+  });
+
+  test('a transparent element is not a cover (any zero alpha)', () => {
+    expect(coversPoint(CLEAR)).toBe(false);
+    expect(coversPoint({ ...CLEAR, backgroundColor: 'rgba(12, 34, 56, 0)' })).toBe(false);
+    expect(coversPoint({ ...CLEAR, backgroundColor: 'transparent' })).toBe(false);
+  });
+
+  test('a transparent glass face covers it: its frost and its light are the face', () => {
+    expect(coversPoint({ ...CLEAR, isFace: true })).toBe(true);
+    expect(coversPoint({ ...CLEAR, backdropFilter: 'blur(3px) saturate(1.5)' })).toBe(true);
+  });
+
+  test('the face selector names every glass face class', () => {
+    const named = GLASS_FACE_SELECTOR.split(/\s*,\s*/).map((s: string) => s.replace(/^\./, ''));
+    expect([...named].sort()).toEqual([...FACE_CLASSES].sort());
+  });
+
+  test('ground-check runs the same function in the page', () => {
+    const src = read('scripts/ground-check.mjs');
+    expect(src).toMatch(/import \{[^}]*coversPoint[^}]*\} from '\.\/ground-lib\.mjs'/);
+    expect(src).toContain('${coversPoint.toString()}');
+    expect(src).toContain('e.matches(${JSON.stringify(GLASS_FACE_SELECTOR)})');
+    expect(src).not.toMatch(/const opaque = \(cs\.backgroundColor/);
+  });
+
+  test('coversPoint closes over nothing (it is serialised into the page)', () => {
+    const body = coversPoint.toString();
+    expect(body).toMatch(/^function coversPoint\(/);
+    expect(body).not.toMatch(/GLASS_FACE_SELECTOR|import|require\(/);
+  });
+});
+
+describe('the Lab blur budget follows the light frost', () => {
+  test('raised from 12 now that page glass frosts at 3px, with the reasoning next to the number', () => {
+    expect(GLASS_BUDGET).toBe(24);
+    const src = read('components/lab/v2/shared/tokens.ts');
+    const at = src.indexOf('export const GLASS_BUDGET');
+    const doc = src.slice(Math.max(0, src.lastIndexOf('/**', at)), at);
+    expect(doc).toMatch(/3px/);
+    expect(doc).toMatch(/20px/);
+    expect(doc).toMatch(/12/);
+  });
+
+  test("g-audit's lab-glass-budget check reads the same cap (no literal 12)", () => {
+    expect(LAB_GLASS_BUDGET).toBe(GLASS_BUDGET);
+    const src = read('scripts/g-audit.mjs');
+    expect(src).toMatch(/g\.blurred > LAB_GLASS_BUDGET/);
+    expect(src).toMatch(/\(max \$\{LAB_GLASS_BUDGET\}\)/);
+    expect(src).not.toMatch(/blurred > 12|max 12\)/);
+  });
+});

@@ -8,6 +8,13 @@
 //   reducedGlassInPage  item 5: every [data-lab='Glass'] opaque with no backdrop filter.
 //   labHeroesInPage     item 3: GHeroCard and LabNarrative in view (max 2).
 
+/**
+ * The lab-glass-budget cap: at most this many blurred surfaces in view in the Lab. Mirrors
+ * components/lab/v2/shared/tokens.ts GLASS_BUDGET (24 since page glass takes the 3px light frost;
+ * the reasoning is there). tests/glass-audit-scripts.test.ts keeps the two equal.
+ */
+export const LAB_GLASS_BUDGET = 24;
+
 /** The 13 styles of 02 section 14. */
 export const LAB_STYLES = [
   ...['ice', 'lime', 'ember', 'mint'].flatMap((accent) => ['dark', 'light'].map((mode) => ({ id: `glados-${accent}-${mode}`, ui: 'glados', accent, mode }))),

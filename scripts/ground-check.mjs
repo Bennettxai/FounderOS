@@ -2,7 +2,8 @@
 // For every route × theme × width it loads the page, scrolls to the end and samples three pixels 4px
 // above the viewport bottom (sidebar + 18, centre, right - 8; right = layout viewport, scrollbar excluded). Each must equal the page ground: the
 // computed background of <html>, or the page-scoped ground layer (.ae-ground, .ap-ground, and the Content Lab v2 .lab2-aurora, AC-02-41). A pixel
-// covered by an opaque content element or its drop shadow is reported as covered, not as a cut-off. Under Grey Frost it
+// covered by an opaque content element, a glass face (transparent by design: its frost and light cover the ground; scripts/ground-lib.mjs)
+// or a drop shadow is reported as covered, not as a cut-off. Under Grey Frost it
 // also looks for near-black regions larger than 200x200 (holes left by literal blacks), ignoring media
 // and dialogs. Screenshots land in <outdir>/<theme>/<route>-<width>-bottom.png. PNGs are decoded with
 // zlib, no extra dependency. Same Chrome as theme-audit.mjs (CDP on 9333 or CDP_PORT).
@@ -10,6 +11,7 @@
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 import { THEME_IDS, cdp, routesFromEnv } from './audit-routes.mjs';
+import { GLASS_FACE_SELECTOR, coversPoint } from './ground-lib.mjs';
 
 const [,, themesArg = 'all', routesArg = 'all', outArg, widthsArg = '1440,2200'] = process.argv;
 const BASE = process.env.BASE ?? 'http://127.0.0.1:4302';
@@ -67,12 +69,13 @@ const rgbOf = (s) => {
 
 /** What sits on a point: 'ground' when only page-level layers are there, else the covering element. */
 const PROBE = (x, y) => `(()=>{
+  const covers = ${coversPoint.toString()};
   const stack = document.elementsFromPoint(${x}, ${y});
   const ground = (e) => e === document.documentElement || e === document.body || e.matches('.page-ground, .ae-ground, .ap-ground, .lab2-aurora, [data-lab-root], main, .os-shell, [data-creative-engine], [data-adpilot]') || (e.parentElement === document.querySelector('main') && getComputedStyle(e).backgroundColor === 'rgba(0, 0, 0, 0)');
   for (const e of stack) {
     if (ground(e)) continue;
     const cs = getComputedStyle(e);
-    const opaque = (cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && !cs.backgroundColor.endsWith(', 0)')) || cs.backgroundImage !== 'none' || ['IMG','VIDEO','CANVAS','svg'].includes(e.tagName);
+    const opaque = covers({ backgroundColor: cs.backgroundColor, backgroundImage: cs.backgroundImage, backdropFilter: cs.backdropFilter || cs.webkitBackdropFilter, tagName: e.tagName, isFace: e.matches(${JSON.stringify(GLASS_FACE_SELECTOR)}) });
     if (opaque) return (e.tagName.toLowerCase() + '.' + String(e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className).split(' ').slice(0, 2).join('.')).slice(0, 60);
   }
   // a drop shadow cast by a card that ends just above the point is content, not a cut-off

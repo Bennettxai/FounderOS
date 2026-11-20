@@ -82,7 +82,7 @@ import {
   parseMasks, readGReady, readyEntryFor, routeInReady, routeSlug,
 } from './g-audit/_lib.mjs';
 import {
-  LAB_PIXEL, LAB_ROUTES, LAB_STYLES, glassScanInPage, labHeroesInPage, pixelTargetsInPage, reducedGlassInPage, sampleTargets,
+  LAB_GLASS_BUDGET, LAB_PIXEL, LAB_ROUTES, LAB_STYLES, glassScanInPage, labHeroesInPage, pixelTargetsInPage, reducedGlassInPage, sampleTargets,
 } from './g-audit/_lab.mjs';
 
 // ── args ─────────────────────────────────────────────────────────────────────────────────────
@@ -442,7 +442,7 @@ async function labGlassChecks(step) {
     await S.ev(`window.scrollTo(0, ${i * vh})`);
     await sleep(1200); // the budget re-grants on the next frame after its IntersectionObserver fires
     const g = await S.ev(`(${glassScanInPage.toString()})()`);
-    if (g.blurred > 12) fails.push({ check: 'lab-glass-budget', step, detail: `${g.blurred} blurred surfaces in view at scroll ${i} (max 12)` });
+    if (g.blurred > LAB_GLASS_BUDGET) fails.push({ check: 'lab-glass-budget', step, detail: `${g.blurred} blurred surfaces in view at scroll ${i} (max ${LAB_GLASS_BUDGET})` });
     for (const b of g.borders) fails.push({ check: 'card-border', step, el: b.el, detail: `Glass border ${b.border}` });
     for (const sh of g.shadows) for (const b of badShadows(sh.boxShadow)) fails.push({ check: b.why === 'outer glow' ? 'outer-glow' : 'hued-shadow', step, el: sh.el, detail: sh.boxShadow.slice(0, 120) });
     const heroes = await S.ev(`(${labHeroesInPage.toString()})()`);
