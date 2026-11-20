@@ -95,6 +95,22 @@ describe('g-audit colour rules', () => {
     expect(badShadows('rgba(0, 255, 171, 0.4) 0px 8px 24px 0px').map((s) => s.why)).toEqual(['hued shadow']);
     expect(badShadows('rgba(0, 0, 0, 0.5) 0px 0px 30px 0px').map((s) => s.why)).toEqual(['outer glow']);
     expect(badShadows('none')).toEqual([]);
+    // the glass recipe (glass pack): a 1px groove hairline, a neutral drop and inset rim/low/pool/shade layers pass
+    expect(badShadows('rgba(0, 0, 0, 0.55) 0px 0px 0px 1px')).toEqual([]);
+    expect(badShadows('rgba(16, 16, 24, 0.1) 0px 0px 0px 1px')).toEqual([]);
+    const recipe = [
+      'rgba(0, 0, 0, 0.55) 0px 0px 0px 1px',
+      'rgba(0, 0, 0, 0.6) 0px 8px 18px -8px',
+      'rgba(255, 255, 255, 0.15) 0px 0px 0px 1px inset',
+      'rgba(255, 255, 255, 0.3) 0px -1px 0px 0px inset',
+      'rgba(255, 255, 255, 0.09) 0px -18px 26px -18px inset',
+      'rgba(0, 0, 0, 0.5) 0px 12px 18px -14px inset',
+    ].join(', ');
+    expect(badShadows(recipe)).toEqual([]);
+    // a wider ring, a blurred ring or a hued hairline is still a glow
+    expect(badShadows('rgba(0, 0, 0, 0.55) 0px 0px 0px 2px').map((s) => s.why)).toEqual(['outer glow']);
+    expect(badShadows('rgba(0, 0, 0, 0.55) 0px 0px 4px 1px').map((s) => s.why)).toEqual(['outer glow']);
+    expect(badShadows('rgba(0, 255, 171, 0.5) 0px 0px 0px 1px').map((s) => s.why)).toEqual(['outer glow']);
     expect(isHued([20, 20, 22])).toBe(false);
     expect(isHued([159, 198, 255])).toBe(true);
   });

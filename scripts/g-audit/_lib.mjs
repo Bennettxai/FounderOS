@@ -289,12 +289,14 @@ export function parseShadows(v) {
 
 /**
  * Shadow layers that break S00 §3.3.8: an accent-hued colour, or an outer glow (outset, no
- * offset, some blur or spread). Transparent layers and inset strokes are ignored.
+ * offset, some blur or a spread wider than a hairline). Transparent layers and inset strokes are
+ * ignored, and so is the glass groove (glass pack): a neutral, unblurred 1px ring that only draws
+ * the face's edge.
  */
 export function badShadows(v) {
   return parseShadows(v).filter((s) => {
     if (s.inset || !s.color || s.color[3] < 0.04) return false;
-    const glow = s.x === 0 && s.y === 0 && (s.blur > 0 || s.spread > 0);
+    const glow = s.x === 0 && s.y === 0 && (s.blur > 0 || s.spread > 1);
     return glow || isHued(s.color);
   }).map((s) => ({ ...s, why: s.x === 0 && s.y === 0 ? 'outer glow' : 'hued shadow' }));
 }
