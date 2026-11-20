@@ -2,7 +2,7 @@ import type { Config } from 'tailwindcss';
 
 // Terminal direction tokens — source of truth mirrored as CSS vars in globals.css
 const config: Config = {
-  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './founderos/**/*.{ts,tsx}'],
   theme: {
     extend: {
       screens: {

@@ -9,9 +9,9 @@ import { VolumeMeter } from '@/founderos/components/VolumeMeter';
  * in that light"). DealBoard is the reference; every page composes these so
  * the opening beat, the sweeping meters and the numerals read the same OS-wide:
  *
- *   <Slab>                       the floating 28px surface (.os-slab)
+ *   <Slab>                       the page column (the 28px slab itself is LegacySlab's)
  *     <SlabTitle … />            eyebrow · 46px title · mono meta · actions
- *     <SlabCard title i>          inset card, rises on the stagger, lifts on hover
+ *     <SlabCard title i>          a glass face, materialises on the stagger, lifts on hover
  *       <BigStat …/>              50px count-up + dot chips + caption
  *       <MeterStack meters/>      the Deal Volume bars
  *     <InsightCard …/>            the ONE gradient card a page may carry
@@ -35,8 +35,16 @@ export const PILL_ACCENT =
 export const chipClass = (active: boolean) =>
   `pressable rounded-full px-4 py-1.5 text-[12.5px] ${active ? 'bg-os-accent font-semibold text-os-ink' : 'border border-os-border text-os-muted hover:text-os-text'}`;
 
+/**
+ * The page column. Under Bennett Legacy the page already sits on LegacySlab's .l-slab
+ * (app/layout.tsx), so this adds no second surface (v1's slab class never had a rule in v3).
+ */
 export function Slab({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`os-slab ${className}`.trim()}>{children}</div>;
+  return (
+    <div data-fo="Slab" className={className || undefined}>
+      {children}
+    </div>
+  );
 }
 
 export function SlabTitle({ eyebrow, title, meta, right }: { eyebrow?: string; title: string; meta?: ReactNode; right?: ReactNode }) {
@@ -68,7 +76,8 @@ export function SlabCard({
   children?: ReactNode;
 }) {
   return (
-    <Rise i={i} className={`rise-card relative min-w-0 rounded-[12px] border border-os-border bg-os-surface ${className}`.trim()}>
+    // A glass face (glass pack: transparent, lit, frosted) that materialises on the 90ms stagger.
+    <Rise i={i} className={`glass-face gl-materialise l-rise-card relative min-w-0 rounded-[var(--gl-r-card)] ${className}`.trim()}>
       {title && (
         <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-5">
           <div className="flex min-w-0 items-baseline gap-2">
@@ -180,7 +189,7 @@ export function InsightCard({
   return (
     <Rise
       i={i}
-      className={`rise-card relative min-w-0 overflow-hidden rounded-[12px] border border-transparent ${className}`.trim()}
+      className={`l-rise-card relative min-w-0 overflow-hidden rounded-[var(--gl-r-card)] border border-transparent ${className}`.trim()}
       style={{
         background: [
           'radial-gradient(120% 90% at 85% 8%, color-mix(in oklab, var(--tile-glow-a) 55%, transparent), transparent 60%)',
@@ -189,8 +198,8 @@ export function InsightCard({
           'var(--insight-base)',
         ].join(', '),
         backgroundSize: '160% 160%',
-        // the rise beat and the slow glow drift share one animation list
-        animation: 'os-rise .6s var(--ease) calc(var(--rise-i) * 90ms) backwards, os-drift 14s ease-in-out 1s infinite alternate',
+        // the rise beat and the slow glow drift share one animation list (the Legacy kit's keyframes)
+        animation: 'l-rise .6s var(--l-ease) calc(var(--l-rise-i) * 90ms) backwards, l-drift 14s ease-in-out 1s infinite alternate',
       }}
     >
       <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: GRAIN, mixBlendMode: 'overlay', opacity: 0.85 }} />
