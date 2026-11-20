@@ -85,7 +85,7 @@ describe('treeFor (X5 generalised)', () => {
 describe('Legacy appearance: themes, cookie, AC-5 round trip', () => {
   test('mono skin wears Monolith in dark and Daylight in light; system follows the OS; ?mode= forces', () => {
     const a: Appearance = { ui: 'legacy', accent: 'ice', mode: 'dark', skin: 'mono' };
-    expect(htmlAttributes(resolveAppearance(a))).toEqual({ 'data-ui': 'legacy', 'data-accent': 'ice', 'data-mode-pref': 'dark', 'data-mode': 'dark', 'data-theme': 'monolith' });
+    expect(htmlAttributes(resolveAppearance(a))).toEqual({ 'data-ui': 'legacy', 'data-accent': 'ice', 'data-mode-pref': 'dark', 'data-mode': 'dark', 'data-theme': 'monolith', 'data-ground': 'black' });
     expect(resolveAppearance({ ...a, mode: 'light' }).theme).toBe('daylight');
     expect(resolveAppearance({ ...a, mode: 'system' }, { prefersLight: true })).toMatchObject({ modePref: 'system', mode: 'light', theme: 'daylight' });
     expect(resolveAppearance({ ...a, mode: 'system' })).toMatchObject({ mode: 'dark', theme: 'monolith' }); // server: system renders dark

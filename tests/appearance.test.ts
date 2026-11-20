@@ -17,6 +17,7 @@ import {
   classicMode,
   createAppearanceObserver,
   deriveClassicTheme,
+  groundFor,
   htmlAttributes,
   isGReady,
   migrateLegacy,
@@ -27,6 +28,7 @@ import {
   resolveMode,
   serializeAppearance,
   usesGTree,
+  LEGACY_THEMES,
   type AppearanceEnv,
   type Appearance,
   type Mode,
@@ -129,7 +131,37 @@ describe('model: cookie, defaults, derive, migrate (SPEC S00 FR-1 to FR-7)', () 
       'data-mode-pref': 'dark',
       'data-mode': 'dark',
       'data-theme': 'grey-frost',
+      'data-ground': 'grey',
     });
+  });
+
+  test('groundFor: the ground every theme paints, which the glass light reads (glass brief §2)', () => {
+    // Classic and Legacy follow the theme's own ground
+    expect(groundFor('monolith', 'dark')).toBe('black');
+    expect(groundFor('console', 'dark')).toBe('black');
+    expect(groundFor('red', 'dark')).toBe('black');
+    expect(groundFor('frost', 'dark')).toBe('black');
+    expect(groundFor('grey-frost', 'dark')).toBe('grey');
+    expect(groundFor('daylight', 'light')).toBe('white');
+    expect(groundFor('light', 'light')).toBe('white');
+    // a forced ?mode= does not repaint a Classic theme's ground
+    expect(groundFor('red', 'light', 'classic')).toBe('black');
+    // GladOS paints its own ground: grey in dark for every accent, white in light
+    for (const accent of ACCENT_IDS) {
+      expect(groundFor(deriveClassicTheme(accent, 'dark'), 'dark', 'glados'), accent).toBe('grey');
+      expect(groundFor(deriveClassicTheme(accent, 'light'), 'light', 'glados'), accent).toBe('white');
+    }
+    // every theme the code defines has a ground
+    for (const t of [...THEMES, ...LEGACY_THEMES]) expect(['black', 'grey', 'white'], t).toContain(groundFor(t, 'dark'));
+  });
+
+  test('htmlAttributes carries data-ground for every style', () => {
+    expect(htmlAttributes(resolveAppearance(parseAppearanceCookie('legacy.mono.dark')))['data-ground']).toBe('black');
+    expect(htmlAttributes(resolveAppearance(parseAppearanceCookie('legacy.mono.light')))['data-ground']).toBe('white');
+    expect(htmlAttributes(resolveAppearance(parseAppearanceCookie('glados.ember.dark')))['data-ground']).toBe('grey');
+    expect(htmlAttributes(resolveAppearance(parseAppearanceCookie('glados.lime.light')))['data-ground']).toBe('white');
+    expect(htmlAttributes(resolveAppearance({ ui: 'classic', accent: 'ice', mode: 'dark' }, { classicTheme: 'grey-frost' }))['data-ground']).toBe('grey');
+    expect(htmlAttributes(resolveAppearance({ ui: 'classic', accent: 'ice', mode: 'dark' }, { classicTheme: 'light' }))['data-ground']).toBe('white');
   });
 
   test('server: system renders dark (edge 4); Classic renders the default theme until the script reads storage', () => {
@@ -216,6 +248,7 @@ const attrsOf = (f: Fake) => ({
   'data-mode-pref': f.attrs['data-mode-pref'],
   'data-mode': f.attrs['data-mode'],
   'data-theme': f.attrs['data-theme'],
+  'data-ground': f.attrs['data-ground'],
 });
 
 describe('APPEARANCE_INIT_SCRIPT (pre-paint)', () => {
@@ -267,7 +300,7 @@ describe('APPEARANCE_INIT_SCRIPT (pre-paint)', () => {
       const f = runScript({ storage: { [THEME_STORAGE_KEY]: theme } });
       const m = migrateLegacy(theme);
       expect(f.cookieWrites, theme).toEqual([appearanceCookie({ ui: 'classic', accent: m.accent, mode: m.mode })]);
-      expect(attrsOf(f), theme).toEqual({ 'data-ui': 'classic', 'data-accent': m.accent, 'data-mode-pref': classicMode(theme), 'data-mode': classicMode(theme), 'data-theme': theme });
+      expect(attrsOf(f), theme).toEqual({ 'data-ui': 'classic', 'data-accent': m.accent, 'data-mode-pref': classicMode(theme), 'data-mode': classicMode(theme), 'data-theme': theme, 'data-ground': groundFor(theme, classicMode(theme)) });
       expect(f.storage.get(THEME_STORAGE_KEY), 'Classic keeps its own key').toBe(theme);
     }
   });
@@ -276,13 +309,13 @@ describe('APPEARANCE_INIT_SCRIPT (pre-paint)', () => {
     const f = runScript({});
     expect(f.cookieWrites).toEqual([appearanceCookie(DEFAULT_APPEARANCE)]);
     // the client build opens on Bennett Legacy · Monolith · Dark
-    expect(attrsOf(f)).toEqual({ 'data-ui': 'legacy', 'data-accent': 'ice', 'data-mode-pref': 'dark', 'data-mode': 'dark', 'data-theme': 'monolith' });
+    expect(attrsOf(f)).toEqual({ 'data-ui': 'legacy', 'data-accent': 'ice', 'data-mode-pref': 'dark', 'data-mode': 'dark', 'data-theme': 'monolith', 'data-ground': 'black' });
     expect(f.storage.get('glados-legacy-skin')).toBe('mono');
   });
 
   test('blocked storage: attributes still apply from the cookie (edge 1)', () => {
     const f = runScript({ cookie: 'glados.lime.light', storageThrows: true });
-    expect(attrsOf(f)).toEqual({ 'data-ui': 'glados', 'data-accent': 'lime', 'data-mode-pref': 'light', 'data-mode': 'light', 'data-theme': 'light' });
+    expect(attrsOf(f)).toEqual({ 'data-ui': 'glados', 'data-accent': 'lime', 'data-mode-pref': 'light', 'data-mode': 'light', 'data-theme': 'light', 'data-ground': 'white' });
   });
 
   test('ae-mode is deleted and never promoted (FR-10, Q-SYS-4)', () => {
@@ -302,11 +335,15 @@ describe('APPEARANCE_INIT_SCRIPT (pre-paint)', () => {
 
   test('FR-5: System follows the OS live, and stops once the preference is not System', () => {
     const f = runScript({ cookie: 'glados.ember.system', prefersLight: false });
-    expect(attrsOf(f)).toMatchObject({ 'data-mode-pref': 'system', 'data-mode': 'dark', 'data-theme': 'red' });
+    expect(attrsOf(f)).toMatchObject({ 'data-mode-pref': 'system', 'data-mode': 'dark', 'data-theme': 'red', 'data-ground': 'grey' });
     f.fireScheme(true);
-    expect(attrsOf(f)).toMatchObject({ 'data-mode': 'light', 'data-theme': 'light' });
+    expect(attrsOf(f)).toMatchObject({ 'data-mode': 'light', 'data-theme': 'light', 'data-ground': 'white' });
     f.fireScheme(false);
-    expect(attrsOf(f)).toMatchObject({ 'data-mode': 'dark', 'data-theme': 'red' });
+    expect(attrsOf(f)).toMatchObject({ 'data-mode': 'dark', 'data-theme': 'red', 'data-ground': 'grey' });
+    const l = runScript({ cookie: 'legacy.mono.system', prefersLight: false });
+    expect(attrsOf(l)).toMatchObject({ 'data-theme': 'monolith', 'data-ground': 'black' });
+    l.fireScheme(true);
+    expect(attrsOf(l)).toMatchObject({ 'data-theme': 'daylight', 'data-ground': 'white' });
     f.attrs['data-mode-pref'] = 'dark'; // Settings switched to Dark later
     f.fireScheme(true);
     expect(f.attrs['data-mode']).toBe('dark');
@@ -421,6 +458,12 @@ describe('layout wiring (FR-2)', () => {
     expect(layout).toContain('__html: APPEARANCE_INIT_SCRIPT');
     expect(layout).not.toContain('THEME_INIT_SCRIPT');
     expect(read('lib/theme.ts')).not.toMatch(/export const THEME_INIT_SCRIPT/);
+  });
+
+  test('the ground rides along wherever the theme is written by hand (glass brief §2)', () => {
+    // htmlAttributes carries it for the server render, AppearanceSync and writeAppearance; the Classic picker sets data-theme itself
+    expect(read('components/AppearanceSync.tsx')).toContain('htmlAttributes(r)');
+    expect(read('components/ThemePicker.tsx')).toMatch(/setAttribute\('data-ground', groundFor\(/);
   });
 
   test('next/headers stays in the server module, out of anything a client component imports', () => {

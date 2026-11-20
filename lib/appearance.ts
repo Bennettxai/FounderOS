@@ -17,7 +17,8 @@
  * <html> attributes: data-ui, data-accent, data-mode-pref (the stored choice,
  * may be `system`), data-mode (always `dark` | `light`), data-theme (the
  * Classic theme, or under `glados` the one derived from accent and mode so
- * unconverted pages stay coherent, FR-3).
+ * unconverted pages stay coherent, FR-3), data-ground (black | grey | white:
+ * the ground that theme paints, which the glass light reads, see groundFor).
  *
  * This module is safe to import from server and client code. The server reader
  * is lib/appearance-server.ts (next/headers), the React hook lib/use-appearance.ts.
@@ -173,6 +174,35 @@ export function deriveClassicTheme(accent: Accent, mode: Mode): Theme {
   return 'console';
 }
 
+/**
+ * The ground a page paints under the glass (FounderOS Glass brief §2): the
+ * groove, drop and shade are tuned per ground, and on a white ground the drop
+ * carries the shape while the groove becomes a hairline (`[data-ground='white']`
+ * in app/globals.css). Classic and Legacy paint their theme's ground; GladOS
+ * paints its own (--g-bg): grey in dark for every accent (Q-SYS-3), white in light.
+ */
+export const GROUNDS = ['black', 'grey', 'white'] as const;
+export type Ground = (typeof GROUNDS)[number];
+export const GROUND_BY_THEME: Record<Theme | LegacyTheme, Ground> = {
+  console: 'black',
+  red: 'black',
+  frost: 'black',
+  'grey-frost': 'grey',
+  light: 'white',
+  monolith: 'black',
+  daylight: 'white',
+};
+
+/**
+ * `ui` is optional: without it the theme decides. A forced `?mode=` does not
+ * repaint a Classic theme, so under Classic and Legacy the mode only breaks
+ * the tie for a theme this table does not know.
+ */
+export function groundFor(theme: string, mode: Mode, ui?: UiStyle): Ground {
+  if (ui === 'glados') return mode === 'light' ? 'white' : 'grey';
+  return (GROUND_BY_THEME as Record<string, Ground>)[theme] ?? (mode === 'light' ? 'white' : 'black');
+}
+
 /** FR-4: under `classic` the mode follows the theme. */
 export function classicMode(theme: Theme): Mode {
   return theme === 'light' ? 'light' : 'dark';
@@ -233,6 +263,7 @@ export function htmlAttributes(r: AppliedAppearance) {
     'data-mode-pref': r.modePref,
     'data-mode': r.mode,
     'data-theme': r.theme,
+    'data-ground': groundFor(r.theme, r.mode, r.ui),
   } as const;
 }
 
@@ -288,7 +319,7 @@ export function usesGTree(a: { ui: UiStyle }, pathname: string, ready?: readonly
  *    fresh install and takes the FR-7 default. The cookie is then written so the server agrees next request.
  * 3. `ae-mode` is deleted (FR-10).
  * 4. Attributes applied: `system` resolved with matchMedia, `?mode=` applied
- *    for this load only, data-theme derived under glados.
+ *    for this load only, data-theme derived under glados, data-ground from groundFor.
  * 5. A live `change` listener on the OS scheme re-applies when the current
  *    preference (read from <html>, so a later Settings change counts) is system.
  * Storage or cookie failures are swallowed: attributes still apply (edge 1).
@@ -297,7 +328,7 @@ export const APPEARANCE_INIT_SCRIPT = `(function(){try{
 var d=document.documentElement;
 var U=${JSON.stringify(UI_STYLES)},A=${JSON.stringify(ACCENT_IDS)},M=${JSON.stringify(MODE_PREFS)},T=${JSON.stringify(THEMES)},SK=${JSON.stringify(LEGACY_SKINS)};
 var D=${JSON.stringify(DEFAULT_APPEARANCE)},DA=${JSON.stringify(DEFAULT_ACCENT)},DS=${JSON.stringify(DEFAULT_LEGACY_SKIN)},DT=${JSON.stringify(DEFAULT_THEME)},L=${JSON.stringify(LEGACY_MAP)};
-var K=${JSON.stringify(STORAGE_KEYS)},C=${JSON.stringify(APPEARANCE_COOKIE)};
+var K=${JSON.stringify(STORAGE_KEYS)},C=${JSON.stringify(APPEARANCE_COOKIE)},G=${JSON.stringify(GROUND_BY_THEME)};
 function g(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function s(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function ok(l,v){return l.indexOf(v)>=0}
@@ -315,11 +346,12 @@ var mq=null;try{mq=window.matchMedia('(prefers-color-scheme: light)');}catch(e){
 var ct=g(${JSON.stringify(THEME_STORAGE_KEY)});if(!ok(T,ct))ct=DT;
 function dv(ac,md){return md==='light'?'light':ac==='ice'?'grey-frost':ac==='ember'?'red':'console'}
 function lv(md){return md==='light'?'daylight':'monolith'}
+function gr(u,t,md){return u==='glados'?(md==='light'?'white':'grey'):(G[t]||(md==='light'?'white':'black'))}
 var mode,pref,th;
 if(a.ui==='glados'||a.ui==='legacy'){pref=a.mode;mode=f||(pref==='system'?(mq&&mq.matches?'light':'dark'):pref);th=a.ui==='legacy'?lv(mode):dv(a.accent,mode);}
 else{th=ct;pref=ct==='light'?'light':'dark';mode=f||pref;}
-d.setAttribute('data-ui',a.ui);d.setAttribute('data-accent',a.accent);d.setAttribute('data-mode-pref',pref);d.setAttribute('data-mode',mode);d.setAttribute('data-theme',th);
-if(mq&&!f){var on=function(){var u=d.getAttribute('data-ui');if((u!=='glados'&&u!=='legacy')||d.getAttribute('data-mode-pref')!=='system')return;var md=mq.matches?'light':'dark';d.setAttribute('data-mode',md);d.setAttribute('data-theme',u==='legacy'?lv(md):dv(d.getAttribute('data-accent'),md));};if(mq.addEventListener)mq.addEventListener('change',on);else if(mq.addListener)mq.addListener(on);}
+d.setAttribute('data-ui',a.ui);d.setAttribute('data-accent',a.accent);d.setAttribute('data-mode-pref',pref);d.setAttribute('data-mode',mode);d.setAttribute('data-theme',th);d.setAttribute('data-ground',gr(a.ui,th,mode));
+if(mq&&!f){var on=function(){var u=d.getAttribute('data-ui');if((u!=='glados'&&u!=='legacy')||d.getAttribute('data-mode-pref')!=='system')return;var md=mq.matches?'light':'dark',t=u==='legacy'?lv(md):dv(d.getAttribute('data-accent'),md);d.setAttribute('data-mode',md);d.setAttribute('data-theme',t);d.setAttribute('data-ground',gr(u,t,md));};if(mq.addEventListener)mq.addEventListener('change',on);else if(mq.addListener)mq.addListener(on);}
 }catch(e){}})();`;
 
 /* ── X3: one appearance observer ─────────────────────────────────────────── */

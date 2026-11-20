@@ -51,6 +51,7 @@ import {
   useToast,
 } from '@/components/g';
 import { DOT_CHARSET } from '@/components/g/logic';
+import { deriveClassicTheme, groundFor } from '@/lib/appearance';
 
 /**
  * Every lane-1d primitive in every state it defines, on fictional fixture
@@ -77,7 +78,7 @@ function usePreviewAppearance(accent: Accent, mode: Mode) {
   const saved = useRef<Record<string, string | null> | null>(null);
   useEffect(() => {
     const html = document.documentElement;
-    const keys = ['data-ui', 'data-accent', 'data-mode'];
+    const keys = ['data-ui', 'data-accent', 'data-mode', 'data-ground'];
     saved.current = Object.fromEntries(keys.map((k) => [k, html.getAttribute(k)]));
     return () => {
       for (const [k, v] of Object.entries(saved.current ?? {})) {
@@ -91,6 +92,8 @@ function usePreviewAppearance(accent: Accent, mode: Mode) {
     html.setAttribute('data-ui', 'glados');
     html.setAttribute('data-accent', accent);
     html.setAttribute('data-mode', mode);
+    // the glass light reads the ground GladOS paints (lib/appearance.ts groundFor)
+    html.setAttribute('data-ground', groundFor(deriveClassicTheme(accent, mode), mode, 'glados'));
   }, [accent, mode]);
 }
 

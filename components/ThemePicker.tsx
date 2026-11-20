@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { DEFAULT_THEME, THEMES, THEME_META, THEME_STORAGE_KEY, isTheme, type Theme } from '@/lib/theme';
-import { classicMode } from '@/lib/appearance';
+import { classicMode, groundFor, isUiStyle } from '@/lib/appearance';
 
 /**
  * OS theme picker (Settings → Appearance). Applies instantly by setting
@@ -27,6 +27,9 @@ export function ThemePicker() {
       root.setAttribute('data-mode-pref', classicMode(theme));
       root.setAttribute('data-mode', classicMode(theme));
     }
+    // The glass light reads the ground the theme paints (lib/appearance.ts groundFor).
+    const ui = root.getAttribute('data-ui');
+    root.setAttribute('data-ground', groundFor(theme, root.getAttribute('data-mode') === 'light' ? 'light' : 'dark', isUiStyle(ui) ? ui : undefined));
     try {
       localStorage.setItem(THEME_STORAGE_KEY, theme);
     } catch {
