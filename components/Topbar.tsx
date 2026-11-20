@@ -87,7 +87,7 @@ export function Topbar({ ui = 'classic' }: { ui?: UiStyle } = {}) {
 
   return (
     <div
-      className="os-topbar sticky top-0 z-30 flex h-[52px] shrink-0 items-center gap-5 border-b border-os-border bg-os-bg2/70 px-6 backdrop-blur"
+      className="os-topbar sticky top-0 z-30 flex h-[52px] shrink-0 items-center gap-5 border-b border-os-border px-6"
       // AdPilot's chrome follows the page accent through theme tokens
       // (.os-topbar[data-route='adpilot'] in app/globals.css, SPEC G1).
       data-route={pathname.startsWith('/adpilot') ? 'adpilot' : undefined}

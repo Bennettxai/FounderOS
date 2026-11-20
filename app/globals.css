@@ -9219,7 +9219,7 @@ button.g-card, button.g-card-raised { display: flex; flex-direction: column; ali
 .g-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: var(--g-r-pill); background: var(--g-card-2); color: var(--g-ink); font: inherit; font-size: 12.5px; line-height: 1.2; padding: 8px 16px; box-shadow: var(--g-shadow-sm); white-space: nowrap; text-decoration: none; cursor: pointer; transition: transform var(--g-dur-lift) var(--ease), box-shadow var(--g-dur-lift) var(--ease), background-color var(--g-dur-colour) var(--ease), color var(--g-dur-colour) var(--ease); }
 .g-btn-label { display: inline-flex; align-items: center; gap: 6px; }
 .g-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--g-shadow); }
-.g-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
+.g-btn:disabled { cursor: default; transform: none; } /* dims its text, not the face (glass phase 2b) */
 .g-btn[data-busy='true'], .g-btn[data-busy='true']:disabled { opacity: 1; cursor: progress; }
 .g-btn[data-busy='true'] .g-btn-label { visibility: hidden; }
 .g-btn-spin { position: absolute; left: 50%; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: var(--g-r-pill); border: 2px solid color-mix(in srgb, currentColor 35%, transparent); border-top-color: currentColor; animation: g-orbit 700ms linear infinite; }
@@ -9247,18 +9247,16 @@ button.g-card, button.g-card-raised { display: flex; flex-direction: column; ali
 .g-chip:hover:not(:disabled) { color: var(--g-ink); }
 .g-chip[aria-pressed='true'], .g-chip.is-on { color: var(--g-ink); }
 .g-chip[aria-pressed='true']:hover:not(:disabled), .g-chip.is-on:hover:not(:disabled) { color: var(--g-ink); }
-.g-chip:disabled { opacity: 0.45; cursor: default; }
+.g-chip:disabled { cursor: default; }
 .g-chip[data-size='compact'] { height: 28px; padding: 0 12px; }
 .g-chip-count { font-variant-numeric: tabular-nums; opacity: 0.7; }
 .g-seg { display: inline-flex; max-width: 100%; gap: 2px; padding: 2px; border-radius: var(--g-r-pill); background: var(--g-card); box-shadow: var(--g-shadow-sm); overflow-x: auto; scrollbar-width: none; }
 .g-seg::-webkit-scrollbar { display: none; }
-.g-seg[data-fade-end] { -webkit-mask-image: linear-gradient(to right, currentColor calc(100% - 20px), transparent); mask-image: linear-gradient(to right, currentColor calc(100% - 20px), transparent); }
-.g-seg[data-fade-start] { -webkit-mask-image: linear-gradient(to right, transparent, currentColor 20px); mask-image: linear-gradient(to right, transparent, currentColor 20px); }
-.g-seg[data-fade-start][data-fade-end] { -webkit-mask-image: linear-gradient(to right, transparent, currentColor 20px, currentColor calc(100% - 20px), transparent); mask-image: linear-gradient(to right, transparent, currentColor 20px, currentColor calc(100% - 20px), transparent); }
+/* .g-seg[data-fade-start|end]: the edge fade is a layer over the options (glass phase 2b), never a mask around the active one */
 .g-seg-opt { flex: none; border: 0; border-radius: var(--g-r-pill); background: transparent; color: var(--g-muted); font: inherit; font-size: 11px; line-height: 1.2; padding: 5px 10px; white-space: nowrap; cursor: pointer; transition: background-color var(--g-dur-colour) var(--ease), color var(--g-dur-colour) var(--ease), box-shadow var(--g-dur-colour) var(--ease); }
 .g-seg-opt:hover:not(:disabled) { color: var(--g-ink); }
 .g-seg-opt[aria-checked='true'], .g-seg-opt.is-on { color: var(--g-ink); }
-.g-seg-opt:disabled { opacity: 0.45; cursor: default; }
+.g-seg-opt:disabled { cursor: default; }
 .g-seg[data-size='md'] .g-seg-opt { font-size: 12.5px; padding: 7px 14px; }
 .g-seg[data-size='compact'] .g-seg-opt { height: 24px; padding: 0 10px; font-size: 12px; }
 @container (max-width: 260px) { .g-seg-opt { padding: 5px 7px; } }
@@ -9433,9 +9431,9 @@ button.g-row-main:not(:disabled), a.g-row-main { cursor: pointer; }
 .g-menu-item:disabled { opacity: 0.45; cursor: default; }
 .g-menu-icon { display: inline-flex; color: var(--g-muted); }
 .g-menu-item[data-danger] .g-menu-icon { color: inherit; }
-.g-tip { position: absolute; left: 50%; bottom: calc(100% + 8px); z-index: 80; width: max-content; max-width: 260px; padding: 6px 12px; border-radius: var(--g-r-input); background: var(--g-card-2); color: var(--g-ink); box-shadow: var(--g-shadow); font-size: var(--g-fs-cap); line-height: 1.35; text-align: left; white-space: normal; pointer-events: none; opacity: 0; visibility: hidden; transform: translateX(-50%); transition: opacity var(--g-dur-colour) var(--ease), visibility var(--g-dur-colour) var(--ease); }
+.g-tip { position: absolute; left: 50%; bottom: calc(100% + 8px); z-index: 80; width: max-content; max-width: 260px; padding: 6px 12px; border-radius: var(--g-r-input); background: var(--g-card-2); color: var(--g-ink); box-shadow: var(--g-shadow); font-size: var(--g-fs-cap); line-height: 1.35; text-align: left; white-space: normal; pointer-events: none; visibility: hidden; transform: translate(-50%, 6px); }
 .g-tip[data-side='bottom'] { top: calc(100% + 8px); bottom: auto; }
-.g-tip[data-show] { opacity: 1; visibility: visible; }
+.g-tip[data-show] { visibility: visible; transform: translate(-50%, 0); transition: transform var(--g-dur-colour) var(--ease); } /* a solid raised face: rises 6px, never fades; hides at once */
 
 /* GToast: the shared toast (components/ui/Toast.tsx) reskinned under GladOS (C16) */
 :root[data-ui='glados'] .ui-toast { gap: var(--g-space-2); padding: 6px 6px 6px 14px; border: 0; border-radius: var(--g-r-pill); background: var(--g-card-2); color: var(--g-ink); box-shadow: var(--g-shadow); font-size: 13px; }
@@ -9916,9 +9914,10 @@ button.g-tl-dot, button.g-tl-cluster { cursor: pointer; }
 :root[data-ui='glados'] .os-nav-tip-sep { color: var(--g-dim); }
 :root[data-ui='glados'] .os-nav-tip-key { background: var(--g-card); color: var(--g-muted); }
 
-/* GTopbar: 52px, --g-bg at 72% + 16px blur, no edge until the page scrolls */
+/* GTopbar: 52px, --g-bg at 72% + 16px blur, no edge until the page scrolls. The fill and blur are layer
+   tokens: the bar's ::before carries them behind its buttons (glass phase 2b). */
 .g-topbar { position: sticky; top: 0; z-index: 30; display: flex; flex-shrink: 0; align-items: center; gap: var(--g-space-5); height: 52px; padding: 0 24px; }
-:root[data-ui='glados'] .g-topbar { border: 0; border-bottom: 1px solid transparent; background: color-mix(in srgb, var(--g-bg) 72%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: none; transition: border-color var(--g-dur-colour) var(--ease); }
+:root[data-ui='glados'] .g-topbar { border: 0; border-bottom: 1px solid transparent; --gl-bar-bg: color-mix(in srgb, var(--g-bg) 72%, transparent); --gl-bar-frost: blur(16px); box-shadow: none; transition: border-color var(--g-dur-colour) var(--ease); }
 /* The scrolled hairline is a border, not a box-shadow: the audit's shadow check reads --g-line's cool neutral as hued (§3.3.8). */
 :root[data-ui='glados'] .g-topbar[data-scrolled] { border-bottom-color: var(--g-line); }
 .g-crumb { display: flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; font-size: 13px; color: var(--g-muted); }
@@ -12900,12 +12899,14 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 .lab2-aurora { position: fixed; }
 .view:has(> .lab[data-lab-root]), .view:has(.lab[data-lab-root]) { animation-name: none; } /* a fade or transform here would kill the glass and trap the fixed aurora; .lab2-page[data-lab-enter] rises instead */
 html:has(.lab[data-lab-root]) .os-sidebar {
-  background: color-mix(in srgb, var(--g-bg, var(--bg)) 42%, transparent) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.2); backdrop-filter: blur(20px) saturate(1.2);
+  background: transparent !important; /* the fill and frost sit on the bar's ::before (glass phase 2b) */
+  --gl-bar-bg: color-mix(in srgb, var(--g-bg, var(--bg)) 42%, transparent);
+  --gl-bar-frost: blur(20px) saturate(1.2);
 }
 html:has(.lab[data-lab-root]) .os-topbar {
-  background: color-mix(in srgb, var(--g-bg, var(--bg)) 32%, transparent) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.2); backdrop-filter: blur(20px) saturate(1.2);
+  background: transparent !important;
+  --gl-bar-bg: color-mix(in srgb, var(--g-bg, var(--bg)) 32%, transparent);
+  --gl-bar-frost: blur(20px) saturate(1.2);
 }
 .lab2-page { max-width: 1360px; margin: 0 auto; padding: var(--lab-s6) var(--lab-s7) var(--lab-s9); }
 @media (max-width: 1100px) { .lab2-page { padding: var(--lab-s5) var(--lab-s6) var(--lab-s8); } }
@@ -15396,7 +15397,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   border-color: var(--l-text);
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--l-text) 14%, transparent);
 }
-.l-pressable:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.l-pressable:disabled { cursor: not-allowed; transform: none; box-shadow: none; } /* dims its text, not the face (glass phase 2b) */
 .l-btn { height: 26px; padding: 0 10px; border-radius: var(--l-r-ctl); font-size: 10.5px; font-weight: 600; }
 .l-btn-icon { display: inline-grid; place-items: center; width: 34px; height: 34px; padding: 0; border-radius: 999px; }
 .l-btn-row { width: 100%; text-align: left; border-radius: var(--l-r-card); }
@@ -17390,11 +17391,13 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :where(html[data-sidebar='rail'] .os-sidebar) .l-side-foot { align-items: center; padding: 14px 0; }
 :where(html[data-sidebar='rail'] .os-sidebar) .l-side-foot-text { display: none; }
 
-/* L2.4 topbar: 11px mono crumb, 30px square bordered controls, the brand mark in the corner. */
+/* L2.4 topbar: 11px mono crumb, 30px square bordered controls, the brand mark in the corner. The fill
+   and blur sit on the bar's ::before, behind the controls (glass phase 2b). */
 :root[data-ui='legacy'] .os-topbar {
   gap: 14px;
-  background: color-mix(in oklab, var(--l-bg-2) 70%, transparent);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  --gl-bar-bg: color-mix(in oklab, var(--l-bg-2) 70%, transparent);
+  --gl-bar-frost: blur(8px);
 }
 :root[data-ui='legacy'] .os-topbar > div:first-child { font-size: 11px; }
 :root[data-ui='legacy'] .os-topbar :is(button, a).border {
@@ -17926,3 +17929,70 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   }
 }
 /* ════ end GLASS PACK ════ */
+
+/* ── glass phase 2b ── */
+/* The sweep after the GLASS PACK recipe (brief §3.2 lint rule, §4, §5B). A glass face never sits inside
+   an element with filter, opacity < 1, mask or backdrop-filter: bars frost on a layer behind their
+   content, the segmented control's edge fade is a layer over its options, disabled faces dim their
+   text. Literal colours stay out of this block (the fo/chats tail check reads to the end of the file). */
+
+/* Bars: the frost is a ::before layer under the bar's content, so the buttons and the sidebar's active
+   pill are never inside a backdrop-filter ancestor. Each style sets the layer tokens on its own bar
+   rule (GladOS .g-topbar, Legacy .os-topbar, the Lab's frosted sidebar and top bar); Classic keeps
+   what Tailwind's backdrop-blur painted: no fill, an 8px blur. */
+.os-topbar {
+  --gl-bar-frost: blur(8px);
+}
+.os-topbar,
+.os-sidebar {
+  isolation: isolate;
+}
+.os-topbar::before,
+.os-sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--gl-bar-bg, transparent);
+  -webkit-backdrop-filter: var(--gl-bar-frost, none);
+  backdrop-filter: var(--gl-bar-frost, none);
+}
+
+/* Segmented control: when the options scroll, a 20px layer in the track colour shades the edge the
+   options run under. It sticks to the scrollport and gives its width back, so nothing moves. */
+.g-seg {
+  --gl-seg-ground: var(--g-card, var(--surface));
+}
+.g-seg:is([data-fade-start], [data-fade-end]) {
+  isolation: isolate;
+}
+.g-seg[data-fade-start]::before,
+.g-seg[data-fade-end]::after {
+  content: '';
+  position: sticky;
+  z-index: 1;
+  flex: none;
+  align-self: stretch;
+  width: 20px;
+  pointer-events: none;
+}
+.g-seg[data-fade-start]::before {
+  left: 0;
+  margin-right: -22px;
+  background: linear-gradient(to right, var(--gl-seg-ground), transparent);
+}
+.g-seg[data-fade-end]::after {
+  right: 0;
+  margin-left: -22px;
+  background: linear-gradient(to left, var(--gl-seg-ground), transparent);
+}
+
+/* Disabled faces keep their light; the text fades toward transparent and the icons (leaves) dim. */
+:is(.g-btn, .g-chip, .g-seg-opt, .l-pressable):disabled:not([data-busy='true']) {
+  -webkit-text-fill-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+:is(.g-btn, .g-chip, .g-seg-opt, .l-pressable):disabled:not([data-busy='true']) :is(svg, img) {
+  opacity: 0.45;
+}
+/* ── end glass phase 2b ── */
