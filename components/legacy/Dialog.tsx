@@ -3,6 +3,7 @@
 import { useId, useState, type ReactNode } from 'react';
 import { Bot, X } from 'lucide-react';
 import { useDialog } from '@/components/ui/use-dialog';
+import { useMeltEnd, useMeltPhase } from '@/lib/use-melt';
 import { cx } from './format';
 
 /**
@@ -11,7 +12,12 @@ import { cx } from './format';
  * on/off switch. Colours from --l-* only; every element carries data-l.
  */
 
-/** Modal over a scrim: focus trapped and returned, Esc closes (components/ui/use-dialog). */
+/**
+ * Modal over a scrim: focus trapped and returned, Esc closes (components/ui/use-dialog). The scrim
+ * is the face's sibling, never its parent (glass brief §3.2: a frosting parent kills the face's
+ * own frost): it frosts and dims the page, closes on a press, and the face sits above it. On
+ * close the dialog releases at once and the face melts out (lib/use-melt).
+ */
 export function LDialog({
   open = true,
   onClose,
@@ -31,10 +37,13 @@ export function LDialog({
 }) {
   const titleId = useId();
   const dlg = useDialog({ open, onClose, labelledBy: titleId });
-  if (!open) return null;
+  const melt = useMeltPhase(open);
+  const onMeltEnd = useMeltEnd(dlg.ref, melt.melting, melt.end);
+  if (!melt.mounted) return null;
   return (
-    <div data-l="DialogScrim" className="l-scrim" onClick={onClose}>
-      <div {...dlg.props} data-l="Dialog" className="l-dialog" style={{ maxWidth: width }} onClick={(e) => e.stopPropagation()}>
+    <div data-l="DialogLayer" className="l-layer" data-melting={melt.melting ? '' : undefined}>
+      <div data-l="DialogScrim" className="l-scrim gl-scrim" aria-hidden onClick={onClose} />
+      <div {...dlg.props} data-l="Dialog" className={cx('l-dialog glass-face--strong', melt.melting && 'is-melting')} style={{ maxWidth: width }} onAnimationEnd={onMeltEnd}>
         <div className="l-dialog-head">
           <div className="min-w-0">
             <h2 id={titleId} className="l-dialog-title">

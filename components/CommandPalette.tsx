@@ -7,8 +7,10 @@ import { filterCommands, type Command } from '@/lib/palette';
 // so they stay in lockstep with the nav.
 import { digitViewsFor } from '@/lib/nav';
 import { GEmpty, GList, GRow, GSearch, GTag } from '@/components/g';
+import { cx } from '@/components/g/cx';
 import type { UiStyle } from '@/lib/appearance';
 import { useUiStyle } from '@/lib/use-ui-style';
+import { useMeltEnd, useMeltPhase } from '@/lib/use-melt';
 
 function isTyping(): boolean {
   const el = document.activeElement;
@@ -17,6 +19,11 @@ function isTyping(): boolean {
   return tag === 'INPUT' || tag === 'TEXTAREA' || (el as HTMLElement).isContentEditable;
 }
 
+/**
+ * The palette (Cmd/Ctrl+K). Glass (brief §3.2, §4): the scrim is the face's sibling, never its
+ * parent, so the face keeps its own strong frost; a press on the scrim closes; on close the face
+ * melts out (lib/use-melt) while the shortcuts already treat the palette as closed.
+ */
 export function CommandPalette({ commands, ui = 'classic', off = [] }: { commands: Command[]; ui?: UiStyle; /** modules switched off in Settings */ off?: string[] }) {
   const g = useUiStyle(ui) === 'glados';
   const router = useRouter();
@@ -24,6 +31,10 @@ export function CommandPalette({ commands, ui = 'classic', off = [] }: { command
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const faceRef = useRef<HTMLDivElement>(null);
+  const melt = useMeltPhase(open);
+  const melting = melt.melting;
+  const onMeltEnd = useMeltEnd(faceRef, melting, melt.end);
 
   const hits = useMemo(() => filterCommands(commands, query).slice(0, 9), [commands, query]);
 
@@ -62,6 +73,12 @@ export function CommandPalette({ commands, ui = 'classic', off = [] }: { command
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // Closed but still melting: the face keeps no focus, so no key reaches its input.
+  useEffect(() => {
+    const active = document.activeElement;
+    if (melting && active instanceof HTMLElement && faceRef.current?.contains(active)) active.blur();
+  }, [melting]);
+
   function go(command: Command | undefined) {
     if (!command) return;
     close();
@@ -72,7 +89,7 @@ export function CommandPalette({ commands, ui = 'classic', off = [] }: { command
     else router.push(command.href);
   }
 
-  if (!open) return null;
+  if (!melt.mounted) return null;
 
   const onListKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
@@ -89,13 +106,15 @@ export function CommandPalette({ commands, ui = 'classic', off = [] }: { command
   if (g) {
     // GPalette (S00 §5.5): a radius-20 card on the --g-scrim, GSearch pill, GRow results
     return (
-      <div className="g-palette-layer" data-g="GPalette" onClick={close}>
+      <div className="g-palette-layer" data-g="GPalette" data-melting={melting ? '' : undefined}>
+        <div className="gl-scrim" aria-hidden onClick={close} />
         <div
-          className="g-palette"
+          ref={faceRef}
+          className={cx('g-palette glass-face--strong', melting && 'is-melting')}
           role="dialog"
           aria-modal="true"
           aria-label="Command palette"
-          onClick={(e) => e.stopPropagation()}
+          onAnimationEnd={onMeltEnd}
         >
           <GSearch
             ref={inputRef}
@@ -140,13 +159,15 @@ export function CommandPalette({ commands, ui = 'classic', off = [] }: { command
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-os-bg/60 pt-[14vh] backdrop-blur-lg"
-      onClick={close}
-    >
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[14vh]" data-melting={melting ? '' : undefined}>
+      <div className="gl-scrim" aria-hidden onClick={close} />
       <div
-        className="c-pop w-[560px] max-w-[calc(100vw-48px)] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        ref={faceRef}
+        className={cx('c-pop glass-face--strong relative w-[560px] max-w-[calc(100vw-48px)] overflow-hidden', melting && 'is-melting')}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+        onAnimationEnd={onMeltEnd}
       >
         <input
           ref={inputRef}

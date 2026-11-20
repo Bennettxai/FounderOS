@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { ChevronLeft, X } from 'lucide-react';
 import { useDialog, FOCUSABLE_SELECTOR } from '@/components/ui/use-dialog';
 import { pushEscape } from '@/lib/escape-stack';
+import { useMeltEnd, useMeltPhase } from '@/lib/use-melt';
 import { cx } from './cx';
 import { rovingIndex, swipeCloses } from './logic';
 import { GButton } from './Controls';
@@ -32,7 +33,14 @@ export { ToastPill as GToast, ToastProvider, useToast } from '@/components/ui/To
  * stack (X6): Escape closes only the top layer, across surfaces. Sheet
  * actions and dialog buttons are GButton; toasts are the existing
  * components/ui/Toast.tsx reskinned (C16), exported here as GToast.
+ *
+ * Glass (brief §3.2, §4): each scrim is its face's sibling, never its parent, and frosts the page
+ * light to strong while it dims it (.gl-scrim). On close the dialog behaviour releases at once and
+ * the face melts out before it unmounts (lib/use-melt); the layer's data-melting clears the scrim.
  */
+
+/** What a panel needs to melt: set by the exported overlay, which owns mounting. */
+type MeltProps = { melting: boolean; onMelted: () => void };
 
 const noSubscribe = () => () => {};
 
@@ -78,22 +86,24 @@ export type GSheetProps = {
 
 /** Centred modal sheet: --g-card, radius 28, Section 30 title, --g-scrim, 240ms in. */
 export function GSheet(props: GSheetProps) {
-  if (!props.open) return null;
+  const melt = useMeltPhase(props.open);
+  if (!melt.mounted) return null;
   return (
     <Layer>
-      <SheetPanel {...props} />
+      <SheetPanel {...props} melting={melt.melting} onMelted={melt.end} />
     </Layer>
   );
 }
 
-function SheetPanel({ onClose, title, caption, children, footer, width = 1200, initialFocus, className }: GSheetProps) {
+function SheetPanel({ open, onClose, title, caption, children, footer, width = 1200, initialFocus, className, melting, onMelted }: GSheetProps & MeltProps) {
   const titleId = useId();
-  const dlg = useDialog({ open: true, onClose, labelledBy: titleId, initialFocus });
+  const dlg = useDialog({ open, onClose, labelledBy: titleId, initialFocus });
+  const onMeltEnd = useMeltEnd(dlg.ref, melting, onMelted);
   return (
     <>
-      <div className="g-layer" data-kind="sheet">
-        <div className="g-scrim" aria-hidden onClick={onClose} />
-        <div {...dlg.props} data-g="GSheet" className={cx('g-sheet', className)} style={{ maxWidth: width }}>
+      <div className="g-layer" data-kind="sheet" data-melting={melting ? '' : undefined}>
+        <div className="g-scrim gl-scrim" aria-hidden onClick={onClose} />
+        <div {...dlg.props} data-g="GSheet" className={cx('g-sheet', className, melting && 'is-melting')} style={{ maxWidth: width }} onAnimationEnd={onMeltEnd}>
           <header className="g-sheet-head">
             <div>
               <h2 id={titleId} className="g-sheet-title">
@@ -132,23 +142,25 @@ export type GDrawerProps = {
 
 /** Right sheet with a back stack; swipe right 80px to close on touch. */
 export function GDrawer(props: GDrawerProps) {
-  if (!props.open) return null;
+  const melt = useMeltPhase(props.open);
+  if (!melt.mounted) return null;
   return (
     <Layer>
-      <DrawerPanel {...props} />
+      <DrawerPanel {...props} melting={melt.melting} onMelted={melt.end} />
     </Layer>
   );
 }
 
-function DrawerPanel({ onClose, title, children, footer, onBack, backLabel = 'Back', width = 480, modal = true, initialFocus, className }: GDrawerProps) {
+function DrawerPanel({ open, onClose, title, children, footer, onBack, backLabel = 'Back', width = 480, modal = true, initialFocus, className, melting, onMelted }: GDrawerProps & MeltProps) {
   const titleId = useId();
-  const dlg = useDialog({ open: modal, onClose, labelledBy: titleId, initialFocus });
+  const dlg = useDialog({ open: open && modal, onClose, labelledBy: titleId, initialFocus });
+  const onMeltEnd = useMeltEnd(dlg.ref, melting, onMelted);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   useEffect(() => {
-    if (modal) return;
+    if (modal || !open) return;
     return pushEscape(() => onCloseRef.current());
-  }, [modal]);
+  }, [modal, open]);
 
   const touch = useRef<{ x: number; y: number } | null>(null);
   const onTouchStart = (e: TouchEvent) => {
@@ -164,18 +176,19 @@ function DrawerPanel({ onClose, title, children, footer, onBack, backLabel = 'Ba
 
   const panelProps = modal
     ? dlg.props
-    : { role: 'dialog' as const, 'aria-modal': false as const, 'aria-labelledby': titleId };
+    : { ref: dlg.ref, role: 'dialog' as const, 'aria-modal': false as const, 'aria-labelledby': titleId };
   return (
     <>
-      <div className="g-layer" data-kind="drawer" data-modal={modal ? 'true' : 'false'}>
-        {modal && <div className="g-scrim" aria-hidden onClick={onClose} />}
+      <div className="g-layer" data-kind="drawer" data-modal={modal ? 'true' : 'false'} data-melting={melting ? '' : undefined}>
+        {modal && <div className="g-scrim gl-scrim" aria-hidden onClick={onClose} />}
         <aside
           {...panelProps}
           data-g="GDrawer"
-          className={cx('g-drawer', className)}
+          className={cx('g-drawer', className, melting && 'is-melting')}
           style={{ width: `min(${width}px, 100vw)` }}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
+          onAnimationEnd={onMeltEnd}
         >
           <header className="g-drawer-head">
             {onBack && (
@@ -215,22 +228,24 @@ export type GDialogProps = {
 
 /** 420px confirm. Focus starts on Cancel so Enter never confirms by accident. */
 export function GDialog(props: GDialogProps) {
-  if (!props.open) return null;
+  const melt = useMeltPhase(props.open);
+  if (!melt.mounted) return null;
   return (
     <Layer>
-      <DialogPanel {...props} />
+      <DialogPanel {...props} melting={melt.melting} onMelted={melt.end} />
     </Layer>
   );
 }
 
-function DialogPanel({ onClose, title, children, confirmLabel, onConfirm, cancelLabel = 'Cancel', tone = 'default', busy = false, confirmDisabledReason }: GDialogProps) {
+function DialogPanel({ open, onClose, title, children, confirmLabel, onConfirm, cancelLabel = 'Cancel', tone = 'default', busy = false, confirmDisabledReason, melting, onMelted }: GDialogProps & MeltProps) {
   const titleId = useId();
-  const dlg = useDialog({ open: true, onClose: busy ? () => {} : onClose, labelledBy: titleId });
+  const dlg = useDialog({ open, onClose: busy ? () => {} : onClose, labelledBy: titleId });
+  const onMeltEnd = useMeltEnd(dlg.ref, melting, onMelted);
   return (
     <>
-      <div className="g-layer" data-kind="dialog">
-        <div className="g-scrim" aria-hidden onClick={busy ? undefined : onClose} />
-        <div {...dlg.props} role={tone === 'danger' ? 'alertdialog' : 'dialog'} data-g="GDialog" data-tone={tone} className="g-dialog">
+      <div className="g-layer" data-kind="dialog" data-melting={melting ? '' : undefined}>
+        <div className="g-scrim gl-scrim" aria-hidden onClick={busy ? undefined : onClose} />
+        <div {...dlg.props} role={tone === 'danger' ? 'alertdialog' : 'dialog'} data-g="GDialog" data-tone={tone} className={cx('g-dialog', melting && 'is-melting')} onAnimationEnd={onMeltEnd}>
           <h2 id={titleId} className="g-dialog-title">
             {title}
           </h2>

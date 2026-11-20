@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { X } from 'lucide-react';
 import { GButton } from '@/components/g/Controls';
 import { useUiStyle } from '@/lib/use-ui-style';
+import { mergeLeaving, useMeltEnd, type Leaving } from '@/lib/use-melt';
 
 /**
  * Shared toasts (SPEC X2). One provider is mounted in app/layout.tsx; any
@@ -24,6 +25,9 @@ import { useUiStyle } from '@/lib/use-ui-style';
  *
  * Cmd/Ctrl+Z runs the newest visible toast's Undo (SPEC C40), unless focus is
  * in a text field, where the key keeps its text meaning.
+ *
+ * A dismissed toast melts out (glass brief §4, lib/use-melt): the stack keeps it in its slot,
+ * inert, until its melt ends; under reduced motion it goes at once.
  */
 
 export type ToastTone = 'info' | 'ok' | 'err';
@@ -173,11 +177,16 @@ export function ToastStack({
   anchor?: boolean;
   onDismiss: (id: number) => void;
 }) {
-  if (items.length === 0) return null;
+  // Dismissed toasts stay, marked leaving, until they melt (derived during render, React's pattern).
+  const [shown, setShown] = useState<Leaving<ToastItem>[]>(() => mergeLeaving([], items));
+  const merged = mergeLeaving(shown, items);
+  if (merged !== shown) setShown(merged);
+  const gone = useCallback((id: number) => setShown((list) => list.filter((x) => x.item.id !== id)), []);
+  if (merged.length === 0) return null;
   return (
     <div className="ui-toasts" data-anchor={anchor ? '' : undefined}>
-      {items.map((t) => (
-        <ToastPill key={t.id} item={t} onDismiss={onDismiss} />
+      {merged.map(({ item, leaving }) => (
+        <ToastPill key={item.id} item={item} onDismiss={onDismiss} leaving={leaving} onGone={gone} />
       ))}
     </div>
   );
@@ -189,14 +198,36 @@ export function ToastStack({
  * GButton sm (§3.2). Behaviour is the same in both styles; toasts only exist
  * after an interaction, so the client-side style read never meets hydration.
  */
-export function ToastPill({ item: t, onDismiss }: { item: ToastItem; onDismiss: (id: number) => void }) {
+export function ToastPill({
+  item: t,
+  onDismiss,
+  leaving = false,
+  onGone,
+}: {
+  item: ToastItem;
+  onDismiss: (id: number) => void;
+  /** Dismissed: melting out, no longer announced or interactive. */
+  leaving?: boolean;
+  /** Called when the melt is over (or skipped): drop it from the stack. */
+  onGone?: (id: number) => void;
+}) {
   const g = useUiStyle('classic') === 'glados';
+  const ref = useRef<HTMLDivElement>(null);
+  const onMeltEnd = useMeltEnd(ref, leaving, () => onGone?.(t.id));
   const act = () => {
     t.action?.onClick();
     onDismiss(t.id);
   };
   return (
-    <div className="ui-toast" data-g="GToast" data-tone={t.tone} role={t.tone === 'err' ? 'alert' : 'status'}>
+    <div
+      ref={ref}
+      className={leaving ? 'ui-toast is-melting' : 'ui-toast'}
+      data-g="GToast"
+      data-tone={t.tone}
+      role={leaving ? undefined : t.tone === 'err' ? 'alert' : 'status'}
+      aria-hidden={leaving || undefined}
+      onAnimationEnd={onMeltEnd}
+    >
       <span className="ui-toast-dot" aria-hidden />
       <span className="ui-toast-text">{t.text}</span>
       {t.link &&

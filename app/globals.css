@@ -9927,7 +9927,7 @@ button.g-tl-dot, button.g-tl-cluster { cursor: pointer; }
 .g-topbar-actions { display: flex; align-items: center; gap: var(--g-space-2); margin-left: auto; }
 
 /* GPalette: a radius-20 card on the scrim, GSearch pill, GRow results */
-.g-palette-layer { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 14vh var(--g-space-4) var(--g-space-4); background: var(--g-scrim); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); animation: g-fade var(--g-dur-sheet) var(--ease) both; }
+.g-palette-layer { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 14vh var(--g-space-4) var(--g-space-4); } /* places only: the scrim is the palette's sibling (.gl-scrim, glass phase 2a) */
 .g-palette { width: 560px; max-width: 100%; padding: var(--g-space-2); border-radius: var(--g-r-nested); background: var(--g-card); color: var(--g-ink); box-shadow: var(--g-shadow); animation: g-sheet-in var(--g-dur-sheet) var(--ease) both; }
 .g-palette > .g-search { margin-bottom: var(--g-space-2); }
 .g-palette-list { max-height: 320px; overflow-y: auto; }
@@ -15768,7 +15768,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 .l-switch:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--l-text) 18%, transparent); }
 
 /* dialog, avatar */
-.l-scrim { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: var(--l-scrim); backdrop-filter: blur(3px); }
+.l-scrim { position: absolute; inset: 0; background: var(--l-scrim); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); } /* the dialog's sibling, under it in .l-layer (glass phase 2a) */
 .l-dialog {
   width: 100%; max-height: calc(100dvh - 32px); display: flex; flex-direction: column; overflow: hidden;
   border: 1px solid var(--l-border-strong); border-radius: 20px; background: var(--l-surface); color: var(--l-text);
@@ -17926,3 +17926,70 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   }
 }
 /* ════ end GLASS PACK ════ */
+
+/* ── glass phase 2a ── */
+/* Overlays on the glass pack (FounderOS Glass brief §3.2, §4, §5 B11).
+   A scrim is its face's sibling, never its parent: a parent with backdrop-filter, filter, opacity
+   below 1 or a mask is a backdrop root, so the face's own frost would stop at it and the face would
+   read as see-through. The scrim covers its layer, frosts the page from the light to the strong frost
+   over 10 frames and dims it 20%; the face (strong frost) sits above it. When the face melts (the
+   layer carries data-melting while lib/use-melt holds the face), the scrim clears with it and lets
+   clicks through. Layers only place things: .l-layer (LDialog), .g-layer (GSheet, GDrawer,
+   GDialog), .g-palette-layer and the Classic palette's fixed wrapper. */
+:root {
+  --gl-scrim: color-mix(in srgb, #000 20%, transparent); /* the page dims 20% */
+  --gl-dur-scrim: 417ms; /* 10f at 24fps */
+}
+:root[data-ground='white'] {
+  --gl-scrim: rgba(16, 16, 24, 0.2); /* 20% of the white ground's ink, like its groove and drop */
+}
+
+.l-layer { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; }
+.gl-scrim { position: absolute; inset: 0; }
+.l-layer > .l-dialog,
+.g-palette-layer > .g-palette { position: relative; } /* above the absolute scrim beside it */
+
+:root[data-ground] .gl-scrim {
+  background: var(--gl-scrim);
+  -webkit-backdrop-filter: var(--gl-blur-strong);
+  backdrop-filter: var(--gl-blur-strong);
+  animation: gl-scrim-in var(--gl-dur-scrim) linear backwards;
+}
+@keyframes gl-scrim-in {
+  from {
+    background-color: transparent;
+    -webkit-backdrop-filter: var(--gl-blur);
+    backdrop-filter: var(--gl-blur);
+  }
+}
+:root[data-ground] [data-melting] > .gl-scrim {
+  animation: gl-scrim-out var(--gl-dur-melt) linear forwards;
+  pointer-events: none;
+}
+@keyframes gl-scrim-out {
+  to {
+    background-color: transparent;
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+  }
+}
+
+/* founderos/components/slab.tsx: a SlabCard is a glass face that materialises on the slab's 90ms
+   stagger (Rise sets --l-rise-i). */
+:root[data-ground] .gl-materialise.l-rise { animation-delay: calc(var(--l-rise-i, 0) * 90ms); }
+
+/* Reduced motion: the scrim is simply there, and goes with its face. */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ground] .gl-scrim,
+  :root[data-ground] [data-melting] > .gl-scrim {
+    animation: none;
+  }
+}
+/* Reduced transparency: the dim only, no frost (a browser without backdrop-filter shows the same). */
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-ground] .gl-scrim {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+/* ── end glass phase 2a ── */

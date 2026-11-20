@@ -43,7 +43,8 @@ describe('AC04.8 / B37: sheets and drawers are dialogs on the shared hook (X1)',
     const classic = read('components/creative-engine/classic.tsx');
     const kit = read('components/g/Overlays.tsx');
     expect(read('components/creative-engine/skin-dash.tsx')).toMatch(/<GSheet[\s\S]*<GDrawer/);
-    expect(kit).toContain('useDialog({ open: true, onClose, labelledBy: titleId');
+    // `open` (not `true`): a closed sheet releases the hook at once while its face melts out (lib/use-melt)
+    expect(kit).toMatch(/useDialog\(\{ open(?:: true)?, onClose, labelledBy: titleId/);
     for (const src of [classic.slice(classic.indexOf('function ClassicDrawer('), classic.indexOf('function ClassicConfirmDelete(')), classic.slice(classic.indexOf('function ClassicSheet('), classic.indexOf('function ClassicDrawer('))]) {
       expect(src).toContain("useDialog({ open: true, onClose, labelledBy: titleId })");
       expect(src).toContain('{...dlg.props}');
