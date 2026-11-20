@@ -65,9 +65,9 @@ const TOKENS = {
 };
 const ALL = Object.values(TOKENS).flat();
 
-/** Fixed values X2 / S00 §5.1 give for the mode-independent tokens. */
+/** Fixed values X2 / S00 §5.1 give for the mode-independent tokens (card and well radii: the glass pack, card 24, well 16). */
 const FIXED: Record<string, string> = {
-  '--g-r-card': '28px', '--g-r-nested': '20px', '--g-r-well': '14px', '--g-r-input': '12px', '--g-r-pill': '999px',
+  '--g-r-card': '24px', '--g-r-nested': '20px', '--g-r-well': '16px', '--g-r-input': '12px', '--g-r-pill': '999px',
   '--g-fs-display': '44px', '--g-fs-section': '26px', '--g-fs-title': '28px', '--g-fs-card': '15px',
   '--g-fs-body': '13.5px', '--g-fs-cap': '11.5px', '--g-fs-faint': '11px',
   '--g-fw-light': '300', '--g-fw-body': '400', '--g-fw-badge': '500',

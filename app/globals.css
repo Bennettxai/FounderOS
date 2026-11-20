@@ -212,9 +212,65 @@
 :root {
   --r-input: 9px;
   --r-nav: 8px;
-  --r-card: 12px;
+  --r-card: 24px; /* glass pack: card 24 */
   --r-panel: 14px;
 }
+
+/* ── GLASS PACK · tokens (FounderOS Glass brief §2). The faces, states and motion are the
+   GLASS PACK block at the end of this file. ── */
+@property --gl-rim-a { syntax: '<percentage>'; inherits: false; initial-value: 15%; }
+@property --gl-pool-a { syntax: '<percentage>'; inherits: false; initial-value: 9%; }
+
+:root {
+  --gl-groove: color-mix(in srgb, #000 55%, transparent);
+  --gl-drop: color-mix(in srgb, #000 60%, transparent);
+  --gl-shade: color-mix(in srgb, #000 50%, transparent);
+  --gl-blur: blur(3px) saturate(150%); /* light frost: page widgets */
+  --gl-blur-strong: blur(28px) saturate(160%); /* strong frost: pop-ups, sheets, drawers, dialogs, the palette */
+  --gl-r-card: 24px;
+  --gl-r-well: 16px;
+  --gl-r-chip: 999px;
+  --gl-on: var(--accent); /* "on" glow: the theme accent; status meaning takes [data-glow='ok'] */
+  --solid-bg: var(--surface);
+  /* Spring S { stiffness 170, damping 20, mass .8 } sampled over 580ms (settles ~14f at 24fps). */
+  --gl-spring: linear(0, 0.051, 0.166, 0.306, 0.446, 0.574, 0.683, 0.772, 0.842, 0.894, 0.933, 0.96, 0.979, 0.991, 0.998, 1.002, 1.005, 1.005, 1.005, 1.005, 1.004, 1.003, 1.002, 1.002, 1);
+  /* Drawer spring { stiffness 210, damping 26, mass 1 } sampled over 500ms. */
+  --gl-spring-drawer: linear(0, 0.038, 0.127, 0.24, 0.359, 0.473, 0.576, 0.666, 0.741, 0.803, 0.853, 0.892, 0.922, 0.946, 0.963, 0.975, 0.984, 0.991, 0.995, 0.998, 1, 1.001, 1.001, 1.002, 1);
+  --gl-dur-materialise: 580ms;
+  --gl-dur-drawer: 500ms;
+  --gl-dur-melt: 333ms; /* 8f at 24fps */
+}
+/* On a white ground the drop carries the shape and the groove is a hairline. */
+[data-ground='white'] {
+  --gl-groove: rgba(16, 16, 24, 0.10);
+  --gl-drop: rgba(16, 16, 24, 0.22);
+  --gl-shade: rgba(16, 16, 24, 0.06);
+}
+/* Each style's opaque surface and accent. */
+:root[data-ui='glados'] {
+  --gl-on: var(--g-accent);
+  --solid-bg: var(--g-card);
+}
+:root[data-ui='legacy'] {
+  --solid-bg: var(--l-surface);
+}
+.lab {
+  --solid-bg: var(--lab-glass-solid);
+}
+
+/* The knobs: animation and state only ever move these. */
+:where(
+  .glass-face, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+  .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
+  .wiz-ask, .g-ask-box, .glass-face--strong, .glass-solid, .os-nav-tip, .g-pop, .g-tip, .g-chart-tip, .gl-on,
+  .g-seg-opt[aria-checked='true'], .g-seg-opt.is-on, .l-toggle-chip[data-on='true'], .os-sidebar a.os-nav-link[aria-current='page']
+) {
+  --gl-tint: #fff;
+  --gl-rim-a: 15%;
+  --gl-low-a: 30%;
+  --gl-pool-a: 9%;
+}
+/* ── end GLASS PACK · tokens ── */
 
 /* Geist Mono does the system voice (ids, timestamps, code); force tabular
    figures so number columns stay aligned in either face. */
@@ -1090,7 +1146,7 @@ body {
   padding: 3px 8px;
   background: var(--surface-2);
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: var(--gl-r-chip);
   color: var(--text-2);
   font-size: 11.5px;
   white-space: nowrap;
@@ -1430,13 +1486,13 @@ body {
    the knowledge graph's purple identity ("i do like the purple elements").
    These are chrome only; data colors still come from the ramp tokens. */
 .glass-panel {
-  border-radius: 20px;
+  border-radius: var(--gl-r-card);
   border: 1px solid rgb(var(--glass-line-rgb) / 0.1);
   background: linear-gradient(165deg, var(--glass-a) 0%, var(--glass-b) 55%, var(--glass-c) 100%);
   backdrop-filter: blur(14px);
 }
 .glass-panel-violet {
-  border-radius: 20px;
+  border-radius: var(--gl-r-card);
   border: 1px solid rgb(var(--glass-v-line-rgb) / 0.13);
   background:
     radial-gradient(ellipse 75% 52% at 50% 0%, var(--glass-v-top), transparent 70%),
@@ -2675,21 +2731,8 @@ html.sidebar-dragging :is(.os-sidebar, .os-shell, .bh-page, .bh-skeleton, .ib-pa
   color: var(--text-3);
 }
 :where(html[data-sidebar='rail'] .os-sidebar) .os-nav-link[aria-current='page'] {
-  background: linear-gradient(160deg, var(--wf-rail-a), var(--wf-rail-b));
   color: var(--accent);
-  box-shadow:
-    inset 0 0 0 1px rgb(var(--accent-rgb) / 0.25),
-    0 0 18px rgb(var(--accent-rgb) / 0.12);
-}
-:where(html[data-sidebar='rail'] .os-sidebar) .os-nav-link[aria-current='page']::before {
-  content: '';
-  position: absolute;
-  left: calc((40px - var(--sidebar-w)) / 2); /* hugs the sidebar edge: -12px at 64 */
-  top: 10px;
-  bottom: 10px;
-  width: 2px;
-  border-radius: 2px;
-  background: var(--accent);
+  /* the glass pack lights the pill and puts the accent glow behind it (no fill, no edge bar) */
 }
 :where(html[data-sidebar='rail'] .os-sidebar) .os-nav-icon {
   width: 19px;
@@ -2855,9 +2898,10 @@ html.sidebar-dragging .os-side-handle::after {
     inset 0 0 0 1px rgb(var(--accent-rgb) / 0.2),
     0 0 24px -7px rgb(var(--accent-rgb) / 0.45);
 }
+/* Tooltips are solid raised faces: they rise 6px on enter, never fade (glass pack). */
 @keyframes os-tip-in {
   from {
-    opacity: 0;
+    transform: translateY(calc(-50% + 6px));
   }
 }
 
@@ -8382,7 +8426,7 @@ input.ae-o-value-input { width: 64px; border: 0; text-align: right; color: var(-
   line-height: 1.35;
   animation: ui-toast-in 180ms var(--ease) both;
 }
-.ui-toast[data-tone='err'] { border-color: var(--err); }
+.ui-toast[data-tone='err'] { border-color: var(--err); --gl-tint: var(--err); }
 .ui-toast-dot { flex: none; width: 6px; height: 6px; border-radius: 999px; background: var(--text-3); }
 .ui-toast[data-tone='ok'] .ui-toast-dot { background: var(--ok); }
 .ui-toast[data-tone='err'] .ui-toast-dot { background: var(--err); }
@@ -8410,8 +8454,8 @@ input.ae-o-value-input { width: 64px; border: 0; text-align: right; color: var(-
 .ae-octane .ui-toast { background: var(--o-toast-bg); border-color: var(--o-toast-line); }
 .ae-octane .ui-toast[data-tone='err'] { border-color: var(--err); }
 @keyframes ui-toast-in {
-  from { opacity: 0; transform: translateY(6px) scale(0.98); }
-  to { opacity: 1; transform: none; }
+  /* the motion half of Materialise; the toast face plays gl-materialise (glass pack) */
+  from { transform: translateY(18px) scale(0.965); }
 }
 @media (prefers-reduced-motion: reduce) {
   .ui-toast { animation: none; }
@@ -8522,7 +8566,7 @@ a.h6-seg:hover { color: var(--text); text-decoration: underline; text-underline-
   min-width: 0;
   background: var(--h6-card-bg);
   border: 1px solid rgb(var(--mist-rgb) / 0.1);
-  border-radius: 18px;
+  border-radius: var(--gl-r-card);
 }
 a.h6-card { display: block; color: inherit; }
 .h6-strip { container: h6-card / inline-size; min-width: 0; }
@@ -8686,7 +8730,7 @@ a.h6-card { display: block; color: inherit; }
   transition: border-color 0.3s var(--ease);
 }
 .wiz-ask:focus-within {
-  border-color: rgb(var(--accent-rgb) / 0.5);
+  --gl-tint: var(--accent); /* the inner glass draws the tinted rim (glass pack) */
 }
 .wiz-ask-orbit {
   position: absolute;
@@ -8889,9 +8933,9 @@ a.h6-card { display: block; color: inherit; }
   --g-diff-add-fg: #74d68f;
 
   /* Shape. */
-  --g-r-card: 28px;
+  --g-r-card: 24px;
   --g-r-nested: 20px;
-  --g-r-well: 14px;
+  --g-r-well: 16px;
   --g-r-input: 12px;
   --g-r-pill: 999px;
 
@@ -9200,8 +9244,8 @@ button.g-card, button.g-card-raised { display: flex; flex-direction: column; ali
 /* Controls: chip, segmented, tabs */
 .g-chip { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: var(--g-r-pill); background: var(--g-card-2); color: var(--g-muted); font: inherit; font-size: 12px; line-height: 1.2; padding: 6px 12px; box-shadow: var(--g-shadow-sm); white-space: nowrap; cursor: pointer; transition: background-color var(--g-dur-colour) var(--ease), color var(--g-dur-colour) var(--ease); }
 .g-chip:hover:not(:disabled) { color: var(--g-ink); }
-.g-chip[aria-pressed='true'], .g-chip.is-on { background: var(--g-ink); color: var(--g-ink-inverse); }
-.g-chip[aria-pressed='true']:hover:not(:disabled), .g-chip.is-on:hover:not(:disabled) { color: var(--g-ink-inverse); }
+.g-chip[aria-pressed='true'], .g-chip.is-on { color: var(--g-ink); }
+.g-chip[aria-pressed='true']:hover:not(:disabled), .g-chip.is-on:hover:not(:disabled) { color: var(--g-ink); }
 .g-chip:disabled { opacity: 0.45; cursor: default; }
 .g-chip[data-size='compact'] { height: 28px; padding: 0 12px; }
 .g-chip-count { font-variant-numeric: tabular-nums; opacity: 0.7; }
@@ -9212,7 +9256,7 @@ button.g-card, button.g-card-raised { display: flex; flex-direction: column; ali
 .g-seg[data-fade-start][data-fade-end] { -webkit-mask-image: linear-gradient(to right, transparent, currentColor 20px, currentColor calc(100% - 20px), transparent); mask-image: linear-gradient(to right, transparent, currentColor 20px, currentColor calc(100% - 20px), transparent); }
 .g-seg-opt { flex: none; border: 0; border-radius: var(--g-r-pill); background: transparent; color: var(--g-muted); font: inherit; font-size: 11px; line-height: 1.2; padding: 5px 10px; white-space: nowrap; cursor: pointer; transition: background-color var(--g-dur-colour) var(--ease), color var(--g-dur-colour) var(--ease), box-shadow var(--g-dur-colour) var(--ease); }
 .g-seg-opt:hover:not(:disabled) { color: var(--g-ink); }
-.g-seg-opt[aria-checked='true'], .g-seg-opt.is-on { background: var(--g-card-2); color: var(--g-ink); box-shadow: var(--g-shadow-sm); }
+.g-seg-opt[aria-checked='true'], .g-seg-opt.is-on { color: var(--g-ink); }
 .g-seg-opt:disabled { opacity: 0.45; cursor: default; }
 .g-seg[data-size='md'] .g-seg-opt { font-size: 12.5px; padding: 7px 14px; }
 .g-seg[data-size='compact'] .g-seg-opt { height: 24px; padding: 0 10px; font-size: 12px; }
@@ -9290,8 +9334,8 @@ button.g-card, button.g-card-raised { display: flex; flex-direction: column; ali
 .g-ask-input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--g-ink); font: inherit; font-size: var(--g-fs-body); padding: 8px 0; }
 .g-ask-input::placeholder { color: var(--g-muted); }
 .g-ask-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
-.g-ask-box:focus-within { box-shadow: inset 0 0 0 2px var(--g-ring), var(--g-shadow-sm); }
-.g-ask[data-error] .g-ask-box { box-shadow: inset 0 0 0 1px var(--g-err), var(--g-shadow-sm); }
+.g-ask-box:focus-within { --gl-tint: var(--g-ring); } /* the inner glass draws the tinted rim (glass pack) */
+.g-ask[data-error] .g-ask-box { --gl-tint: var(--g-err); }
 .g-ask > .g-field-error { padding-left: 16px; }
 .g-swatch { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; min-width: 48px; }
 .g-swatch-btn { width: 32px; height: 32px; padding: 0; border: 0; border-radius: var(--g-r-pill); box-shadow: var(--g-shadow-sm); cursor: pointer; transition: box-shadow var(--g-dur-colour) var(--ease); }
@@ -9417,11 +9461,14 @@ button.g-row-main:not(:disabled), a.g-row-main { cursor: pointer; }
   .g-seg-opt { min-height: 36px; }
 }
 
-@keyframes g-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes g-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes g-sheet-in { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: none; } }
-@keyframes g-drawer-in { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
-@keyframes g-pop-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* Faces never fade (glass pack): sheets, dialogs, the palette and drawers play gl-materialise; these
+   keep the motion half for anything else that names them. g-orbit is an alias of gl-orbit. Scrims
+   do not fade either: they dim and frost in. */
+@keyframes g-orbit { to { transform: rotate(360deg); } }
+@keyframes g-fade { from { background-color: transparent; -webkit-backdrop-filter: blur(0px); backdrop-filter: blur(0px); } }
+@keyframes g-sheet-in { from { transform: translateY(18px) scale(0.965); } }
+@keyframes g-drawer-in { from { transform: translateX(100%); } }
+@keyframes g-pop-in { from { transform: translateY(6px); } }
 @keyframes g-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @keyframes g-breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 
@@ -9461,12 +9508,12 @@ button.g-row-main:not(:disabled), a.g-row-main { cursor: pointer; }
 }
 .g-chart-tip::after {
   content: ''; position: absolute; left: var(--gk-tip-caret, 50%); bottom: -5px; width: 10px; height: 10px; margin-left: -5px;
-  background: var(--g-card-2); transform: rotate(45deg); border-radius: 2px;
+  background: var(--solid-bg, var(--g-card-2)); transform: rotate(45deg); border-radius: 2px;
 }
 .g-chart-tip-title { font-size: 13px; color: var(--g-ink); }
 .g-chart-tip-line { font-variant-numeric: tabular-nums; }
 .g-chart-tip-hint { margin-top: 2px; font-size: var(--g-fs-faint); color: var(--g-dim); }
-@keyframes g-tip-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes g-tip-in { from { transform: translateY(calc(-100% + 6px)); } } /* rises 6px, never fades (glass pack) */
 
 /* GBar */
 .g-bar { display: flex; gap: 2px; height: 6px; border-radius: var(--g-r-pill); background: var(--g-track); overflow: hidden; }
@@ -9843,14 +9890,14 @@ button.g-tl-dot, button.g-tl-cluster { cursor: pointer; }
 /* Ground: GladOS dark is always the grey ground (Q-SYS-3), shell and page alike */
 :root[data-ui='glados'] body { background: var(--g-bg); }
 
-/* GSidebar: --g-bg, no border, 40px pill rows, active = raised fill + ink (no accent tint) */
+/* GSidebar: --g-bg, no border, 40px pill rows, active = a glass pill with the glow behind it (glass pack) */
 :root[data-ui='glados'] .os-sidebar.g-side { border: 0; background: var(--g-bg); color: var(--g-ink); }
 :root[data-ui='glados'] .g-side .os-nav-group-title { padding: 16px 14px 6px; font-size: var(--g-fs-cap); font-weight: var(--g-fw-body); letter-spacing: 0; text-transform: none; color: var(--g-muted); }
 :root[data-ui='glados'] .g-side .os-nav-divider { background: var(--g-line); }
 :root[data-ui='glados'] .os-sidebar.g-side a.g-side-item { min-height: 40px; padding: 0 14px; border-radius: var(--g-r-pill); background: transparent; color: var(--g-muted); font-size: var(--g-fs-body); line-height: 1.2; text-decoration: none; box-shadow: none; transition: background-color var(--g-dur-colour) var(--ease), color var(--g-dur-colour) var(--ease), box-shadow var(--g-dur-colour) var(--ease); }
-:root[data-ui='glados'] .os-sidebar.g-side a.g-side-item:hover { background: var(--g-card); color: var(--g-ink); box-shadow: none; }
+:root[data-ui='glados'] .os-sidebar.g-side a.g-side-item:not([aria-current='page']):hover { background: var(--g-card); color: var(--g-ink); box-shadow: none; }
 :root[data-ui='glados'] .os-sidebar.g-side a.g-side-item[aria-current='page'],
-:root[data-ui='glados'] .os-sidebar.g-side a.g-side-item[aria-current='page']:hover { background: var(--g-card-2); color: var(--g-ink); box-shadow: var(--g-shadow-sm); }
+:root[data-ui='glados'] .os-sidebar.g-side a.g-side-item[aria-current='page']:hover { color: var(--g-ink); }
 :root[data-ui='glados'] .os-sidebar.g-side a.g-side-item svg,
 :root[data-ui='glados'] .os-sidebar.g-side a.g-side-item:hover svg { filter: none; }
 :root[data-ui='glados'] .os-sidebar.g-side .g-side-item .os-nav-icon { width: 16px; height: 16px; color: var(--g-muted); }
@@ -9859,7 +9906,6 @@ button.g-tl-dot, button.g-tl-cluster { cursor: pointer; }
 :root[data-ui='glados'] .os-sidebar.g-side a.g-side-item:focus-visible { outline: 2px solid var(--g-ring); outline-offset: -2px; }
 /* rail (S09): the same rows as 40px round buttons, no accent edge bar */
 :root[data-ui='glados'][data-sidebar='rail'] .os-sidebar.g-side a.g-side-item { width: 40px; height: 40px; min-height: 40px; padding: 0; gap: 0; justify-content: center; }
-:root[data-ui='glados'] .os-sidebar.g-side a.g-side-item[aria-current='page']::before { display: none; }
 /* edge toggle: a GButton icon sm that keeps the S09 placement and reveal */
 :root[data-ui='glados'] .g-btn.g-side-toggle { position: absolute; top: 64px; right: -14px; z-index: 2; transition: opacity var(--g-dur-colour) var(--ease), transform var(--g-dur-lift) var(--ease), box-shadow var(--g-dur-lift) var(--ease); }
 :root[data-ui='glados'] .g-side .os-side-handle::after { background: var(--g-ring); }
@@ -10670,7 +10716,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 :root[data-ui='glados'] .kg-blueprint .bh-page { font-family: var(--font-sans); }
 :root[data-ui='glados'] .kg-blueprint .bh-levels { gap: 4px; border: 0; background: var(--g-track-soft); border-radius: var(--g-r-pill); padding: 3px; box-shadow: none; }
 :root[data-ui='glados'] .kg-blueprint .bh-lvl.g-chip { box-shadow: none; background: transparent; }
-:root[data-ui='glados'] .kg-blueprint .bh-lvl.g-chip[aria-pressed='true'] { background: var(--g-ink); color: var(--g-ink-inverse); }
+:root[data-ui='glados'] .kg-blueprint .bh-lvl.g-chip[aria-pressed='true'] { color: var(--g-ink); }
 :root[data-ui='glados'] .kg-blueprint .bh-search-pill.g-btn { background: var(--g-card-2); }
 :root[data-ui='glados'] .kg-blueprint .bh-insp-handle.g-btn { box-shadow: var(--g-shadow-sm); }
 :root[data-ui='glados'] .kg-blueprint .bh-itab.g-chip { box-shadow: none; }
@@ -11240,7 +11286,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 :root[data-ui='glados'] .wfc[data-skin='g'] .g-input, :root[data-ui='glados'] .wfc[data-skin='g'] .g-select { border: 0; border-radius: var(--g-r-input); background: var(--g-card-2); color: var(--g-ink); box-shadow: inset 0 0 0 1px var(--g-line); }
 :root[data-ui='glados'] .wfc[data-skin='g'] .g-input:focus, :root[data-ui='glados'] .wfc[data-skin='g'] .g-select:focus { outline: 2px solid var(--g-ring); outline-offset: 0; }
 :root[data-ui='glados'] .wfc[data-skin='g'] .seg .g-chip { border-radius: var(--g-r-pill); }
-:root[data-ui='glados'] .wfc[data-skin='g'] .seg .g-chip.is-on { background: var(--g-ink); color: var(--g-ink-inverse); }
+:root[data-ui='glados'] .wfc[data-skin='g'] .seg .g-chip.is-on { color: var(--g-ink); }
 /* nodes: raised cards, no border, no glow; selected = 2px ring */
 :root[data-ui='glados'] .wfc[data-skin='g'] .node .frame { border: 0; border-radius: 18px; background: var(--g-card-2); box-shadow: var(--g-shadow-sm); }
 :root[data-ui='glados'] .wfc[data-skin='g'] .node .frame::before, :root[data-ui='glados'] .wfc[data-skin='g'] .node .frame::after { display: none; }
@@ -12851,8 +12897,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 /* The Aurora fills the whole window, behind the sidebar and top bar, which turn to
    frosted glass on Lab pages so the backdrop reads through them. */
 .lab2-aurora { position: fixed; }
-.view:has(> .lab[data-lab-root]), .view:has(.lab[data-lab-root]) { animation-name: lab-view-in; }
-@keyframes lab-view-in { from { opacity: 0.6; } }
+.view:has(> .lab[data-lab-root]), .view:has(.lab[data-lab-root]) { animation-name: none; } /* a fade or transform here would kill the glass and trap the fixed aurora; .lab2-page[data-lab-enter] rises instead */
 html:has(.lab[data-lab-root]) .os-sidebar {
   background: color-mix(in srgb, var(--g-bg, var(--bg)) 42%, transparent) !important;
   -webkit-backdrop-filter: blur(20px) saturate(1.2); backdrop-filter: blur(20px) saturate(1.2);
@@ -13373,7 +13418,8 @@ html:has(.lab[data-lab-root]) .os-topbar {
 
 /* ── Content Lab v2 · motion ── */
 /* docs/projects/content-lab/v2/spec/03-motion.md. Mirrors LAB_EASE and LAB_DUR in lib/lab/motion.ts (AC-03-1).
-   Keyframes animate only opacity and transform; every selector starts with .lab. */
+   Keyframes animate only opacity and transform; every selector starts with .lab. Entrances never fade
+   (glass pack): a fading parent kills the frost of every glass face inside it. */
 .lab {
   --lab-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --lab-ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
@@ -13390,9 +13436,9 @@ html:has(.lab[data-lab-root]) .os-topbar {
   --lab-dur-seal: 180ms;
 }
 
-@keyframes lab2-rise { from { opacity: 0; transform: translateY(var(--lab-rise, 8px)); } to { opacity: 1; transform: none; } }
+@keyframes lab2-rise { from { transform: translateY(var(--lab-rise, 8px)); } to { transform: none; } }
 @keyframes lab2-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes lab2-pop  { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes lab2-pop  { from { transform: scale(0.96); } to { transform: none; } }
 @keyframes lab2-drift {
   0%   { transform: translate3d(0, 0, 0) scale(1); }
   33%  { transform: translate3d(6%, -5%, 0) scale(1.06); }
@@ -14328,11 +14374,11 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   --l-swatch-daylight: #f2f6f9;
   --l-swatch-daylight-ink: #16222c;
   --l-swatch-daylight-dot: #4db3de;
-  --l-r-chip: 5px;
+  --l-r-chip: 999px; /* glass pack: chips are pills */
   --l-r-ctl: 6px;
   --l-r-card: 8px;
   --l-r-panel: 10px;
-  --l-r-tile: 12px;
+  --l-r-tile: 24px; /* glass pack: card 24 */
   --l-r-slab: 28px;
   --l-ease: cubic-bezier(0.32, 0.72, 0, 1);
   --l-ease-lens: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -14853,7 +14899,8 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   --brain-2: var(--l-brain-2);
   --brain-3: var(--l-brain-3);
   --kg-tool: var(--l-brain-2);
-  /* Glass and the Home gradients go flat: Monolith cards are hairline on the ground, no fills, no glows. */
+  /* The Home gradients go flat and glass reads the glass pack (end of this file): no fills;
+     a glow only behind an "on" face. The --glass-* fills below are the solid fallback only. */
   --glass-a: var(--l-surface);
   --glass-b: var(--l-surface);
   --glass-c: var(--l-surface);
@@ -15035,14 +15082,10 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   }
 }
 
-/* Cards in the slab: hairline, no shadow, no gradient fill (Monolith rules). */
-:root[data-ui='legacy'] [data-l-frame] :is(.card, .glass-panel, .glass-panel-violet, [class*='shadow-']):not(.l-insight):not([data-l]) {
+/* Cards in the slab: no Classic drop shadow (Monolith rules). Glass faces keep their light: the
+   glass pack at the end of this file shapes them (no fills; a glow only behind an "on" face). */
+:root[data-ui='legacy'] [data-l-frame] :is(.card, [class*='shadow-']):not(.l-insight):not([data-l]):not(.glass-face, .glass-panel, .glass-panel-violet, .glass-chip, .c-pop, .c-chip, .h6-card) {
   box-shadow: none !important;
-}
-:root[data-ui='legacy'] [data-l-frame] :is(.glass-panel, .glass-panel-violet) {
-  background: var(--l-surface) !important;
-  border-color: var(--l-border) !important;
-  backdrop-filter: none !important;
 }
 :root[data-ui='legacy'] [data-l-frame] :is(.rounded-lg-t.border, .bg-os-surface.border) {
   transition:
@@ -15068,7 +15111,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   color: var(--l-text-2);
   border-radius: var(--l-r-ctl);
 }
-:root[data-ui='legacy'] .os-sidebar a.os-nav-link:hover {
+:root[data-ui='legacy'] .os-sidebar a.os-nav-link:not([aria-current='page']):hover {
   background: var(--l-surface-2);
   box-shadow: none;
   color: var(--l-text);
@@ -15079,17 +15122,12 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 }
 :root[data-ui='legacy'] .os-sidebar a.os-nav-link[aria-current='page'],
 :root[data-ui='legacy'] .os-sidebar a.os-nav-link[aria-current='page']:hover {
-  background: var(--l-surface-2);
-  box-shadow: inset 0 0 0 1px var(--l-border-strong);
   color: var(--l-text);
 }
 :root[data-ui='legacy'] .os-sidebar a.os-nav-link[aria-current='page'] svg,
 :root[data-ui='legacy'] .os-sidebar a.os-nav-link[aria-current='page']:hover svg {
   color: var(--l-text);
   filter: none;
-}
-:root[data-ui='legacy'] .os-sidebar a.os-nav-link[aria-current='page']::before {
-  display: none;
 }
 :root[data-ui='legacy'] .os-sidebar {
   border-color: var(--l-border);
@@ -15372,9 +15410,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   font-weight: 600;
 }
 .l-toggle-chip[data-on='true'] {
-  border-color: var(--l-text);
-  background: var(--l-text);
-  color: var(--l-bg);
+  color: var(--l-text);
 }
 .l-toggle-chip:active { transform: scale(0.94); }
 
@@ -15574,10 +15610,9 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   to { background-position: -20% 0; }
 }
 
-/* Slab motion: rise staggered 90 ms, line draw 1.4 s, fades */
+/* Slab motion: rise staggered 90 ms (cards materialise, glass pack), line draw 1.4 s, chart fades */
 @keyframes l-rise {
-  from { opacity: 0; transform: translateY(10px) scale(0.992); }
-  to { opacity: 1; transform: none; }
+  from { transform: translateY(10px) scale(0.992); }
 }
 @keyframes l-draw { to { stroke-dashoffset: 0; } }
 @keyframes l-fade { from { opacity: 0; } }
@@ -16656,10 +16691,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-ui='legacy'] .lab .lab2-tab[aria-current='page'] {
   letter-spacing: -0.035em;
 }
-/* Sheets open as FO panels: scrim fade, 1px border, radius 12. */
-:root[data-ui='legacy'] .lab .lab2-sheet-layer .lab2-glass {
-  border: 1px solid var(--l-border);
-}
+/* Sheets open as FO panels over a scrim; the glass pack lights their edge (no border). */
 /* Daylight takes White's print palette for beats and categories (they must read on white), and the
    dark beats carry light labels, as White does. */
 :root[data-ui='legacy'][data-theme='daylight'] .lab {
@@ -17104,7 +17136,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   color: var(--text);
 }
 .h6-interject-input::placeholder { color: var(--text-3); }
-.h6-interject:focus-within { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.h6-interject:focus-within { --gl-tint: var(--accent); --gl-rim-a: 45%; }
 .h6-interject-send {
   display: inline-flex;
   flex-shrink: 0;
@@ -17126,8 +17158,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 }
 
 /* Bennett Legacy (the Classic tree under the Legacy skin): FO console composer, mono with a block caret; LEDs glow. */
-:root[data-ui='legacy'] .h6-interject { border-color: var(--l-border-strong); background: var(--l-surface); }
-:root[data-ui='legacy'] .h6-interject:focus-within { border-color: var(--l-accent-line); }
+:root[data-ui='legacy'] .h6-interject:focus-within { --gl-tint: var(--l-accent); --gl-rim-a: 45%; }
 :root[data-ui='legacy'] .h6-interject-caret {
   display: inline-block;
   color: var(--l-accent);
@@ -17313,7 +17344,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :where(html[data-sidebar='rail'] .os-sidebar) .l-side-word { display: none; }
 :where(html[data-sidebar='rail'] .os-sidebar) .l-side-lockup .l-side-mark { width: 30px !important; height: 30px !important; }
 
-/* L2.2 sidebar: FO group labels (9px, tracked 0.18em) and the accent-line active row. */
+/* L2.2 sidebar: FO group labels (9px, tracked 0.18em); the active row is a glass pill (glass pack). */
 :root[data-ui='legacy'] .os-sidebar .os-nav-group-title {
   padding: 14px 10px 6px;
   font-size: 9px;
@@ -17323,8 +17354,6 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-ui='legacy'] .os-sidebar a.os-nav-link { font-weight: 500; }
 :root[data-ui='legacy'] .os-sidebar a.os-nav-link[aria-current='page'],
 :root[data-ui='legacy'] .os-sidebar a.os-nav-link[aria-current='page']:hover {
-  background: var(--l-accent-soft);
-  box-shadow: inset 0 0 0 1px var(--l-accent-line);
   color: var(--l-accent-deep);
 }
 :root[data-ui='legacy'] .os-sidebar a.os-nav-link[aria-current='page'] svg,
@@ -17665,3 +17694,234 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 .kg-modules-row[data-off] { color: var(--g-muted); }
 .kg-modules-label { flex: 1; font-size: var(--g-fs-body); }
 .kg-modules > [role='alert'], .kg-modules > .g-error-line { grid-column: 1 / -1; }
+
+/* ════ GLASS PACK (FounderOS Glass brief §1, §2, §4; every style, every theme) ═══════════════════
+   Glass is shaped by light, never by fill. A face is transparent: a dark groove and a soft drop
+   outside, a shade under the top edge, a rim brightest along the bottom and light pooling at the
+   bottom inside, and whatever is underneath frosted. "On" is a glow behind the face plus a rim
+   tinted the same colour, never a coloured fill. Faces never fade in: they materialise (frost,
+   scale and rim draw in together) and melt out.
+
+   How it applies: the existing face classes are pointed at the recipe here, so no call site
+   changes. The face rules are prefixed :root[data-ground] (lib/appearance.ts groundFor writes it
+   on <html>) so they outrank the per-theme face rules above them; the knobs (--gl-tint, rim, low,
+   pool) sit in a zero-specificity :where() so any rule or style attribute can turn them.
+   --solid-bg is each style's opaque surface: the face under reduced transparency, and the face of
+   tooltips and menus (small pop-ups over text are solid raised faces, never frost). The --g-card,
+   --l-surface and --surface tokens stay opaque for exactly that reason (and for the contrast tests).
+
+   Frost animates by interpolating backdrop-filter itself (blur(0px) saturate(100%) to the face's
+   own resting frost), so .glass-face keeps backdrop-filter: var(--gl-blur) and one keyframe serves
+   the light and the strong faces. Rim and pool are registered so the light can animate.
+   Melt is wired by adding .is-melting before unmount (components do that; reduced motion skips it).
+   The tokens, the white-ground values, the per-style --solid-bg and the knobs live with the
+   theme-independent tokens near the top of this file ("GLASS PACK · tokens"). */
+
+/* The face. */
+:root[data-ground] :is(
+  .glass-face, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+  .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
+  .wiz-ask, .g-ask-box
+) {
+  background: transparent;
+  border-color: transparent;
+  -webkit-backdrop-filter: var(--gl-blur);
+  backdrop-filter: var(--gl-blur);
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+
+/* The ask bars ("Tell an agent"): an accent light orbits behind an inner frosted layer that clips to
+   the bar, so that layer carries the inner light (rim, low, pool, shade) above the frosted orbit. */
+:root[data-ground] :is(.wiz-ask-glass, .g-ask-glass) {
+  border-radius: inherit;
+  background: transparent;
+  -webkit-backdrop-filter: var(--gl-blur-strong);
+  backdrop-filter: var(--gl-blur-strong);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+:root[data-ground] :is(.wiz-ask:focus-within .wiz-ask-glass, .g-ask-box:focus-within .g-ask-glass, .g-ask[data-error] .g-ask-glass) {
+  --gl-rim-a: 45%; /* focus and error: a stronger tinted rim instead of a coloured border */
+}
+
+/* Strong frost: pop-ups, sheets, drawers, dialogs, the palette. */
+:root[data-ground] :is(.glass-face--strong, .g-sheet, .g-drawer, .g-dialog, .g-palette, .c-pop, .l-dialog, .lab2-glass[data-tone='strong']) {
+  -webkit-backdrop-filter: var(--gl-blur-strong);
+  backdrop-filter: var(--gl-blur-strong);
+}
+
+/* Content Lab glass: the blur budget (components/lab/v2/shared/Glass.tsx) still decides who frosts;
+   a face without a slot, or tone solid, is the solid face. Tint never blurs, nor does glass behind
+   an inert page (a sheet is open over it). */
+:root[data-ground] .lab2-glass:is([data-tone='solid'], [data-blur='off'][data-tone='base'], [data-blur='off'][data-tone='strong']) {
+  background: var(--solid-bg);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+:root[data-ground] .lab2-glass[data-tone='tint'],
+:root[data-ground] :is([inert] .lab2-glass, .lab2-glass[inert]) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Solid raised faces: tooltips and menus (they sit over text, so never frost). */
+:root[data-ground] :is(.glass-solid, .os-nav-tip, .g-pop, .g-tip, .g-chart-tip, .c-pop[role='menu'], .c-pop[role='tooltip']) {
+  background: var(--solid-bg);
+  border-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+
+/* "On": sidebar pills, pressed chips, the segmented control's option, anything marked .gl-on. The
+   rim takes the glow's colour; the glow sits behind the face (0.6x, blur 40px, .55). Never a fill. */
+:where(
+  .gl-on, .g-chip[aria-pressed='true'], .g-chip.is-on, .g-seg-opt[aria-checked='true'], .g-seg-opt.is-on,
+  .l-toggle-chip[data-on='true'], .os-sidebar a.os-nav-link[aria-current='page']
+) {
+  position: relative;
+  isolation: isolate;
+}
+:root[data-ground] :is(
+  .gl-on, .g-chip[aria-pressed='true'], .g-chip.is-on, .g-seg-opt[aria-checked='true'], .g-seg-opt.is-on,
+  .l-toggle-chip[data-on='true'], .os-sidebar a.os-nav-link[aria-current='page']
+) {
+  --gl-tint: var(--gl-on);
+  background: transparent;
+  border-color: transparent;
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+:root[data-ground] :is(
+  .gl-on, .g-chip[aria-pressed='true'], .g-chip.is-on, .g-seg-opt[aria-checked='true'], .g-seg-opt.is-on,
+  .l-toggle-chip[data-on='true'], .os-sidebar a.os-nav-link[aria-current='page']
+)::before {
+  content: '';
+  position: absolute;
+  inset: 20%;
+  width: auto;
+  height: auto;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--gl-on);
+  filter: blur(40px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+/* Status meaning glows status green. */
+:root[data-ground] [data-glow='ok'] {
+  --gl-on: var(--ok);
+}
+
+/* Motion. Materialise (12f): frost 0 to full, scale .965 and y +18 to rest on the spring, the rim
+   drawn by ~420ms, then the pool rising over ~330ms. No opacity, ever. Melt (8f, linear): rim, pool
+   and frost to 0, scale to .98. */
+@keyframes gl-materialise {
+  0% {
+    transform: translateY(18px) scale(0.965);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+    --gl-rim-a: 0%;
+    --gl-pool-a: 0%;
+  }
+  42% { --gl-pool-a: 0%; }
+  72% { --gl-rim-a: 15%; }
+}
+/* The drawer slides from the right instead of rising (brief §5 B11). */
+@keyframes gl-materialise-drawer {
+  0% {
+    transform: translateX(100%);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+    --gl-rim-a: 0%;
+    --gl-pool-a: 0%;
+  }
+  42% { --gl-pool-a: 0%; }
+  72% { --gl-rim-a: 15%; }
+}
+@keyframes gl-melt {
+  to {
+    transform: scale(0.98);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+    --gl-rim-a: 0%;
+    --gl-pool-a: 0%;
+  }
+}
+/* Content inside a face may follow 3f (125ms) later, transform only. */
+@keyframes gl-follow { from { transform: translateY(8px); } }
+@keyframes gl-breathe { 50% { filter: brightness(1.2); } }
+@keyframes gl-sweep { from { background-position: -60% 0; } to { background-position: 160% 0; } }
+@keyframes gl-reflect { 50% { opacity: 0.42; } }
+@keyframes gl-orbit { to { transform: rotate(360deg); } }
+
+/* Faces that used to fade in materialise instead (their old keyframes keep the motion half only). */
+:root[data-ground] :is(.gl-materialise, .g-sheet, .g-dialog, .g-palette, .ui-toast, .l-dialog) {
+  animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) backwards;
+}
+:root[data-ground] .g-drawer {
+  animation: gl-materialise-drawer var(--gl-dur-drawer) var(--gl-spring-drawer) backwards;
+}
+:root[data-ground] .l-card.l-rise {
+  animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) calc(var(--l-rise-i, 0) * 90ms) backwards;
+}
+:root[data-ground] .gl-follow {
+  animation: gl-follow var(--gl-dur-materialise) var(--gl-spring) 125ms backwards;
+}
+:root[data-ground] .is-melting {
+  animation: gl-melt var(--gl-dur-melt) linear forwards;
+  pointer-events: none;
+}
+
+/* Reduced motion: faces appear at rest (no rise, no scale, no melt). */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ground] :is(
+    .glass-face, .gl-materialise, .gl-follow, .is-melting, .g-sheet, .g-dialog, .g-palette, .g-drawer, .ui-toast,
+    .l-dialog, .l-card.l-rise
+  ) {
+    animation: none;
+  }
+}
+
+/* No blur where the browser or the viewer asks for none: the same light on a solid face. */
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-ground] :is(
+    .glass-face, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+    .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
+    .wiz-ask, .g-ask-box, .glass-face--strong, .lab2-glass[data-tone='strong'], .wiz-ask-glass, .g-ask-glass
+  ) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--solid-bg);
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-ground] :is(
+    .glass-face, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+    .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
+    .wiz-ask, .g-ask-box, .glass-face--strong, .lab2-glass[data-tone='strong'], .wiz-ask-glass, .g-ask-glass
+  ) {
+    background: var(--solid-bg);
+  }
+}
+/* ════ end GLASS PACK ════ */
