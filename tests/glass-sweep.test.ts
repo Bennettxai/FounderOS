@@ -364,3 +364,135 @@ describe('no face enters with an opacity fade (brief §4): every fading keyframe
     expect(read('components/BusinessIncomeChart.tsx')).toMatch(/className="fin-tip c-pop glass-solid /);
   });
 });
+
+describe('Classic ad-hoc cards are glass faces', () => {
+  /** The recipe phase 1 put on .glass-face: the one source of the six layers. */
+  const recipe = props(
+    TOP.filter((r) => r.selectors.some((s) => /\[data-ground\] :is\(\s*\.glass-face,/.test(s)) && /box-shadow/.test(r.body))[0].body,
+  );
+  const SIX = layers(recipe.get('box-shadow')!);
+  const MAPPED = ':root[data-ground] .bg-os-surface.rounded-lg-t:not(.border-dashed)';
+  const at = (sel: string, media?: RegExp) =>
+    RULES.filter((r) => r.selectors.includes(sel) && (media ? r.at.some((a) => media.test(a)) : r.at.length === 0));
+
+  test('an os surface with the card radius is a card face: transparent, light frost, the six layers', () => {
+    const r = at(MAPPED);
+    expect(r.length).toBe(1);
+    const p = props(r[0].body);
+    expect(p.get('background')).toBe('transparent');
+    expect(p.get('border-color')).toBe('transparent');
+    expect(p.get('backdrop-filter')).toBe('var(--gl-blur)');
+    expect(p.get('-webkit-backdrop-filter')).toBe('var(--gl-blur)');
+    expect(layers(p.get('box-shadow')!)).toEqual(SIX);
+  });
+
+  test('the mapped cards and the wells carry the knobs at zero specificity', () => {
+    const k = TOP.filter((r) => r.selectors.includes(':where(.bg-os-surface.rounded-lg-t, .glass-well)'));
+    expect(k.length).toBe(1);
+    const p = props(k[0].body);
+    expect(p.get('--gl-tint')).toBe('white');
+    expect(p.get('--gl-rim-a')).toBe('15%');
+    expect(p.get('--gl-low-a')).toBe('30%');
+    expect(p.get('--gl-pool-a')).toBe('9%');
+  });
+
+  test('a card inside a face is a well: rim light only, no second frost, radius 16', () => {
+    const wells = TOP.filter((r) => r.selectors.includes(':root[data-ground] .glass-well'));
+    expect(wells.length).toBe(1);
+    const nested = wells[0].selectors.find((s) => /\) :not\(\.border-dashed\)\.bg-os-surface\.rounded-lg-t$/.test(s));
+    expect(nested, 'nested mapped cards share the well rule').toBeDefined();
+    for (const face of ['.glass-face', '.c-pop', '.l-card', '.g-card', '.h6-card', '.glass-panel', '.bg-os-surface.rounded-lg-t']) {
+      expect(nested!, face).toContain(face);
+    }
+    const p = props(wells[0].body);
+    expect(p.get('background')).toBe('transparent');
+    expect(p.get('border-color')).toBe('transparent');
+    expect(p.get('backdrop-filter')).toBe('none');
+    expect(p.get('border-radius')).toBe('var(--gl-r-well)');
+    expect(layers(p.get('box-shadow')!)).toEqual([SIX[2], SIX[3]]);
+  });
+
+  test('no blur where the viewer or the browser asks for none: the mapped card is the solid face', () => {
+    for (const media of [/prefers-reduced-transparency: reduce/, /^@supports not/]) {
+      const r = at(MAPPED, media);
+      expect(r.length, String(media)).toBe(1);
+      const p = props(r[0].body);
+      expect(p.get('background')).toBe('var(--solid-bg)');
+      if (/reduced/.test(String(media))) expect(p.get('backdrop-filter')).toBe('none');
+    }
+  });
+
+  test('an accent border becomes a tinted rim; a hoverable card brightens its rim', () => {
+    const accent = props(at(':root[data-ground] .bg-os-surface.rounded-lg-t.border-os-accent')[0].body);
+    expect(accent.get('--gl-tint')).toBe('var(--accent)');
+    expect(accent.get('--gl-rim-a')).toBe('45%');
+    const hover = TOP.filter((r) => r.selectors.includes(':root[data-ground] :is(.glass-face, .bg-os-surface.rounded-lg-t).hoverable:hover'));
+    expect(hover.length).toBe(1);
+    expect(props(hover[0].body).get('--gl-rim-a')).toBe('28%');
+  });
+
+  /** Lines that are not cards (inputs, buttons, tracks, badges, calendar chips) and keep their surface. */
+  const NOT_CARD: [string, string, string][] = [
+    ['components/knowledge/KnowledgeVisualizer.tsx', 'flex flex-wrap gap-1 rounded-[11px]', 'section nav track (buttons)'],
+    ['components/compute/ComputeConsole.tsx', 'w-full rounded-[10px] border p-3 text-left', 'selectable option button'],
+    ['components/KnowledgeDetail.tsx', 'g-btn kg-detail-row', 'row button'],
+    ['components/InstagramDmInbox.tsx', 'inline-flex gap-1 rounded-md-t', 'tab track'],
+    ['components/tasks/Board.tsx', 'tasks-card', 'calendar event chips inside grid cells'],
+    ['components/BrainQuery.tsx', 'border-b-2 bg-os-surface', 'keyboard hint badge'],
+    ['app/org/page.tsx', 'mb-4 rounded-lg border bg-os-surface', 'venture banner, lit by its own inline venture colour'],
+  ];
+  const SKIP_DIRS = /^(founderos)\//;
+  const PHASE_2A = new Set(['components/CommandPalette.tsx', 'components/legacy/Dialog.tsx', 'components/g/GSheet.tsx', 'components/g/GDrawer.tsx', 'components/g/GDialog.tsx', 'components/ui/Toast.tsx']);
+  const walk = (dir: string): string[] =>
+    require('node:fs')
+      .readdirSync(join(process.cwd(), dir), { withFileTypes: true })
+      .flatMap((d: { name: string; isDirectory: () => boolean }) =>
+        d.isDirectory() ? walk(`${dir}/${d.name}`) : /\.tsx?$/.test(d.name) ? [`${dir}/${d.name}`] : [],
+      );
+  const FILES = [...walk('app'), ...walk('components')].filter((f) => !SKIP_DIRS.test(f) && !PHASE_2A.has(f));
+  const SURFACE = /(^|[\s'"`])bg-os-surface(?![\w/-])/;
+  const CARD_RADIUS = /\brounded-(?:lg|xl|2xl)(?![\w-])|\brounded-\[(?:1\d|2\d)px\]|\brounded-(?:md|sm)-t\b/;
+
+  test('no os-surface card keeps an ad-hoc radius: cards take the card token, insets are wells, pop-ups are solid', () => {
+    const left: string[] = [];
+    for (const f of FILES) {
+      read(f)
+        .split('\n')
+        .forEach((line, i) => {
+          if (!SURFACE.test(line) || !CARD_RADIUS.test(line) || !/\bborder\b/.test(line)) return;
+          if (/outline-none/.test(line)) return; // inputs
+          if (/\bglass-(well|solid|face)\b|\bc-pop\b/.test(line)) return;
+          if (NOT_CARD.some(([file, needle]) => file === f && line.includes(needle))) return;
+          left.push(`${f}:${i + 1} ${line.trim().slice(0, 110)}`);
+        });
+    }
+    expect(left).toEqual([]);
+  });
+
+  test('every allowlisted non-card still exists (the list cannot rot)', () => {
+    for (const [file, needle] of NOT_CARD) expect(read(file), `${file}: ${needle}`).toContain(needle);
+  });
+
+  test('menus and hover tips over the task charts are solid raised faces that rise, never fade', () => {
+    for (const f of ['components/tasks/TaskOverview.tsx', 'components/tasks/RangePill.tsx']) {
+      const menus = read(f).split('\n').filter((l) => /absolute right-0 z-20 mt-1/.test(l));
+      expect(menus.length, f).toBeGreaterThan(0);
+      for (const l of menus) expect(l, f).toMatch(/\bglass-solid\b/);
+    }
+    for (const f of ['components/tasks/TaskOverview.tsx', 'components/tasks/ActivityGraph.tsx']) {
+      const tips = read(f).split('\n').filter((l) => /pointer-events-none absolute -top-\d/.test(l));
+      expect(tips.length, f).toBeGreaterThan(0);
+      for (const l of tips) {
+        expect(l, f).toMatch(/\bglass-solid\b/);
+        expect(l, f).not.toMatch(/opacity-0|group-hover:opacity/);
+        expect(l, f).toMatch(/\binvisible\b.*\btranslate-y-1\.5\b.*\bgroup-hover:visible\b.*\bgroup-hover:translate-y-0\b/);
+      }
+    }
+  });
+
+  test('the Brand Deals cards rise without fading', () => {
+    const kf = /@keyframes bd-rise \{([^}]*\}[^}]*)\}/.exec(read('components/brand-deals/DealBoard.tsx'));
+    expect(kf).not.toBeNull();
+    expect(kf![1]).not.toMatch(/opacity/);
+  });
+});

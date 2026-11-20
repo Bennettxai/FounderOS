@@ -102,7 +102,7 @@ export function ActivityGraph({
                 {d.runs === 0 ? '—' : `${d.pct}%`}
               </span>
               <span className="font-mono text-[9.5px] text-os-dim">{d.label}</span>
-              <div className="pointer-events-none absolute -top-7 z-10 whitespace-nowrap rounded-sm-t border border-os-border bg-os-surface px-2 py-1 font-mono text-[10px] text-os-muted opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="glass-solid pointer-events-none absolute -top-7 z-10 whitespace-nowrap rounded-sm-t border border-os-border bg-os-surface px-2 py-1 font-mono text-[10px] text-os-muted invisible translate-y-1.5 transition-transform group-hover:visible group-hover:translate-y-0">
                 {d.runs} runs
               </div>
             </div>

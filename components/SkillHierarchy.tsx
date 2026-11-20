@@ -569,7 +569,7 @@ export function SkillHierarchy({
           <div className="mt-1.5 text-[16px] font-medium leading-snug text-os-text">{sel.name}</div>
 
           {/* the vertical hierarchy — where this skill lives */}
-          <div className="mt-3 rounded-[11px] border border-os-border bg-os-surface2 p-3 font-mono text-[10.5px] leading-[1.9]">
+          <div className="glass-well mt-3 border border-os-border bg-os-surface2 p-3 font-mono text-[10.5px] leading-[1.9]">
             <div className="text-os-dim">skills/</div>
             <div className="pl-3 text-os-muted">
               <span style={{ color: domainColor(selDomain.ci) }}>├</span> {selPath[0]}

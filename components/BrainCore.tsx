@@ -111,7 +111,7 @@ export function BrainCore({
                     {doctor.connected ? `${warnings.length} of ${doctor.checks.length} checks` : 'offline'}
                   </span>
                 </div>
-                <div className="rounded-md-t border border-os-border bg-os-surface px-4 py-3">
+                <div className="glass-well border border-os-border bg-os-surface px-4 py-3">
                   {doctor.connected && warnings.length === 0 && doctor.checks.length > 0 && (
                     <div className="flex items-center gap-2.5 text-[12.5px] text-os-muted">
                       <span className="dot ok" /> All {doctor.checks.length} checks green · health {doctor.healthScore ?? '—'}/100
@@ -145,7 +145,7 @@ export function BrainCore({
                 </div>
                 <BrainQuery fallbackActive={fallbackActive} />
                 {fallbackActive && (
-                  <div className="mt-3.5 flex items-center gap-3.5 rounded-md-t border border-os-border bg-os-surface px-4 py-3.5">
+                  <div className="glass-well mt-3.5 flex items-center gap-3.5 border border-os-border bg-os-surface px-4 py-3.5">
                     <Zap className="h-3.5 w-3.5 shrink-0 text-os-warn" strokeWidth={1.7} />
                     <div className="flex-1 text-[13px] text-os-muted">
                       Supabase free tier is paused — hybrid queries fall back to local grep until revived.

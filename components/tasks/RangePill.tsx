@@ -48,7 +48,7 @@ export function RangePill({ range }: { range: RangeId }) {
           <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} strokeWidth={1.6} />
         </button>
         {open && (
-          <div className="absolute right-0 z-20 mt-1 w-[168px] overflow-hidden rounded-md-t border border-os-border bg-os-surface shadow-lg">
+          <div className="glass-solid absolute right-0 z-20 mt-1 w-[168px] overflow-hidden rounded-md-t border border-os-border bg-os-surface shadow-lg">
             {TASK_RANGES.map((r) => (
               <button
                 key={r.id}

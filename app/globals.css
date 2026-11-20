@@ -18025,4 +18025,62 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
     animation: none;
   }
 }
+/* Classic ad-hoc cards. In the Classic markup an os surface with the card radius (bg-os-surface +
+   rounded-lg-t) is a card, so it takes the recipe here instead of at ~60 call sites; cards with other
+   radii moved to rounded-lg-t. A dashed border is a drop zone, not a card. A card inside a face is a
+   well: rim light only, no second frost, radius 16 (call sites that are insets say .glass-well).
+   The declarations mirror the .glass-face recipe above (tests/glass-sweep.test.ts holds them equal). */
+:where(.bg-os-surface.rounded-lg-t, .glass-well) {
+  --gl-tint: white;
+  --gl-rim-a: 15%;
+  --gl-low-a: 30%;
+  --gl-pool-a: 9%;
+}
+:root[data-ground] .bg-os-surface.rounded-lg-t:not(.border-dashed) {
+  background: transparent;
+  border-color: transparent;
+  -webkit-backdrop-filter: var(--gl-blur);
+  backdrop-filter: var(--gl-blur);
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+:root[data-ground] .glass-well,
+:root[data-ground] :is(
+  .glass-face, .c-pop, .l-card, .l-slab, .l-dialog, .g-card, .g-card-raised, .g-sheet, .g-drawer, .g-dialog, .h6-card,
+  .glass-panel, .glass-panel-violet, .lab2-glass, .bg-os-surface.rounded-lg-t
+) :not(.border-dashed).bg-os-surface.rounded-lg-t {
+  background: transparent;
+  border-color: transparent;
+  border-radius: var(--gl-r-well);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent);
+}
+/* A drag-over or accent border is "on": a tinted, stronger rim. A clickable card brightens its rim. */
+:root[data-ground] .bg-os-surface.rounded-lg-t.border-os-accent {
+  --gl-tint: var(--accent);
+  --gl-rim-a: 45%;
+}
+:root[data-ground] :is(.glass-face, .bg-os-surface.rounded-lg-t).hoverable:hover {
+  --gl-rim-a: 28%;
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-ground] .bg-os-surface.rounded-lg-t:not(.border-dashed) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--solid-bg);
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-ground] .bg-os-surface.rounded-lg-t:not(.border-dashed) {
+    background: var(--solid-bg);
+  }
+}
 /* ── end glass phase 2b ── */

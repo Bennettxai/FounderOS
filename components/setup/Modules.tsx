@@ -75,7 +75,7 @@ export function ModulesClassic({ initialOff }: { initialOff: string[] }) {
       {GROUPS.map((g) => (
         <div key={g.id} role="group" aria-label={g.label}>
           <p className="mb-1.5 text-[11.5px] text-os-dim">{g.title ?? 'Command'}</p>
-          <div className="divide-y divide-os-border rounded-[8px] border border-os-border bg-os-surface">
+          <div className="divide-y divide-os-border rounded-lg-t border border-os-border bg-os-surface">
             {g.items.map(({ href, label, icon: Icon }) => {
               const on = !off.includes(href);
               return (

@@ -47,7 +47,7 @@ export default function DatabasePage() {
       {db.configured ? (
         <DatabaseExplorer initial={{ root: db.root, tree: db.tree, scannedAt: db.scannedAt, truncated: db.truncated }} />
       ) : (
-        <div className="rounded-[12px] border border-[var(--hairline)] bg-os-surface p-5">
+        <div className="rounded-lg-t border border-[var(--hairline)] bg-os-surface p-5">
           <div className="flex items-center gap-3">
             <span className="rounded-full border border-[var(--hairline)] px-2 py-[2px] text-[11px] text-os-muted">Not configured</span>
             <span className="text-[13px] text-os-text">No brain folder found on this machine.</span>

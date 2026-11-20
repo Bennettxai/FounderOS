@@ -71,7 +71,7 @@ function Card({
 }) {
   return (
     <div
-      className={`bd-card relative rounded-[12px] border border-os-border bg-os-surface ${className}`}
+      className={`bd-card relative rounded-lg-t border border-os-border bg-os-surface ${className}`}
       style={{
         animation: `bd-rise .6s ${EASE} ${delay}ms both`,
         ...style,
@@ -460,7 +460,7 @@ export function DealBoard({ initial, botUrl = null }: { initial: BrandDealsSnaps
             <RefreshCw size={15} strokeWidth={1.7} />
           </button>
         </div>
-        <div className="flex flex-col items-center gap-3 rounded-[12px] border border-os-border bg-os-surface px-6 py-14 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-lg-t border border-os-border bg-os-surface px-6 py-14 text-center">
           <Badge>Not configured</Badge>
           <p className="text-[15px] text-os-text">bdpilot is not reporting</p>
           <p className="max-w-[440px] text-[13px] text-os-muted">
@@ -475,7 +475,7 @@ export function DealBoard({ initial, botUrl = null }: { initial: BrandDealsSnaps
   return (
     <div>
       <style>{`
-        @keyframes bd-rise { from { opacity: 0; transform: translateY(10px) scale(.992); } to { opacity: 1; transform: none; } }
+        @keyframes bd-rise { from { transform: translateY(10px) scale(.992); } to { transform: none; } }
         @keyframes bd-fadein { from { opacity: 0; } to { opacity: 1; } }
         @keyframes bd-draw { to { stroke-dashoffset: 0; } }
         @keyframes bd-meter-in { from { width: 0; } }
@@ -1010,7 +1010,7 @@ export function DealBoard({ initial, botUrl = null }: { initial: BrandDealsSnaps
                   <details
                     key={i}
                     open={i >= selected.chain.length - 2}
-                    className="rounded-md-t border border-os-border bg-os-surface px-3.5 py-2.5"
+                    className="glass-well border border-os-border bg-os-surface px-3.5 py-2.5"
                   >
                     <summary className="flex cursor-pointer list-none items-baseline justify-between gap-3">
                       <span className="truncate text-[12.5px] font-medium">{m.who}</span>

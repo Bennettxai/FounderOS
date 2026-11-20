@@ -70,7 +70,7 @@ export default async function ComputePage() {
     <div>
       <PageHeader title="Compute" eyebrow="Cloud computers your agents work on" right={right} />
       {!snap.configured ? (
-        <div className="rounded-[12px] border border-[var(--hairline)] bg-os-surface p-5">
+        <div className="rounded-lg-t border border-[var(--hairline)] bg-os-surface p-5">
           <div className="flex items-center gap-3">
             <span className="rounded-full border border-[var(--hairline)] px-2 py-[2px] text-[11px] text-os-muted">Not configured</span>
             <span className="text-[13px] text-os-text">No MIOSA key on this machine.</span>
@@ -78,11 +78,11 @@ export default async function ComputePage() {
           </div>
         </div>
       ) : !snap.ok ? (
-        <div className="rounded-[12px] border border-[var(--hairline)] bg-os-surface p-5 text-[13px]">
+        <div className="rounded-lg-t border border-[var(--hairline)] bg-os-surface p-5 text-[13px]">
           <span className="text-os-err">MIOSA did not answer: {snap.error}</span>
         </div>
       ) : snap.computers.length === 0 ? (
-        <div className="rounded-[12px] border border-[var(--hairline)] bg-os-surface p-5 text-[13px] text-os-muted">
+        <div className="rounded-lg-t border border-[var(--hairline)] bg-os-surface p-5 text-[13px] text-os-muted">
           No computers yet. Create one with <code className="text-os-text">miosa computers create</code> and it appears here.
         </div>
       ) : (
