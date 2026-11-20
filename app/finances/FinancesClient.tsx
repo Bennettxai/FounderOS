@@ -216,7 +216,7 @@ export function FinancesClient({
       {/* Hero — income by category, the Pipeline design, with the search bar
           melting out of its base. Typing filters everything below. */}
       <section className="mb-6">
-        <div className="rounded-[12px] border border-os-border bg-os-surface pb-4">
+        <div className="rounded-lg-t border border-os-border bg-os-surface pb-4">
           <div className="flex items-center justify-between px-6 pt-5">
             <h2 className="text-[19px] font-semibold tracking-[-0.01em]">Income by category</h2>
             <span className="text-[12.5px] text-os-dim">

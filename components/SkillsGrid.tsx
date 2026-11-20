@@ -206,7 +206,7 @@ export function SkillsGrid({
                     key={c.id}
                     onClick={() => open(c)}
                     title={`${c.name} — open SKILL.md`}
-                    className="group flex flex-col gap-2.5 rounded-lg border border-os-border bg-os-surface p-2.5 text-left transition-colors hover:border-os-border-strong hover:bg-os-surface2"
+                    className="group flex flex-col gap-2.5 rounded-lg-t border border-os-border bg-os-surface p-2.5 text-left transition-colors hover:border-os-border-strong hover:bg-os-surface2"
                   >
                     <div className="flex items-center gap-2.5">
                       <Icon className="h-[15px] w-[15px] shrink-0 text-os-accent" strokeWidth={1.7} />

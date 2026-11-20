@@ -77,7 +77,7 @@ function SystemCard({ href, title, caption }: { href: string; title: string; cap
   return (
     <Link
       href={href}
-      className="hoverable group block w-44 rounded-xl border border-os-border bg-os-surface p-5 text-center"
+      className="hoverable group block w-44 rounded-lg-t border border-os-border bg-os-surface p-5 text-center"
     >
       <div className="flex justify-center">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-os-border-bright bg-os-bg">
@@ -217,7 +217,7 @@ export default function OrgChartPage({ searchParams }: { searchParams?: { ventur
       )}
 
       {/* Life-area legend: every crew below is tinted by the part of life it serves */}
-      <div className="mb-8 flex flex-wrap items-center gap-5 rounded-lg border border-os-border bg-os-surface px-4 py-3">
+      <div className="mb-8 flex flex-wrap items-center gap-5 rounded-lg-t border border-os-border bg-os-surface px-4 py-3">
         <span className="text-[11.5px] text-os-dim">Life areas</span>
         {LIFE_AREAS.map((area) => (
           <span key={area.id} className="flex items-center gap-2.5 text-[11.5px] text-os-muted">
@@ -305,7 +305,7 @@ export default function OrgChartPage({ searchParams }: { searchParams?: { ventur
                     <div
                       key={agent.id}
                       title={agent.description}
-                      className={`w-full rounded-xl border border-os-border-bright bg-os-surface px-4 py-3 ${
+                      className={`w-full rounded-lg-t border border-os-border-bright bg-os-surface px-4 py-3 ${
                         dimFor(agent.id) ? 'opacity-20' : ''
                       }`}
                       style={

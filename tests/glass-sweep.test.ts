@@ -1,0 +1,498 @@
+/**
+ * Glass pack, phase 2b: the sweep after the recipe (FounderOS Glass brief §3.2 lint rule, §4, §5B).
+ *
+ * - Lint rule: a glass face never sits inside an element with filter, opacity < 1, mask or
+ *   backdrop-filter. Bars frost on a layer behind their content; the segmented control's edge fade
+ *   is a layer over the options, not a mask around them; disabled faces dim their text, not the face.
+ * - Tooltips are solid raised faces that rise 6px on enter, never fade.
+ * - No face enters with an opacity fade: every keyframe that fades from transparent is classified,
+ *   and the face ones move only transform and the light.
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, test } from 'vitest';
+import { CSS_NO_COMMENTS, GLOBALS_CSS, splitSelectors, topLevelRules, type Rule } from './helpers/theme-css';
+
+const read = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
+const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
+
+/** Every declaration of a rule body (custom properties included), last one wins. */
+function props(body: string): Map<string, string> {
+  const out = new Map<string, string>();
+  let depth = 0;
+  let cur = '';
+  for (const c of body + ';') {
+    if (c === '(') depth++;
+    if (c === ')') depth--;
+    if (c === ';' && depth === 0) {
+      const i = cur.indexOf(':');
+      if (i > 0) out.set(cur.slice(0, i).trim(), norm(cur.slice(i + 1)));
+      cur = '';
+    } else cur += c;
+  }
+  return out;
+}
+
+/** Split a value on top-level commas (box-shadow layers). */
+function layers(v: string): string[] {
+  return splitSelectors(v).map(norm);
+}
+
+/** Every rule, top level and inside @media/@supports, with the at-rule heads it sits in. */
+function allRules(src = CSS_NO_COMMENTS): (Rule & { at: string[] })[] {
+  const out: (Rule & { at: string[] })[] = [];
+  const walk = (s: string, at: string[]) => {
+    let depth = 0;
+    let start = 0;
+    let open = -1;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (c === '{') {
+        if (depth === 0) open = i;
+        depth++;
+      } else if (c === '}') {
+        depth--;
+        if (depth === 0) {
+          const head = norm(s.slice(start, open));
+          const body = s.slice(open + 1, i);
+          if (/^@(media|supports|container)/.test(head)) walk(body, [...at, head]);
+          else if (!head.startsWith('@')) out.push({ selectors: splitSelectors(head), body, at });
+          start = i + 1;
+        }
+      } else if (c === ';' && depth === 0) start = i + 1;
+    }
+  };
+  walk(src, []);
+  return out;
+}
+
+/** Bodies of every @keyframes block by name (the last one wins in the cascade). */
+function keyframeBlocks(src = CSS_NO_COMMENTS): Map<string, string> {
+  const out = new Map<string, string>();
+  const re = /@keyframes\s+([\w-]+)\s*\{/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src))) {
+    let depth = 1;
+    let i = re.lastIndex;
+    while (depth && i < src.length) {
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}') depth--;
+      i++;
+    }
+    out.set(m[1], norm(src.slice(re.lastIndex, i - 1)));
+  }
+  return out;
+}
+
+/** The subject compound of a selector: its last compound, with :is()/:where()/:has()/:not() arguments dropped. */
+function subject(sel: string): string {
+  let flat = '';
+  let depth = 0;
+  for (const c of sel) {
+    if (c === '(') {
+      if (depth === 0) flat += '(';
+      depth++;
+    } else if (c === ')') {
+      depth--;
+      if (depth === 0) flat += ')';
+    } else if (depth === 0) flat += c;
+  }
+  return flat.trim().split(/\s*[\s>+~]\s*/).pop()!;
+}
+const hasClass = (compound: string, cls: string) => new RegExp(`\\.${cls.replace(/[-]/g, '\\-')}(?![\\w-])`).test(compound);
+
+const RULES = allRules();
+const TOP = topLevelRules();
+const KF = keyframeBlocks();
+
+/** Rules whose subject carries one of `classes` (no pseudo-element), optionally filtered. */
+function rulesOn(classes: string[], pred: (compound: string) => boolean = () => true) {
+  return RULES.filter((r) =>
+    r.selectors.some((s) => {
+      const c = subject(s);
+      return !c.includes('::') && classes.some((k) => hasClass(c, k)) && pred(c);
+    }),
+  );
+}
+
+const PHASE_START = '/* ── glass phase 2b ── */';
+const PHASE_END = '/* ── end glass phase 2b ── */';
+
+describe('the phase 2b block', () => {
+  test('sits once, delimited, at the very end of globals.css, with no literal colour (the fo/chats tail check)', () => {
+    expect(GLOBALS_CSS.split(PHASE_START).length).toBe(2);
+    const end = GLOBALS_CSS.indexOf(PHASE_END);
+    expect(end).toBeGreaterThan(GLOBALS_CSS.indexOf(PHASE_START));
+    expect(GLOBALS_CSS.slice(end + PHASE_END.length).trim()).toBe('');
+    const block = GLOBALS_CSS.slice(GLOBALS_CSS.indexOf(PHASE_START), end);
+    expect(block).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
+    expect(block).not.toMatch(/rgba?\(\s*\d/);
+  });
+});
+
+describe('lint rule: bars frost on a layer behind their content (brief §3.2)', () => {
+  const BARS = ['os-topbar', 'g-topbar', 'os-sidebar'];
+
+  test('no bar is itself a backdrop-filter ancestor of its buttons or the active pill', () => {
+    const offenders = rulesOn(BARS).filter((r) => {
+      const p = props(r.body);
+      return [p.get('backdrop-filter'), p.get('-webkit-backdrop-filter')].some((v) => v && v !== 'none');
+    });
+    expect(offenders.map((r) => r.selectors.join(', '))).toEqual([]);
+  });
+
+  test('the frost lives on a ::before layer under the content', () => {
+    const layer = RULES.filter((r) => r.at.length === 0 && r.selectors.some((s) => /\.os-topbar::before$/.test(s)) && r.selectors.some((s) => /\.os-sidebar::before$/.test(s)));
+    expect(layer.length).toBe(1);
+    const p = props(layer[0].body);
+    expect(p.get('content')).toBe("''");
+    expect(p.get('position')).toBe('absolute');
+    expect(p.get('inset')).toBe('0');
+    expect(p.get('z-index')).toBe('-1');
+    expect(p.get('pointer-events')).toBe('none');
+    expect(p.get('background')).toBe('var(--gl-bar-bg, transparent)');
+    expect(p.get('backdrop-filter')).toBe('var(--gl-bar-frost, none)');
+    expect(p.get('-webkit-backdrop-filter')).toBe('var(--gl-bar-frost, none)');
+    // the bar isolates, so the layer stays inside it, above the page and below the bar's content
+    const iso = RULES.filter((r) => r.at.length === 0 && r.selectors.includes('.os-topbar') && r.selectors.includes('.os-sidebar'));
+    expect(iso.some((r) => props(r.body).get('isolation') === 'isolate')).toBe(true);
+  });
+
+  test('each style keeps its own bar frost, now as layer tokens', () => {
+    const v = (sel: string, name: string) =>
+      TOP.filter((r) => r.selectors.includes(sel)).map((r) => props(r.body).get(name)).filter(Boolean).pop();
+    expect(v('.os-topbar', '--gl-bar-frost')).toBe('blur(8px)'); // Classic: what Tailwind backdrop-blur painted
+    expect(v(":root[data-ui='glados'] .g-topbar", '--gl-bar-bg')).toBe('color-mix(in srgb, var(--g-bg) 72%, transparent)');
+    expect(v(":root[data-ui='glados'] .g-topbar", '--gl-bar-frost')).toBe('blur(16px)');
+    expect(v(":root[data-ui='legacy'] .os-topbar", '--gl-bar-bg')).toBe('color-mix(in oklab, var(--l-bg-2) 70%, transparent)');
+    expect(v(":root[data-ui='legacy'] .os-topbar", '--gl-bar-frost')).toBe('blur(8px)');
+    expect(v('html:has(.lab[data-lab-root]) .os-sidebar', '--gl-bar-bg')).toBe('color-mix(in srgb, var(--g-bg, var(--bg)) 42%, transparent)');
+    expect(v('html:has(.lab[data-lab-root]) .os-sidebar', '--gl-bar-frost')).toBe('blur(20px) saturate(1.2)');
+    expect(v('html:has(.lab[data-lab-root]) .os-topbar', '--gl-bar-bg')).toBe('color-mix(in srgb, var(--g-bg, var(--bg)) 32%, transparent)');
+    expect(v('html:has(.lab[data-lab-root]) .os-topbar', '--gl-bar-frost')).toBe('blur(20px) saturate(1.2)');
+  });
+
+  test('the Lab bars clear their own fill so the page reads through the frost layer', () => {
+    for (const sel of ['html:has(.lab[data-lab-root]) .os-sidebar', 'html:has(.lab[data-lab-root]) .os-topbar']) {
+      const bg = TOP.filter((r) => r.selectors.includes(sel)).map((r) => props(r.body).get('background')).filter(Boolean).pop();
+      expect(bg, sel).toBe('transparent !important');
+    }
+  });
+
+  test('the Classic top bar carries no blur utility of its own', () => {
+    const cls = /className="(os-topbar [^"]*)"/.exec(read('components/Topbar.tsx'))![1];
+    expect(cls).not.toMatch(/backdrop-blur|bg-os-bg2\//);
+  });
+});
+
+describe('lint rule: the segmented control masks nothing around its active option', () => {
+  test('no .g-seg rule masks the track', () => {
+    const offenders = rulesOn(['g-seg']).filter((r) => /(^|;|\s)(-webkit-)?mask(-image)?\s*:/.test(r.body));
+    expect(offenders.map((r) => r.selectors.join(', '))).toEqual([]);
+  });
+
+  test('the edge fade is a sticky layer over the options, painted in the track colour', () => {
+    const pick = (re: RegExp) => RULES.filter((r) => r.selectors.some((s) => re.test(s)));
+    const both = pick(/^\.g-seg\[data-fade-start\]::before$/).filter((r) => r.selectors.some((s) => /^\.g-seg\[data-fade-end\]::after$/.test(s)));
+    expect(both.length).toBe(1);
+    const p = props(both[0].body);
+    expect(p.get('content')).toBe("''");
+    expect(p.get('position')).toBe('sticky');
+    expect(p.get('pointer-events')).toBe('none');
+    expect(p.get('width')).toBe('20px');
+    const start = props(pick(/^\.g-seg\[data-fade-start\]::before$/).filter((r) => r.selectors.length === 1).pop()!.body);
+    const end = props(pick(/^\.g-seg\[data-fade-end\]::after$/).filter((r) => r.selectors.length === 1).pop()!.body);
+    expect(start.get('left')).toBe('0');
+    expect(start.get('background')).toBe('linear-gradient(to right, var(--gl-seg-ground), transparent)');
+    expect(end.get('right')).toBe('0');
+    expect(end.get('background')).toBe('linear-gradient(to left, var(--gl-seg-ground), transparent)');
+    // the layer takes no room: its width is given back (20px + the 2px gap)
+    expect(start.get('margin-right')).toBe('-22px');
+    expect(end.get('margin-left')).toBe('-22px');
+  });
+});
+
+describe('lint rule: disabled faces dim their text and icons, not the face', () => {
+  const DISABLED_FACES = ['g-btn', 'g-chip', 'g-seg-opt', 'l-pressable'];
+
+  test('no disabled face drops its own opacity', () => {
+    const offenders = rulesOn(DISABLED_FACES, (c) => /:disabled/.test(c)).filter((r) => {
+      const o = props(r.body).get('opacity');
+      return o !== undefined && Number(o) < 1;
+    });
+    expect(offenders.map((r) => r.selectors.join(', '))).toEqual([]);
+  });
+
+  test('the text fades toward transparent and only the icon leaves take opacity', () => {
+    const text = RULES.filter((r) => r.selectors.some((s) => /^:is\(\.g-btn, \.g-chip, \.g-seg-opt, \.l-pressable\):disabled/.test(s) && !/svg|img/.test(s)));
+    expect(text.length).toBe(1);
+    expect(props(text[0].body).get('-webkit-text-fill-color')).toBe('color-mix(in srgb, currentColor 45%, transparent)');
+    const icons = RULES.filter((r) => r.selectors.some((s) => /^:is\(\.g-btn, \.g-chip, \.g-seg-opt, \.l-pressable\):disabled.* :is\(svg, img\)$/.test(s)));
+    expect(icons.length).toBe(1);
+    expect(props(icons[0].body).get('opacity')).toBe('0.45');
+  });
+});
+
+describe('tooltips are solid raised faces that rise 6px, never fade (brief §5 B13)', () => {
+  const tip = props(TOP.filter((r) => r.selectors.includes('.g-tip')).pop()!.body);
+  const shown = props(TOP.filter((r) => r.selectors.includes('.g-tip[data-show]')).pop()!.body);
+
+  test('hidden: invisible and 6px low, no opacity', () => {
+    expect(tip.has('opacity')).toBe(false);
+    expect(tip.get('visibility')).toBe('hidden');
+    expect(tip.get('transform')).toBe('translate(-50%, 6px)');
+    expect(tip.get('transition') ?? '').not.toMatch(/opacity/);
+  });
+
+  test('shown: visible, risen into place on a transform transition', () => {
+    expect(shown.has('opacity')).toBe(false);
+    expect(shown.get('visibility')).toBe('visible');
+    expect(shown.get('transform')).toBe('translate(-50%, 0)');
+    expect(shown.get('transition')).toMatch(/^transform var\(--g-dur-colour\) var\(--ease\)$/);
+  });
+});
+
+describe('no face enters with an opacity fade (brief §4): every fading keyframe is classified', () => {
+  /** Face entrances (card, panel, sheet, toast, popover, tooltip, chip): transform and the light only. */
+  const FACE = {
+    'panel-in': 'Optimal Engine doctor/search pop-out panel (.c-pop), materialises',
+    'fin-tip-in': "Finances bar value tip, a solid raised tooltip: rises 6px",
+    'wizard-row-in': 'Wizard project cards and conversation rows',
+    'bh-pop': 'Blueprint canvas node (holds .bh-card), positioned by --tx/--ty',
+    'bh-enter': 'Blueprint canvas node on first layout',
+    'ae-sheet-in': 'Creative Engine sheet, dialog and drawer, materialise (drawer: from the right)',
+    'ae-tl-tip-in': 'Creative Engine timeline tooltip: rises 6px',
+    'ae-bstat-in': 'Creative Engine status picker opening (pill track)',
+    'ae-o-in': 'Octane window, palette, workflow sheet, menu, coach mark, gate dialog',
+    'ae-o-rise': 'Octane window sections, HUD, canvas nodes, start tiles, popover',
+    'ae-o-sheet': 'Octane bottom sheet',
+    'ae-o-toast': 'Octane toast: rises, holds, melts',
+    'lab-c-sheet-in': 'Lab Classic side sheet, slides in as a drawer',
+    'lab2c-seal': 'Lab script tag (chip) stamping on seal',
+    'trd-g-arrive': 'Trading hero card (GHeroCard), materialises',
+    'ch-slide': 'Chats thread pane sliding over the list on narrow screens',
+  };
+  /** Not faces: scrims and grounds (siblings of the faces they dim), text, dots, lines, media leaves,
+   *  skeletons, progress, and looping status lights. These may fade. */
+  const NOT_FACE = {
+    'overlay-in': 'Optimal Engine pop-out scrim, a sibling of the panel',
+    'wiz-dot-in': 'Wizard launcher status dot',
+    'os-label-in': 'sidebar labels (text)',
+    'bh-draw': 'Blueprint edge lines (SVG)',
+    'bh-rise': 'Blueprint inspector text sections and the ask answer text',
+    'ae-toast': 'Creative Engine notice caption (a <p>, text only)',
+    'ae-arrive': 'UGC video (a media leaf)',
+    'ae-phase': 'phase label text',
+    'ae-o-arrive': 'Octane media leaves, stage note text, preview row',
+    'ae-o-rowin': 'Octane tree note rows',
+    'db-zoom-in': 'Database treemap view (data viz)',
+    'lab2-fade': 'Lab aurora ground and the hero number',
+    'route-skel-in': 'route skeleton',
+    'nav-progress-in': 'nav progress bar',
+    'l-fade': 'Legacy chart dots and peak labels',
+    'ch-arrive': 'new chat messages (text rows)',
+    // loops and decoration, not entrances
+    'led-blink': 'status LED', blink: 'caret', 'funnel-halo': 'funnel ring', 'funnel-hub': 'funnel hub glow',
+    'conductor-halo': 'launcher ring', 'ae-o-pulse': 'busy dot', 'g-pulse': 'busy dot', 'g-breathe': 'progress breathe',
+    'g-viz-breathe': 'viz skeleton', 'lab-pulse': 'Lab ring', 'lab-c-pulse': 'Lab ring', 'route-skel-pulse': 'skeleton',
+    'l-led-blink': 'status LED', 'l-halo': 'launcher ring', 'h6-caret-blink': 'caret', 'gl-reflect': 'brief §2 reflection',
+  };
+
+  test.each(Object.keys(FACE))('%s (a face entrance) moves only transform and the light', (name) => {
+    const k = KF.get(name);
+    expect(k, name).toBeDefined();
+    expect(k, name).not.toMatch(/opacity/);
+  });
+
+  test('every keyframe that touches opacity is classified as not a face', () => {
+    const fading = [...KF].filter(([, body]) => /opacity/.test(body)).map(([name]) => name);
+    const unclassified = fading.filter((n) => !(n in NOT_FACE));
+    expect(unclassified).toEqual([]);
+  });
+
+  test('the Octane grounds and veils fade their fill, not their opacity (they hold faces)', () => {
+    expect(KF.get('ae-o-fade')).toBe('from { background-color: transparent; }');
+  });
+
+  const anim = (cls: string) =>
+    RULES.filter((r) => r.at.length === 0 && r.selectors.some((s) => /\[data-ground\]/.test(s) && subject(s) === cls))
+      .map((r) => props(r.body).get('animation') ?? '')
+      .join(' | ');
+
+  test('faces that used to fade now materialise (drawers slide from the right)', () => {
+    for (const cls of ['.panel-in', '.ae-sheet', '.trd-g-hero', '.ae-o-wf-palette', '.ae-o-wf-banner']) {
+      expect(anim(cls), cls).toMatch(/^gl-materialise var\(--gl-dur-materialise\) var\(--gl-spring\)/);
+    }
+    expect(RULES.some((r) => r.selectors.some((s) => /\[data-ground\] \.ae-o-gate > div$/.test(s)) && /gl-materialise var/.test(props(r.body).get('animation') ?? ''))).toBe(true);
+    for (const cls of ['.ae-sheet.ae-drawer', '.ae-o-wf-sheet', '.lab-c-sheet']) {
+      expect(anim(cls), cls).toMatch(/^gl-materialise-drawer var\(--gl-dur-drawer\) var\(--gl-spring-drawer\)/);
+    }
+    // the pop-out panel keeps its 50ms beat after the scrim
+    expect(anim('.panel-in')).toMatch(/ 50ms backwards$/);
+  });
+
+  test('the centred Octane hint rises 6px without leaving its centre', () => {
+    expect(KF.get('gl-rise-centred')).toBe('from { transform: translateX(-50%) translateY(6px); } to { transform: translateX(-50%); }');
+    expect(anim('.ae-o-wf-hint')).toMatch(/^gl-rise-centred /);
+  });
+
+  test('tooltips rise 6px from their anchor, never fade', () => {
+    expect(KF.get('fin-tip-in')).toBe('from { transform: translateX(-50%) translateY(6px); } to { transform: translateX(-50%); }');
+    expect(KF.get('ae-tl-tip-in')).toBe('from { transform: translateX(-50%) translateY(6px); } to { transform: translateX(-50%); }');
+  });
+
+  test('reduced motion: the faces that now materialise appear at rest', () => {
+    const rm = RULES.filter((r) => r.at.some((a) => /prefers-reduced-motion: reduce/.test(a)) && r.selectors.some((s) => /\[data-ground\]/.test(s)));
+    const covered = rm.filter((r) => props(r.body).get('animation') === 'none').flatMap((r) => r.selectors.map(subject));
+    for (const cls of ['.panel-in', '.ae-sheet', '.trd-g-hero', '.ae-o-wf-palette', '.ae-o-wf-banner', '.ae-o-wf-sheet', '.lab-c-sheet', '.ae-o-wf-hint', 'div']) {
+      expect(covered, cls).toContain(cls);
+    }
+  });
+
+  test('the pop-out scrim is a sibling of its panel, so the panel frosts the page, not the scrim', () => {
+    const core = read('components/BrainCore.tsx');
+    const scrim = /<div[^>]*className="overlay-in[^"]*"[^>]*\/>/.exec(core);
+    expect(scrim, 'self-closing scrim').not.toBeNull();
+    expect(scrim![0]).toMatch(/backdrop-blur/);
+    // the panel's own container carries no blur, fade or fill
+    const holder = /<div\s+className="([^"]*)"(?:[^>]|=>)*>\s*<div\s+className="panel-in/.exec(core);
+    expect(holder, 'panel holder').not.toBeNull();
+    expect(holder![1]).not.toMatch(/backdrop|overlay-in|opacity|bg-/);
+  });
+
+  test('the Finances bar tip is a solid raised face', () => {
+    expect(read('components/BusinessIncomeChart.tsx')).toMatch(/className="fin-tip c-pop glass-solid /);
+  });
+});
+
+describe('Classic ad-hoc cards are glass faces', () => {
+  /** The recipe phase 1 put on .glass-face: the one source of the six layers. */
+  const recipe = props(
+    TOP.filter((r) => r.selectors.some((s) => /\[data-ground\] :is\(\s*\.glass-face,/.test(s)) && /box-shadow/.test(r.body))[0].body,
+  );
+  const SIX = layers(recipe.get('box-shadow')!);
+  const MAPPED = ':root[data-ground] .bg-os-surface.rounded-lg-t:not(.border-dashed)';
+  const at = (sel: string, media?: RegExp) =>
+    RULES.filter((r) => r.selectors.includes(sel) && (media ? r.at.some((a) => media.test(a)) : r.at.length === 0));
+
+  test('an os surface with the card radius is a card face: transparent, light frost, the six layers', () => {
+    const r = at(MAPPED);
+    expect(r.length).toBe(1);
+    const p = props(r[0].body);
+    expect(p.get('background')).toBe('transparent');
+    expect(p.get('border-color')).toBe('transparent');
+    expect(p.get('backdrop-filter')).toBe('var(--gl-blur)');
+    expect(p.get('-webkit-backdrop-filter')).toBe('var(--gl-blur)');
+    expect(layers(p.get('box-shadow')!)).toEqual(SIX);
+  });
+
+  test('the mapped cards and the wells carry the knobs at zero specificity', () => {
+    const k = TOP.filter((r) => r.selectors.includes(':where(.bg-os-surface.rounded-lg-t, .glass-well)'));
+    expect(k.length).toBe(1);
+    const p = props(k[0].body);
+    expect(p.get('--gl-tint')).toBe('white');
+    expect(p.get('--gl-rim-a')).toBe('15%');
+    expect(p.get('--gl-low-a')).toBe('30%');
+    expect(p.get('--gl-pool-a')).toBe('9%');
+  });
+
+  test('a card inside a face is a well: rim light only, no second frost, radius 16', () => {
+    const wells = TOP.filter((r) => r.selectors.includes(':root[data-ground] .glass-well'));
+    expect(wells.length).toBe(1);
+    const nested = wells[0].selectors.find((s) => /\) :not\(\.border-dashed\)\.bg-os-surface\.rounded-lg-t$/.test(s));
+    expect(nested, 'nested mapped cards share the well rule').toBeDefined();
+    for (const face of ['.glass-face', '.c-pop', '.l-card', '.g-card', '.h6-card', '.glass-panel', '.bg-os-surface.rounded-lg-t']) {
+      expect(nested!, face).toContain(face);
+    }
+    const p = props(wells[0].body);
+    expect(p.get('background')).toBe('transparent');
+    expect(p.get('border-color')).toBe('transparent');
+    expect(p.get('backdrop-filter')).toBe('none');
+    expect(p.get('border-radius')).toBe('var(--gl-r-well)');
+    expect(layers(p.get('box-shadow')!)).toEqual([SIX[2], SIX[3]]);
+  });
+
+  test('no blur where the viewer or the browser asks for none: the mapped card is the solid face', () => {
+    for (const media of [/prefers-reduced-transparency: reduce/, /^@supports not/]) {
+      const r = at(MAPPED, media);
+      expect(r.length, String(media)).toBe(1);
+      const p = props(r[0].body);
+      expect(p.get('background')).toBe('var(--solid-bg)');
+      if (/reduced/.test(String(media))) expect(p.get('backdrop-filter')).toBe('none');
+    }
+  });
+
+  test('an accent border becomes a tinted rim; a hoverable card brightens its rim', () => {
+    const accent = props(at(':root[data-ground] .bg-os-surface.rounded-lg-t.border-os-accent')[0].body);
+    expect(accent.get('--gl-tint')).toBe('var(--accent)');
+    expect(accent.get('--gl-rim-a')).toBe('45%');
+    const hover = TOP.filter((r) => r.selectors.includes(':root[data-ground] :is(.glass-face, .bg-os-surface.rounded-lg-t).hoverable:hover'));
+    expect(hover.length).toBe(1);
+    expect(props(hover[0].body).get('--gl-rim-a')).toBe('28%');
+  });
+
+  /** Lines that are not cards (inputs, buttons, tracks, badges, calendar chips) and keep their surface. */
+  const NOT_CARD: [string, string, string][] = [
+    ['components/knowledge/KnowledgeVisualizer.tsx', 'flex flex-wrap gap-1 rounded-[11px]', 'section nav track (buttons)'],
+    ['components/compute/ComputeConsole.tsx', 'w-full rounded-[10px] border p-3 text-left', 'selectable option button'],
+    ['components/KnowledgeDetail.tsx', 'g-btn kg-detail-row', 'row button'],
+    ['components/InstagramDmInbox.tsx', 'inline-flex gap-1 rounded-md-t', 'tab track'],
+    ['components/tasks/Board.tsx', 'tasks-card', 'calendar event chips inside grid cells'],
+    ['components/BrainQuery.tsx', 'border-b-2 bg-os-surface', 'keyboard hint badge'],
+    ['app/org/page.tsx', 'mb-4 rounded-lg border bg-os-surface', 'venture banner, lit by its own inline venture colour'],
+  ];
+  const SKIP_DIRS = /^(founderos)\//;
+  const PHASE_2A = new Set(['components/CommandPalette.tsx', 'components/legacy/Dialog.tsx', 'components/g/GSheet.tsx', 'components/g/GDrawer.tsx', 'components/g/GDialog.tsx', 'components/ui/Toast.tsx']);
+  const walk = (dir: string): string[] =>
+    require('node:fs')
+      .readdirSync(join(process.cwd(), dir), { withFileTypes: true })
+      .flatMap((d: { name: string; isDirectory: () => boolean }) =>
+        d.isDirectory() ? walk(`${dir}/${d.name}`) : /\.tsx?$/.test(d.name) ? [`${dir}/${d.name}`] : [],
+      );
+  const FILES = [...walk('app'), ...walk('components')].filter((f) => !SKIP_DIRS.test(f) && !PHASE_2A.has(f));
+  const SURFACE = /(^|[\s'"`])bg-os-surface(?![\w/-])/;
+  const CARD_RADIUS = /\brounded-(?:lg|xl|2xl)(?![\w-])|\brounded-\[(?:1\d|2\d)px\]|\brounded-(?:md|sm)-t\b/;
+
+  test('no os-surface card keeps an ad-hoc radius: cards take the card token, insets are wells, pop-ups are solid', () => {
+    const left: string[] = [];
+    for (const f of FILES) {
+      read(f)
+        .split('\n')
+        .forEach((line, i) => {
+          if (!SURFACE.test(line) || !CARD_RADIUS.test(line) || !/\bborder\b/.test(line)) return;
+          if (/outline-none/.test(line)) return; // inputs
+          if (/\bglass-(well|solid|face)\b|\bc-pop\b/.test(line)) return;
+          if (NOT_CARD.some(([file, needle]) => file === f && line.includes(needle))) return;
+          left.push(`${f}:${i + 1} ${line.trim().slice(0, 110)}`);
+        });
+    }
+    expect(left).toEqual([]);
+  });
+
+  test('every allowlisted non-card still exists (the list cannot rot)', () => {
+    for (const [file, needle] of NOT_CARD) expect(read(file), `${file}: ${needle}`).toContain(needle);
+  });
+
+  test('menus and hover tips over the task charts are solid raised faces that rise, never fade', () => {
+    for (const f of ['components/tasks/TaskOverview.tsx', 'components/tasks/RangePill.tsx']) {
+      const menus = read(f).split('\n').filter((l) => /absolute right-0 z-20 mt-1/.test(l));
+      expect(menus.length, f).toBeGreaterThan(0);
+      for (const l of menus) expect(l, f).toMatch(/\bglass-solid\b/);
+    }
+    for (const f of ['components/tasks/TaskOverview.tsx', 'components/tasks/ActivityGraph.tsx']) {
+      const tips = read(f).split('\n').filter((l) => /pointer-events-none absolute -top-\d/.test(l));
+      expect(tips.length, f).toBeGreaterThan(0);
+      for (const l of tips) {
+        expect(l, f).toMatch(/\bglass-solid\b/);
+        expect(l, f).not.toMatch(/opacity-0|group-hover:opacity/);
+        expect(l, f).toMatch(/\binvisible\b.*\btranslate-y-1\.5\b.*\bgroup-hover:visible\b.*\bgroup-hover:translate-y-0\b/);
+      }
+    }
+  });
+
+  test('the Brand Deals cards rise without fading', () => {
+    const kf = /@keyframes bd-rise \{([^}]*\}[^}]*)\}/.exec(read('components/brand-deals/DealBoard.tsx'));
+    expect(kf).not.toBeNull();
+    expect(kf![1]).not.toMatch(/opacity/);
+  });
+});

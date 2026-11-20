@@ -85,7 +85,7 @@ export function SessionsTab({ projects, now }: { projects: WizardProject[]; now:
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[12px] border border-os-border bg-os-surface2/60 px-3 py-2.5">
+    <div className="glass-well border border-os-border bg-os-surface2/60 px-3 py-2.5">
       <div className="text-[11px] text-os-dim">{label}</div>
       <div className="mt-0.5 text-[20px] font-light tabular-nums text-os-text">{value}</div>
     </div>

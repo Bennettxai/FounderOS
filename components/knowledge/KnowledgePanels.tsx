@@ -192,7 +192,7 @@ export function MatrixView({
           .map(({ c, out, inside }) => {
             const pct = (out / Math.max(1, out + inside)) * 100;
             return (
-              <div key={c} className="hoverable rounded-[11px] border border-os-border bg-os-surface p-3">
+              <div key={c} className="glass-well hoverable border border-os-border bg-os-surface p-3">
                 <div className="flex items-baseline justify-between">
                   <span className="text-[12px] text-os-text">{c}</span>
                   <span className="font-mono text-[13px] font-light text-os-accent">{pct.toFixed(0)}%</span>
@@ -520,7 +520,7 @@ export function FindingsView({
           const isOpen = open === f.id;
           const targets = [...new Set(f.targets)];
           return (
-            <div key={f.id} className="hoverable overflow-hidden rounded-[13px] border border-os-border bg-os-surface">
+            <div key={f.id} className="glass-well hoverable overflow-hidden border border-os-border bg-os-surface">
               <button className="flex w-full items-start gap-3 p-4 text-left" onClick={() => setOpen(isOpen ? null : f.id)}>
                 <span className="mt-[5px] h-2 w-2 shrink-0 rounded-full" style={{ background: SEV_COLOR[f.severity] }} />
                 <span className="min-w-0 flex-1">

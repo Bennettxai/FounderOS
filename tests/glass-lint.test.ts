@@ -74,7 +74,7 @@ const PENDING_NESTING_OUTSIDE_PHASE_2A = [
  * Phase 2b is converting the remaining fade-ins (panel-in, fin-tip-in, ...) to Materialise;
  * it empties this list as it goes. Stale names fail too, so the list only shrinks.
  */
-const PENDING_FACE_FADE_KEYFRAMES_PHASE_2B = ['fin-tip-in', 'panel-in'];
+const PENDING_FACE_FADE_KEYFRAMES_PHASE_2B: string[] = [];
 
 /** Files phase 2a owns: none of them may sit on a pending list. */
 const OWNED = ['components/legacy/Dialog.tsx', 'components/CommandPalette.tsx', 'components/g/Overlays.tsx', 'components/ui/Toast.tsx'];

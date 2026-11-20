@@ -193,7 +193,7 @@ export function KnowledgeVisualizer({
 
   if (!index.mounted && index.entities.length === 0) {
     return (
-      <div className="rounded-[14px] border border-os-border bg-os-surface p-8 text-center">
+      <div className="rounded-lg-t border border-os-border bg-os-surface p-8 text-center">
         <div className="text-[14px] text-os-text">Nothing to index</div>
         <p className="mx-auto mt-2 max-w-[52ch] text-[12px] leading-relaxed text-os-muted">
           The knowledge store is not mounted and the database has no records, so there is no graph to draw. This page
@@ -219,7 +219,7 @@ export function KnowledgeVisualizer({
           { v: String(s.orphans), l: 'orphans', h: 'Records nothing an author wrote points to' },
           { v: s.medianDays === null ? '—' : `${s.medianDays}d`, l: 'median age', h: 'Median days since last edit, files only' },
         ].map((t) => (
-          <div key={t.l} className="hoverable rounded-[12px] border border-os-border bg-os-surface px-3 py-2.5" title={t.h}>
+          <div key={t.l} className="hoverable rounded-lg-t border border-os-border bg-os-surface px-3 py-2.5" title={t.h}>
             <div className="font-mono text-[17px] font-light tabular-nums text-os-text">{t.v}</div>
             <div className="mt-0.5 text-[10.5px] text-os-dim">{t.l}</div>
           </div>
@@ -266,7 +266,7 @@ export function KnowledgeVisualizer({
           className={
             networkFs
               ? 'fixed inset-0 z-[130] flex overflow-hidden'
-              : 'relative flex overflow-hidden rounded-[16px] border border-os-border bg-os-surface'
+              : 'relative flex overflow-hidden rounded-lg-t border border-os-border bg-os-surface'
           }
           style={{ height: networkFs ? '100vh' : '72vh', minHeight: networkFs ? undefined : 600, background: networkFs ? 'var(--bg)' : undefined }}
         >
@@ -423,7 +423,7 @@ export function KnowledgeVisualizer({
             </button>
           )}
         </div>
-        <div className="rounded-[16px] border border-os-border bg-os-surface">
+        <div className="rounded-lg-t border border-os-border bg-os-surface">
           <MatrixView analysis={analysis as unknown as GraphAnalysis} onPickCluster={setQuery} limit={MATRIX_INLINE_LIMIT} />
         </div>
       </section>
@@ -436,7 +436,7 @@ export function KnowledgeVisualizer({
       {/* ── timeline ─────────────────────────────────────────────────────── */}
       <section id="timeline" className="scroll-mt-20">
         <SectionHead label="Timeline" />
-        <div className="rounded-[16px] border border-os-border bg-os-surface">
+        <div className="rounded-lg-t border border-os-border bg-os-surface">
           <TimelineView entities={index.entities} />
         </div>
       </section>
@@ -444,7 +444,7 @@ export function KnowledgeVisualizer({
       {/* ── ranking ──────────────────────────────────────────────────────── */}
       <section id="ranking" className="scroll-mt-20">
         <SectionHead label="Ranking" count={`${index.entities.length} records`} />
-        <div className="rounded-[16px] border border-os-border bg-os-surface">
+        <div className="rounded-lg-t border border-os-border bg-os-surface">
           <RankingView entities={index.entities} metrics={metrics} query={query} onFocus={openRecord} />
         </div>
       </section>
@@ -452,7 +452,7 @@ export function KnowledgeVisualizer({
       {/* ── findings ─────────────────────────────────────────────────────── */}
       <section id="findings" className="scroll-mt-20">
         <SectionHead label="Findings" count={`${analysis.findings.length} findings`} />
-        <div className="rounded-[16px] border border-os-border bg-os-surface">
+        <div className="rounded-lg-t border border-os-border bg-os-surface">
           <FindingsView findings={analysis.findings} entities={index.entities} onFocus={openRecord} />
         </div>
       </section>

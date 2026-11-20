@@ -48,7 +48,7 @@ export function ConductorCard({
   }
 
   return (
-    <div className="hoverable group w-[340px] rounded-2xl border border-os-border-bright bg-os-surface p-6">
+    <div className="hoverable group w-[340px] rounded-lg-t border border-os-border-bright bg-os-surface p-6">
       <div className="text-center text-[12.5px] text-os-muted">AI head</div>
 
       {/* Living core — breathes and orbits while the Wizard is broadcasting */}
