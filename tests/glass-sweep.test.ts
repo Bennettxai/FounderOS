@@ -251,3 +251,116 @@ describe('tooltips are solid raised faces that rise 6px, never fade (brief §5 B
     expect(shown.get('transition')).toMatch(/^transform var\(--g-dur-colour\) var\(--ease\)$/);
   });
 });
+
+describe('no face enters with an opacity fade (brief §4): every fading keyframe is classified', () => {
+  /** Face entrances (card, panel, sheet, toast, popover, tooltip, chip): transform and the light only. */
+  const FACE = {
+    'panel-in': 'Optimal Engine doctor/search pop-out panel (.c-pop), materialises',
+    'fin-tip-in': "Finances bar value tip, a solid raised tooltip: rises 6px",
+    'wizard-row-in': 'Wizard project cards and conversation rows',
+    'bh-pop': 'Blueprint canvas node (holds .bh-card), positioned by --tx/--ty',
+    'bh-enter': 'Blueprint canvas node on first layout',
+    'ae-sheet-in': 'Creative Engine sheet, dialog and drawer, materialise (drawer: from the right)',
+    'ae-tl-tip-in': 'Creative Engine timeline tooltip: rises 6px',
+    'ae-bstat-in': 'Creative Engine status picker opening (pill track)',
+    'ae-o-in': 'Octane window, palette, workflow sheet, menu, coach mark, gate dialog',
+    'ae-o-rise': 'Octane window sections, HUD, canvas nodes, start tiles, popover',
+    'ae-o-sheet': 'Octane bottom sheet',
+    'ae-o-toast': 'Octane toast: rises, holds, melts',
+    'lab-c-sheet-in': 'Lab Classic side sheet, slides in as a drawer',
+    'lab2c-seal': 'Lab script tag (chip) stamping on seal',
+    'trd-g-arrive': 'Trading hero card (GHeroCard), materialises',
+    'ch-slide': 'Chats thread pane sliding over the list on narrow screens',
+  };
+  /** Not faces: scrims and grounds (siblings of the faces they dim), text, dots, lines, media leaves,
+   *  skeletons, progress, and looping status lights. These may fade. */
+  const NOT_FACE = {
+    'overlay-in': 'Optimal Engine pop-out scrim, a sibling of the panel',
+    'wiz-dot-in': 'Wizard launcher status dot',
+    'os-label-in': 'sidebar labels (text)',
+    'bh-draw': 'Blueprint edge lines (SVG)',
+    'bh-rise': 'Blueprint inspector text sections and the ask answer text',
+    'ae-toast': 'Creative Engine notice caption (a <p>, text only)',
+    'ae-arrive': 'UGC video (a media leaf)',
+    'ae-phase': 'phase label text',
+    'ae-o-arrive': 'Octane media leaves, stage note text, preview row',
+    'ae-o-rowin': 'Octane tree note rows',
+    'db-zoom-in': 'Database treemap view (data viz)',
+    'lab2-fade': 'Lab aurora ground and the hero number',
+    'route-skel-in': 'route skeleton',
+    'nav-progress-in': 'nav progress bar',
+    'l-fade': 'Legacy chart dots and peak labels',
+    'ch-arrive': 'new chat messages (text rows)',
+    // loops and decoration, not entrances
+    'led-blink': 'status LED', blink: 'caret', 'funnel-halo': 'funnel ring', 'funnel-hub': 'funnel hub glow',
+    'conductor-halo': 'launcher ring', 'ae-o-pulse': 'busy dot', 'g-pulse': 'busy dot', 'g-breathe': 'progress breathe',
+    'g-viz-breathe': 'viz skeleton', 'lab-pulse': 'Lab ring', 'lab-c-pulse': 'Lab ring', 'route-skel-pulse': 'skeleton',
+    'l-led-blink': 'status LED', 'l-halo': 'launcher ring', 'h6-caret-blink': 'caret', 'gl-reflect': 'brief §2 reflection',
+  };
+
+  test.each(Object.keys(FACE))('%s (a face entrance) moves only transform and the light', (name) => {
+    const k = KF.get(name);
+    expect(k, name).toBeDefined();
+    expect(k, name).not.toMatch(/opacity/);
+  });
+
+  test('every keyframe that touches opacity is classified as not a face', () => {
+    const fading = [...KF].filter(([, body]) => /opacity/.test(body)).map(([name]) => name);
+    const unclassified = fading.filter((n) => !(n in NOT_FACE));
+    expect(unclassified).toEqual([]);
+  });
+
+  test('the Octane grounds and veils fade their fill, not their opacity (they hold faces)', () => {
+    expect(KF.get('ae-o-fade')).toBe('from { background-color: transparent; }');
+  });
+
+  const anim = (cls: string) =>
+    RULES.filter((r) => r.at.length === 0 && r.selectors.some((s) => /\[data-ground\]/.test(s) && subject(s) === cls))
+      .map((r) => props(r.body).get('animation') ?? '')
+      .join(' | ');
+
+  test('faces that used to fade now materialise (drawers slide from the right)', () => {
+    for (const cls of ['.panel-in', '.ae-sheet', '.trd-g-hero', '.ae-o-wf-palette', '.ae-o-wf-banner']) {
+      expect(anim(cls), cls).toMatch(/^gl-materialise var\(--gl-dur-materialise\) var\(--gl-spring\)/);
+    }
+    expect(RULES.some((r) => r.selectors.some((s) => /\[data-ground\] \.ae-o-gate > div$/.test(s)) && /gl-materialise var/.test(props(r.body).get('animation') ?? ''))).toBe(true);
+    for (const cls of ['.ae-sheet.ae-drawer', '.ae-o-wf-sheet', '.lab-c-sheet']) {
+      expect(anim(cls), cls).toMatch(/^gl-materialise-drawer var\(--gl-dur-drawer\) var\(--gl-spring-drawer\)/);
+    }
+    // the pop-out panel keeps its 50ms beat after the scrim
+    expect(anim('.panel-in')).toMatch(/ 50ms backwards$/);
+  });
+
+  test('the centred Octane hint rises 6px without leaving its centre', () => {
+    expect(KF.get('gl-rise-centred')).toBe('from { transform: translateX(-50%) translateY(6px); } to { transform: translateX(-50%); }');
+    expect(anim('.ae-o-wf-hint')).toMatch(/^gl-rise-centred /);
+  });
+
+  test('tooltips rise 6px from their anchor, never fade', () => {
+    expect(KF.get('fin-tip-in')).toBe('from { transform: translateX(-50%) translateY(6px); } to { transform: translateX(-50%); }');
+    expect(KF.get('ae-tl-tip-in')).toBe('from { transform: translateX(-50%) translateY(6px); } to { transform: translateX(-50%); }');
+  });
+
+  test('reduced motion: the faces that now materialise appear at rest', () => {
+    const rm = RULES.filter((r) => r.at.some((a) => /prefers-reduced-motion: reduce/.test(a)) && r.selectors.some((s) => /\[data-ground\]/.test(s)));
+    const covered = rm.filter((r) => props(r.body).get('animation') === 'none').flatMap((r) => r.selectors.map(subject));
+    for (const cls of ['.panel-in', '.ae-sheet', '.trd-g-hero', '.ae-o-wf-palette', '.ae-o-wf-banner', '.ae-o-wf-sheet', '.lab-c-sheet', '.ae-o-wf-hint', 'div']) {
+      expect(covered, cls).toContain(cls);
+    }
+  });
+
+  test('the pop-out scrim is a sibling of its panel, so the panel frosts the page, not the scrim', () => {
+    const core = read('components/BrainCore.tsx');
+    const scrim = /<div[^>]*className="overlay-in[^"]*"[^>]*\/>/.exec(core);
+    expect(scrim, 'self-closing scrim').not.toBeNull();
+    expect(scrim![0]).toMatch(/backdrop-blur/);
+    // the panel's own container carries no blur, fade or fill
+    const holder = /<div\s+className="([^"]*)"(?:[^>]|=>)*>\s*<div\s+className="panel-in/.exec(core);
+    expect(holder, 'panel holder').not.toBeNull();
+    expect(holder![1]).not.toMatch(/backdrop|overlay-in|opacity|bg-/);
+  });
+
+  test('the Finances bar tip is a solid raised face', () => {
+    expect(read('components/BusinessIncomeChart.tsx')).toMatch(/className="fin-tip c-pop glass-solid /);
+  });
+});

@@ -1260,7 +1260,6 @@ body {
 }
 @keyframes panel-in {
   from {
-    opacity: 0;
     transform: translateY(16px) scale(0.98);
   }
 }
@@ -1271,15 +1270,13 @@ body {
   }
 }
 
-/* Finance bars: the month's number rises out of the hovered bar. */
+/* Finance bars: the month's number rises out of the hovered bar (a solid raised tip: rises 6px, never fades). */
 @keyframes fin-tip-in {
   from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(5px) scale(0.94);
+    transform: translateX(-50%) translateY(6px);
   }
   to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: translateX(-50%);
   }
 }
 .fin-tip {
@@ -3291,11 +3288,9 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
 }
 @keyframes wizard-row-in {
   from {
-    opacity: 0;
     transform: translateY(2px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
@@ -4181,11 +4176,9 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
 }
 @keyframes bh-pop {
   from {
-    opacity: 0;
     transform: translate(var(--tx), var(--ty)) scale(0.86);
   }
   to {
-    opacity: 1;
     transform: translate(var(--tx), var(--ty)) scale(1);
   }
 }
@@ -4195,11 +4188,9 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
 }
 @keyframes bh-enter {
   from {
-    opacity: 0;
     transform: translate(var(--tx), calc(var(--ty) + 14px));
   }
   to {
-    opacity: 1;
     transform: translate(var(--tx), var(--ty));
   }
 }
@@ -7292,7 +7283,7 @@ body {
 .ae-dotline { display: flex; align-items: center; gap: 6px; }
 .ae-dotline .ae-dl-line { flex: 1; height: 1px; background: var(--p-ring); }
 .ae-sheet-scrim { background: rgba(29, 29, 31, 0.22); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
-@keyframes ae-sheet-in { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: none; } }
+@keyframes ae-sheet-in { from { transform: translateY(8px) scale(0.985); } to { transform: none; } }
 .ae-sheet { animation: ae-sheet-in 240ms var(--ease); }
 @keyframes ae-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 @keyframes ae-toast { 0% { opacity: 0; transform: translateY(4px); } 12% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; } }
@@ -7449,7 +7440,7 @@ button.ae-tl-thumb { cursor: pointer; }
 .ae-tl[data-docked] { padding-bottom: 64px; }
 .ae-tl-thumb[data-docked] { top: calc(100% + 10px); transform: translateX(-50%); }
 .ae-tl[data-docked] .ae-tl-caret { top: auto; bottom: -9px; border-top: 0; border-bottom: 6px solid var(--p-ink); }
-@keyframes ae-tl-tip-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ae-tl-tip-in { from { transform: translateX(-50%) translateY(6px); } to { transform: translateX(-50%); } }
 .ae-tl-tip { position: absolute; z-index: 30; bottom: calc(100% + 12px); width: 228px; transform: translateX(-50%); padding: 9px 11px; font-size: 12px; line-height: 1.4; box-shadow: var(--p-shadow); pointer-events: none; animation: ae-tl-tip-in 120ms var(--ease) 120ms both; }
 
 /* rendering track (F19 to F22, §5.3): thumb, line, ring (the timeout), end dot.
@@ -7485,7 +7476,7 @@ button.ae-tl-thumb { cursor: pointer; }
 .ae-bstat-stop:disabled { cursor: not-allowed; opacity: 0.55; }
 .ae-bstat-stop:focus-visible { outline: 2px solid var(--p-ring); outline-offset: 2px; }
 .ae-bstat[aria-disabled='true'] .ae-bstat-stop[aria-checked='true'] { cursor: default; }
-@keyframes ae-bstat-in { from { opacity: 0; transform: scaleX(0.92); } to { opacity: 1; transform: none; } }
+@keyframes ae-bstat-in { from { transform: scaleX(0.92); } to { transform: none; } }
 .ae-bstat[data-open] { animation: ae-bstat-in 160ms var(--ease); }
 
 /* deep-link targets: the run or video the dashboard opened on */
@@ -7642,16 +7633,16 @@ button.ae-tl-thumb { cursor: pointer; }
   font-weight: 400;
   line-height: 1.35;
 }
-@keyframes ae-o-in { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: none; } }
-@keyframes ae-o-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes ae-o-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@keyframes ae-o-sheet { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes ae-o-in { from { transform: translateY(10px) scale(0.985); } to { transform: none; } }
+@keyframes ae-o-fade { from { background-color: transparent; } } /* grounds and veils hold faces: fade the fill, never the opacity */
+@keyframes ae-o-rise { from { transform: translateY(6px); } to { transform: none; } }
+@keyframes ae-o-sheet { from { transform: translateY(14px); } to { transform: none; } }
 @keyframes ae-o-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 @keyframes ae-o-draw { to { stroke-dashoffset: 0; } }
 @keyframes ae-o-pop { 0% { transform: scale(0.8); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
 @keyframes ae-o-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes ae-o-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
-@keyframes ae-o-toast { 0% { opacity: 0; transform: translateY(4px); } 12% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes ae-o-toast { 0% { transform: translateY(4px) scale(0.965); } 12% { transform: none; } 85% { transform: none; visibility: visible; } 100% { transform: scale(0.98); visibility: hidden; } } /* rises, holds, melts; never fades */
 @keyframes ae-o-arrive { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: none; } }
 @keyframes ae-o-popnum { 0% { transform: scale(1); color: var(--o-text); } 40% { transform: scale(1.35); color: var(--o-green); } 100% { transform: scale(1); color: var(--o-text); } }
 @keyframes ae-o-rowin { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
@@ -12611,7 +12602,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 :root[data-theme='light'] .lab-c-scrim { background: rgba(20, 24, 32, 0.32); }
 .lab-c-sheet { position: relative; width: min(980px, 100%); height: 100%; overflow-y: auto; background: var(--lab-ground); border-left: 1px solid var(--lab-line); box-shadow: var(--shadow-pop); padding: 28px 32px 48px; animation: lab-c-sheet-in 0.26s var(--ease) both; }
 .lab-c-sheet-narrow { width: min(720px, 100%); }
-@keyframes lab-c-sheet-in { from { transform: translateX(24px); opacity: 0; } }
+@keyframes lab-c-sheet-in { from { transform: translateX(24px); } }
 @media (prefers-reduced-motion: reduce) { .lab-c-sheet { animation: none; } }
 .lab-c-sheet-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
 .lab-c-sheet-t { font-size: 20px; font-weight: 500; line-height: 1.3; letter-spacing: -0.01em; }
@@ -14142,7 +14133,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 .lab2c-script-controls, .lab2c-script-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--lab-s3) var(--lab-s5); }
 .lab2c-seal { display: inline-flex; }
 .lab2c-seal[data-sealed] .lab2c-tag { animation: lab2c-seal var(--lab-dur-seal, 600ms) var(--lab-ease-out); }
-@keyframes lab2c-seal { from { transform: scale(1.12); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes lab2c-seal { from { transform: scale(1.12); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .lab2c-seal[data-sealed] .lab2c-tag { animation: none; } }
 .lab2c-editor { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--lab-s6); align-items: start; }
 @media (max-width: 1000px) { .lab2c-editor { grid-template-columns: minmax(0, 1fr); } }
@@ -16036,7 +16027,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 .trd-g-autopilot { display: flex; flex-direction: column; gap: var(--g-space-1); }
 .trd-g-save { display: flex; justify-content: flex-end; }
 .trd-g-foot { margin: 0; text-align: center; font-size: var(--g-fs-cap); color: var(--g-muted); }
-@keyframes trd-g-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes trd-g-arrive { from { transform: translateY(10px); } to { transform: none; } }
 @keyframes trd-g-draw { from { clip-path: inset(-8px 100% -8px -64px); } to { clip-path: inset(-8px 0 -8px -64px); } }
 @media (prefers-reduced-motion: reduce) { .trd-g-hero, .trd-g-chart .g-xy-svg { animation: none; } }
 
@@ -16790,7 +16781,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   .ch-g-thread-head > .g-btn:last-child { display: none; }
 }
 @keyframes ch-arrive { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@keyframes ch-slide { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+@keyframes ch-slide { from { transform: translateX(18px); } to { transform: none; } }
 
 /* Classic */
 .ch-c-shell { container: ch-c-shell / inline-size; overflow: hidden; }
@@ -17994,5 +17985,44 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 }
 :is(.g-btn, .g-chip, .g-seg-opt, .l-pressable):disabled:not([data-busy='true']) :is(svg, img) {
   opacity: 0.45;
+}
+/* Entrances. No face fades in: the face keyframes elsewhere in this file keep only their motion
+   (tests/glass-sweep.test.ts holds the classification), and the cards, panels, dialogs and palettes
+   among them materialise; side sheets slide in from the right as drawers; the centred Octane hint
+   rises 6px in place. Scrims, grounds, text, dots, lines, media and skeletons may still fade. */
+@keyframes gl-rise-centred {
+  from { transform: translateX(-50%) translateY(6px); }
+  to { transform: translateX(-50%); }
+}
+:root[data-ground] .panel-in {
+  animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) 50ms backwards;
+}
+:root[data-ground] .ae-sheet,
+:root[data-ground] .trd-g-hero,
+:root[data-ground] .ae-o-wf-palette,
+:root[data-ground] .ae-o-wf-banner,
+:root[data-ground] .ae-o-gate > div {
+  animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) backwards;
+}
+:root[data-ground] .ae-sheet.ae-drawer,
+:root[data-ground] .ae-o-wf-sheet,
+:root[data-ground] .lab-c-sheet {
+  animation: gl-materialise-drawer var(--gl-dur-drawer) var(--gl-spring-drawer) backwards;
+}
+:root[data-ground] .ae-o-wf-hint {
+  animation: gl-rise-centred var(--gl-dur-materialise) var(--gl-spring) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ground] .panel-in,
+  :root[data-ground] .ae-sheet,
+  :root[data-ground] .trd-g-hero,
+  :root[data-ground] .ae-o-wf-palette,
+  :root[data-ground] .ae-o-wf-banner,
+  :root[data-ground] .ae-o-gate > div,
+  :root[data-ground] .ae-o-wf-sheet,
+  :root[data-ground] .lab-c-sheet,
+  :root[data-ground] .ae-o-wf-hint {
+    animation: none;
+  }
 }
 /* ── end glass phase 2b ── */

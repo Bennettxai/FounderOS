@@ -74,8 +74,11 @@ export function BrainCore({
       </div>
 
       {open && (
+        <>
+        {/* The scrim is a sibling, not the panel's parent: a glass face never sits inside a blurred or fading element. */}
+        <div aria-hidden className="overlay-in fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
         <div
-          className="overlay-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:p-8"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:p-8"
           onClick={() => setOpen(false)}
         >
           <div
@@ -159,6 +162,7 @@ export function BrainCore({
             </div>
           </div>
         </div>
+        </>
       )}
     </>
   );

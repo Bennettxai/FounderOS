@@ -116,7 +116,7 @@ export function BusinessIncomeChart({ series }: { series: BusinessSeries }) {
                   {/* the month's number rises out of the bar on hover */}
                   {hot && (
                     <span
-                      className="fin-tip c-pop pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 text-[11.5px] tabular-nums text-os-text"
+                      className="fin-tip c-pop glass-solid pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 text-[11.5px] tabular-nums text-os-text"
                       style={{ bottom: `${h + 6}px` }}
                     >
                       {metric === 'net' ? signedUsd(cents) : usd(cents)}
