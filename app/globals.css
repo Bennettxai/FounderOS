@@ -17937,11 +17937,8 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
    clicks through. Layers only place things: .l-layer (LDialog), .g-layer (GSheet, GDrawer,
    GDialog), .g-palette-layer and the Classic palette's fixed wrapper. */
 :root {
-  --gl-scrim: color-mix(in srgb, #000 20%, transparent); /* the page dims 20% */
+  --gl-scrim: color-mix(in srgb, black 20%, transparent); /* the page dims 20%, on every ground */
   --gl-dur-scrim: 417ms; /* 10f at 24fps */
-}
-:root[data-ground='white'] {
-  --gl-scrim: rgba(16, 16, 24, 0.2); /* 20% of the white ground's ink, like its groove and drop */
 }
 
 .l-layer { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; }

@@ -198,10 +198,10 @@ describe('the scrim: light to strong frost over 10 frames, 20% dim (brief §5 B1
   const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
   const rule = (pred: (sel: string) => boolean, src = block) => topLevelRules(src).filter((r) => r.selectors.some(pred));
 
-  test('dim tokens: 20% of black on dark grounds, 20% of the ink on white; 10 frames is 417ms', () => {
-    expect(norm(block)).toMatch(/:root \{[^}]*--gl-scrim: color-mix\(in srgb, #000 20%, transparent\);/);
-    expect(norm(block)).toMatch(/\[data-ground='white'\] \{[^}]*--gl-scrim: rgba\(16, 16, 24, 0\.2\);/);
+  test('dim token: the page dims 20% on every ground; 10 frames is 417ms; no literal colour (the block sits after /chats)', () => {
+    expect(norm(block)).toMatch(/:root \{[^}]*--gl-scrim: color-mix\(in srgb, black 20%, transparent\);/);
     expect(norm(block)).toMatch(/--gl-dur-scrim: 417ms;/);
+    expect(block).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(\s*\d/);
   });
 
   test('the scrim rests at strong frost and the dim, and arrives from the light frost', () => {
