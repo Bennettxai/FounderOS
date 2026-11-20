@@ -40,6 +40,7 @@ beforeAll(() => {
 });
 afterEach(() => {
   delete process.env.LAB_DRY;
+  vi.useRealTimers();
 });
 const SKILL = '# voice\n- No AI-tell words (unlock, leverage, seamless, etc.). No "however".\n';
 const readSkill = (slug: string) => (slug === 'reel' ? '# reel rubric\nHook in the first second.' : slug === 'brody-voice-speaking' ? SKILL : null);
@@ -325,6 +326,10 @@ describe('G-Brain docs, the intel cycle and the Lab agent', () => {
 
   test('read-only tools answer from the view with n; draftScript only creates a draft', async () => {
     process.env.LAB_DRY = '1';
+    // The agent tools read the real clock (their windows end today); pin it to the fixture's NOW so the
+    // 30-day breakout window still covers the fixture posts. Only Date is faked: the tools' awaits keep real timers.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(NOW);
     const s = newWorld();
     const w = async () => ({ store: s, configured: true, setupHref: '/integrations#apify' });
     expect(await breakoutsFor(w, 'tutorial_walkthrough', 30)).toMatch(/breakouts in AI tool tutorials, last 30 days[\s\S]*baseline n \d+/);
