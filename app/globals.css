@@ -2417,6 +2417,7 @@ html.conductor-dragging .os-shell {
 .os-sidebar a.os-nav-adpilot[aria-current='page'] {
   --accent: var(--adpilot-accent);
   --accent-soft: var(--adpilot-pill-soft);
+  --gl-on: var(--adpilot-accent); /* the glass pack's glow behind the pill (--gl-on resolves at :root otherwise) */
 }
 /* ── end G1 AdPilot chrome ── */
 /* ── S12 nav groups ──
