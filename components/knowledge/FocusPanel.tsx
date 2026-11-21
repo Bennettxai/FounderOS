@@ -68,7 +68,7 @@ export function FocusPanel({
   const color = CATEGORY_COLOR[KIND_CATEGORY[entity.kind] ?? 'system'];
 
   const stat = (label: string, value: string, hint: string) => (
-    <div className="rounded-[9px] border border-os-border bg-os-surface2 px-2.5 py-2" title={hint}>
+    <div className="glass-well px-2.5 py-2" title={hint}>
       <div className="font-mono text-[14px] font-light text-os-text">{value}</div>
       <div className="mt-0.5 text-[10px] text-os-dim">{label}</div>
     </div>

@@ -111,7 +111,7 @@ export function Spending({ spend, hide }: { spend: SpendCard; hide: boolean }) {
                   <span className="tabular-nums text-os-text" style={mask}>{usd(c.total)}</span>
                 </button>
                 {open === c.category && (
-                  <ul className="mb-2 max-h-[220px] overflow-y-auto rounded-md-t bg-os-surface2 px-3 py-1" aria-label={`${c.category} transactions`}>
+                  <ul className="glass-well mb-2 max-h-[220px] overflow-y-auto px-3 py-1" aria-label={`${c.category} transactions`}>
                     {txns.map((t) => (
                       <li key={`${t.date}|${t.description}|${t.usd}`} className="flex items-baseline justify-between gap-3 py-1 text-[12px]">
                         <span className="font-mono text-os-muted">{t.date}</span>

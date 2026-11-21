@@ -55,9 +55,9 @@ export function TaskOverview({ tasks, now }: { tasks: AgentTask[]; now: number }
 
         <div className="flex flex-wrap items-center gap-2">
           {/* segmented control — the active pill slides between positions */}
-          <div className="relative flex rounded-md-t bg-os-surface2 p-0.5">
+          <div className="relative flex rounded-full bg-os-surface2 p-0.5">
             <span
-              className="absolute inset-y-0.5 rounded-sm-t bg-os-surface shadow-sm transition-transform duration-200 ease-out"
+              className="glass-chip gl-on absolute inset-y-0.5 rounded-full transition-transform duration-200 ease-out"
               style={{
                 width: `calc((100% - 4px) / ${GRAINS.length})`,
                 transform: `translateX(${grainIndex * 100}%)`,

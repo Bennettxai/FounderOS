@@ -89,13 +89,13 @@ function AgentRosterCard({
         {agent.tools.slice(0, 5).map((tool) => (
           <span
             key={tool}
-            className="whitespace-nowrap rounded-sm-t border border-os-border bg-os-surface2 px-[7px] py-0.5 font-mono text-[11px] text-os-muted"
+            className="glass-chip whitespace-nowrap rounded-full px-[7px] py-0.5 font-mono text-[11px] text-os-muted"
           >
             {tool}
           </span>
         ))}
         {agent.tools.length > 5 && (
-          <span className="rounded-sm-t border border-os-border bg-os-surface2 px-[7px] py-0.5 font-mono text-[11px] text-os-dim">
+          <span className="glass-chip rounded-full px-[7px] py-0.5 font-mono text-[11px] text-os-dim">
             +{agent.tools.length - 5}
           </span>
         )}

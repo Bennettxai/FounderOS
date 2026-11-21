@@ -154,7 +154,7 @@ export function DatabaseExplorer({ initial }: { initial: Tree }) {
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find a file or folder" aria-label="Find a file or folder"
               className="h-8 w-[240px] max-w-[46vw] rounded-[9px] border border-[var(--hairline)] bg-os-surface pl-8 pr-2 text-[12.5px] text-os-text outline-none placeholder:text-os-dim focus:border-[var(--accent-line)]" />
             {matches.length > 0 && (
-              <span className="absolute right-0 top-9 z-20 w-[360px] max-w-[86vw] overflow-hidden rounded-[10px] border border-[var(--hairline)] bg-[var(--elevated)] py-1 shadow-lg">
+              <span className="glass-solid absolute right-0 top-9 z-20 w-[360px] max-w-[86vw] overflow-hidden rounded-lg-t py-1">
                 {matches.map((m) => (
                   <button key={m.path} type="button" onClick={() => jump(m)} className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[12px] hover:bg-[var(--accent-soft)]">
                     <i className="h-2 w-2 shrink-0 rounded-[2px]" style={{ background: COLOUR[dominant(mix.get(m.path)!)] }} />

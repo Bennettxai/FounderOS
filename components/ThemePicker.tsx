@@ -50,9 +50,7 @@ export function ThemePicker() {
             aria-pressed={active}
             data-theme-id={theme}
             onClick={() => apply(theme)}
-            className={`hoverable rounded-[12px] border p-4 text-left transition-colors ${
-              active ? 'border-[var(--accent-line)] bg-[var(--accent-soft)]' : 'border-[var(--hairline)] bg-os-surface'
-            }`}
+            className={`glass-face hoverable rounded-lg-t p-4 text-left transition-colors ${active ? 'gl-on-rim' : ''}`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">

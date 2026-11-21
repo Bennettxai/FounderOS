@@ -612,7 +612,7 @@ export function ConductorPanel({ ui = 'classic' }: { ui?: UiStyle } = {}) {
               </div>
             ) : t.role === 'user' ? (
               <div key={t.id} className="text-right">
-                <span className="inline-block max-w-[88%] break-words rounded-md bg-os-surface2 px-2.5 py-2.5 text-left text-[13px] text-os-text">
+                <span className="glass-well gl-on-rim inline-block max-w-[88%] break-words px-2.5 py-2.5 text-left text-[13px] text-os-text">
                   {t.content}
                 </span>
               </div>

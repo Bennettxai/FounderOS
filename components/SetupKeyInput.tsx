@@ -42,7 +42,7 @@ export function SetupKeyInput({ envVar, present, masked }: { envVar: string; pre
   return (
     <div className="flex flex-wrap items-center gap-2.5">
       {state === 'saved' ? (
-        <span className="inline-flex items-center gap-2 rounded-[6px] border border-os-border-strong bg-os-surface2 px-3 py-1 text-[11.5px] text-os-muted">
+        <span className="glass-chip inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11.5px] text-os-muted">
           <span className="dot ok" /> set {masked && <span className="font-mono">· {masked}</span>}
         </span>
       ) : (

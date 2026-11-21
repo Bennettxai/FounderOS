@@ -412,7 +412,7 @@ export default async function AnalyticsPage() {
               pending.map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-center gap-4 rounded-sm-t border border-os-border bg-os-surface2 px-3.5 py-3"
+                  className="glass-well flex items-center gap-4 px-3.5 py-3"
                 >
                   <span className="dot off" />
                   <div className="min-w-0 flex-1">

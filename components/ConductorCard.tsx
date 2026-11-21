@@ -83,7 +83,7 @@ export function ConductorCard({
       {/* Capability pills */}
       <div className="mt-4 grid grid-cols-3 gap-1">
         {['Broadcast', 'Orchestration', 'Instances'].map((cap) => (
-          <span key={cap} className="truncate rounded-[6px] border border-os-border-strong bg-os-surface2 px-1.5 py-1 text-center text-[11px] text-os-muted">
+          <span key={cap} className="glass-chip truncate rounded-full px-1.5 py-1 text-center text-[11px] text-os-muted">
             {cap}
           </span>
         ))}

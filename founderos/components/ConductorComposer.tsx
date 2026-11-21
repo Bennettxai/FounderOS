@@ -144,7 +144,7 @@ export function ConductorComposer({
       />
       {attachment && (
         <div className="mb-1.5 flex items-center gap-1.5">
-          <span className="flex items-center gap-1.5 rounded-full border border-os-border bg-os-surface2 px-2 py-0.5 font-mono text-[9.5px] text-os-muted">
+          <span className="glass-chip flex items-center gap-1.5 rounded-full px-2 py-0.5 font-mono text-[9.5px] text-os-muted">
             {attachment.name}
             <button onClick={() => setAttachment(null)} aria-label="Remove attachment" className="pressable text-os-dim hover:text-os-text">
               <X className="h-2.5 w-2.5" />

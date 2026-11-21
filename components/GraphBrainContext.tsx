@@ -48,7 +48,7 @@ export function GraphBrainContext({ label }: { label: string | null }) {
       ) : (
         <div className="flex flex-col gap-1.5">
           {state.hits.map((h, i) => (
-            <div key={`${h.title}-${i}`} className="rounded-sm-t border border-os-border bg-os-surface2 px-2.5 py-2">
+            <div key={`${h.title}-${i}`} className="glass-well px-2.5 py-2">
               <div className="truncate font-mono text-[11px] text-os-text">{h.title.split('/').pop()}</div>
               <div className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-os-dim">
                 {h.snippet.replace(/^#+\s*/, '').slice(0, 140)}

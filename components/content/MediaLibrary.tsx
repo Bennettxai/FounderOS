@@ -129,7 +129,7 @@ function IdentitySection({ account }: { account: HiggsfieldAccount | null }) {
 function IdentityCard({ asset, badge, compat }: { asset: IdentityAsset; badge: string; compat: string }) {
   return (
     <div className="glass-panel flex w-40 flex-col gap-2 p-3">
-      <div className="relative aspect-square overflow-hidden rounded-[12px] bg-black/30">
+      <div className="glass-well relative aspect-square overflow-hidden">
         <Image src={asset.portrait} alt={asset.name} fill sizes="160px" className="object-cover" />
       </div>
       <span className="truncate text-[12.5px] text-os-text">{asset.name}</span>
@@ -433,8 +433,8 @@ function FilterBar({
             key={k}
             type="button"
             onClick={() => onChange({ ...filter, kind: k })}
-            className={`rounded-[5px] px-2.5 py-1 text-[11px] capitalize transition-colors ${
-              filter.kind === k ? 'bg-os-surface3 text-os-text' : 'text-os-dim hover:text-os-text'
+            className={`rounded-full px-2.5 py-1 text-[11px] capitalize transition-colors ${
+              filter.kind === k ? 'glass-chip gl-on text-os-text' : 'text-os-dim hover:text-os-text'
             }`}
           >
             {k}

@@ -150,7 +150,7 @@ describe('the phase 2b block', () => {
     const end = GLOBALS_CSS.indexOf(PHASE_END);
     expect(end).toBeGreaterThan(GLOBALS_CSS.indexOf(PHASE_START));
     const tail = GLOBALS_CSS.slice(end + PHASE_END.length).trim();
-    expect(tail.replace(/^\/\* ── glass phase 3 ── \*\/[\s\S]*\/\* ── end glass phase 3 ── \*\/$/, '')).toBe('');
+    expect(tail.replace(/^\/\* ── glass phase 3 ── \*\/[\s\S]*\/\* ── end glass phase 3 ── \*\/(?:\s*\/\* ── glass phase 5 ── \*\/[\s\S]*\/\* ── end glass phase 5 ── \*\/)?$/, '')).toBe('');
     const block = GLOBALS_CSS.slice(GLOBALS_CSS.indexOf(PHASE_START), end);
     expect(block).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     expect(block).not.toMatch(/rgba?\(\s*\d/);
@@ -494,7 +494,6 @@ describe('Classic ad-hoc cards are glass faces', () => {
     ['components/InstagramDmInbox.tsx', 'inline-flex gap-1 rounded-md-t', 'tab track'],
     ['components/tasks/Board.tsx', 'tasks-card', 'calendar event chips inside grid cells'],
     ['components/BrainQuery.tsx', 'border-b-2 bg-os-surface', 'keyboard hint badge'],
-    ['app/org/page.tsx', 'mb-4 rounded-lg border bg-os-surface', 'venture banner, lit by its own inline venture colour'],
     ['founderos/components/InstagramDmInbox.tsx', 'inline-flex gap-1 rounded-md-t', 'tab track'],
     ['founderos/components/terminal.tsx', 'border-b-2 bg-os-surface', 'keyboard hint badge'],
   ];

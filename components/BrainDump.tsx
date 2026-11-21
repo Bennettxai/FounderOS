@@ -367,10 +367,10 @@ export function BrainDump({ compact = false, g = false }: { compact?: boolean; g
               <button
                 key={v.id}
                 onClick={() => setTags((prev) => (on ? prev.filter((t) => t !== v.brainTag) : [...prev, v.brainTag]))}
-                className={`flex items-center gap-1 rounded-[6px] border px-2 py-0.5 text-[11.5px] transition-colors ${
-                  on ? 'text-os-ink' : 'border-os-border-strong bg-os-surface2 text-os-muted hover:bg-os-surface3 hover:text-os-text'
+                className={`glass-chip flex items-center gap-1 rounded-full px-2 py-0.5 text-[11.5px] transition-colors ${
+                  on ? 'glass-chip gl-on text-os-text' : 'text-os-muted hover:text-os-text'
                 }`}
-                style={on ? { background: v.color, borderColor: v.color } : undefined}
+                style={on ? ({ '--gl-on': v.color } as React.CSSProperties) : undefined}
               >
                 #{v.brainTag}
               </button>

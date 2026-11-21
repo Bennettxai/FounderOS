@@ -93,7 +93,7 @@ function FlowStep({ title, detail, dashed = false }: { title: string; detail: st
   return (
     <div
       className={`flex-1 rounded-md-t border px-3 py-3.5 ${
-        dashed ? 'border-dashed border-os-border' : 'border-os-border bg-os-surface2'
+        dashed ? 'border-dashed border-os-border' : 'glass-well'
       }`}
     >
       <div className="text-xs font-medium">{title}</div>
@@ -407,7 +407,7 @@ export default async function BrainPage() {
             </ul>
             <div className="mt-4 flex flex-wrap gap-1">
               {['put', 'get', 'query', 'search', 'sync', 'import', 'export', 'doctor'].map((cmd) => (
-                <span key={cmd} className="rounded-sm-t border border-os-border bg-os-surface2 px-1.5 py-0.5 font-mono text-[11.5px] text-os-muted">
+                <span key={cmd} className="glass-chip rounded-full px-1.5 py-0.5 font-mono text-[11.5px] text-os-muted">
                   {cmd}
                 </span>
               ))}
@@ -419,11 +419,11 @@ export default async function BrainPage() {
           <Stage step="3" title="Supabase Postgres + pgvector" caption='"Second Brain" · ZeroEntropy embeddings'>
             {stats ? (
               <div className="grid grid-cols-2 gap-3" title="From engine stats, read when this page loaded">
-                <div className="rounded-md-t border border-os-border bg-os-surface2 px-3 py-3.5">
+                <div className="glass-well px-3 py-3.5">
                   <div className="text-[22px] font-normal tabular-nums">{formatCompact(stats.pages)}</div>
                   <div className="text-[11.5px] text-os-dim">Pages · engine stats</div>
                 </div>
-                <div className="rounded-md-t border border-os-border bg-os-surface2 px-3 py-3.5">
+                <div className="glass-well px-3 py-3.5">
                   <div className="text-[22px] font-normal tabular-nums">{formatCompact(stats.chunks)}</div>
                   <div className="text-[11.5px] text-os-dim">Chunks · engine stats</div>
                 </div>

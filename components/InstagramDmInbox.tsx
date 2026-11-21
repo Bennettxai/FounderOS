@@ -92,8 +92,8 @@ export function InstagramDmInbox({ threads: initial, nowMs }: { threads: DmThrea
                     return (
                       <div key={m.id} className={`flex flex-col ${out ? 'items-end' : 'items-start'}`}>
                         <div
-                          className={`max-w-[78%] rounded-md-t px-3 py-3 text-[13.5px] leading-relaxed ${
-                            out ? 'bg-os-accent text-os-bg' : 'border border-os-border bg-os-surface2 text-os-text'
+                          className={`glass-well max-w-[78%] px-3 py-3 text-[13.5px] leading-relaxed ${
+                            out ? 'gl-on-rim text-os-text' : 'text-os-text'
                           }`}
                         >
                           {m.text}

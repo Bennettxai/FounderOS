@@ -613,7 +613,7 @@ function TradeDialog({ trade: t, onClose }: { trade: TradeActivity; onClose: () 
           </div>
         ))}
       </dl>
-      <p className="m-5 rounded-[8px] border border-os-border bg-os-bg2 p-3 text-[13px] leading-relaxed text-os-text">{t.rationale || 'No rationale given.'}</p>
+      <p className="glass-well m-5 p-3 text-[13px] leading-relaxed text-os-text">{t.rationale || 'No rationale given.'}</p>
     </Modal>
   );
 }

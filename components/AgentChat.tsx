@@ -82,8 +82,8 @@ export function AgentChat({
               return (
                 <div key={m.id} className={isUser ? 'text-right' : 'text-left'}>
                   <span
-                    className={`inline-block max-w-[85%] break-words rounded-md px-2 py-1 text-[12.5px] leading-relaxed ${
-                      isUser ? 'bg-os-surface2 text-os-text' : 'bg-os-raised text-os-muted'
+                    className={`glass-well inline-block max-w-[85%] break-words px-2 py-1 text-[12.5px] leading-relaxed ${
+                      isUser ? 'gl-on-rim text-os-text' : 'text-os-muted'
                     }`}
                   >
                     {m.content}

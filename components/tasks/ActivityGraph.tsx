@@ -49,7 +49,7 @@ export function ActivityGraph({
     <div className="glass-panel flex min-h-[300px] flex-col px-5 py-4">
       <div className="flex items-start justify-between">
         <div className="glass-label">My Activity</div>
-        <span className="rounded-md-t border border-os-border bg-os-surface2 px-2 py-0.5 text-[11.5px] text-os-dim">
+        <span className="glass-chip rounded-full px-2 py-0.5 text-[11.5px] text-os-dim">
           {rangeLabel}
         </span>
       </div>
@@ -71,7 +71,7 @@ export function ActivityGraph({
           style={{ bottom: `${(activity.days[activity.peakIndex].runs / peak) * 70 + 22}%` }}
         >
           <span className="tasks-marker h-px flex-1" style={{ background: 'var(--hairline)' }} />
-          <span className="ml-2 shrink-0 rounded-full border border-os-border bg-os-surface px-2 py-0.5 font-mono text-[10px] text-os-muted">
+          <span className="glass-chip ml-2 shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px] text-os-muted">
             {activity.peakRuns} runs
           </span>
         </div>

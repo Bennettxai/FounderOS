@@ -52,7 +52,7 @@ export function ScheduleRail({
         <div className="text-[13.5px] font-medium">My Schedule</div>
       </div>
 
-      <div className="mx-5 mt-3 flex items-center justify-between rounded-md-t border border-os-border bg-os-surface2 px-2 py-1.5">
+      <div className="glass-well mx-5 mt-3 flex items-center justify-between px-2 py-1.5">
         <button onClick={() => setOffset((o) => o - 30)} className="rounded-sm-t p-1 text-os-dim transition-colors hover:text-os-text" aria-label="Previous month">
           <ChevronLeft className="h-3.5 w-3.5" strokeWidth={1.8} />
         </button>
@@ -92,7 +92,7 @@ export function ScheduleRail({
 
       <div className="flex flex-col gap-2 px-5 pb-4 pt-3">
         {due.map((t) => (
-          <div key={t.id} className="tasks-card rounded-md-t border border-os-border bg-os-surface2 px-3 py-2.5">
+          <div key={t.id} className="tasks-card glass-well px-3 py-2.5">
             <div className="truncate text-[12.5px] text-os-text">{t.title}</div>
             <div className="mt-1 flex items-center gap-2 text-[11.5px] text-os-dim">
               <Clock className="h-3 w-3" strokeWidth={1.6} />

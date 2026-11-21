@@ -138,7 +138,7 @@ function ReferenceSlot({
           {selected.map((m) => (
             <div
               key={m.ref}
-              className="relative h-14 w-14 overflow-hidden rounded-[8px] border border-[rgb(var(--mist-rgb) / 0.14)] bg-black/30"
+              className="glass-well relative h-14 w-14 overflow-hidden"
             >
               {slot.type === 'image' ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -162,7 +162,7 @@ function ReferenceSlot({
       )}
 
       {pickerOpen && (
-        <div className="mt-2.5 rounded-[10px] border border-[rgb(var(--mist-rgb) / 0.12)] bg-black/25 p-2.5">
+        <div className="glass-well mt-2.5 p-2.5">
           <div className="flex flex-wrap gap-1.5 border-b border-[var(--hairline)] pb-2">
             {(['library', 'uploads', ...(showIdentityTab ? (['identity'] as const) : []), 'upload'] as PickerTab[]).map(
               (t) => (

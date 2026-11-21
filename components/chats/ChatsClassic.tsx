@@ -209,7 +209,7 @@ function Thread({ c }: { c: ChatsState }) {
           </div>
         )}
         {c.status === 'error' && (
-          <div className="flex items-center gap-2.5 rounded-[10px] border border-os-border bg-os-surface2 px-3 py-2 text-[12.5px] text-os-muted" role="alert">
+          <div className="glass-well flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-os-muted" role="alert">
             <span className="dot err" /> {c.error ?? 'Could not load the thread.'}
             <button type="button" onClick={c.reload} className="ml-auto inline-flex items-center gap-1.5 text-os-text hover:underline">
               <RotateCcw className="h-3 w-3" strokeWidth={1.8} aria-hidden /> Retry
@@ -283,7 +283,7 @@ function Thread({ c }: { c: ChatsState }) {
                   <Face id={h.agentId} src={h.avatar} name={h.name} size={26} /> Thinking
                 </div>
               ) : (
-                <div className="flex items-center gap-2.5 rounded-[10px] border border-os-border bg-os-surface2 px-3 py-2 text-[12.5px] text-os-muted" role="alert">
+                <div className="glass-well flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-os-muted" role="alert">
                   <span className="dot err" /> Not sent. {p.error}
                   <button type="button" onClick={() => c.retry(p.key)} className="ml-auto inline-flex items-center gap-1.5 text-os-text hover:underline">
                     <RotateCcw className="h-3 w-3" strokeWidth={1.8} aria-hidden /> Retry

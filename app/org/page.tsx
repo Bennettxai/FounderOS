@@ -169,8 +169,8 @@ export default function OrgChartPage({ searchParams }: { searchParams?: { ventur
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <Link
           href="/org"
-          className={`rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
-            !venture ? 'glass-chip gl-on text-os-text' : 'border-os-border bg-os-surface text-os-muted hover:text-os-text'
+          className={`glass-chip rounded-full px-3 py-2.5 text-xs font-medium transition-colors ${
+            !venture ? 'glass-chip gl-on text-os-text' : 'text-os-muted hover:text-os-text'
           }`}
         >
           All ventures
@@ -181,12 +181,12 @@ export default function OrgChartPage({ searchParams }: { searchParams?: { ventur
             <Link
               key={v.id}
               href={`/org?venture=${v.id}`}
-              className={`flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
-                active ? 'text-os-ink' : 'border-os-border bg-os-surface text-os-muted hover:text-os-text'
+              className={`glass-chip flex items-center gap-2.5 rounded-full px-3 py-2.5 text-xs font-medium transition-colors ${
+                active ? 'glass-chip gl-on text-os-text' : 'text-os-muted hover:text-os-text'
               }`}
-              style={active ? { background: ventureColor(v.color), borderColor: ventureColor(v.color) } : undefined}
+              style={active ? ({ '--gl-on': ventureColor(v.color) } as React.CSSProperties) : undefined}
             >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: active ? 'var(--accent-ink)' : ventureColor(v.color) }} />
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: ventureColor(v.color) }} />
               {v.label}
             </Link>
           );
@@ -196,8 +196,8 @@ export default function OrgChartPage({ searchParams }: { searchParams?: { ventur
 
       {venture && (
         <div
-          className="mb-4 rounded-lg border bg-os-surface px-5 py-3"
-          style={{ borderColor: `color-mix(in srgb, ${ventureColor(venture.color)} 40%, transparent)`, boxShadow: `inset 3px 0 0 ${ventureColor(venture.color)}` }}
+          className="glass-face gl-on-rim mb-4 rounded-lg-t px-5 py-3"
+          style={{ '--gl-on': ventureColor(venture.color) } as React.CSSProperties}
         >
           <div className="text-[11.5px]" style={{ color: ventureColor(venture.color) }}>
             {venture.label} — executive focus

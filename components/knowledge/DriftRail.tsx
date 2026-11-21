@@ -153,7 +153,7 @@ function DriftCard({ insight }: { insight: DriftInsight }) {
               <div className="mt-2 grid gap-2">
                 {insight.occurrences.map((occ, i) =>
                   openOcc.has(i) ? (
-                    <div key={`${occ.source}-${i}-excerpt`} className="rounded-[10px] border border-white/[0.06] bg-black/20 p-3">
+                    <div key={`${occ.source}-${i}-excerpt`} className="glass-well p-3">
                       <div className="flex items-center justify-between gap-3 text-[10.5px] text-os-dim">
                         <span>{occ.speaker}</span>
                         <span className="font-mono">{occ.source}</span>
@@ -167,7 +167,7 @@ function DriftCard({ insight }: { insight: DriftInsight }) {
           </div>
 
           {/* canon passage */}
-          <div className="rounded-[10px] border border-white/[0.06] bg-black/20 p-3">
+          <div className="glass-well p-3">
             <div className="flex items-center justify-between gap-3">
               <span className="glass-label">Canon</span>
               <span className="font-mono text-[10.5px] text-os-dim">{insight.canon.file}</span>
@@ -196,7 +196,7 @@ function DriftCard({ insight }: { insight: DriftInsight }) {
           </div>
 
           {showDiff && fix && (
-            <div className="rounded-[10px] border border-white/[0.06] bg-black/20 p-3 font-mono text-[11px] leading-relaxed">
+            <div className="glass-well p-3 font-mono text-[11px] leading-relaxed">
               <div className="mb-1.5 text-[10.5px] uppercase tracking-[0.2em] text-os-dim">Proposed diff · {insight.canon.file}</div>
               <div className="rounded-[6px] bg-[var(--drift-del-bg)] px-2 py-1.5 text-[var(--drift-del-fg)]">− {fix.removed}</div>
               <div className="mt-1 rounded-[6px] bg-[var(--drift-add-bg)] px-2 py-1.5 text-[var(--diff-add-fg)]">+ {fix.added}</div>
@@ -208,7 +208,7 @@ function DriftCard({ insight }: { insight: DriftInsight }) {
           )}
 
           {showDraft && fix && (
-            <div className="rounded-[10px] border border-white/[0.06] bg-black/20 p-3">
+            <div className="glass-well p-3">
               <div className="text-[11px] text-os-dim">
                 To: <span className="text-os-muted">{fix.to}</span>
               </div>

@@ -48,7 +48,7 @@ export function useFilmingToggle(filming: boolean) {
 
 function FilmingClassic({ filming, pinned, dataDir, busy, error, toggle }: State & { busy: boolean; error: string | null; toggle: () => void }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-[8px] border border-os-border-strong bg-os-surface2 px-4 py-3">
+    <div className="glass-well flex items-start justify-between gap-4 px-4 py-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2 text-[12.5px] text-os-text">
           <Clapperboard size={14} className="shrink-0" />
@@ -65,7 +65,7 @@ function FilmingClassic({ filming, pinned, dataDir, busy, error, toggle }: State
       </div>
 
       {pinned ? (
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-[6px] border border-os-border-strong bg-os-surface3 px-3 py-1 text-[11.5px] text-os-muted">
+        <span className="glass-chip inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-[11.5px] text-os-muted">
           <Lock size={12} /> Pinned by host
         </span>
       ) : (

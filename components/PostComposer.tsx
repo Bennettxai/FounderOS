@@ -89,7 +89,7 @@ export function PostComposer({ initialPosts }: { initialPosts: SocialPost[] }) {
             <p className="px-3 py-6 text-center text-[12.5px] text-os-dim">Nothing queued yet</p>
           )}
           {queued.map((post) => (
-            <div key={post.id} className="rounded-sm-t border border-os-border bg-os-surface2 px-3 py-3.5">
+            <div key={post.id} className="glass-well px-3 py-3.5">
               <p className="line-clamp-2 text-[13px] leading-snug text-os-text">{post.caption}</p>
               <div className="mt-3 flex flex-wrap items-center gap-2.5">
                 {post.platforms.map((p) => (

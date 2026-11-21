@@ -211,7 +211,7 @@ export function Conversation({
             </div>
           )}
           {engineError && (
-            <div className="flex items-center gap-2 rounded-[10px] border border-os-border bg-os-surface2 px-3 py-2 text-[12px] text-os-muted">
+            <div className="glass-well flex items-center gap-2 px-3 py-2 text-[12px] text-os-muted">
               <span className="dot err" />
               {engineError}
             </div>

@@ -26,7 +26,7 @@ export function SlidingTabs<T extends string>({
       <span
         aria-hidden
         className={`pointer-events-none absolute transition-transform duration-lens ease-lens ${
-          pill ? 'bottom-[3px] left-[3px] top-[3px] rounded-[5px] bg-os-surface2' : '-bottom-px left-0 h-[2px] bg-os-text'
+          pill ? 'gl-on bottom-[3px] left-[3px] top-[3px] rounded-full' : '-bottom-px left-0 h-[2px] bg-os-text'
         }`}
         style={{ width: tabWidth, transform: `translateX(${i * tabWidth}px)` }}
       />
