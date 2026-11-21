@@ -838,7 +838,7 @@ export function mountWorkflowEditor(root: HTMLElement, opts: EditorOptions) {
   on(need('#viewExecutions'), 'click', (ev) => {
     const t = ev.target as HTMLElement;
     const f = t.closest('[data-exec-filter]') as HTMLElement | null; if (f) { S.execFilter = f.dataset.execFilter!; renderExecutions(); return; }
-    const r = t.closest('[data-run]') as HTMLElement | null; if (!r) return; const tr = $(`[data-trace="${CSS.escape(r.dataset.run!)}"]`); tr?.classList.toggle('is-open');
+    const r = t.closest('[data-run]') as HTMLElement | null; if (!r) return; const tr = $(`[data-trace="${CSS.escape(r.dataset.run!)}"]`); tr?.classList.toggle('is-open'); r.classList.toggle('is-on', !!tr?.classList.contains('is-open')); r.setAttribute('aria-expanded', String(!!tr?.classList.contains('is-open')));
   });
   function renderTests() {
     need('#testSummary').textContent = 'Workflow tests are not built yet.';

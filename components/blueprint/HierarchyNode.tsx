@@ -72,9 +72,10 @@ export const HierarchyNode = memo(function HierarchyNode({
       </div>
     );
   } else if (shape === 'start' || shape === 'diamond') {
+    // the start disc and the router diamond are graph glyphs, not cards: the glass pack's card rule skips them
     body = (
       <>
-        <div className="bh-card">
+        <div className="bh-card bh-glyph">
           <Icon />
         </div>
         <div className="bh-label">

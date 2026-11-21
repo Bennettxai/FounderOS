@@ -11,7 +11,7 @@
 export const GLASS_FACE_SELECTOR = [
   '.glass-face', '.glass-face--strong', '.l-card', '.l-chip', '.l-dialog', '.g-card', '.g-card-raised', '.g-well',
   '.g-chip', '.g-sheet', '.g-drawer', '.g-dialog', '.g-palette', '.ui-toast', '.c-pop', '.c-chip', '.h6-card', '.glass-panel',
-  '.glass-panel-violet', '.glass-chip', '.lab2-glass', '.wiz-ask', '.g-ask-box', '.ap-panel', '.ap-chip',
+  '.glass-panel-violet', '.glass-chip', '.lab2-glass', '.wiz-ask', '.g-ask-box', '.bh-ask', '.ap-panel', '.ap-chip',
 ].join(', ');
 
 /**

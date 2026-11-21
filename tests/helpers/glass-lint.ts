@@ -27,7 +27,7 @@ import { CSS_NO_COMMENTS, splitSelectors, topLevelRules, type Rule } from './the
 export const FACE_CLASSES = [
   'glass-face', 'glass-face--strong', 'l-card', 'l-chip', 'l-dialog', 'g-card', 'g-card-raised', 'g-well', 'g-chip',
   'g-sheet', 'g-drawer', 'g-dialog', 'g-palette', 'ui-toast', 'c-pop', 'c-chip', 'h6-card', 'glass-panel', 'glass-panel-violet',
-  'glass-chip', 'lab2-glass', 'wiz-ask', 'g-ask-box', 'ap-panel', 'ap-chip',
+  'glass-chip', 'lab2-glass', 'wiz-ask', 'g-ask-box', 'bh-ask', 'ap-panel', 'ap-chip',
 ] as const;
 
 /**
@@ -189,6 +189,9 @@ export function cssKillers(css: string = CSS_NO_COMMENTS): Killer[] {
     }
     if (!why) continue;
     for (const sel of r.selectors) {
+      // a frost on a ::before or ::after layer (the bars, the Wizard dock) sits under the content: the element
+      // itself is no backdrop root, so its faces keep their frost
+      if (/::?(?:before|after)\s*$/.test(sel)) continue;
       const last = sel.replace(/:(?:not|is|where|has)\([^)]*\)/g, '').split(/\s*[\s>+~]\s*/).pop() ?? '';
       const classes = [...last.matchAll(/\.([\w-]+)/g)].map((m) => m[1]);
       if (!classes.length || classes.some((c) => faces.has(c))) continue;

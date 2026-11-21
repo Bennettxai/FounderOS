@@ -279,7 +279,7 @@
 :where(
   .glass-face, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
   .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
-  .wiz-ask, .g-ask-box, .glass-face--strong, .glass-solid, .os-nav-tip, .g-pop, .g-tip, .g-chart-tip, .gl-on,
+  .wiz-ask, .g-ask-box, .bh-ask, .glass-face--strong, .glass-solid, .os-nav-tip, .g-pop, .g-tip, .g-chart-tip, .gl-on,
   .g-seg-opt[aria-checked='true'], .g-seg-opt.is-on, .l-toggle-chip[data-on='true'], .os-sidebar a.os-nav-link[aria-current='page']
 ) {
   --gl-tint: #fff;
@@ -491,7 +491,7 @@ body {
    stray blue glow on every hoverable card and nav row, so it gets a warm
    re-tone here instead of at each call site. */
 /* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
-:root[data-theme='red'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
+:root[data-theme='red'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(255, 170, 130, 0.22),
     0 0 30px -8px rgba(255, 130, 90, 0.42);
@@ -687,7 +687,7 @@ body {
   background-image: none;
 }
 /* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
-:root[data-theme='light'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
+:root[data-theme='light'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(20, 40, 80, 0.14),
     0 10px 24px -10px rgba(20, 24, 32, 0.22);
@@ -891,8 +891,8 @@ body {
   background-image: linear-gradient(155deg, rgba(36, 52, 84, 0.38) 0%, rgba(12, 18, 30, 0.18) 55%, rgba(5, 8, 14, 0.32) 100%);
 }
 /* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
-:root[data-theme='frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover,
-:root[data-theme='grey-frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
+:root[data-theme='frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover,
+:root[data-theme='grey-frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(170, 210, 255, 0.28),
     0 0 34px -8px rgba(120, 180, 255, 0.6);
@@ -14620,7 +14620,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   background-image: none;
 }
 /* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
-:root[data-theme='daylight'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
+:root[data-theme='daylight'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(20, 40, 80, 0.14),
     0 10px 24px -10px rgba(20, 24, 32, 0.22);
@@ -15146,7 +15146,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-ui='legacy'] [data-l-frame] :is(.card, [class*='shadow-']):not(.l-insight):not([data-l]):not(
   .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
   .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
-  .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .glass-solid, .glass-well, .g-seg-opt, .l-toggle-chip, .os-nav-link, .gl-on,
+  .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip, .glass-solid, .glass-well, .g-seg-opt, .l-toggle-chip, .os-nav-link, .gl-on,
   .ap-pill, .bh-itab, .ib-chip, .ib-seg-btn, .ae-chip, .ae-pill, .g-pill, .wiz-bc-chip, .kg-radial-row, .lab2-seg-opt, .lab2c-fchip,
   .ch-g-strip-btn, .ch-c-strip-btn, .fo-c-filter, .bg-os-surface.rounded-lg-t, .os-nav-tip, .g-pop, .g-tip, .g-chart-tip
 ) {
@@ -17780,7 +17780,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-ground] :is(
   .glass-face, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
   .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
-  .wiz-ask, .g-ask-box, .ap-panel, .ap-chip
+  .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip
 ) {
   background: transparent;
   border-color: transparent;
@@ -17797,7 +17797,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 
 /* The ask bars ("Tell an agent"): an accent light orbits behind an inner frosted layer that clips to
    the bar, so that layer carries the inner light (rim, low, pool, shade) above the frosted orbit. */
-:root[data-ground] :is(.wiz-ask-glass, .g-ask-glass) {
+:root[data-ground] :is(.wiz-ask-glass, .g-ask-glass, .bh-ask-glass) {
   border-radius: inherit;
   background: transparent;
   -webkit-backdrop-filter: var(--gl-blur-strong);
@@ -17922,11 +17922,12 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-ground] :is(
   .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
   .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
-  .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .glass-solid, .glass-well, .g-seg-opt, .l-toggle-chip, .os-nav-link, .gl-on,
+  .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip, .glass-solid, .glass-well, .g-seg-opt, .l-toggle-chip, .os-nav-link, .gl-on,
   .ap-pill, .bh-itab, .ib-chip, .ib-seg-btn, .ae-chip, .ae-pill, .g-pill, .wiz-bc-chip, .kg-radial-row, .lab2-seg-opt, .lab2c-fchip,
   .ch-g-strip-btn, .ch-c-strip-btn, .fo-c-filter, .bg-os-surface.rounded-lg-t
 ):focus-visible,
-:root[data-ground] :is(.wiz-ask, .g-ask-box):has(:focus-visible) {
+:root[data-ground] :is(.wiz-ask, .g-ask-box):has(:focus-visible),
+:root[data-ground] .bh-ask:has(:focus-visible) {
   outline: 2px solid var(--gl-focus);
   outline-offset: 2px;
 }
@@ -18052,7 +18053,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   :root[data-ground] :is(
     .glass-face, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
     .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
-    .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .glass-face--strong, .lab2-glass[data-tone='strong'], .wiz-ask-glass, .g-ask-glass
+    .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip, .glass-face--strong, .lab2-glass[data-tone='strong'], .wiz-ask-glass, .g-ask-glass, .bh-ask-glass
   ) {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -18063,7 +18064,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   :root[data-ground] :is(
     .glass-face, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
     .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
-    .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .glass-face--strong, .lab2-glass[data-tone='strong'], .wiz-ask-glass, .g-ask-glass
+    .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip, .glass-face--strong, .lab2-glass[data-tone='strong'], .wiz-ask-glass, .g-ask-glass, .bh-ask-glass
   ) {
     background: var(--solid-bg);
   }
@@ -18301,7 +18302,35 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 ) :is(
   .glass-face, .l-card, .g-card, .g-card-raised, .h6-card, .glass-panel, .glass-panel-violet, .lab2-glass, .ap-panel,
   .bg-os-surface.rounded-lg-t
-):not(.border-dashed, .glass-face--strong, .glass-solid, .c-pop, .ui-toast, [data-tone='strong'], [data-tone='solid'], [data-tone='tint']) {
+):not(.border-dashed, .glass-face--strong, .glass-solid, .c-pop, .ui-toast, [data-tone='strong'], [data-tone='solid'], [data-tone='tint']),
+/* the wells glass phase 5 swept in (each its own selector, so it outranks the rule that filled it) */
+:root[data-ground] .bh-tile,
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-tile,
+:root[data-ground] .wfc .node .tile,
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .node .tile,
+:root[data-ground] .wfc .item .tile,
+:root[data-ground] .wfc .insp-head .tile,
+:root[data-ground] .wfc .wf-card,
+:root[data-ground] .ib-bubble,
+:root[data-ground] .ae-card-3,
+:root[data-ground] .ae-o-wf-start .tile,
+:root[data-ground] .ae-o-wf-start .tile.ce-g-orow,
+:root[data-ground] .wg-ib-bubble,
+:root[data-ground] .soc-g-bubble,
+:root[data-ground] .lab2c-banner,
+:root[data-ground] .lab2c-ground-card,
+:root[data-ground] .lab2c-section-card,
+:root[data-ground] .lab2g-side-panel,
+:root[data-ground] .l-lab-banner,
+:root[data-ground] .l-lab-ground-card,
+:root[data-ground] .l-lab-frame,
+:root[data-ground] .l-ch-bubble,
+:root[data-ground] .wz-tile,
+:root[data-ground] .wz-bubble-user,
+:root[data-ground] .l-wz .wz-bubble-user,
+:root[data-ground] .ap-card,
+:root[data-ground] .ap-tile,
+:root[data-ground] .ap-ask-tile {
   background: transparent;
   border-color: transparent;
   border-radius: var(--gl-r-well);
@@ -18345,11 +18374,11 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-ground] :is(
   .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
   .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
-  .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
+  .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
 ) :is(
   .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
   .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
-  .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
+  .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
 ) {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -18360,7 +18389,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   :root[data-ground] :is(
     .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
     .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
-    .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
+    .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
   ) :is(.gl-materialise, .l-card.l-rise, .panel-in) {
     animation-name: gl-materialise-lit, gl-rim-in, gl-pool-in;
   }
@@ -18368,7 +18397,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-ground] :is(
   .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
   .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
-  .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
+  .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
 ) :is(.c-chip, .g-chip, .l-chip, .glass-chip, .ap-chip) {
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
@@ -18378,7 +18407,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-ground] :is(
   .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
   .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
-  .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
+  .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
 ) :is(.c-pop, .glass-face--strong, .ui-toast, .lab2-glass[data-tone='strong']) {
   background: var(--solid-bg);
   border-color: transparent;
@@ -18441,14 +18470,14 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
    brightens its rim, bottom edge and pool; the glow themes tint that light with their accent instead of the
    coloured glow they give other hoverables (those theme rules exclude the faces). */
 :root[data-ground] :is(
-  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .glass-well, .glass-solid, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
 ).hoverable:hover {
   --gl-rim-a: 28%;
   --gl-low-a: 40%;
   --gl-pool-a: 14%;
 }
 :root[data-ground]:is([data-theme='red'], [data-theme='frost'], [data-theme='grey-frost'], [data-theme='light'], [data-theme='daylight']) :is(
-  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .bh-ask, .glass-well, .glass-solid, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
 ).hoverable:hover {
   --gl-tint: var(--accent);
 }
@@ -18662,3 +18691,469 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   }
 }
 /* ── end glass phase 3 ── */
+
+/* ── glass phase 5 ── */
+/* The final sweep (FounderOS Glass brief §1, §2, §5B; glass canon). Every face that still painted the old look
+   (a fill, a gradient, a top-edge highlight, a coloured "on" fill, a radius off the pack's three) takes the pack
+   here, in every style that renders it. Each selector is the face's own selector under :root[data-ground], so it
+   outranks the rule that filled it (component sheets load after this file, so they lose on specificity, never on
+   order). tests/glass-final-sweep.test.ts reads every stylesheet and every TSX element and holds the list: a face
+   that fills again fails it. Literal colours stay out of this block (tokens and color-mix only).
+     Faces sit on the page or the canvas: light frost, the six layers, card radius 24.
+     Strong faces sit over content (sheets, drawers, modals, panels over a graph): strong frost.
+     Solid faces are small pop-ups over text (menus, tooltips): the solid face colour, no frost.
+     Wells are faces nested in a face: no frost of their own, the rim and the bottom edge, radius 16.
+     Chips and pills are lit like a nested chip (rim, bottom edge, pool), radius a pill.
+     "On" is a tinted, stronger rim (and, on chips, the glow behind); status chips tint their rim with the status. */
+
+/* The knobs, at zero specificity like the pack's own. */
+:where(
+  .bh-ask, .bh-card, .bh-frame, .bh-hud, .bh-search-panel, .bh-tile, .bh-pill, .bh-search-pill, .wfc .node .frame, .wfc .node .tile,
+  .wfc .item .tile, .wfc .insp-head .tile, .wfc .dock, .wfc .panel, .wfc .lib-card, .wfc .table, .wfc .modal, .wfc .menu, .wfc .toast,
+  .wfc .wf-card, .wfc .pill, .wfc .pill-add, .wfc .pill-set, .wz-chip-accent, .ib-card, .ib-w-card, .ib-sort-menu, .ib-bubble, .ib-chip, .ib-filter-chip,
+  .ib-quick-chip, .ib-w-chip, .ae-card, .ae-card-2, .ae-card-3, .ae-pill, .ae-chip, .ae-pop, .ae-o-panel, .ae-o-hud, .ae-o-strip,
+  .ae-o-sheet, .ae-o-wf-sheet, .ae-o-wf-banner, .ae-o-wf-menu, .ae-o-pop, .ae-o-wf-chip, .ae-o-wf-start .tile, .ae-o-pill, .g-pill,
+  .g-vizstage-hud, .g-dock, .kg-know-stats .g-stat, .bd-g-volume .g-hero-strip, .wg-ib-bubble, .soc-g-bubble, .hg-chart-tip,
+  .wg-cf-week-chip, .wiz-bc-chip, .lab2-pill, .lab2-chip, .lab2-sheet-ghost, .lab2c-banner, .lab2c-ground-card, .lab2c-section-card,
+  .lab2g-side-panel, .lab2g-chip, .l-lab-menu, .l-lab-banner, .l-lab-pop, .l-lab-sheet, .l-lab-ground-card, .l-lab-frame,
+  .lab2-verse-panel, .lab2-verse-tip, .l-insight-pill, .l-ch-bubble, .wz-tile, .wz-chip, .wz-bubble-user, .trd-c-chip, .trd-c-stat,
+  .fo-c-pill, .ap-card, .ap-tile, .ap-ask-tile, .ap-pill, .ap-globe-tip, .fc-card, .fc-panel, .fc-drawer, .fc-menu, .fc-tip, .fc-pill,
+  .fc-chip, .fc-link-chip, .fc-mini-pill, .fc-ins-pill
+) {
+  --gl-tint: white;
+  --gl-rim-a: 15%;
+  --gl-low-a: 30%;
+  --gl-pool-a: 9%;
+}
+
+/* Faces: light frost, the six layers, the card radius. */
+:root[data-ground] .bh-ask,
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-ask,
+:root[data-ground] .bh-card:not(.bh-glyph),
+:root[data-ground] .bh-frame,
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-frame,
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-hud,
+:root[data-ground] .wfc .node .frame,
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .node .frame,
+:root[data-ground] .wfc .lib-card,
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .lib-card,
+:root[data-ground] .wfc .table,
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .table,
+:root[data-ground] .ib-card,
+:root[data-ground] .ib-page .ib-card,
+:root[data-ground] .ib-w-card,
+:root[data-ground] .ae-card,
+:root[data-ground] .ae-card-2,
+:root[data-ground] .ae-o-panel,
+:root[data-ground] .ae-o-hud,
+:root[data-ground] .ae-o-strip,
+:root[data-ground] .g-vizstage-hud,
+:root[data-ground] .kg-know-stats .g-stat,
+:root[data-ground] .trd-c-stat,
+:root[data-ground] .fc-card,
+:root[data-ground] .fc-panel {
+  background: transparent;
+  border-color: transparent;
+  border-radius: var(--gl-r-card);
+  -webkit-backdrop-filter: var(--gl-blur);
+  backdrop-filter: var(--gl-blur);
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+
+/* Strong faces: over a graph, a stage or the page (side panels, docks, modals, sheets, drawers, toasts, banners). */
+:root[data-ground] .bh-search-panel,
+:root[data-ground] .wfc .dock:not(.dock-ratio),
+:root[data-ground] .wfc .panel,
+:root[data-ground] .wfc .modal,
+:root[data-ground] .wfc .toast,
+:root[data-ground] .ae-o-sheet,
+:root[data-ground] .ae-o-wf-sheet,
+:root[data-ground] .ae-o-wf-banner,
+:root[data-ground] .lab2-sheet-ghost,
+:root[data-ground]:not([data-ui='glados'])[data-theme='console'] .lab2-sheet-ghost,
+:root[data-ground] .l-lab-sheet,
+:root[data-ground] .lab .lab2-verse-panel,
+:root[data-ground] .lab[data-lab-style='legacy'] .l-lab-verse .lab2-verse-panel,
+:root[data-ground] .fc-drawer {
+  background: transparent;
+  border-color: transparent;
+  border-radius: var(--gl-r-card);
+  -webkit-backdrop-filter: var(--gl-blur-strong);
+  backdrop-filter: var(--gl-blur-strong);
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+/* Edge-anchored ones keep their flush edges square; the toast is a pill (brief §5 B12). */
+:root[data-ground] .ae-o-sheet { border-radius: var(--gl-r-card) var(--gl-r-card) 0 0; }
+:root[data-ground] .wfc .toast { border-radius: var(--gl-r-chip); }
+
+/* The Wizard dock is fixed and page-tall: like the bars, its frost is a layer under its content (glass canon
+   amendment: a page-tall container is never itself frosted, so nothing inside it loses its own frost), and that
+   layer carries the light. */
+:root[data-ground][data-ui='glados'] .g-dock {
+  isolation: isolate;
+  background: transparent;
+  border-color: transparent;
+  border-radius: var(--gl-r-card) 0 0 var(--gl-r-card);
+  box-shadow: none;
+}
+:root[data-ground][data-ui='glados'] .g-dock::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  -webkit-backdrop-filter: var(--gl-blur-strong);
+  backdrop-filter: var(--gl-blur-strong);
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+
+/* Solid raised faces: menus, pop-overs and tooltips over text. */
+:root[data-ground] .wfc .menu,
+:root[data-ground] .ib-sort-menu,
+:root[data-ground] .ae-pop,
+:root[data-ground] .ae-o-wf-menu,
+:root[data-ground] .ae-o-pop,
+:root[data-ground] .hg-chart-tip,
+:root[data-ground] .l-lab-menu,
+:root[data-ground] .l-lab-pop,
+:root[data-ground] .lab .lab2-verse-tip,
+:root[data-ground] .lab[data-lab-style='legacy'] .l-lab-verse .lab2-verse-tip,
+:root[data-ground] .ap-globe-tip,
+:root[data-ground] .bd-g-volume .g-hero-strip,
+:root[data-ground] .fc-menu,
+:root[data-ground] .fc-tip {
+  background: var(--solid-bg);
+  border-color: transparent;
+  border-radius: var(--gl-r-card);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+/* The brand-deals hero strip sits on the hero's bottom glow, where no ink reads through a clear face (1.5 to 2.9:1,
+   tests/glass-final-sweep.test.ts): so, like the funnel insight strip, it is the solid raised face, a well's radius. */
+:root[data-ground] .bd-g-volume .g-hero-strip { border-radius: var(--gl-r-well); color: var(--g-ink); }
+/* Pop-ups that were already solid faces of the pack take the card radius too (a one-line tip clamps to a pill). */
+:root[data-ground] .g-tip,
+:root[data-ground] .os-nav-tip,
+:root[data-ground]:not([data-ui='glados'])[data-theme='console'] .lab2-menu {
+  border-radius: var(--gl-r-card);
+}
+
+/* Wells (faces nested in a face: icon tiles, inner cards, bubbles, banners) join the one well rule (glass phase 2b). */
+/* Radii only: a stat tile and a strip that paint nothing, but sat at 10 and 12px. */
+:root[data-ground] .ae-stat,
+:root[data-ground] .l-strip {
+  border-radius: var(--gl-r-well);
+}
+
+/* Chips and pills: lit like a chip in a face (rim, bottom edge, pool), no frost of their own, a pill. */
+:root[data-ground] .bh-pill,
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-pill,
+:root[data-ground] .bh-search-pill,
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-search-pill.g-btn,
+:root[data-ground] .wfc .pill,
+:root[data-ground] .wfc .pill-add,
+:root[data-ground] .wfc .pill-set,
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .pill-add,
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .pill-set,
+:root[data-ground] .ib-chip,
+:root[data-ground] .ib-page .ib-chip,
+:root[data-ground] .ib-page .ib-filter-chip,
+:root[data-ground] .ib-filter-chip,
+:root[data-ground] .ib-quick-chip,
+:root[data-ground] .ib-w-chip,
+:root[data-ground] .ae-pill,
+:root[data-ground] .ae-chip,
+:root[data-ground][data-ui='legacy'] .ae-paper .ae-pill,
+:root[data-ground][data-ui='legacy'] .ae-paper .ae-chip,
+:root[data-ground] .ae-o-pill:not(select),
+:root[data-ground] .ae-o-top .ae-o-pill.center:not(select),
+:root[data-ground] .ae-o-wf-chip,
+:root[data-ground] .g-pill,
+:root[data-ground] .wg-cf-week-chip,
+:root[data-ground] .wiz-bc-chip,
+:root[data-ground] .lab2-pill:not(.lab2-glass),
+:root[data-ground] .lab2-chip:not(.lab2-glass),
+:root[data-ground] .lab2g-chip:not(.lab2-glass),
+:root[data-ground] .l-insight-pill,
+:root[data-ground] .wz-chip,
+:root[data-ground] .wz-chip-accent,
+:root[data-ground] .trd-c-chip,
+:root[data-ground] .fo-c-pill,
+:root[data-ground] .ap-pill,
+:root[data-ground] .fc-pill,
+:root[data-ground] .fc-chip,
+:root[data-ground] .fc-link-chip,
+:root[data-ground] .fc-mini-pill,
+:root[data-ground] .fc-ins-pill {
+  background: transparent;
+  border-color: transparent;
+  border-radius: var(--gl-r-chip);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent);
+}
+
+/* A face nested in a frosting face does not frost again (glass over glass, as in phase 3). */
+:root[data-ground] :is(
+  .glass-face, .glass-face--strong, .l-card, .l-dialog, .g-card, .g-card-raised, .g-sheet, .g-drawer, .g-dialog, .g-palette, .c-pop,
+  .h6-card, .glass-panel, .glass-panel-violet, .lab2-glass, .ap-panel, .bg-os-surface.rounded-lg-t, .ae-card, .ae-card-2, .ae-o-panel,
+  .ib-card, .fc-card, .fc-panel, .fc-drawer, .bh-frame
+) :is(.ae-card-2, .ib-card, .fc-card, .fc-panel, .g-vizstage-hud, .bh-hud, .ae-o-hud, .ae-o-strip, .trd-c-stat, .g-stat) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* "On" and status. A large face: a tinted, stronger rim. The expanded workflow node and the mint modal read in the
+   theme's ink (they were a mint gradient with on-gradient ink). */
+:root[data-ground] .wfc .node:is(.is-selected, .is-expanded) .frame,
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .node:is(.is-selected, .is-expanded) .frame,
+:root[data-ground] .wfc .modal.mint,
+:root[data-ground] .bh-node.is-selected .bh-card:not(.bh-glyph),
+:root[data-ground] .ib-w-card.is-accent,
+:root[data-ground] .ib-msg.is-me .ib-bubble,
+:root[data-ground] .wg-ib-msg[data-me] .wg-ib-bubble,
+:root[data-ground] .soc-g-msg[data-dir='out'] .soc-g-bubble,
+:root[data-ground] .l-wz .wz-bubble-user,
+:root[data-ground] .wz-bubble-user {
+  --gl-tint: var(--gl-on);
+  --gl-rim-a: 45%;
+}
+:root[data-ground] .wfc .node.is-expanded .frame,
+:root[data-ground] .wfc .modal.mint {
+  --wf-on-grad: var(--text);
+  --wf-on-grad-rgb: var(--wf-ink-rgb);
+  --wf-bright: var(--accent);
+  color: var(--text);
+}
+:root[data-ground] .ib-w-card.is-accent :is(.ib-w-accent-h, .ib-w-chip) { color: var(--text); }
+:root[data-ground] .ib-w-card.is-accent .ib-w-accent-p { color: var(--text-2); }
+/* A small face: the tinted rim and the glow behind it (a blurred ::before at .55, the pack's "on"). */
+:where(
+  .bh-pill.hot, .bh-pill.dyn, .wfc .pill-add.is-open, .wfc .pill-set.is-open, .wfc .pill-set.is-visible, .ib-filter-chip,
+  .ae-o-pill.center, .wg-cf-week-chip, .lab2g-chip[data-tone='up'], .lab2g-chip[data-tone='strong'], .wz-chip-accent,
+  .trd-c-chip[aria-checked='true'], .fc-chip.on
+) {
+  position: relative;
+  isolation: isolate;
+}
+:root[data-ground] :is(
+  .bh-pill.hot, .bh-pill.dyn, .wfc .pill-add.is-open, .wfc .pill-set.is-open, .wfc .pill-set.is-visible, .ib-filter-chip,
+  .ae-o-pill.center, .wg-cf-week-chip, .lab2g-chip[data-tone='up'], .lab2g-chip[data-tone='strong'], .wz-chip-accent,
+  .trd-c-chip[aria-checked='true'], .fc-chip.on
+) {
+  --gl-tint: var(--gl-on);
+  --gl-rim-a: 45%;
+}
+:root[data-ground] :is(
+  .bh-pill.hot, .bh-pill.dyn, .ib-filter-chip, .wg-cf-week-chip, .lab2g-chip[data-tone='up'], .lab2g-chip[data-tone='strong'],
+  .wz-chip-accent, .trd-c-chip[aria-checked='true'], .fc-chip.on
+)::before {
+  content: '';
+  position: absolute;
+  inset: 20%;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--gl-on);
+  filter: blur(40px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+/* The ones that inverted their text onto the fill read in their ground's ink again. */
+:root[data-ground] :is(.bh-pill.hot, .bh-pill.dyn, .wfc .pill-add.is-open, .wfc .pill-set.is-open, .ib-filter-chip, .trd-c-chip[aria-checked='true']) {
+  color: var(--text);
+}
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] :is(.pill-add.is-open, .pill-set.is-open, .pill-set.is-visible) {
+  color: var(--g-ink);
+}
+:root[data-ground] .ae-o-pill.center { color: var(--o-text); }
+:root[data-ground] .lab2g-chip:is([data-tone='up'], [data-tone='strong']) { color: var(--lab-ink-hero); }
+/* Status chips tint their rim with the status (colour means status), never a fill. */
+:root[data-ground] .wfc .pill.success { --gl-tint: var(--ok); }
+:root[data-ground] .wfc .pill.live { --gl-tint: var(--accent); }
+:root[data-ground] .wfc .pill:is(.failed, .fail) { --gl-tint: var(--err); }
+:root[data-ground] .wfc .pill:is(.suggested, .waiting) { --gl-tint: var(--wf-hue-amber); }
+:root[data-ground] .ae-o-pill.green { --gl-tint: var(--o-green); }
+:root[data-ground] .ae-o-wf-chip { --gl-tint: var(--lvl, white); }
+:root[data-ground] .fo-c-pill[data-tone='accent'] { --gl-tint: var(--accent); }
+:root[data-ground] .fo-c-pill[data-tone='warn'] { --gl-tint: var(--warn); }
+:root[data-ground] .l-insight-pill { --gl-tint: var(--l-insight-ink); }
+
+/* Hover moves the knobs only (brief §2): these faces brightened a fill on hover. */
+:root[data-ground] :is(
+  .wfc .wf-card, .ap-ask-tile, .ap-pill, .ae-o-pill, .ae-o-wf-chip, .ae-o-wf-start .tile, .ib-page .ib-chip, .ib-w-card, .lab2-pill,
+  .wfc .lib-card, .bh-search-pill
+):hover {
+  --gl-rim-a: 28%;
+  --gl-low-a: 40%;
+  --gl-pool-a: 14%;
+}
+
+/* The executions and tests tables (the workflow canvas): the table is the face; its rows and cells are unfilled,
+   hairline-separated. A row that is open (its trace showing) is "on": a tinted row light (the rim and the pool, in
+   the "on" colour), never a fill. tests/glass-final-sweep.test.ts measures its text over that light. */
+:root[data-ground] .wfc .row,
+:root[data-ground] .wfc .row.head,
+:root[data-ground] .wfc .row:not(.head):hover {
+  background: transparent;
+}
+:root[data-ground] .wfc .row:not(.head):hover {
+  box-shadow: inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint, white) 9%, transparent);
+}
+/* The pool under the text is held at 3% on this row only: the GladOS light modes' muted ink is 4.89:1 on the bare
+   ground and drops under 4.5:1 from a 6% tint (glass canon: lower it on the component, never the global token). */
+:root[data-ground] .wfc .row.is-on {
+  background: transparent;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-on) 45%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-on) 60%, transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-on) 3%, transparent);
+}
+
+/* The Blueprint ask bar is the dock input bar (brief §5 B14), like the wizard's: an accent light orbits behind an
+   inner frosted layer that clips to the bar, and that layer carries the inner light. The scope chip in it is lit. */
+:root[data-ground] .bh-ask-glass,
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-ask-glass {
+  display: block;
+  border-radius: inherit;
+  background: transparent;
+  -webkit-backdrop-filter: var(--gl-blur-strong);
+  backdrop-filter: var(--gl-blur-strong);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-ask-orbit { display: block; }
+:root[data-ground] .bh-ask:focus-within .bh-ask-glass,
+:root[data-ground] .bh-ask.has-scope .bh-ask-glass {
+  --gl-rim-a: 45%; /* focus and a scope: a stronger rim instead of a coloured border */
+}
+:root[data-ground] .bh-ask.has-scope { --gl-tint: var(--sc, var(--gl-on)); }
+
+/* No blur where the viewer or the browser asks for none: the same light on the solid face. The selectors repeat the
+   frosting faces above one for one, so each outranks (or ties and follows) the rule that frosted it. */
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-ground][data-ui='glados'] .g-dock::before,
+  :root[data-ground] .bh-ask,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-ask,
+  :root[data-ground] .bh-card:not(.bh-glyph),
+  :root[data-ground] .bh-frame,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-frame,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-hud,
+  :root[data-ground] .wfc .node .frame,
+  :root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .node .frame,
+  :root[data-ground] .wfc .lib-card,
+  :root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .lib-card,
+  :root[data-ground] .wfc .table,
+  :root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .table,
+  :root[data-ground] .ib-card,
+  :root[data-ground] .ib-page .ib-card,
+  :root[data-ground] .ib-w-card,
+  :root[data-ground] .ae-card,
+  :root[data-ground] .ae-card-2,
+  :root[data-ground] .ae-o-panel,
+  :root[data-ground] .ae-o-hud,
+  :root[data-ground] .ae-o-strip,
+  :root[data-ground] .g-vizstage-hud,
+  :root[data-ground] .kg-know-stats .g-stat,
+  :root[data-ground] .trd-c-stat,
+  :root[data-ground] .fc-card,
+  :root[data-ground] .fc-panel,
+  :root[data-ground] .bh-search-panel,
+  :root[data-ground] .wfc .dock:not(.dock-ratio),
+  :root[data-ground] .wfc .panel,
+  :root[data-ground] .wfc .modal,
+  :root[data-ground] .wfc .toast,
+  :root[data-ground] .ae-o-sheet,
+  :root[data-ground] .ae-o-wf-sheet,
+  :root[data-ground] .ae-o-wf-banner,
+  :root[data-ground] .lab2-sheet-ghost,
+  :root[data-ground]:not([data-ui='glados'])[data-theme='console'] .lab2-sheet-ghost,
+  :root[data-ground] .l-lab-sheet,
+  :root[data-ground] .lab .lab2-verse-panel,
+  :root[data-ground] .lab[data-lab-style='legacy'] .l-lab-verse .lab2-verse-panel,
+  :root[data-ground] .fc-drawer,
+  :root[data-ground] .bh-ask-glass,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-ask-glass {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--solid-bg);
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-ground][data-ui='glados'] .g-dock::before,
+  :root[data-ground] .bh-ask,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-ask,
+  :root[data-ground] .bh-card:not(.bh-glyph),
+  :root[data-ground] .bh-frame,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-frame,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-hud,
+  :root[data-ground] .wfc .node .frame,
+  :root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .node .frame,
+  :root[data-ground] .wfc .lib-card,
+  :root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .lib-card,
+  :root[data-ground] .wfc .table,
+  :root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .table,
+  :root[data-ground] .ib-card,
+  :root[data-ground] .ib-page .ib-card,
+  :root[data-ground] .ib-w-card,
+  :root[data-ground] .ae-card,
+  :root[data-ground] .ae-card-2,
+  :root[data-ground] .ae-o-panel,
+  :root[data-ground] .ae-o-hud,
+  :root[data-ground] .ae-o-strip,
+  :root[data-ground] .g-vizstage-hud,
+  :root[data-ground] .kg-know-stats .g-stat,
+  :root[data-ground] .trd-c-stat,
+  :root[data-ground] .fc-card,
+  :root[data-ground] .fc-panel,
+  :root[data-ground] .bh-search-panel,
+  :root[data-ground] .wfc .dock:not(.dock-ratio),
+  :root[data-ground] .wfc .panel,
+  :root[data-ground] .wfc .modal,
+  :root[data-ground] .wfc .toast,
+  :root[data-ground] .ae-o-sheet,
+  :root[data-ground] .ae-o-wf-sheet,
+  :root[data-ground] .ae-o-wf-banner,
+  :root[data-ground] .lab2-sheet-ghost,
+  :root[data-ground]:not([data-ui='glados'])[data-theme='console'] .lab2-sheet-ghost,
+  :root[data-ground] .l-lab-sheet,
+  :root[data-ground] .lab .lab2-verse-panel,
+  :root[data-ground] .lab[data-lab-style='legacy'] .l-lab-verse .lab2-verse-panel,
+  :root[data-ground] .fc-drawer,
+  :root[data-ground] .bh-ask-glass,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-ask-glass {
+    background: var(--solid-bg);
+  }
+}
+/* ── end glass phase 5 ── */
