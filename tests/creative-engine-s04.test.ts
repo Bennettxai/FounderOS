@@ -46,7 +46,8 @@ describe('AC04.8 / B37: sheets and drawers are dialogs on the shared hook (X1)',
     // `open` (not `true`): a closed sheet releases the hook at once while its face melts out (lib/use-melt)
     expect(kit).toMatch(/useDialog\(\{ open(?:: true)?, onClose, labelledBy: titleId/);
     for (const src of [classic.slice(classic.indexOf('function ClassicDrawer('), classic.indexOf('function ClassicConfirmDelete(')), classic.slice(classic.indexOf('function ClassicSheet('), classic.indexOf('function ClassicDrawer('))]) {
-      expect(src).toContain("useDialog({ open: true, onClose, labelledBy: titleId })");
+      // Escape (the hook's onClose) melts the face first; the parent's onClose runs once it has melted.
+      expect(src).toContain('useDialog({ open: true, onClose: () => melt.close(), labelledBy: titleId })');
       expect(src).toContain('{...dlg.props}');
       expect(src).toContain('id={titleId}');
       expect(src).toContain('data-dialog-close');
@@ -71,6 +72,43 @@ describe('AC04.8 / B37: sheets and drawers are dialogs on the shared hook (X1)',
     expect(block.length).toBeGreaterThan(100);
     expect(block).toMatch(/\.ae-paper :where\(:focus-visible\) \{ outline: 2px solid var\(--p-ring\)/);
     expect(block).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(/);
+  });
+});
+
+describe('glass review, findings 1 and 6: the Classic sheets render in a portal and melt out', () => {
+  const classic = read('components/creative-engine/classic.tsx');
+  const fn = (name: string) => {
+    const i = classic.indexOf(`export function ${name}(`);
+    const j = classic.indexOf('\nexport function', i + 1);
+    return classic.slice(i, j < 0 ? undefined : j);
+  };
+
+  test.each(['ClassicSheet', 'ClassicDrawer', 'ClassicConfirmDelete'])('%s: close melts the face, then the parent unmounts it', (name) => {
+    const src = fn(name);
+    // lib/use-melt useMeltClose on the dialog's own face: close() starts the melt, the parent's callback runs on gl-melt's end
+    expect(src).toMatch(/const melt = useMeltClose\((?:onClose|onCancel), dlg\.ref\);/);
+    // (the delete confirm's Escape goes through its busy guard, which melts)
+    expect(src).toMatch(/useDialog\(\{ open: true, onClose: \(\) => (?:melt\.close|cancel)\(\), labelledBy: titleId \}\)/);
+    if (name === 'ClassicConfirmDelete') expect(src).toMatch(/const cancel = \(\) => \{\s*if \(!busy\) melt\.close\(\);\s*\};/);
+    expect(src).toContain('{...melt.layer}');
+    expect(src).toContain('onAnimationEnd={melt.onAnimationEnd}');
+    expect(src).toContain("${melt.melting ? ' is-melting' : ''}");
+    // nothing closes around the melt: the scrim, Close, Back-to and Cancel all go through it
+    expect(src).not.toMatch(/onClick=\{(?:onClose|onCancel)\}/);
+  });
+
+  test.each(['ClassicSheet', 'ClassicDrawer', 'ClassicConfirmDelete'])('%s: the layer is portalled to <body> and carries the paper scope', (name) => {
+    const src = fn(name);
+    expect(src).toMatch(/return \(\s*<Layer>\s*<div className="ae-paper ae-sheet-layer /);
+    expect(src).toMatch(/<\/div>\s*<\/Layer>\s*\);\s*\}/);
+  });
+
+  test('the melt plays on the paper sheet: it beats both entrances, and reduced motion skips it', () => {
+    const css = read('app/globals.css').replace(/\/\*[\s\S]*?\*\//g, '');
+    const sel = ':root[data-ground] .ae-sheet-layer > .ae-sheet.is-melting';
+    const esc = sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    expect(css).toMatch(new RegExp(`${esc} \\{ animation: gl-melt var\\(--gl-dur-melt\\) linear forwards; pointer-events: none; \\}`));
+    expect(css).toMatch(new RegExp(`@media \\(prefers-reduced-motion: reduce\\) \\{[^{}]*(?:\\{[^{}]*\\}[^{}]*)*${esc} \\{ animation: none; \\}`));
   });
 });
 

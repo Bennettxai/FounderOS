@@ -15,6 +15,7 @@ import { WorkflowCanvas } from '@/components/creative-engine/WorkflowCanvas';
 import { SpendGate } from '@/components/creative-engine/SpendGate';
 import { OBtn, OInput, OSelect, OTextarea, SetupLink } from '@/components/creative-engine/skin';
 import { ConsoleErrorBoundary } from '@/components/creative-engine/ConsoleErrorBoundary';
+import { Layer } from '@/components/g/Overlays';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
 import { lockBodyScroll } from '@/components/ui/use-dialog';
 import { pushEscape } from '@/lib/escape-stack';
@@ -103,13 +104,17 @@ function clearStoredDraft(campaignId: string | null | undefined) {
 
 /** The console inside its error boundary and its own toast stack: a render error shows a Reset controls / Close card, never a white screen (S05a FR-2). */
 export function MotionConsole(props: ConsoleProps) {
+  // The console is a full-viewport layer, portalled to <body> (a frosted ancestor would trap it). It is
+  // its own scope root (.ae-octane): the workflow's dialogs portal into it.
   return (
     <ConsoleErrorBoundary onClose={props.onClose} onReset={() => clearStoredDraft(props.campaign?.id)}>
-      <div className="ae-octane ae-o-ground fixed inset-0 z-[130] overflow-y-auto">
-        <ToastProvider>
-          <MotionConsoleBody {...props} />
-        </ToastProvider>
-      </div>
+      <Layer>
+        <div className="ae-octane ae-o-ground fixed inset-0 z-[130] overflow-y-auto">
+          <ToastProvider>
+            <MotionConsoleBody {...props} />
+          </ToastProvider>
+        </div>
+      </Layer>
     </ConsoleErrorBoundary>
   );
 }

@@ -779,7 +779,8 @@ describe('cards that are cards only at a breakpoint, and the Creative Engine she
   };
   test.each(['ClassicSheet', 'ClassicDrawer', 'ClassicConfirmDelete'])('%s: the scrim is the sheet\'s sibling and the sheet a strong glass face', (name) => {
     const src = fn(name);
-    expect(src).toMatch(/<div className="[^"]*\bae-sheet-layer\b[^"]*">\s*<div className="ae-sheet-scrim gl-scrim" aria-hidden onClick=\{\w+\} \/>/);
+    // (the layer may carry the melt's data-melting, {...melt.layer}, so the scrim clears with the face)
+    expect(src).toMatch(/<div className="[^"]*\bae-sheet-layer\b[^"]*"(?: \{\.\.\.\w+\.layer\})?>\s*<div className="ae-sheet-scrim gl-scrim" aria-hidden onClick=\{\w+\} \/>/);
     expect(src).toMatch(/className=\{?[`"][^`"]*\bae-sheet\b[^`"]*\bglass-face glass-face--strong\b/);
     expect(src).not.toMatch(/stopPropagation/);
     expect(src).not.toMatch(/bg-\[var\(--p-card-2\)\]|shadow-\[var\(--p-shadow\)\]/);

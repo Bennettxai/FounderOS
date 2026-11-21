@@ -6,6 +6,8 @@ import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cx } from '@/components/g/cx';
 import { pushEscape } from '@/lib/escape-stack';
 import { useDialog } from '@/components/ui/use-dialog';
+import { Layer } from '@/components/g/Overlays';
+import { useMeltClose } from '@/lib/use-melt';
 
 /**
  * The Creative Engine's Classic controls (glados-ui SPEC GP1, X5). Under the
@@ -256,19 +258,25 @@ export function ClassicTag({ children, className, ...data }: { children: ReactNo
  */
 export function ClassicSheet({ title, onClose, backLabel, children }: { title: string; onClose: () => void; backLabel?: string; children: ReactNode }) {
   const titleId = useId();
-  const dlg = useDialog({ open: true, onClose, labelledBy: titleId });
+  // Escape, the scrim and Close melt the face (lib/use-melt); the parent unmounts it once it has melted.
+  const dlg = useDialog({ open: true, onClose: () => melt.close(), labelledBy: titleId });
+  const melt = useMeltClose(onClose, dlg.ref);
+  const close = melt.close;
+  // Portalled to <body> (a frosted ancestor traps a fixed layer); the layer carries the paper scope.
   return (
-    <div className="ae-sheet-layer fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto p-4">
-      <div className="ae-sheet-scrim gl-scrim" aria-hidden onClick={onClose} />
-      <div {...dlg.props} className="ae-paper ae-sheet ae-card glass-face glass-face--strong relative my-6 w-full max-w-[1200px] p-7 outline-none">
-        <div className="flex items-center justify-between gap-3">
-          <h2 id={titleId} className="ae-section !text-[30px]">{title}</h2>
-          <button type="button" onClick={onClose} className="ae-btn" data-dialog-close title={backLabel ? `${backLabel} (Esc)` : 'Close (Esc)'}>{backLabel ? <><ChevronLeft className="h-4 w-4" strokeWidth={1.8} /> {backLabel}</> : <><X className="h-4 w-4" strokeWidth={1.8} /> Close</>}</button>
+    <Layer>
+      <div className="ae-paper ae-sheet-layer fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto p-4" {...melt.layer}>
+        <div className="ae-sheet-scrim gl-scrim" aria-hidden onClick={close} />
+        <div {...dlg.props} onAnimationEnd={melt.onAnimationEnd} className={`ae-paper ae-sheet ae-card glass-face glass-face--strong relative my-6 w-full max-w-[1200px] p-7 outline-none${melt.melting ? ' is-melting' : ''}`}>
+          <div className="flex items-center justify-between gap-3">
+            <h2 id={titleId} className="ae-section !text-[30px]">{title}</h2>
+            <button type="button" onClick={close} className="ae-btn" data-dialog-close title={backLabel ? `${backLabel} (Esc)` : 'Close (Esc)'}>{backLabel ? <><ChevronLeft className="h-4 w-4" strokeWidth={1.8} /> {backLabel}</> : <><X className="h-4 w-4" strokeWidth={1.8} /> Close</>}</button>
+          </div>
+          <div className="mt-5 min-h-[60vh]">{children}</div>
+          <div className="ae-faint mt-5 flex justify-end"><span className="flex items-center gap-1">Esc closes <ChevronRight className="h-3 w-3" /></span></div>
         </div>
-        <div className="mt-5 min-h-[60vh]">{children}</div>
-        <div className="ae-faint mt-5 flex justify-end"><span className="flex items-center gap-1">Esc closes <ChevronRight className="h-3 w-3" /></span></div>
       </div>
-    </div>
+    </Layer>
   );
 }
 
@@ -279,43 +287,54 @@ export function ClassicSheet({ title, onClose, backLabel, children }: { title: s
  */
 export function ClassicDrawer({ title, onClose, children, width = 'max-w-[520px]', back }: { title: string; onClose: () => void; children: ReactNode; width?: string; back?: { label: string; onClick: () => void } }) {
   const titleId = useId();
-  const dlg = useDialog({ open: true, onClose, labelledBy: titleId });
+  // Escape, the scrim and Close melt the face (lib/use-melt); the parent unmounts it once it has melted.
+  const dlg = useDialog({ open: true, onClose: () => melt.close(), labelledBy: titleId });
+  const melt = useMeltClose(onClose, dlg.ref);
+  const close = melt.close;
+  // Portalled to <body>: opened from a sheet it would otherwise sit inside that sheet's frosted face.
   return (
-    <div className="ae-paper ae-sheet-layer fixed inset-0 z-[125] flex justify-end">
-      <div className="ae-sheet-scrim gl-scrim" aria-hidden onClick={onClose} />
-      <div {...dlg.props} className={`ae-sheet ae-drawer glass-face glass-face--strong relative h-full w-full ${width} overflow-y-auto p-6 outline-none`}>
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <span className="flex min-w-0 items-center gap-2">
-            {back && <button type="button" onClick={back.onClick} className="ae-btn ae-btn-sm" title={back.label}><ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.8} /> {back.label}</button>}
-            <h2 id={titleId} className="ae-title min-w-0 truncate text-[24px]">{title}</h2>
-          </span>
-          <button type="button" onClick={onClose} aria-label="Close" title="Close (Esc)" data-dialog-close className="ae-btn ae-btn-sm"><X className="h-4 w-4" strokeWidth={1.8} /></button>
+    <Layer>
+      <div className="ae-paper ae-sheet-layer fixed inset-0 z-[125] flex justify-end" {...melt.layer}>
+        <div className="ae-sheet-scrim gl-scrim" aria-hidden onClick={close} />
+        <div {...dlg.props} onAnimationEnd={melt.onAnimationEnd} className={`ae-sheet ae-drawer glass-face glass-face--strong relative h-full w-full ${width} overflow-y-auto p-6 outline-none${melt.melting ? ' is-melting' : ''}`}>
+          <div className="mb-5 flex items-center justify-between gap-3">
+            <span className="flex min-w-0 items-center gap-2">
+              {back && <button type="button" onClick={back.onClick} className="ae-btn ae-btn-sm" title={back.label}><ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.8} /> {back.label}</button>}
+              <h2 id={titleId} className="ae-title min-w-0 truncate text-[24px]">{title}</h2>
+            </span>
+            <button type="button" onClick={close} aria-label="Close" title="Close (Esc)" data-dialog-close className="ae-btn ae-btn-sm"><X className="h-4 w-4" strokeWidth={1.8} /></button>
+          </div>
+          {children}
         </div>
-        {children}
       </div>
-    </div>
+    </Layer>
   );
 }
 
 /** Hard-delete confirm (S03 FR-6, Q-ENG-4) on the X1 dialog: Cancel has focus, Escape closes. */
 export function ClassicConfirmDelete({ title, body, error, busy, onCancel, onConfirm }: { title: ReactNode; body: ReactNode; error: string | null; busy: boolean; onCancel: () => void; onConfirm: () => void }) {
   const titleId = useId();
+  // Escape, the scrim and Cancel melt the face (lib/use-melt), never while the delete is in flight.
+  const dlg = useDialog({ open: true, onClose: () => cancel(), labelledBy: titleId });
+  const melt = useMeltClose(onCancel, dlg.ref);
   const cancel = () => {
-    if (!busy) onCancel();
+    if (!busy) melt.close();
   };
-  const dlg = useDialog({ open: true, onClose: cancel, labelledBy: titleId });
+  // Portalled to <body>: a frosted ancestor traps a fixed layer.
   return (
-    <div className="ae-paper ae-sheet-layer fixed inset-0 z-[140] flex items-center justify-center p-4">
-      <div className="ae-sheet-scrim gl-scrim" aria-hidden onClick={cancel} />
-      <div {...dlg.props} className="ae-sheet ae-card glass-face glass-face--strong relative w-full max-w-[460px] p-6">
-        <h2 id={titleId} className="ae-title text-[22px]">{title}</h2>
-        <p className="mt-3 text-[13px] leading-snug text-[var(--p-muted)]">{body}</p>
-        {error && <p role="alert" className="mt-3 text-[12.5px] text-[var(--p-red)]">{error}</p>}
-        <div className="mt-6 flex justify-end gap-2">
-          <button type="button" data-dialog-close onClick={onCancel} disabled={busy} className="ae-btn">Cancel</button>
-          <button type="button" onClick={onConfirm} disabled={busy} className="ae-btn ae-btn-danger">{busy ? 'Deleting' : 'Delete'}</button>
+    <Layer>
+      <div className="ae-paper ae-sheet-layer fixed inset-0 z-[140] flex items-center justify-center p-4" {...melt.layer}>
+        <div className="ae-sheet-scrim gl-scrim" aria-hidden onClick={cancel} />
+        <div {...dlg.props} onAnimationEnd={melt.onAnimationEnd} className={`ae-sheet ae-card glass-face glass-face--strong relative w-full max-w-[460px] p-6${melt.melting ? ' is-melting' : ''}`}>
+          <h2 id={titleId} className="ae-title text-[22px]">{title}</h2>
+          <p className="mt-3 text-[13px] leading-snug text-[var(--p-muted)]">{body}</p>
+          {error && <p role="alert" className="mt-3 text-[12.5px] text-[var(--p-red)]">{error}</p>}
+          <div className="mt-6 flex justify-end gap-2">
+            <button type="button" data-dialog-close onClick={cancel} disabled={busy} className="ae-btn">Cancel</button>
+            <button type="button" onClick={onConfirm} disabled={busy} className="ae-btn ae-btn-danger">{busy ? 'Deleting' : 'Delete'}</button>
+          </div>
         </div>
       </div>
-    </div>
+    </Layer>
   );
 }

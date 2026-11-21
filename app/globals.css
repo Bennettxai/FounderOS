@@ -7323,6 +7323,9 @@ body {
 .ae-sheet-scrim { background: rgba(29, 29, 31, 0.22); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
 @keyframes ae-sheet-in { from { transform: translateY(8px) scale(0.985); } to { transform: none; } }
 .ae-sheet { animation: ae-sheet-in 240ms var(--ease); }
+/* The Classic sheets, drawer and confirm melt out like every glass face (lib/use-melt): this beats the paper
+   and glass entrances on the same face (components/creative-engine/classic.tsx). */
+:root[data-ground] .ae-sheet-layer > .ae-sheet.is-melting { animation: gl-melt var(--gl-dur-melt) linear forwards; pointer-events: none; }
 @keyframes ae-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 @keyframes ae-toast { 0% { opacity: 0; transform: translateY(4px); } 12% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes ae-arrive { from { opacity: 0; transform: scale(0.985); } to { opacity: 1; transform: none; } }
@@ -7336,6 +7339,7 @@ body {
 .ae-tick { font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) {
   .ae-sheet, .ae-shake, .ae-arrive, .ae-phase, .ae-sending[data-busy='true']::before, .animate-pulse { animation: none; }
+  :root[data-ground] .ae-sheet-layer > .ae-sheet.is-melting { animation: none; }
   .ae-toast { animation: ae-toast 1ms both; animation-fill-mode: forwards; opacity: 1; }
   .ae-pill, .ae-btn, .ae-chip, .ae-input, .transition-shadow { transition: none; }
   .ae-pill:hover, .ae-btn:hover { transform: none; }
@@ -11738,9 +11742,9 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 :root[data-ui='glados'][data-mode='light'] .ae-octane { color-scheme: light; }
 /* Elevation is one neutral soft shadow (§3.3.8): the bottom sheets' hairline top edge becomes the kit shadow. */
 :root[data-ui='glados'] .ae-octane .ae-o-sheet { box-shadow: var(--g-shadow); }
-/* The console is a full-viewport layer: the dashboard behind it is hidden (not just covered), so it leaves
-   the accessibility tree and its heroes never paint under the console. */
-:root[data-ui='glados'] .ae-paper:has(> .ae-o-ground) > .ae-dash { visibility: hidden; }
+/* The console is a full-viewport layer, portalled to <body> (MotionConsole): the dashboard behind it is hidden
+   (not just covered), so it leaves the accessibility tree and its heroes never paint under the console. */
+:root[data-ui='glados'] body:has(> .ae-o-ground) .ae-paper > .ae-dash { visibility: hidden; }
 /* ── end G console re-token ── */
 
 /* ── Content Lab tokens (docs/projects/content-lab/SPEC.md §5.2, §5.3; lane lab/a foundation) ──
