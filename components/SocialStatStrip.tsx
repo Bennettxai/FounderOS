@@ -8,6 +8,7 @@ import { InstagramDmInbox } from '@/components/InstagramDmInbox';
 import { seriesColor } from '@/lib/series';
 import { channelsNetChange, netChange, seriesWindow, windowPoints } from '@/lib/social-range';
 import { useMeltClose } from '@/lib/use-melt';
+import { Layer } from '@/components/g/Overlays';
 
 type Range = 7 | 30 | 60 | 'all';
 const RANGES: Range[] = [7, 30, 60, 'all'];
@@ -148,90 +149,93 @@ function StatPopout({
   const shown = useMemo(() => (data ?? []).filter((s) => active.has(s.key)), [data, active]);
   const title = metric === 'audience' ? 'Audience growth' : 'Total DMs';
 
+  // Portalled to <body>: a frosted ancestor would trap the fixed layer.
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-6" {...melt.layer}>
-      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
-      <div className="gl-scrim" aria-hidden onClick={close} />
-      <div
-        ref={melt.faceRef}
-        onAnimationEnd={melt.onAnimationEnd}
-        className={`c-pop glass-face--strong gl-materialise relative w-full max-w-3xl overflow-hidden${melt.melting ? ' is-melting' : ''}`}
-      >
-        <div className="flex items-center justify-between border-b border-os-border px-5 py-3.5">
-          <div className="flex items-center gap-4">
-            <h2 className="text-[15px] font-medium">{title}</h2>
-            <RangeChips value={range} onChange={setRange} />
+    <Layer>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-6" {...melt.layer}>
+        {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+        <div className="gl-scrim" aria-hidden onClick={close} />
+        <div
+          ref={melt.faceRef}
+          onAnimationEnd={melt.onAnimationEnd}
+          className={`c-pop glass-face--strong gl-materialise relative w-full max-w-3xl overflow-hidden${melt.melting ? ' is-melting' : ''}`}
+        >
+          <div className="flex items-center justify-between border-b border-os-border px-5 py-3.5">
+            <div className="flex items-center gap-4">
+              <h2 className="text-[15px] font-medium">{title}</h2>
+              <RangeChips value={range} onChange={setRange} />
+            </div>
+            <button onClick={close} className="grid h-7 w-7 place-items-center rounded-sm-t border border-os-border text-os-muted transition-colors hover:bg-os-surface2 hover:text-os-text">
+              <X className="h-3.5 w-3.5" />
+            </button>
           </div>
-          <button onClick={close} className="grid h-7 w-7 place-items-center rounded-sm-t border border-os-border text-os-muted transition-colors hover:bg-os-surface2 hover:text-os-text">
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
 
-        <div className="p-5">
-          {data === null ? (
-            <div className="py-20 text-center text-[12.5px] text-os-dim">Loading history…</div>
-          ) : (
-            <>
-              {metric === 'audience' && (
-                <div className="mb-4 flex flex-wrap gap-2.5">
-                  {data.map((s) => {
-                    const on = active.has(s.key);
+          <div className="p-5">
+            {data === null ? (
+              <div className="py-20 text-center text-[12.5px] text-os-dim">Loading history…</div>
+            ) : (
+              <>
+                {metric === 'audience' && (
+                  <div className="mb-4 flex flex-wrap gap-2.5">
+                    {data.map((s) => {
+                      const on = active.has(s.key);
+                      return (
+                        <button
+                          key={s.key}
+                          onClick={() =>
+                            setActive((prev) => {
+                              const next = new Set(prev);
+                              next.has(s.key) ? next.delete(s.key) : next.add(s.key);
+                              return next;
+                            })
+                          }
+                          className={`flex items-center gap-2.5 rounded-sm-t border px-2 py-1 text-[12px] transition-colors ${
+                            on ? 'border-os-border-strong text-os-text' : 'border-os-border text-os-dim hover:bg-os-surface2 hover:text-os-muted'
+                          }`}
+                        >
+                          <span className="h-2 w-2 rounded-full" style={{ background: on ? seriesColor(s.series) : 'var(--text-3)' }} />
+                          {s.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <LineChart series={shown} range={range} />
+
+                <div className="mt-5 flex flex-col gap-2.5">
+                  {shown.map((s) => {
+                    const pts = inRange(s.points, range);
+                    // the "All audience" row reads the same channel sum as the tile
+                    const g =
+                      s.key === 'all'
+                        ? channelsNetChange(
+                            (data ?? []).filter((c) => c.key !== 'all').map((c) => c.points),
+                            range,
+                            today(),
+                          )?.pct ?? null
+                        : growthOf(s.points, range);
+                    const latest = pts.at(-1)?.value ?? null;
                     return (
-                      <button
-                        key={s.key}
-                        onClick={() =>
-                          setActive((prev) => {
-                            const next = new Set(prev);
-                            next.has(s.key) ? next.delete(s.key) : next.add(s.key);
-                            return next;
-                          })
-                        }
-                        className={`flex items-center gap-2.5 rounded-sm-t border px-2 py-1 text-[12px] transition-colors ${
-                          on ? 'border-os-border-strong text-os-text' : 'border-os-border text-os-dim hover:bg-os-surface2 hover:text-os-muted'
-                        }`}
-                      >
-                        <span className="h-2 w-2 rounded-full" style={{ background: on ? seriesColor(s.series) : 'var(--text-3)' }} />
-                        {s.label}
-                      </button>
+                      <div key={s.key} className="flex items-center gap-3.5 text-[13px]">
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: seriesColor(s.series) }} />
+                        <span className="min-w-0 flex-1 truncate">{s.label}</span>
+                        <span className="font-mono text-os-muted">{fmtNum(latest)}</span>
+                        <span className={`w-20 text-right font-mono ${pctClass(g)}`}>{fmtPct(g)}</span>
+                      </div>
                     );
                   })}
+                  {shown.length === 0 && <div className="text-[12.5px] text-os-dim">Select a series to plot</div>}
                 </div>
-              )}
-
-              <LineChart series={shown} range={range} />
-
-              <div className="mt-5 flex flex-col gap-2.5">
-                {shown.map((s) => {
-                  const pts = inRange(s.points, range);
-                  // the "All audience" row reads the same channel sum as the tile
-                  const g =
-                    s.key === 'all'
-                      ? channelsNetChange(
-                          (data ?? []).filter((c) => c.key !== 'all').map((c) => c.points),
-                          range,
-                          today(),
-                        )?.pct ?? null
-                      : growthOf(s.points, range);
-                  const latest = pts.at(-1)?.value ?? null;
-                  return (
-                    <div key={s.key} className="flex items-center gap-3.5 text-[13px]">
-                      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: seriesColor(s.series) }} />
-                      <span className="min-w-0 flex-1 truncate">{s.label}</span>
-                      <span className="font-mono text-os-muted">{fmtNum(latest)}</span>
-                      <span className={`w-20 text-right font-mono ${pctClass(g)}`}>{fmtPct(g)}</span>
-                    </div>
-                  );
-                })}
-                {shown.length === 0 && <div className="text-[12.5px] text-os-dim">Select a series to plot</div>}
-              </div>
-              <p className="mt-5 text-[12px] text-os-dim">
-                {RANGE_LABEL[String(range)]} window · {metric === 'dms' ? 'DM totals are seeded dummy until a source is wired' : 'email tracks the real Beehiiv subscriber count (the Newsletter)'}
-              </p>
-            </>
-          )}
+                <p className="mt-5 text-[12px] text-os-dim">
+                  {RANGE_LABEL[String(range)]} window · {metric === 'dms' ? 'DM totals are seeded dummy until a source is wired' : 'email tracks the real Beehiiv subscriber count (the Newsletter)'}
+                </p>
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Layer>
   );
 }
 
@@ -288,32 +292,35 @@ function DmInboxPopout({ threads, nowMs, onClose }: { threads: DmThread[]; nowMs
     return () => window.removeEventListener('keydown', onKey);
   }, [close]);
 
+  // Portalled to <body>: a frosted ancestor would trap the fixed layer.
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6" {...melt.layer}>
-      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
-      <div className="gl-scrim" aria-hidden onClick={close} />
-      <div
-        ref={melt.faceRef}
-        onAnimationEnd={melt.onAnimationEnd}
-        className={`c-pop glass-face--strong gl-materialise relative max-h-[92vh] w-full max-w-6xl overflow-y-auto${melt.melting ? ' is-melting' : ''}`}
-      >
-        <div className="flex items-center justify-between border-b border-os-border px-5 py-3.5">
-          <div className="flex items-center gap-3">
-            <MessageSquare className="h-4 w-4 text-os-muted" />
-            <h2 className="text-[15px] font-medium">Instagram DMs</h2>
+    <Layer>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6" {...melt.layer}>
+        {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+        <div className="gl-scrim" aria-hidden onClick={close} />
+        <div
+          ref={melt.faceRef}
+          onAnimationEnd={melt.onAnimationEnd}
+          className={`c-pop glass-face--strong gl-materialise relative max-h-[92vh] w-full max-w-6xl overflow-y-auto${melt.melting ? ' is-melting' : ''}`}
+        >
+          <div className="flex items-center justify-between border-b border-os-border px-5 py-3.5">
+            <div className="flex items-center gap-3">
+              <MessageSquare className="h-4 w-4 text-os-muted" />
+              <h2 className="text-[15px] font-medium">Instagram DMs</h2>
+            </div>
+            <button
+              onClick={close}
+              className="grid h-7 w-7 place-items-center rounded-sm-t border border-os-border text-os-muted transition-colors hover:bg-os-surface2 hover:text-os-text"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
           </div>
-          <button
-            onClick={close}
-            className="grid h-7 w-7 place-items-center rounded-sm-t border border-os-border text-os-muted transition-colors hover:bg-os-surface2 hover:text-os-text"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-        <div className="p-5">
-          <InstagramDmInbox threads={threads} nowMs={nowMs} />
+          <div className="p-5">
+            <InstagramDmInbox threads={threads} nowMs={nowMs} />
+          </div>
         </div>
       </div>
-    </div>
+    </Layer>
   );
 }
 

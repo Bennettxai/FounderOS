@@ -24,6 +24,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { SectionHead } from '@/components/terminal';
+import { Layer } from '@/components/g/Overlays';
 
 export type SkillCard = {
   id: string; // slug — also the /api/skills/[slug] key
@@ -222,27 +223,30 @@ export function SkillsGrid({
         );
       })}
 
+      {/* Portalled to <body>: a frosted ancestor would trap the fixed layer. */}
       {viewing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6" onClick={() => setViewing(null)}>
-          <div className="c-pop flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="flex shrink-0 items-center justify-between border-b border-os-border px-5 py-3">
-              <span className="flex min-w-0 items-center gap-3 font-mono text-[12.5px] text-os-dim">
-                <ViewingIcon className="h-3.5 w-3.5 shrink-0 text-os-accent" strokeWidth={1.7} />
-                <span className="truncate">{viewing.filePath}</span>
-              </span>
-              <button onClick={() => setViewing(null)} aria-label="Close" className="shrink-0 text-os-dim transition-colors hover:text-os-text">
-                <X className="h-4 w-4" strokeWidth={1.7} />
-              </button>
-            </div>
-            <div className="overflow-y-auto px-5 py-4">
-              {md === null ? (
-                <p className="animate-pulse text-[12.5px] text-os-muted">Loading SKILL.md…</p>
-              ) : (
-                <Markdown src={md} />
-              )}
+        <Layer>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6" onClick={() => setViewing(null)}>
+            <div className="c-pop flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <div className="flex shrink-0 items-center justify-between border-b border-os-border px-5 py-3">
+                <span className="flex min-w-0 items-center gap-3 font-mono text-[12.5px] text-os-dim">
+                  <ViewingIcon className="h-3.5 w-3.5 shrink-0 text-os-accent" strokeWidth={1.7} />
+                  <span className="truncate">{viewing.filePath}</span>
+                </span>
+                <button onClick={() => setViewing(null)} aria-label="Close" className="shrink-0 text-os-dim transition-colors hover:text-os-text">
+                  <X className="h-4 w-4" strokeWidth={1.7} />
+                </button>
+              </div>
+              <div className="overflow-y-auto px-5 py-4">
+                {md === null ? (
+                  <p className="animate-pulse text-[12.5px] text-os-muted">Loading SKILL.md…</p>
+                ) : (
+                  <Markdown src={md} />
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </Layer>
       )}
     </div>
   );

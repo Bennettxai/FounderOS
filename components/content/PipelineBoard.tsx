@@ -31,6 +31,7 @@ import type { Campaign } from '@/lib/content-campaigns';
 import type { Pipeline, PipelineInput, PipelineNode, PipelineNodeKind } from '@/lib/content-pipelines';
 import { PipelineBuilder } from '@/components/content/PipelineBuilder';
 import { useMeltClose } from '@/lib/use-melt';
+import { Layer } from '@/components/g/Overlays';
 
 export type PipelineBoardProps = {
   pipelines: Pipeline[];
@@ -401,127 +402,130 @@ function RunModal({
     }
   }
 
+  // Portalled to <body>: under a frosted ancestor the fixed layer would be trapped.
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" role="presentation" {...melt.layer}>
-      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
-      <div className="gl-scrim" aria-hidden onClick={close} />
-      <div
-        ref={melt.faceRef}
-        onAnimationEnd={melt.onAnimationEnd}
-        className={`glass-panel glass-face--strong gl-materialise relative flex w-full max-w-[560px] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
-        style={{ maxHeight: '85vh' }}
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Run ${pipeline.name}`}
-      >
-        <button
-          onClick={close}
-          aria-label="Close"
-          className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] bg-black/30 text-os-dim transition-colors hover:text-os-text"
+    <Layer>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" role="presentation" {...melt.layer}>
+        {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+        <div className="gl-scrim" aria-hidden onClick={close} />
+        <div
+          ref={melt.faceRef}
+          onAnimationEnd={melt.onAnimationEnd}
+          className={`glass-panel glass-face--strong gl-materialise relative flex w-full max-w-[560px] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
+          style={{ maxHeight: '85vh' }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Run ${pipeline.name}`}
         >
-          <X className="h-4 w-4" />
-        </button>
-
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          <h2 className="pr-10 text-[16px] font-medium leading-tight">
-            {step === 'form' ? `${pipeline.name} — inputs` : `Run ${pipeline.name}`}
-          </h2>
-
-          {step === 'form' && (
-            <div className="mt-5 flex flex-col gap-4">
-              {inputNodes.map((n) => (
-                <div key={n.id} className="flex flex-col gap-1.5">
-                  <span className="glass-label">{n.label}</span>
-                  {n.inputKind === 'text' ? (
-                    <input
-                      value={inputValues[n.id] ?? ''}
-                      onChange={(e) => setInputValues((v) => ({ ...v, [n.id]: e.target.value }))}
-                      placeholder="Paste the value"
-                      className="glass-chip border-none px-3 py-2 text-[13px] text-os-text outline-none placeholder:text-os-dim"
-                    />
-                  ) : (
-                    <p className="text-[12px] text-os-dim">
-                      Provide the {n.inputKind ?? 'reference'} for this input during fulfillment — the operator picks it up
-                      when this run reaches it.
-                    </p>
-                  )}
-                </div>
-              ))}
-              <p className="text-[11px] text-os-dim">
-                This queues the pipeline exactly as drawn — the operator resolves each input against the values above during
-                fulfillment.
-              </p>
-            </div>
-          )}
-
-          {step === 'confirm' && (
-            <div className="mt-5 flex flex-col gap-3">
-              {preview.nodes.length === 0 ? (
-                <p className="text-[12.5px] text-os-dim">This pipeline has no generate or transform nodes to run.</p>
-              ) : (
-                <ol className="flex flex-col gap-2">
-                  {preview.nodes.map((n, i) => (
-                    <li key={n.nodeId} className="glass-chip flex items-center justify-between gap-3 px-3 py-2">
-                      <span className="flex min-w-0 items-center gap-2 text-[12.5px] text-os-text">
-                        <span className="shrink-0 font-mono text-[10.5px] text-os-dim">{i + 1}</span>
-                        <span className="truncate">{n.label}</span>
-                        <span className="shrink-0 font-mono text-[10.5px] text-os-dim">· {n.model}</span>
-                      </span>
-                      <span className="shrink-0 font-mono text-[11.5px] tabular-nums text-os-muted">~{n.credits} cr</span>
-                    </li>
-                  ))}
-                </ol>
-              )}
-              <label className="flex flex-col gap-1.5">
-                <span className="glass-label">Campaign</span>
-                <select
-                  value={campaignId}
-                  onChange={(e) => setCampaignId(e.target.value)}
-                  className="glass-chip border-none px-3 py-2 text-[13px] text-os-text outline-none"
-                >
-                  <option value="">Pick a campaign…</option>
-                  {campaigns.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="flex items-center justify-between border-t border-[var(--hairline)] pt-3">
-                <span className="text-[12px] text-os-dim">Total</span>
-                <span className="font-mono text-[13px] tabular-nums text-os-text">~{preview.totalCredits} credits</span>
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <p className="mt-4 flex items-center gap-2 text-[12.5px] text-os-muted">
-              <span className="dot err" />
-              {error}
-            </p>
-          )}
-        </div>
-
-        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[rgb(var(--mist-rgb) / 0.1)] px-6 py-4">
-          <button type="button" onClick={close} className="c-btn">
-            Cancel
+          <button
+            onClick={close}
+            aria-label="Close"
+            className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] bg-black/30 text-os-dim transition-colors hover:text-os-text"
+          >
+            <X className="h-4 w-4" />
           </button>
-          {step === 'form' ? (
-            <button type="button" onClick={() => setStep('confirm')} className="c-btn c-btn-primary">
-              Continue
+
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <h2 className="pr-10 text-[16px] font-medium leading-tight">
+              {step === 'form' ? `${pipeline.name} — inputs` : `Run ${pipeline.name}`}
+            </h2>
+
+            {step === 'form' && (
+              <div className="mt-5 flex flex-col gap-4">
+                {inputNodes.map((n) => (
+                  <div key={n.id} className="flex flex-col gap-1.5">
+                    <span className="glass-label">{n.label}</span>
+                    {n.inputKind === 'text' ? (
+                      <input
+                        value={inputValues[n.id] ?? ''}
+                        onChange={(e) => setInputValues((v) => ({ ...v, [n.id]: e.target.value }))}
+                        placeholder="Paste the value"
+                        className="glass-chip border-none px-3 py-2 text-[13px] text-os-text outline-none placeholder:text-os-dim"
+                      />
+                    ) : (
+                      <p className="text-[12px] text-os-dim">
+                        Provide the {n.inputKind ?? 'reference'} for this input during fulfillment — the operator picks it up
+                        when this run reaches it.
+                      </p>
+                    )}
+                  </div>
+                ))}
+                <p className="text-[11px] text-os-dim">
+                  This queues the pipeline exactly as drawn — the operator resolves each input against the values above during
+                  fulfillment.
+                </p>
+              </div>
+            )}
+
+            {step === 'confirm' && (
+              <div className="mt-5 flex flex-col gap-3">
+                {preview.nodes.length === 0 ? (
+                  <p className="text-[12.5px] text-os-dim">This pipeline has no generate or transform nodes to run.</p>
+                ) : (
+                  <ol className="flex flex-col gap-2">
+                    {preview.nodes.map((n, i) => (
+                      <li key={n.nodeId} className="glass-chip flex items-center justify-between gap-3 px-3 py-2">
+                        <span className="flex min-w-0 items-center gap-2 text-[12.5px] text-os-text">
+                          <span className="shrink-0 font-mono text-[10.5px] text-os-dim">{i + 1}</span>
+                          <span className="truncate">{n.label}</span>
+                          <span className="shrink-0 font-mono text-[10.5px] text-os-dim">· {n.model}</span>
+                        </span>
+                        <span className="shrink-0 font-mono text-[11.5px] tabular-nums text-os-muted">~{n.credits} cr</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+                <label className="flex flex-col gap-1.5">
+                  <span className="glass-label">Campaign</span>
+                  <select
+                    value={campaignId}
+                    onChange={(e) => setCampaignId(e.target.value)}
+                    className="glass-chip border-none px-3 py-2 text-[13px] text-os-text outline-none"
+                  >
+                    <option value="">Pick a campaign…</option>
+                    {campaigns.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="flex items-center justify-between border-t border-[var(--hairline)] pt-3">
+                  <span className="text-[12px] text-os-dim">Total</span>
+                  <span className="font-mono text-[13px] tabular-nums text-os-text">~{preview.totalCredits} credits</span>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <p className="mt-4 flex items-center gap-2 text-[12.5px] text-os-muted">
+                <span className="dot err" />
+                {error}
+              </p>
+            )}
+          </div>
+
+          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[rgb(var(--mist-rgb) / 0.1)] px-6 py-4">
+            <button type="button" onClick={close} className="c-btn">
+              Cancel
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={confirm}
-              disabled={busy || !campaignId || preview.nodes.length === 0}
-              className="c-btn c-btn-primary"
-            >
-              {busy ? 'Queuing…' : 'Confirm & queue'}
-            </button>
-          )}
+            {step === 'form' ? (
+              <button type="button" onClick={() => setStep('confirm')} className="c-btn c-btn-primary">
+                Continue
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={confirm}
+                disabled={busy || !campaignId || preview.nodes.length === 0}
+                className="c-btn c-btn-primary"
+              >
+                {busy ? 'Queuing…' : 'Confirm & queue'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Layer>
   );
 }

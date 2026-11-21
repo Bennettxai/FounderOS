@@ -32,6 +32,7 @@ import { VerbButton } from '@/components/content/ActionRow';
 import { HoverVideo } from '@/components/content/MediaPreview';
 import { MediaDetailOverlay } from '@/components/content/MediaDetail';
 import { useMeltClose } from '@/lib/use-melt';
+import { Layer } from '@/components/g/Overlays';
 
 /** Filename inside public/content-media/uploads/ — mirrors lib/content-uploads.ts's
  * uploadUrl without importing that (server-only, node:fs) module into the client bundle. */
@@ -211,44 +212,47 @@ function TrainAvatarModal({ onClose }: { onClose: () => void }) {
     }
   }
 
+  // Portalled to <body>: under a frosted ancestor the fixed layer would be trapped.
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" role="presentation" {...melt.layer}>
-      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
-      <div className="gl-scrim" aria-hidden onClick={close} />
-      <div
-        ref={melt.faceRef}
-        onAnimationEnd={melt.onAnimationEnd}
-        className={`glass-panel glass-face--strong gl-materialise relative w-full max-w-md p-6${melt.melting ? ' is-melting' : ''}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Train new avatar"
-      >
-        <h3 className="text-[14px] text-os-text">Train a new avatar</h3>
-        <p className="mt-2 text-[12.5px] leading-relaxed text-os-muted">
-          Soul training runs on 5 to 20 photos of one person and takes about 10 minutes. Once trained, the identity
-          works with Soul 2.0 and Soul Cinema like any character above. This queues the training run for the
-          operator — there is no instant version.
-        </p>
-        <label className="mt-4 block">
-          <span className="glass-label">Name</span>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. identity 2"
-            className="mt-1.5 w-full rounded-md-t border border-os-border-strong bg-transparent px-3 py-2 text-[13px] text-os-text outline-none focus:border-os-border"
-          />
-        </label>
-        {error && <p className="mt-2 text-[12px] text-os-err">{error}</p>}
-        <div className="mt-5 flex items-center justify-end gap-2">
-          <button type="button" onClick={close} className="c-btn">
-            Cancel
-          </button>
-          <button type="button" onClick={submit} disabled={busy} className="c-btn c-btn-primary">
-            Queue training
-          </button>
+    <Layer>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" role="presentation" {...melt.layer}>
+        {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+        <div className="gl-scrim" aria-hidden onClick={close} />
+        <div
+          ref={melt.faceRef}
+          onAnimationEnd={melt.onAnimationEnd}
+          className={`glass-panel glass-face--strong gl-materialise relative w-full max-w-md p-6${melt.melting ? ' is-melting' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Train new avatar"
+        >
+          <h3 className="text-[14px] text-os-text">Train a new avatar</h3>
+          <p className="mt-2 text-[12.5px] leading-relaxed text-os-muted">
+            Soul training runs on 5 to 20 photos of one person and takes about 10 minutes. Once trained, the identity
+            works with Soul 2.0 and Soul Cinema like any character above. This queues the training run for the
+            operator — there is no instant version.
+          </p>
+          <label className="mt-4 block">
+            <span className="glass-label">Name</span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. identity 2"
+              className="mt-1.5 w-full rounded-md-t border border-os-border-strong bg-transparent px-3 py-2 text-[13px] text-os-text outline-none focus:border-os-border"
+            />
+          </label>
+          {error && <p className="mt-2 text-[12px] text-os-err">{error}</p>}
+          <div className="mt-5 flex items-center justify-end gap-2">
+            <button type="button" onClick={close} className="c-btn">
+              Cancel
+            </button>
+            <button type="button" onClick={submit} disabled={busy} className="c-btn c-btn-primary">
+              Queue training
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Layer>
   );
 }
 

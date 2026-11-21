@@ -14,6 +14,8 @@ import { X, Search, Sparkles, MessagesSquare, Send, RefreshCw, Lightbulb, Extern
 import { Badge, Label } from '@/components/terminal';
 import { PipelineChart, useCountUp, CARET_ANIMATION, type PipelineStage } from '@/components/PipelineChart';
 import { SetupLink } from '@/components/SetupLink';
+import { Layer } from '@/components/g/Overlays';
+import { pushEscape } from '@/lib/escape-stack';
 import { formatUsdCompact } from '@/lib/format-number';
 import { chainDepthColumns, pollStatus, stageBars, type DealFilter } from '@/lib/brand-deals-view';
 import type { BrandDealsSnapshot, Deal, DealEvent, DealOutcome } from '@/lib/brand-deals';
@@ -86,8 +88,23 @@ function Card({
  *  only when BDPILOT_BOT_URL gives it a real link (H5). */
 function CardHead({ title, onRefresh, botUrl }: { title: string; onRefresh: () => void; botUrl: string | null }) {
   const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  // Outside press or Escape closes the menu (the GPopover pattern). No fixed click-away: under the
+  // frosted card it would be trapped to the card instead of covering the page.
+  useEffect(() => {
+    if (!open) return;
+    const off = pushEscape(() => setOpen(false));
+    const onDown = (e: PointerEvent) => {
+      if (root.current && !root.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => {
+      off();
+      document.removeEventListener('pointerdown', onDown);
+    };
+  }, [open]);
   return (
-    <div className="relative flex items-center justify-between px-6 pt-5">
+    <div ref={root} className="relative flex items-center justify-between px-6 pt-5">
       <h2 className="text-[19px] font-semibold tracking-[-0.01em]">{title}</h2>
       <button
         onClick={() => setOpen((v) => !v)}
@@ -97,31 +114,28 @@ function CardHead({ title, onRefresh, botUrl }: { title: string; onRefresh: () =
         ···
       </button>
       {open && (
-        <>
-          <div className="fixed inset-0 z-[30]" onClick={() => setOpen(false)} aria-hidden="true" />
-          <div className="glass-solid absolute right-5 top-14 z-[40] w-[210px] overflow-hidden rounded-md-t py-1">
-            <button
-              onClick={() => {
-                setOpen(false);
-                onRefresh();
-              }}
+        <div className="glass-solid absolute right-5 top-14 z-[40] w-[210px] overflow-hidden rounded-md-t py-1">
+          <button
+            onClick={() => {
+              setOpen(false);
+              onRefresh();
+            }}
+            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[12.5px] text-os-muted transition-colors hover:bg-[color-mix(in_oklab,var(--text)_6%,transparent)] hover:text-os-text"
+          >
+            <RefreshCw size={13} strokeWidth={1.7} /> Refresh data
+          </button>
+          {botUrl && (
+            <a
+              href={botUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpen(false)}
               className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[12.5px] text-os-muted transition-colors hover:bg-[color-mix(in_oklab,var(--text)_6%,transparent)] hover:text-os-text"
             >
-              <RefreshCw size={13} strokeWidth={1.7} /> Refresh data
-            </button>
-            {botUrl && (
-              <a
-                href={botUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setOpen(false)}
-                className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[12.5px] text-os-muted transition-colors hover:bg-[color-mix(in_oklab,var(--text)_6%,transparent)] hover:text-os-text"
-              >
-                <ExternalLink size={13} strokeWidth={1.7} /> Open approval bot
-              </a>
-            )}
-          </div>
-        </>
+              <ExternalLink size={13} strokeWidth={1.7} /> Open approval bot
+            </a>
+          )}
+        </div>
       )}
     </div>
   );
@@ -811,219 +825,219 @@ export function DealBoard({ initial, botUrl = null }: { initial: BrandDealsSnaps
         </Card>
       </div>
 
-      {/* Detail drawer (unchanged behavior) */}
+      {/* Detail drawer (unchanged behavior), portalled to <body>: the board's frosted cards would trap a fixed layer. */}
       {selected && (
-        <div className="fixed inset-0 z-[60] bg-black/45 backdrop-blur-[2px]" onClick={() => setSelectedId(null)} aria-hidden="true" />
-      )}
-      {selected && (
-        <aside className="glass-face glass-face--strong gl-materialise--drawer fixed right-0 top-0 z-[70] flex h-full w-[460px] max-w-[92vw] flex-col">
-          <div className="flex items-start justify-between gap-4 border-b border-os-border px-6 py-5">
-            <div className="min-w-0">
-              <div className="truncate text-[17px] font-semibold">{selected.brand}</div>
-              <div className="mt-0.5 truncate font-mono text-[11.5px] text-os-dim">{selected.email}</div>
-              <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <Badge tone={selected.tag === 'UNIQUE' ? 'accent' : 'default'}>{selected.tag.toLowerCase()}</Badge>
-                <Badge tone={selected.stage === 'approval' ? 'warn' : selected.stage === 'sent' ? 'ok' : 'default'}>
-                  {selected.stage === 'approval' ? 'needs approval' : selected.stage}
-                </Badge>
-                {selected.chainLen > 0 && <Badge tone="default">{selected.chainLen} msgs</Badge>}
+        <Layer>
+          <div className="fixed inset-0 z-[60] bg-black/45 backdrop-blur-[2px]" onClick={() => setSelectedId(null)} aria-hidden="true" />
+          <aside className="glass-face glass-face--strong gl-materialise--drawer fixed right-0 top-0 z-[70] flex h-full w-[460px] max-w-[92vw] flex-col">
+            <div className="flex items-start justify-between gap-4 border-b border-os-border px-6 py-5">
+              <div className="min-w-0">
+                <div className="truncate text-[17px] font-semibold">{selected.brand}</div>
+                <div className="mt-0.5 truncate font-mono text-[11.5px] text-os-dim">{selected.email}</div>
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  <Badge tone={selected.tag === 'UNIQUE' ? 'accent' : 'default'}>{selected.tag.toLowerCase()}</Badge>
+                  <Badge tone={selected.stage === 'approval' ? 'warn' : selected.stage === 'sent' ? 'ok' : 'default'}>
+                    {selected.stage === 'approval' ? 'needs approval' : selected.stage}
+                  </Badge>
+                  {selected.chainLen > 0 && <Badge tone="default">{selected.chainLen} msgs</Badge>}
+                </div>
+                {selected.tagReason && <div className="mt-2 text-[12px] text-os-accent/85">{selected.tagReason}</div>}
               </div>
-              {selected.tagReason && <div className="mt-2 text-[12px] text-os-accent/85">{selected.tagReason}</div>}
+              <button
+                onClick={() => setSelectedId(null)}
+                aria-label="Close"
+                className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-sm-t border border-os-border text-os-muted transition-colors hover:border-os-border-strong hover:text-os-text"
+              >
+                <X size={15} strokeWidth={1.8} />
+              </button>
             </div>
-            <button
-              onClick={() => setSelectedId(null)}
-              aria-label="Close"
-              className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-sm-t border border-os-border text-os-muted transition-colors hover:border-os-border-strong hover:text-os-text"
-            >
-              <X size={15} strokeWidth={1.8} />
-            </button>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
-            {notice && (
-              <div className="mb-4 rounded-md-t border border-[color-mix(in_oklab,var(--err)_35%,transparent)] bg-[color-mix(in_oklab,var(--err)_9%,transparent)] px-3.5 py-2.5 text-[12px] text-os-err">
-                {notice}
-              </div>
-            )}
-            {selected.stage === 'approval' && (
-              <section className="mb-6">
-                <Label rule>Draft actions</Label>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {!armedSend ? (
-                    <button onClick={() => setArmedSend(true)} disabled={busy != null} className={BTN_SOLID}>
-                      <Send size={13} strokeWidth={1.8} /> Send as the verified sender
-                    </button>
-                  ) : (
-                    <>
-                      <button
-                        onClick={async () => {
-                          const ok = await act('send', '/api/brand-deals/send', { dealId: selected.id });
-                          if (ok) setArmedSend(false);
-                        }}
-                        disabled={busy != null}
-                        className={BTN_SOLID}
-                      >
-                        {busy === 'send' ? 'Sending...' : 'Confirm send'}
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+              {notice && (
+                <div className="mb-4 rounded-md-t border border-[color-mix(in_oklab,var(--err)_35%,transparent)] bg-[color-mix(in_oklab,var(--err)_9%,transparent)] px-3.5 py-2.5 text-[12px] text-os-err">
+                  {notice}
+                </div>
+              )}
+              {selected.stage === 'approval' && (
+                <section className="mb-6">
+                  <Label rule>Draft actions</Label>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {!armedSend ? (
+                      <button onClick={() => setArmedSend(true)} disabled={busy != null} className={BTN_SOLID}>
+                        <Send size={13} strokeWidth={1.8} /> Send as the verified sender
                       </button>
-                      <button onClick={() => setArmedSend(false)} disabled={busy != null} className={BTN_GHOST}>
-                        Cancel
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => act('skip', '/api/brand-deals/override', { dealId: selected.id, outcome: 'skipped' })}
-                    disabled={busy != null}
-                    className={BTN_GHOST}
-                  >
-                    {busy === 'skip' ? 'Skipping...' : 'Skip'}
-                  </button>
-                  {draftText === null && (
+                    ) : (
+                      <>
+                        <button
+                          onClick={async () => {
+                            const ok = await act('send', '/api/brand-deals/send', { dealId: selected.id });
+                            if (ok) setArmedSend(false);
+                          }}
+                          disabled={busy != null}
+                          className={BTN_SOLID}
+                        >
+                          {busy === 'send' ? 'Sending...' : 'Confirm send'}
+                        </button>
+                        <button onClick={() => setArmedSend(false)} disabled={busy != null} className={BTN_GHOST}>
+                          Cancel
+                        </button>
+                      </>
+                    )}
                     <button
-                      onClick={async () => {
-                        setBusy('draft-load');
-                        setNotice(null);
-                        try {
-                          const r = await fetch(`/api/brand-deals/draft?id=${selected.id}`);
-                          const b = await r.json();
-                          if (b.ok) setDraftText(b.draft.body);
-                          else setNotice(b.error || 'could not load the draft');
-                        } catch (e) {
-                          setNotice(String(e));
-                        } finally {
-                          setBusy(null);
-                        }
-                      }}
+                      onClick={() => act('skip', '/api/brand-deals/override', { dealId: selected.id, outcome: 'skipped' })}
                       disabled={busy != null}
                       className={BTN_GHOST}
                     >
-                      {busy === 'draft-load' ? 'Loading...' : 'Edit draft'}
+                      {busy === 'skip' ? 'Skipping...' : 'Skip'}
                     </button>
-                  )}
-                </div>
-                {draftText !== null && (
-                  <div className="mt-3">
-                    <textarea
-                      value={draftText}
-                      onChange={(e) => setDraftText(e.target.value)}
-                      rows={10}
-                      className="w-full resize-y rounded-md-t border border-os-border bg-os-bg p-3 font-mono text-[12px] leading-relaxed text-os-text outline-none focus:border-os-border-strong"
-                    />
-                    <div className="mt-2 flex gap-2">
+                    {draftText === null && (
                       <button
                         onClick={async () => {
-                          const ok = await act('draft-save', '/api/brand-deals/draft', {
-                            dealId: selected.id,
-                            text: draftText,
-                          });
-                          if (ok) setDraftText(null);
+                          setBusy('draft-load');
+                          setNotice(null);
+                          try {
+                            const r = await fetch(`/api/brand-deals/draft?id=${selected.id}`);
+                            const b = await r.json();
+                            if (b.ok) setDraftText(b.draft.body);
+                            else setNotice(b.error || 'could not load the draft');
+                          } catch (e) {
+                            setNotice(String(e));
+                          } finally {
+                            setBusy(null);
+                          }
                         }}
-                        disabled={busy != null || !draftText.trim()}
-                        className={BTN_SOLID}
+                        disabled={busy != null}
+                        className={BTN_GHOST}
                       >
-                        {busy === 'draft-save' ? 'Saving...' : 'Save draft'}
+                        {busy === 'draft-load' ? 'Loading...' : 'Edit draft'}
                       </button>
-                      <button onClick={() => setDraftText(null)} disabled={busy != null} className={BTN_GHOST}>
-                        Cancel
-                      </button>
-                    </div>
-                    <p className="mt-2 text-[11px] text-os-dim">
-                      Recipient, subject, and thread are locked in code — an edit can never redirect the email.
-                    </p>
+                    )}
                   </div>
-                )}
-              </section>
-            )}
-            <section className="mb-6">
-              <Label rule>Outcome</Label>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {(
-                  [
-                    ['open', 'Reopen'],
-                    ['won', 'Mark won'],
-                    ['lost', 'Mark lost'],
-                  ] as Array<[DealOutcome, string]>
-                ).map(([o, label]) => (
-                  <button
-                    key={o}
-                    onClick={() => act(`outcome-${o}`, '/api/brand-deals/override', { dealId: selected.id, outcome: o })}
-                    disabled={busy != null || selected.outcome === o}
-                    className={
-                      selected.outcome === o
-                        ? 'glass-chip gl-on inline-flex items-center rounded-full px-3.5 py-1.5 text-[12px] font-semibold text-os-text'
-                        : BTN_GHOST
-                    }
-                  >
-                    {busy === `outcome-${o}` ? '...' : label}
-                  </button>
-                ))}
-              </div>
-              <div className="mt-3.5 flex flex-wrap items-center gap-2">
-                <span className="text-[12px] text-os-muted">Quote</span>
-                <input
-                  value={quoteInput}
-                  onChange={(e) => setQuoteInput(e.target.value.replace(/[^0-9]/g, ''))}
-                  inputMode="numeric"
-                  placeholder="USD"
-                  className="w-[110px] rounded-md-t border border-os-border bg-os-bg px-2.5 py-1.5 font-mono text-[12.5px] tabular-nums outline-none focus:border-os-border-strong"
-                />
-                <button
-                  onClick={() =>
-                    act('quote', '/api/brand-deals/override', {
-                      dealId: selected.id,
-                      amountUsd: quoteInput ? Number(quoteInput) : null,
-                    })
-                  }
-                  disabled={busy != null}
-                  className={BTN_GHOST}
-                >
-                  {busy === 'quote' ? 'Saving...' : 'Set'}
-                </button>
-                <span className="font-mono text-[10.5px] text-os-dim">
-                  {selected.quotedUsd != null
-                    ? selected.quoteSource === 'manual'
-                      ? 'set manually'
-                      : 'parsed from the thread'
-                    : 'no quote detected'}
-                </span>
-              </div>
-              <p className="mt-2.5 text-[11px] text-os-dim">
-                Outcome and quote are tracked here only — they never email anyone.
-              </p>
-            </section>
-            {selected.summary && (
-              <section className="mb-6">
-                <Label rule>Summary</Label>
-                <p className="mt-3 whitespace-pre-wrap text-[13px] leading-relaxed text-os-muted">{selected.summary}</p>
-              </section>
-            )}
-            <section>
-              <div className="flex items-center gap-3">
-                <Label>Email chain</Label>
-                {selected.chain.length > 0 && (
-                  <span className="font-mono text-[11.5px] tabular-nums tracking-normal text-os-muted">{selected.chain.length}</span>
-                )}
-                <span className="h-px flex-1 bg-os-border" />
-              </div>
-              {selected.chain.length === 0 && (
-                <p className="mt-3 text-[12px] text-os-dim">No cached chain for this deal (sent before chain caching existed).</p>
+                  {draftText !== null && (
+                    <div className="mt-3">
+                      <textarea
+                        value={draftText}
+                        onChange={(e) => setDraftText(e.target.value)}
+                        rows={10}
+                        className="w-full resize-y rounded-md-t border border-os-border bg-os-bg p-3 font-mono text-[12px] leading-relaxed text-os-text outline-none focus:border-os-border-strong"
+                      />
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          onClick={async () => {
+                            const ok = await act('draft-save', '/api/brand-deals/draft', {
+                              dealId: selected.id,
+                              text: draftText,
+                            });
+                            if (ok) setDraftText(null);
+                          }}
+                          disabled={busy != null || !draftText.trim()}
+                          className={BTN_SOLID}
+                        >
+                          {busy === 'draft-save' ? 'Saving...' : 'Save draft'}
+                        </button>
+                        <button onClick={() => setDraftText(null)} disabled={busy != null} className={BTN_GHOST}>
+                          Cancel
+                        </button>
+                      </div>
+                      <p className="mt-2 text-[11px] text-os-dim">
+                        Recipient, subject, and thread are locked in code — an edit can never redirect the email.
+                      </p>
+                    </div>
+                  )}
+                </section>
               )}
-              <div className="mt-3 flex flex-col gap-2">
-                {selected.chain.map((m, i) => (
-                  <details
-                    key={i}
-                    open={i >= selected.chain.length - 2}
-                    className="glass-well border border-os-border bg-os-surface px-3.5 py-2.5"
+              <section className="mb-6">
+                <Label rule>Outcome</Label>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {(
+                    [
+                      ['open', 'Reopen'],
+                      ['won', 'Mark won'],
+                      ['lost', 'Mark lost'],
+                    ] as Array<[DealOutcome, string]>
+                  ).map(([o, label]) => (
+                    <button
+                      key={o}
+                      onClick={() => act(`outcome-${o}`, '/api/brand-deals/override', { dealId: selected.id, outcome: o })}
+                      disabled={busy != null || selected.outcome === o}
+                      className={
+                        selected.outcome === o
+                          ? 'glass-chip gl-on inline-flex items-center rounded-full px-3.5 py-1.5 text-[12px] font-semibold text-os-text'
+                          : BTN_GHOST
+                      }
+                    >
+                      {busy === `outcome-${o}` ? '...' : label}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3.5 flex flex-wrap items-center gap-2">
+                  <span className="text-[12px] text-os-muted">Quote</span>
+                  <input
+                    value={quoteInput}
+                    onChange={(e) => setQuoteInput(e.target.value.replace(/[^0-9]/g, ''))}
+                    inputMode="numeric"
+                    placeholder="USD"
+                    className="w-[110px] rounded-md-t border border-os-border bg-os-bg px-2.5 py-1.5 font-mono text-[12.5px] tabular-nums outline-none focus:border-os-border-strong"
+                  />
+                  <button
+                    onClick={() =>
+                      act('quote', '/api/brand-deals/override', {
+                        dealId: selected.id,
+                        amountUsd: quoteInput ? Number(quoteInput) : null,
+                      })
+                    }
+                    disabled={busy != null}
+                    className={BTN_GHOST}
                   >
-                    <summary className="flex cursor-pointer list-none items-baseline justify-between gap-3">
-                      <span className="truncate text-[12.5px] font-medium">{m.who}</span>
-                      <span className="shrink-0 whitespace-nowrap font-mono text-[10.5px] text-os-dim">{m.date}</span>
-                    </summary>
-                    <p className="mt-2 whitespace-pre-wrap text-[12.5px] leading-relaxed text-os-muted">{m.body}</p>
-                  </details>
-                ))}
-              </div>
-            </section>
-          </div>
-        </aside>
+                    {busy === 'quote' ? 'Saving...' : 'Set'}
+                  </button>
+                  <span className="font-mono text-[10.5px] text-os-dim">
+                    {selected.quotedUsd != null
+                      ? selected.quoteSource === 'manual'
+                        ? 'set manually'
+                        : 'parsed from the thread'
+                      : 'no quote detected'}
+                  </span>
+                </div>
+                <p className="mt-2.5 text-[11px] text-os-dim">
+                  Outcome and quote are tracked here only — they never email anyone.
+                </p>
+              </section>
+              {selected.summary && (
+                <section className="mb-6">
+                  <Label rule>Summary</Label>
+                  <p className="mt-3 whitespace-pre-wrap text-[13px] leading-relaxed text-os-muted">{selected.summary}</p>
+                </section>
+              )}
+              <section>
+                <div className="flex items-center gap-3">
+                  <Label>Email chain</Label>
+                  {selected.chain.length > 0 && (
+                    <span className="font-mono text-[11.5px] tabular-nums tracking-normal text-os-muted">{selected.chain.length}</span>
+                  )}
+                  <span className="h-px flex-1 bg-os-border" />
+                </div>
+                {selected.chain.length === 0 && (
+                  <p className="mt-3 text-[12px] text-os-dim">No cached chain for this deal (sent before chain caching existed).</p>
+                )}
+                <div className="mt-3 flex flex-col gap-2">
+                  {selected.chain.map((m, i) => (
+                    <details
+                      key={i}
+                      open={i >= selected.chain.length - 2}
+                      className="glass-well border border-os-border bg-os-surface px-3.5 py-2.5"
+                    >
+                      <summary className="flex cursor-pointer list-none items-baseline justify-between gap-3">
+                        <span className="truncate text-[12.5px] font-medium">{m.who}</span>
+                        <span className="shrink-0 whitespace-nowrap font-mono text-[10.5px] text-os-dim">{m.date}</span>
+                      </summary>
+                      <p className="mt-2 whitespace-pre-wrap text-[12.5px] leading-relaxed text-os-muted">{m.body}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
+            </div>
+          </aside>
+        </Layer>
       )}
     </div>
   );

@@ -16,7 +16,7 @@
  * the draft to the API, and a 400 response's `problems` array renders
  * inline exactly where a client-side check would have.
  */
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Send, Sparkles, Trash2, Upload, Wand2, X, type LucideIcon } from 'lucide-react';
 import { ParamFields, type ParamValues } from '@/components/content/ParamFields';
@@ -40,6 +40,8 @@ import type {
   PipelineNodeKind,
 } from '@/lib/content-pipelines';
 import { useMeltClose } from '@/lib/use-melt';
+import { Layer } from '@/components/g/Overlays';
+import { pushEscape } from '@/lib/escape-stack';
 
 const NODE_KINDS: PipelineNodeKind[] = ['input', 'generate', 'transform', 'output'];
 const NODE_KIND_LABEL: Record<PipelineNodeKind, string> = {
@@ -272,144 +274,162 @@ export function PipelineBuilder({
     }
   }
 
+  // Portalled to <body>: under a frosted ancestor the fixed layer would be trapped.
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="presentation" {...melt.layer}>
-      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
-      <div className="gl-scrim" aria-hidden onClick={close} />
-      <div
-        ref={melt.faceRef}
-        onAnimationEnd={melt.onAnimationEnd}
-        className={`glass-panel glass-face--strong gl-materialise relative flex w-full max-w-[1180px] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
-        style={{ maxHeight: '92vh' }}
-        role="dialog"
-        aria-modal="true"
-        aria-label={editing ? `Edit ${pipeline!.name}` : 'New pipeline'}
-      >
-        <button
-          onClick={close}
-          aria-label="Close"
-          className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] bg-black/30 text-os-dim transition-colors hover:text-os-text"
+    <Layer>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="presentation" {...melt.layer}>
+        {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+        <div className="gl-scrim" aria-hidden onClick={close} />
+        <div
+          ref={melt.faceRef}
+          onAnimationEnd={melt.onAnimationEnd}
+          className={`glass-panel glass-face--strong gl-materialise relative flex w-full max-w-[1180px] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
+          style={{ maxHeight: '92vh' }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={editing ? `Edit ${pipeline!.name}` : 'New pipeline'}
         >
-          <X className="h-4 w-4" />
-        </button>
+          <button
+            onClick={close}
+            aria-label="Close"
+            className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] bg-black/30 text-os-dim transition-colors hover:text-os-text"
+          >
+            <X className="h-4 w-4" />
+          </button>
 
-        <div className="flex-1 overflow-y-auto px-7 py-7">
-          <h2 className="pr-10 text-[18px] font-medium leading-tight">{editing ? 'Edit pipeline' : 'New pipeline'}</h2>
+          <div className="flex-1 overflow-y-auto px-7 py-7">
+            <h2 className="pr-10 text-[18px] font-medium leading-tight">{editing ? 'Edit pipeline' : 'New pipeline'}</h2>
 
-          <section className="mt-5 grid gap-3 sm:grid-cols-2">
-            <label className="flex flex-col gap-1.5">
-              <span className="glass-label">Name</span>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Thumbnail pack"
-                className="glass-chip border-none px-3 py-2.5 text-[13px] text-os-text outline-none placeholder:text-os-dim"
-              />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="glass-label">Description</span>
-              <input
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="What this pipeline delivers, in one line"
-                className="glass-chip border-none px-3 py-2.5 text-[13px] text-os-text outline-none placeholder:text-os-dim"
-              />
-            </label>
-          </section>
+            <section className="mt-5 grid gap-3 sm:grid-cols-2">
+              <label className="flex flex-col gap-1.5">
+                <span className="glass-label">Name</span>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Thumbnail pack"
+                  className="glass-chip border-none px-3 py-2.5 text-[13px] text-os-text outline-none placeholder:text-os-dim"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="glass-label">Description</span>
+                <input
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="What this pipeline delivers, in one line"
+                  className="glass-chip border-none px-3 py-2.5 text-[13px] text-os-text outline-none placeholder:text-os-dim"
+                />
+              </label>
+            </section>
 
-          <section className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="overflow-x-auto">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="glass-label">Flow</span>
-                <InsertMenu onPick={(kind) => addNode(nodes.at(-1)?.id ?? null, kind)} label="Add node" />
-              </div>
-              {nodes.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 py-10 text-center">
-                  <p className="text-[12.5px] text-os-dim">No nodes yet.</p>
-                  <InsertMenu onPick={(kind) => addNode(null, kind)} label="Add the first node" />
+            <section className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="overflow-x-auto">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="glass-label">Flow</span>
+                  <InsertMenu onPick={(kind) => addNode(nodes.at(-1)?.id ?? null, kind)} label="Add node" />
                 </div>
-              ) : (
-                <div className="flex min-w-max items-start gap-3 pb-2">
-                  {columns.map((col, ci) => (
-                    <div key={ci} className="flex items-center">
-                      {ci > 0 && <span className="mx-1 h-px w-[18px] shrink-0" style={{ background: 'rgba(255,255,255,0.14)' }} />}
-                      <div className="flex flex-col gap-2.5">
-                        {col.map((node) => (
-                          <div key={node.id} className="flex items-center gap-1.5">
-                            <NodeChip node={node} selected={node.id === selectedId} onSelect={() => setSelectedId(node.id)} onDelete={() => deleteNode(node.id)} />
-                            <InsertMenu compact onPick={(kind) => addNode(node.id, kind)} />
-                          </div>
-                        ))}
+                {nodes.length === 0 ? (
+                  <div className="flex flex-col items-center gap-3 py-10 text-center">
+                    <p className="text-[12.5px] text-os-dim">No nodes yet.</p>
+                    <InsertMenu onPick={(kind) => addNode(null, kind)} label="Add the first node" />
+                  </div>
+                ) : (
+                  <div className="flex min-w-max items-start gap-3 pb-2">
+                    {columns.map((col, ci) => (
+                      <div key={ci} className="flex items-center">
+                        {ci > 0 && <span className="mx-1 h-px w-[18px] shrink-0" style={{ background: 'rgba(255,255,255,0.14)' }} />}
+                        <div className="flex flex-col gap-2.5">
+                          {col.map((node) => (
+                            <div key={node.id} className="flex items-center gap-1.5">
+                              <NodeChip node={node} selected={node.id === selectedId} onSelect={() => setSelectedId(node.id)} onDelete={() => deleteNode(node.id)} />
+                              <InsertMenu compact onPick={(kind) => addNode(node.id, kind)} />
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {selectedNode ? (
+                <NodeDetailPanel node={selectedNode} nodes={nodes} edges={edges} setNodes={setNodes} setEdges={setEdges} onClose={() => setSelectedId(null)} />
+              ) : (
+                <div className="glass-panel-violet flex min-h-[220px] flex-col items-center justify-center gap-1 px-5 py-8 text-center">
+                  <span className="text-[12px] text-os-dim">Select a node to edit it.</span>
                 </div>
               )}
-            </div>
-
-            {selectedNode ? (
-              <NodeDetailPanel node={selectedNode} nodes={nodes} edges={edges} setNodes={setNodes} setEdges={setEdges} onClose={() => setSelectedId(null)} />
-            ) : (
-              <div className="glass-panel-violet flex min-h-[220px] flex-col items-center justify-center gap-1 px-5 py-8 text-center">
-                <span className="text-[12px] text-os-dim">Select a node to edit it.</span>
-              </div>
-            )}
-          </section>
-
-          {problems.length > 0 && (
-            <section className="mt-5">
-              <span className="glass-label">Problems</span>
-              <ul className="mt-2 flex flex-col gap-1.5">
-                {problems.map((p, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[12px] leading-relaxed text-os-muted">
-                    <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--accent)' }} />
-                    {p}
-                  </li>
-                ))}
-              </ul>
             </section>
-          )}
 
-          {error && (
-            <p className="mt-4 flex items-center gap-2 text-[12.5px] text-os-muted">
-              <span className="dot err" />
-              {error}
-            </p>
-          )}
-        </div>
+            {problems.length > 0 && (
+              <section className="mt-5">
+                <span className="glass-label">Problems</span>
+                <ul className="mt-2 flex flex-col gap-1.5">
+                  {problems.map((p, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[12px] leading-relaxed text-os-muted">
+                      <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--accent)' }} />
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
-        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[rgb(var(--mist-rgb) / 0.1)] px-6 py-4">
-          <div>
-            {editing && (
-              <button
-                type="button"
-                onClick={confirmDelete}
-                disabled={deleting}
-                className="flex items-center gap-1.5 rounded-sm-t border border-[color-mix(in_oklab,var(--err)_35%,transparent)] bg-[color-mix(in_oklab,var(--err)_9%,transparent)] px-3 py-2 text-[12.5px] text-os-err transition-colors"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                {deleting ? 'Deleting…' : deleteArmed ? 'Really delete? Click again' : 'Delete pipeline'}
-              </button>
+            {error && (
+              <p className="mt-4 flex items-center gap-2 text-[12.5px] text-os-muted">
+                <span className="dot err" />
+                {error}
+              </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={close} className="c-btn">
-              Cancel
-            </button>
-            <button type="button" onClick={submit} disabled={busy} className="c-btn c-btn-primary">
-              {busy ? 'Saving…' : 'Save'}
-            </button>
+
+          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[rgb(var(--mist-rgb) / 0.1)] px-6 py-4">
+            <div>
+              {editing && (
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  disabled={deleting}
+                  className="flex items-center gap-1.5 rounded-sm-t border border-[color-mix(in_oklab,var(--err)_35%,transparent)] bg-[color-mix(in_oklab,var(--err)_9%,transparent)] px-3 py-2 text-[12.5px] text-os-err transition-colors"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {deleting ? 'Deleting…' : deleteArmed ? 'Really delete? Click again' : 'Delete pipeline'}
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={close} className="c-btn">
+                Cancel
+              </button>
+              <button type="button" onClick={submit} disabled={busy} className="c-btn c-btn-primary">
+                {busy ? 'Saving…' : 'Save'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Layer>
   );
 }
 
 function InsertMenu({ onPick, compact, label }: { onPick: (kind: PipelineNodeKind) => void; compact?: boolean; label?: string }) {
   const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  // Outside press or Escape closes the menu (the GPopover pattern). No fixed click-away: inside the
+  // modal's frosted face it would be trapped to the face instead of covering the page.
+  useEffect(() => {
+    if (!open) return;
+    const off = pushEscape(() => setOpen(false));
+    const onDown = (e: PointerEvent) => {
+      if (root.current && !root.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => {
+      off();
+      document.removeEventListener('pointerdown', onDown);
+    };
+  }, [open]);
   return (
-    <div className="relative">
+    <div ref={root} className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -419,24 +439,21 @@ function InsertMenu({ onPick, compact, label }: { onPick: (kind: PipelineNodeKin
         <Plus className="h-3 w-3" strokeWidth={1.8} /> {!compact && (label ?? 'Add node')}
       </button>
       {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="c-pop absolute left-0 top-full z-20 mt-1 flex flex-col gap-0.5 p-1">
-            {NODE_KINDS.map((kind) => (
-              <button
-                key={kind}
-                type="button"
-                onClick={() => {
-                  onPick(kind);
-                  setOpen(false);
-                }}
-                className="whitespace-nowrap rounded-[6px] px-2.5 py-1.5 text-left text-[11.5px] text-os-muted transition-colors hover:bg-white/5 hover:text-os-text"
-              >
-                {NODE_KIND_LABEL[kind]}
-              </button>
-            ))}
-          </div>
-        </>
+        <div className="c-pop absolute left-0 top-full z-20 mt-1 flex flex-col gap-0.5 p-1">
+          {NODE_KINDS.map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => {
+                onPick(kind);
+                setOpen(false);
+              }}
+              className="whitespace-nowrap rounded-[6px] px-2.5 py-1.5 text-left text-[11.5px] text-os-muted transition-colors hover:bg-white/5 hover:text-os-text"
+            >
+              {NODE_KIND_LABEL[kind]}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );

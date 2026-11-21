@@ -41,6 +41,7 @@ import type { Campaign } from '@/lib/content-campaigns';
 import type { HiggsfieldAccount, IdentityAsset } from '@/lib/higgsfield/account';
 import type { UploadAsset } from '@/lib/content-uploads';
 import { useMeltEnd, useMeltPhase } from '@/lib/use-melt';
+import { Layer } from '@/components/g/Overlays';
 
 const inputCls =
   'w-full rounded-[9px] border border-[rgb(var(--mist-rgb) / 0.14)] bg-[var(--surface-2)] px-3 py-2 text-[13px] text-os-text outline-none placeholder:text-os-dim';
@@ -416,280 +417,283 @@ export function Composer({
 
   const credits = estimateCredits({ model: model.id, batch: spec.batch });
 
+  // Portalled to <body>: under a frosted ancestor the fixed drawer would be trapped.
   return (
-    <div className="fixed inset-0 z-[100]" role="presentation" data-melting={melt.melting ? '' : undefined}>
-      {/* The scrim is the drawer's sibling (glass brief §3.2): it frosts and dims the page; the drawer frosts on its own. */}
-      <div className="gl-scrim" aria-hidden onClick={closeComposer} />
-      <div
-        ref={faceRef}
-        onAnimationEnd={onMeltEnd}
-        className={`glass-panel glass-face--strong gl-materialise--drawer fixed inset-y-0 right-0 flex w-full max-w-[560px] flex-col overflow-hidden rounded-l-[24px] rounded-r-none${melt.melting ? ' is-melting' : ''}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Compose ${tool.label}`}
-      >
-        <div className="flex shrink-0 items-center justify-between border-b border-[var(--hairline)] px-6 py-4">
-          <div>
-            <span className="glass-label">{tool.label}</span>
-            <h2 className="mt-1 text-[16px] font-medium text-os-text">Compose production</h2>
-          </div>
-          <button
-            type="button"
-            onClick={closeComposer}
-            aria-label="Close"
-            className="grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] text-os-dim transition-colors hover:text-os-text"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-6 py-5">
-          {/* Creative zone */}
-          <div className="flex flex-col gap-4">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-[12px] text-os-muted">Title</span>
-              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What this production is" className={inputCls} />
-            </label>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-[12px] text-os-muted">Campaign</span>
-              <select value={campaignId} onChange={(e) => setCampaignId(e.target.value)} className={inputCls}>
-                {campaigns.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[12px] text-os-muted">Creative direction</span>
-                <button
-                  type="button"
-                  onClick={refinePrompt}
-                  disabled={refining}
-                  className="flex items-center gap-1.5 text-[11.5px] text-os-accent disabled:opacity-50"
-                >
-                  <Sparkles className="h-3 w-3" strokeWidth={2} />
-                  {refining ? 'Refining…' : 'Refine with director'}
-                </button>
-              </div>
-              <textarea
-                value={spec.prompt}
-                onChange={(e) => setSpec((s) => (s ? { ...s, prompt: e.target.value } : s))}
-                rows={4}
-                placeholder="What goes into the model — composition, references, mood"
-                className={`${inputCls} resize-none leading-relaxed`}
-              />
-              {refineError && <p className="text-[12px] text-os-err">{refineError}</p>}
-            </label>
-
-            {model.medias.length > 0 && (
-              <div className="flex flex-col gap-2.5">
-                <span className="glass-label">References</span>
-                {model.medias.map((slot) => (
-                  <ReferenceSlot
-                    key={slot.role}
-                    slot={slot}
-                    spec={spec}
-                    model={model}
-                    libraryAssets={libraryAssets}
-                    uploads={uploads}
-                    identityOptions={slot.type === 'image' ? identityList : []}
-                    onSetMedia={(role, media) => setSpec((s) => (s ? setMedia(s, model, role, media) : s))}
-                    onRemoveMedia={(role, ref) => setSpec((s) => (s ? removeMedia(s, role, ref) : s))}
-                  />
-                ))}
-              </div>
-            )}
-
+    <Layer>
+      <div className="fixed inset-0 z-[100]" role="presentation" data-melting={melt.melting ? '' : undefined}>
+        {/* The scrim is the drawer's sibling (glass brief §3.2): it frosts and dims the page; the drawer frosts on its own. */}
+        <div className="gl-scrim" aria-hidden onClick={closeComposer} />
+        <div
+          ref={faceRef}
+          onAnimationEnd={onMeltEnd}
+          className={`glass-panel glass-face--strong gl-materialise--drawer fixed inset-y-0 right-0 flex w-full max-w-[560px] flex-col overflow-hidden rounded-l-[24px] rounded-r-none${melt.melting ? ' is-melting' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Compose ${tool.label}`}
+        >
+          <div className="flex shrink-0 items-center justify-between border-b border-[var(--hairline)] px-6 py-4">
             <div>
-              <span className="glass-label">Identity</span>
-              {support === 'none' ? (
-                <p className="mt-1.5 text-[12px] text-os-dim">This model takes no identity reference.</p>
-              ) : !account ? (
-                <p className="mt-1.5 text-[12px] text-os-dim">Higgsfield not synced — no identity assets available.</p>
-              ) : identityList.length === 0 ? (
-                <p className="mt-1.5 text-[12px] text-os-dim">No {support === 'soul' ? 'Soul characters' : 'Elements'} synced yet.</p>
-              ) : (
-                <div className="mt-1.5 flex flex-wrap gap-2">
-                  {identityList.map((a) => {
-                    const active = spec.identity?.id === a.id;
-                    return (
-                      <button
-                        key={a.id}
-                        type="button"
-                        onClick={() =>
-                          setSpec((s) =>
-                            s ? setIdentity(s, model, active ? null : { kind: a.kind, id: a.id, name: a.name }) : s,
-                          )
-                        }
-                        className={`glass-chip flex items-center gap-2 py-1 pl-1 pr-3 text-[12px] transition-colors ${
-                          active ? 'border-[var(--accent-line)] text-os-text' : 'text-os-muted hover:text-os-text'
-                        }`}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={a.portrait} alt="" className="h-5 w-5 rounded-full object-cover" />
-                        {a.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              <span className="glass-label">{tool.label}</span>
+              <h2 className="mt-1 text-[16px] font-medium text-os-text">Compose production</h2>
             </div>
+            <button
+              type="button"
+              onClick={closeComposer}
+              aria-label="Close"
+              className="grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] text-os-dim transition-colors hover:text-os-text"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
 
-            {tool.skill && (
-              <label className="flex items-center justify-between gap-3 border-t border-[var(--hairline)] py-2.5">
-                <span className="text-[12.5px] text-os-text">
-                  Apply skill: <span className="font-mono text-os-muted">{tool.skill}</span>
-                </span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={!!spec.skill}
-                  onClick={() => setSpec((s) => (s ? toggleSkill(s, tool.skill) : s))}
-                  className={`relative h-5 w-9 shrink-0 rounded-full border transition-colors ${
-                    spec.skill ? 'border-os-accent/50 bg-os-accent/25' : 'border-[rgb(var(--mist-rgb) / 0.18)] bg-black/25'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-[3px] h-3 w-3 rounded-full transition-all ${
-                      spec.skill ? 'left-[19px] bg-os-accent' : 'left-[3px] bg-os-dim'
-                    }`}
-                  />
-                </button>
-              </label>
-            )}
-
-            {/* Parameter rail */}
-            <div className="mt-2 flex flex-col gap-4 border-t border-[var(--hairline)] pt-4">
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            {/* Creative zone */}
+            <div className="flex flex-col gap-4">
               <label className="flex flex-col gap-1.5">
-                <span className="text-[12px] text-os-muted">Model</span>
-                <select value={model.id} onChange={(e) => handleModelChange(e.target.value)} className={inputCls}>
-                  {familyGroups.map(([family, models]) => (
-                    <optgroup key={family} label={family}>
-                      {models.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} — {m.provider}
-                          {m.unlim ? ' · unlim' : ''}
-                        </option>
-                      ))}
-                    </optgroup>
+                <span className="text-[12px] text-os-muted">Title</span>
+                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What this production is" className={inputCls} />
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[12px] text-os-muted">Campaign</span>
+                <select value={campaignId} onChange={(e) => setCampaignId(e.target.value)} className={inputCls}>
+                  {campaigns.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
                   ))}
                 </select>
-                <button
-                  type="button"
-                  onClick={() => setShowAllModels((v) => !v)}
-                  className="self-start text-[11.5px] text-os-dim transition-colors hover:text-os-text"
-                >
-                  {showAllModels ? `Only ${model.family} models` : 'All models'}
-                </button>
               </label>
 
-              {model.aspectRatios.length > 0 && (
-                <div>
-                  <span className="text-[12px] text-os-muted">Aspect ratio</span>
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {model.aspectRatios.map((ar) => (
-                      <button
-                        key={ar}
-                        type="button"
-                        onClick={() => setSpec((s) => (s ? { ...s, aspectRatio: ar } : s))}
-                        className={chipCls(spec.aspectRatio === ar)}
-                      >
-                        {ar}
-                      </button>
-                    ))}
-                  </div>
+              <label className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] text-os-muted">Creative direction</span>
+                  <button
+                    type="button"
+                    onClick={refinePrompt}
+                    disabled={refining}
+                    className="flex items-center gap-1.5 text-[11.5px] text-os-accent disabled:opacity-50"
+                  >
+                    <Sparkles className="h-3 w-3" strokeWidth={2} />
+                    {refining ? 'Refining…' : 'Refine with director'}
+                  </button>
+                </div>
+                <textarea
+                  value={spec.prompt}
+                  onChange={(e) => setSpec((s) => (s ? { ...s, prompt: e.target.value } : s))}
+                  rows={4}
+                  placeholder="What goes into the model — composition, references, mood"
+                  className={`${inputCls} resize-none leading-relaxed`}
+                />
+                {refineError && <p className="text-[12px] text-os-err">{refineError}</p>}
+              </label>
+
+              {model.medias.length > 0 && (
+                <div className="flex flex-col gap-2.5">
+                  <span className="glass-label">References</span>
+                  {model.medias.map((slot) => (
+                    <ReferenceSlot
+                      key={slot.role}
+                      slot={slot}
+                      spec={spec}
+                      model={model}
+                      libraryAssets={libraryAssets}
+                      uploads={uploads}
+                      identityOptions={slot.type === 'image' ? identityList : []}
+                      onSetMedia={(role, media) => setSpec((s) => (s ? setMedia(s, model, role, media) : s))}
+                      onRemoveMedia={(role, ref) => setSpec((s) => (s ? removeMedia(s, role, ref) : s))}
+                    />
+                  ))}
                 </div>
               )}
 
-              {model.durations && model.durations.length > 0 && (
-                <div>
-                  <span className="text-[12px] text-os-muted">Duration</span>
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {model.durations.map((d) => (
-                      <button
-                        key={d}
-                        type="button"
-                        onClick={() => setSpec((s) => (s ? { ...s, duration: d } : s))}
-                        className={chipCls(spec.duration === d)}
-                      >
-                        {d}s
-                      </button>
-                    ))}
+              <div>
+                <span className="glass-label">Identity</span>
+                {support === 'none' ? (
+                  <p className="mt-1.5 text-[12px] text-os-dim">This model takes no identity reference.</p>
+                ) : !account ? (
+                  <p className="mt-1.5 text-[12px] text-os-dim">Higgsfield not synced — no identity assets available.</p>
+                ) : identityList.length === 0 ? (
+                  <p className="mt-1.5 text-[12px] text-os-dim">No {support === 'soul' ? 'Soul characters' : 'Elements'} synced yet.</p>
+                ) : (
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    {identityList.map((a) => {
+                      const active = spec.identity?.id === a.id;
+                      return (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() =>
+                            setSpec((s) =>
+                              s ? setIdentity(s, model, active ? null : { kind: a.kind, id: a.id, name: a.name }) : s,
+                            )
+                          }
+                          className={`glass-chip flex items-center gap-2 py-1 pl-1 pr-3 text-[12px] transition-colors ${
+                            active ? 'border-[var(--accent-line)] text-os-text' : 'text-os-muted hover:text-os-text'
+                          }`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={a.portrait} alt="" className="h-5 w-5 rounded-full object-cover" />
+                          {a.name}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {!model.durations && model.durationRange && (
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-[12px] text-os-muted">Duration (seconds)</span>
-                  <input
-                    type="number"
-                    min={model.durationRange.min}
-                    max={model.durationRange.max}
-                    value={spec.duration ?? model.durationRange.min}
-                    onChange={(e) => {
-                      const range = model.durationRange!;
-                      const v = Math.min(Math.max(Number(e.target.value), range.min), range.max);
-                      setSpec((s) => (s ? { ...s, duration: v } : s));
-                    }}
-                    className={inputCls}
-                  />
+              {tool.skill && (
+                <label className="flex items-center justify-between gap-3 border-t border-[var(--hairline)] py-2.5">
+                  <span className="text-[12.5px] text-os-text">
+                    Apply skill: <span className="font-mono text-os-muted">{tool.skill}</span>
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={!!spec.skill}
+                    onClick={() => setSpec((s) => (s ? toggleSkill(s, tool.skill) : s))}
+                    className={`relative h-5 w-9 shrink-0 rounded-full border transition-colors ${
+                      spec.skill ? 'border-os-accent/50 bg-os-accent/25' : 'border-[rgb(var(--mist-rgb) / 0.18)] bg-black/25'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-[3px] h-3 w-3 rounded-full transition-all ${
+                        spec.skill ? 'left-[19px] bg-os-accent' : 'left-[3px] bg-os-dim'
+                      }`}
+                    />
+                  </button>
                 </label>
               )}
 
-              <ParamFields
-                model={model}
-                values={spec.params as ParamValues}
-                onChange={(name, value) => setSpec((s) => (s ? setParam(s, name, value) : s))}
-              />
+              {/* Parameter rail */}
+              <div className="mt-2 flex flex-col gap-4 border-t border-[var(--hairline)] pt-4">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[12px] text-os-muted">Model</span>
+                  <select value={model.id} onChange={(e) => handleModelChange(e.target.value)} className={inputCls}>
+                    {familyGroups.map(([family, models]) => (
+                      <optgroup key={family} label={family}>
+                        {models.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.name} — {m.provider}
+                            {m.unlim ? ' · unlim' : ''}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowAllModels((v) => !v)}
+                    className="self-start text-[11.5px] text-os-dim transition-colors hover:text-os-text"
+                  >
+                    {showAllModels ? `Only ${model.family} models` : 'All models'}
+                  </button>
+                </label>
 
-              {(model.output === 'image' || model.output === 'video') && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[12px] text-os-muted">Batch</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSpec((s) => (s ? { ...s, batch: Math.max(1, s.batch - 1) } : s))}
-                      className="c-btn h-7 w-7 justify-center p-0"
-                      aria-label="Decrease batch"
-                    >
-                      −
-                    </button>
-                    <span className="w-4 text-center font-mono text-[13px] text-os-text">{spec.batch}</span>
-                    <button
-                      type="button"
-                      onClick={() => setSpec((s) => (s ? { ...s, batch: Math.min(8, s.batch + 1) } : s))}
-                      className="c-btn h-7 w-7 justify-center p-0"
-                      aria-label="Increase batch"
-                    >
-                      +
-                    </button>
+                {model.aspectRatios.length > 0 && (
+                  <div>
+                    <span className="text-[12px] text-os-muted">Aspect ratio</span>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {model.aspectRatios.map((ar) => (
+                        <button
+                          key={ar}
+                          type="button"
+                          onClick={() => setSpec((s) => (s ? { ...s, aspectRatio: ar } : s))}
+                          className={chipCls(spec.aspectRatio === ar)}
+                        >
+                          {ar}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {model.durations && model.durations.length > 0 && (
+                  <div>
+                    <span className="text-[12px] text-os-muted">Duration</span>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {model.durations.map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setSpec((s) => (s ? { ...s, duration: d } : s))}
+                          className={chipCls(spec.duration === d)}
+                        >
+                          {d}s
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!model.durations && model.durationRange && (
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[12px] text-os-muted">Duration (seconds)</span>
+                    <input
+                      type="number"
+                      min={model.durationRange.min}
+                      max={model.durationRange.max}
+                      value={spec.duration ?? model.durationRange.min}
+                      onChange={(e) => {
+                        const range = model.durationRange!;
+                        const v = Math.min(Math.max(Number(e.target.value), range.min), range.max);
+                        setSpec((s) => (s ? { ...s, duration: v } : s));
+                      }}
+                      className={inputCls}
+                    />
+                  </label>
+                )}
+
+                <ParamFields
+                  model={model}
+                  values={spec.params as ParamValues}
+                  onChange={(name, value) => setSpec((s) => (s ? setParam(s, name, value) : s))}
+                />
+
+                {(model.output === 'image' || model.output === 'video') && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] text-os-muted">Batch</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSpec((s) => (s ? { ...s, batch: Math.max(1, s.batch - 1) } : s))}
+                        className="c-btn h-7 w-7 justify-center p-0"
+                        aria-label="Decrease batch"
+                      >
+                        −
+                      </button>
+                      <span className="w-4 text-center font-mono text-[13px] text-os-text">{spec.batch}</span>
+                      <button
+                        type="button"
+                        onClick={() => setSpec((s) => (s ? { ...s, batch: Math.min(8, s.batch + 1) } : s))}
+                        className="c-btn h-7 w-7 justify-center p-0"
+                        aria-label="Increase batch"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center justify-between border-t border-[var(--hairline)] px-6 py-4">
+            <span className="font-mono text-[11.5px] text-os-dim">
+              ~{credits} credit{credits === 1 ? '' : 's'}
+            </span>
+            <div className="flex items-center gap-2.5">
+              {submitError && <span className="text-[12px] text-os-err">{submitError}</span>}
+              <button type="button" onClick={closeComposer} className="c-btn">
+                Cancel
+              </button>
+              <button type="button" onClick={submit} disabled={submitting} className="c-btn c-btn-primary">
+                {submitting ? 'Queuing…' : 'Queue production'}
+              </button>
             </div>
           </div>
         </div>
-
-        <div className="flex shrink-0 items-center justify-between border-t border-[var(--hairline)] px-6 py-4">
-          <span className="font-mono text-[11.5px] text-os-dim">
-            ~{credits} credit{credits === 1 ? '' : 's'}
-          </span>
-          <div className="flex items-center gap-2.5">
-            {submitError && <span className="text-[12px] text-os-err">{submitError}</span>}
-            <button type="button" onClick={closeComposer} className="c-btn">
-              Cancel
-            </button>
-            <button type="button" onClick={submit} disabled={submitting} className="c-btn c-btn-primary">
-              {submitting ? 'Queuing…' : 'Queue production'}
-            </button>
-          </div>
-        </div>
       </div>
-    </div>
+    </Layer>
   );
 }

@@ -12,6 +12,7 @@ import {
 } from '@/lib/posting-activity';
 import { channelColor } from '@/lib/series';
 import { useMeltEnd, useMeltPhase } from '@/lib/use-melt';
+import { Layer } from '@/components/g/Overlays';
 import { channelsNetChange, rangeWindow } from '@/lib/social-range';
 
 type Range = 7 | 30 | 60 | 'all';
@@ -392,52 +393,55 @@ export function AudienceConsistency({
         )}
       </div>
 
+      {/* Portalled to <body>: this card frosts, and a frosted ancestor traps a fixed layer. */}
       {melt.mounted && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6" data-melting={melt.melting ? '' : undefined}>
-          {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
-          <div className="gl-scrim" aria-hidden onClick={collapse} />
-          <div
-            ref={faceRef}
-            onAnimationEnd={onMeltEnd}
-            className={`c-pop glass-face--strong gl-materialise relative flex max-h-[94vh] w-[min(1240px,96vw)] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-os-border px-5 py-3.5">
-              <div>
-                <div className="text-[15px] font-medium">Combined audience &amp; posting consistency</div>
-                <div className="mt-0.5 text-[12.5px] text-os-muted">Social</div>
+        <Layer>
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6" data-melting={melt.melting ? '' : undefined}>
+            {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+            <div className="gl-scrim" aria-hidden onClick={collapse} />
+            <div
+              ref={faceRef}
+              onAnimationEnd={onMeltEnd}
+              className={`c-pop glass-face--strong gl-materialise relative flex max-h-[94vh] w-[min(1240px,96vw)] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-os-border px-5 py-3.5">
+                <div>
+                  <div className="text-[15px] font-medium">Combined audience &amp; posting consistency</div>
+                  <div className="mt-0.5 text-[12.5px] text-os-muted">Social</div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <RangeChips value={range} onChange={setRange} />
+                  <button
+                    onClick={collapse}
+                    aria-label="Close"
+                    className="flex h-7 w-7 items-center justify-center rounded-sm-t border border-os-border text-os-dim transition-colors hover:bg-os-surface2 hover:text-os-text"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-4">
-                <RangeChips value={range} onChange={setRange} />
-                <button
-                  onClick={collapse}
-                  aria-label="Close"
-                  className="flex h-7 w-7 items-center justify-center rounded-sm-t border border-os-border text-os-dim transition-colors hover:bg-os-surface2 hover:text-os-text"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
 
-            <div className="flex-1 overflow-y-auto px-5 py-4">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-[13px] font-medium text-os-muted">Combined audience</span>
-                {netLabel}
+              <div className="flex-1 overflow-y-auto px-5 py-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[13px] font-medium text-os-muted">Combined audience</span>
+                  {netLabel}
+                </div>
+                <ChartPair
+                  axis={axis}
+                  audienceVals={audienceVals}
+                  carried={carried}
+                  from={from}
+                  days={days}
+                  platforms={platforms}
+                  audClass="h-[clamp(240px,40vh,420px)]"
+                  postClass="h-[clamp(160px,26vh,300px)]"
+                />
+                {staleNote}
+                <PlatformLegend platforms={platforms} days={days} />
               </div>
-              <ChartPair
-                axis={axis}
-                audienceVals={audienceVals}
-                carried={carried}
-                from={from}
-                days={days}
-                platforms={platforms}
-                audClass="h-[clamp(240px,40vh,420px)]"
-                postClass="h-[clamp(160px,26vh,300px)]"
-              />
-              {staleNote}
-              <PlatformLegend platforms={platforms} days={days} />
             </div>
           </div>
-        </div>
+        </Layer>
       )}
     </div>
   );

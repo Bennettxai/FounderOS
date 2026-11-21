@@ -7,6 +7,7 @@ import Link from 'next/link';
 import type { BrainCluster } from '@/lib/brain-viz';
 import { BrainViz } from '@/components/BrainViz';
 import { BrainQuery } from '@/components/BrainQuery';
+import { Layer } from '@/components/g/Overlays';
 
 type DoctorCheck = { name: string; status: string; message: string };
 type Doctor = {
@@ -74,7 +75,8 @@ export function BrainCore({
       </div>
 
       {open && (
-        <>
+        <Layer>
+        {/* Portalled to <body>: the Brain page's frosted panel would trap these fixed layers. */}
         {/* The scrim is a sibling, not the panel's parent: a glass face never sits inside a blurred or fading element. */}
         <div aria-hidden className="overlay-in fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
         <div
@@ -162,7 +164,7 @@ export function BrainCore({
             </div>
           </div>
         </div>
-        </>
+        </Layer>
       )}
     </>
   );

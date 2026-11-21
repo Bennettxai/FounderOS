@@ -36,6 +36,7 @@ import { patchUrlParams, readLocal, writeLocal } from '@/components/adpilot/url'
 import { findLinkedAd } from '@/lib/adpilot-links';
 import { GAsk, GBar, GButton, GCard, GEmpty, GHeroCard, GTag, GTickStrip } from '@/components/g';
 import { useGStyle, useGc } from '@/components/system-g/style-context';
+import { Layer } from '@/components/g/Overlays';
 
 /** Set up link for the current style: the kit button under GladOS (GP4), the Classic SetupLink otherwise. */
 function Setup({ href, hint }: { href: string; hint?: string }) {
@@ -1452,147 +1453,154 @@ function Dossier({
   };
 
   const gc = useGc();
+  const g = useGStyle();
   const swipeStyle: CSSProperties | undefined = dx > 0 ? { transform: `translateX(${dx}px)` } : undefined;
 
+  // Portalled to <body>: a frosted ancestor would trap the fixed drawer. The page's token scope rides
+  // along on a box-less wrapper: [data-adpilot] in Classic (app/adpilot/page.tsx), .ap-g under GladOS.
   return (
-    <div className="ap-backdrop fixed inset-0 z-50 flex justify-end" onClick={onClose}>
-      <div
-        {...dlg.props}
-        data-ad-id={ad.id}
-        className={gc('ap-g-dossier', 'ap-panel h-full w-full max-w-[460px] overflow-y-auto rounded-none border-y-0 border-r-0 p-5 outline-none')}
-        style={swipeStyle}
-        onClick={(e) => e.stopPropagation()}
-        onTouchStart={(e) => {
-          const t = e.touches[0];
-          touch.current = { x: t.clientX, y: t.clientY };
-        }}
-        onTouchMove={(e) => {
-          const start = touch.current;
-          if (!start) return;
-          const t = e.touches[0];
-          const ddx = t.clientX - start.x;
-          if (Math.abs(t.clientY - start.y) > Math.abs(ddx)) return;
-          setDx(Math.max(0, ddx));
-        }}
-        onTouchEnd={() => {
-          touch.current = null;
-          if (dx >= SWIPE_CLOSE_PX) onClose();
-          else setDx(0);
-        }}
-      >
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div>
-            <h2 id="ap-dossier-title" className="text-[15px] font-normal text-os-text">
-              {ad.brand}
-            </h2>
-            <div className="mt-0.5 text-[12px] text-os-dim">
-              {ad.format ?? 'ad'} · {ad.daysRunning} days {ad.live ? '· live' : '· off'}
-              {ad.ctaType ? ` · ${ad.ctaType.toLowerCase().replaceAll('_', ' ')}` : ''}
-            </div>
-          </div>
-          <button type="button" data-dialog-close onClick={onClose} aria-label="Close dossier" title="Close (Esc)" className={gc('g-btn g-btn-icon g-btn-sm', 'c-btn p-1.5')}>
-            <X aria-hidden className="h-4 w-4" strokeWidth={1.7} />
-          </button>
-        </div>
-
-        {ad.video ? (
-          <video ref={videoRef} src={ad.video} controls playsInline preload="metadata" className="ap-media w-full rounded-[10px]" />
-        ) : ad.thumbnail || ad.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={ad.thumbnail ?? ad.image ?? ''} alt={`${ad.brand} creative`} className="ap-media w-full rounded-[10px]" />
-        ) : null}
-
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          <button type="button" onClick={() => onSave(ad)} aria-pressed={isSaved} className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
-            <Bookmark aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} fill={isSaved ? 'currentColor' : 'none'} />
-            {isSaved ? 'Saved' : 'Save'}
-          </button>
-          {ad.brandId &&
-            (isWatched ? (
-              <button type="button" disabled title={`${ad.brand} is already on your watchlist`} className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
-                <Check aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} /> Tracking
-              </button>
-            ) : (
-              <button type="button" onClick={() => onWatch(ad)} className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
-                <Plus aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} /> Track brand
-              </button>
-            ))}
-          {ad.hook && (
-            <button type="button" onClick={copyHook} className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
-              <Copy aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} /> {copied ? 'Copied' : 'Copy hook'}
-            </button>
-          )}
-          {ad.linkUrl && (
-            <a href={ad.linkUrl} target="_blank" rel="noreferrer" className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
-              <ExternalLink aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} /> Landing page
-            </a>
-          )}
-        </div>
-
-        {ad.hook && (
-          <div className="mt-4">
-            <div className="text-[11px] text-os-dim">Hook ({ad.hookSource})</div>
-            <p className="mt-1 text-[13.5px] leading-snug text-os-text">“{ad.hook}”</p>
-          </div>
-        )}
-
-        {topDrivers.length > 0 && (
-          <div className="mt-4">
-            <div className="text-[11px] text-os-dim">Emotional drivers</div>
-            <div className="mt-2 flex flex-col gap-1.5">
-              {topDrivers.map(([axis, score]) => (
-                <div key={axis} className="flex items-center gap-2">
-                  <span className="w-24 shrink-0 text-[12px] text-os-muted">{axis}</span>
-                  <div className="ap-inset h-[7px] flex-1 overflow-hidden rounded-full" role="img" aria-label={`${axis} ${score} of 10`}>
-                    <div className="ap-solid h-full rounded-full" style={{ width: `${(score / 10) * 100}%`, opacity: 0.4 + 0.06 * score }} />
-                  </div>
-                  <span className="w-6 shrink-0 text-right text-[11.5px] tabular-nums text-os-dim">{score}</span>
+    <Layer>
+      <div className={gc('ap-g contents', 'contents')} data-adpilot={g ? undefined : ''}>
+        <div className="ap-backdrop fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+          <div
+            {...dlg.props}
+            data-ad-id={ad.id}
+            className={gc('ap-g-dossier', 'ap-panel h-full w-full max-w-[460px] overflow-y-auto rounded-none border-y-0 border-r-0 p-5 outline-none')}
+            style={swipeStyle}
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => {
+              const t = e.touches[0];
+              touch.current = { x: t.clientX, y: t.clientY };
+            }}
+            onTouchMove={(e) => {
+              const start = touch.current;
+              if (!start) return;
+              const t = e.touches[0];
+              const ddx = t.clientX - start.x;
+              if (Math.abs(t.clientY - start.y) > Math.abs(ddx)) return;
+              setDx(Math.max(0, ddx));
+            }}
+            onTouchEnd={() => {
+              touch.current = null;
+              if (dx >= SWIPE_CLOSE_PX) onClose();
+              else setDx(0);
+            }}
+          >
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <h2 id="ap-dossier-title" className="text-[15px] font-normal text-os-text">
+                  {ad.brand}
+                </h2>
+                <div className="mt-0.5 text-[12px] text-os-dim">
+                  {ad.format ?? 'ad'} · {ad.daysRunning} days {ad.live ? '· live' : '· off'}
+                  {ad.ctaType ? ` · ${ad.ctaType.toLowerCase().replaceAll('_', ' ')}` : ''}
                 </div>
-              ))}
+              </div>
+              <button type="button" data-dialog-close onClick={onClose} aria-label="Close dossier" title="Close (Esc)" className={gc('g-btn g-btn-icon g-btn-sm', 'c-btn p-1.5')}>
+                <X aria-hidden className="h-4 w-4" strokeWidth={1.7} />
+              </button>
             </div>
-          </div>
-        )}
 
-        {ad.transcript.length > 0 && (
-          <div className="mt-4">
-            <div className="text-[11px] text-os-dim">{ad.video ? 'Transcript: click a line to seek' : 'Transcript'}</div>
-            <div className="mt-2 flex flex-col">
-              {ad.transcript.map((line, i) => {
-                const stamp = `${Math.floor(line.t / 60)}:${String(Math.floor(line.t % 60)).padStart(2, '0')}`;
-                const body = (
-                  <>
-                    <span className="shrink-0 text-[11px] tabular-nums text-os-dim group-hover:text-[var(--accent)]">{stamp}</span>
-                    <span className="text-[12.5px] leading-snug text-os-muted group-hover:text-os-text">{line.s}</span>
-                  </>
-                );
-                // Without a video there is nothing to seek: plain lines, not buttons.
-                return ad.video ? (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => {
-                      const v = videoRef.current;
-                      if (v) {
-                        v.currentTime = line.t;
-                        v.play().catch(() => undefined);
-                      }
-                    }}
-                    title={`Play from ${stamp}`}
-                    className={gc('g-btn ap-g-rowbtn group', 'ap-inset-hover group flex gap-2.5 rounded-[7px] px-2 py-1.5 text-left')}
-                  >
-                    {body}
+            {ad.video ? (
+              <video ref={videoRef} src={ad.video} controls playsInline preload="metadata" className="ap-media w-full rounded-[10px]" />
+            ) : ad.thumbnail || ad.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={ad.thumbnail ?? ad.image ?? ''} alt={`${ad.brand} creative`} className="ap-media w-full rounded-[10px]" />
+            ) : null}
+
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <button type="button" onClick={() => onSave(ad)} aria-pressed={isSaved} className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
+                <Bookmark aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} fill={isSaved ? 'currentColor' : 'none'} />
+                {isSaved ? 'Saved' : 'Save'}
+              </button>
+              {ad.brandId &&
+                (isWatched ? (
+                  <button type="button" disabled title={`${ad.brand} is already on your watchlist`} className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
+                    <Check aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} /> Tracking
                   </button>
                 ) : (
-                  <div key={i} className="flex gap-2.5 px-2 py-1.5">
-                    {body}
-                  </div>
-                );
-              })}
+                  <button type="button" onClick={() => onWatch(ad)} className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
+                    <Plus aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} /> Track brand
+                  </button>
+                ))}
+              {ad.hook && (
+                <button type="button" onClick={copyHook} className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
+                  <Copy aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} /> {copied ? 'Copied' : 'Copy hook'}
+                </button>
+              )}
+              {ad.linkUrl && (
+                <a href={ad.linkUrl} target="_blank" rel="noreferrer" className={gc('g-btn g-btn-sm', 'c-btn flex items-center gap-1.5 text-[12px]')}>
+                  <ExternalLink aria-hidden className="h-3.5 w-3.5" strokeWidth={1.7} /> Landing page
+                </a>
+              )}
             </div>
+
+            {ad.hook && (
+              <div className="mt-4">
+                <div className="text-[11px] text-os-dim">Hook ({ad.hookSource})</div>
+                <p className="mt-1 text-[13.5px] leading-snug text-os-text">“{ad.hook}”</p>
+              </div>
+            )}
+
+            {topDrivers.length > 0 && (
+              <div className="mt-4">
+                <div className="text-[11px] text-os-dim">Emotional drivers</div>
+                <div className="mt-2 flex flex-col gap-1.5">
+                  {topDrivers.map(([axis, score]) => (
+                    <div key={axis} className="flex items-center gap-2">
+                      <span className="w-24 shrink-0 text-[12px] text-os-muted">{axis}</span>
+                      <div className="ap-inset h-[7px] flex-1 overflow-hidden rounded-full" role="img" aria-label={`${axis} ${score} of 10`}>
+                        <div className="ap-solid h-full rounded-full" style={{ width: `${(score / 10) * 100}%`, opacity: 0.4 + 0.06 * score }} />
+                      </div>
+                      <span className="w-6 shrink-0 text-right text-[11.5px] tabular-nums text-os-dim">{score}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {ad.transcript.length > 0 && (
+              <div className="mt-4">
+                <div className="text-[11px] text-os-dim">{ad.video ? 'Transcript: click a line to seek' : 'Transcript'}</div>
+                <div className="mt-2 flex flex-col">
+                  {ad.transcript.map((line, i) => {
+                    const stamp = `${Math.floor(line.t / 60)}:${String(Math.floor(line.t % 60)).padStart(2, '0')}`;
+                    const body = (
+                      <>
+                        <span className="shrink-0 text-[11px] tabular-nums text-os-dim group-hover:text-[var(--accent)]">{stamp}</span>
+                        <span className="text-[12.5px] leading-snug text-os-muted group-hover:text-os-text">{line.s}</span>
+                      </>
+                    );
+                    // Without a video there is nothing to seek: plain lines, not buttons.
+                    return ad.video ? (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          const v = videoRef.current;
+                          if (v) {
+                            v.currentTime = line.t;
+                            v.play().catch(() => undefined);
+                          }
+                        }}
+                        title={`Play from ${stamp}`}
+                        className={gc('g-btn ap-g-rowbtn group', 'ap-inset-hover group flex gap-2.5 rounded-[7px] px-2 py-1.5 text-left')}
+                      >
+                        {body}
+                      </button>
+                    ) : (
+                      <div key={i} className="flex gap-2.5 px-2 py-1.5">
+                        {body}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
-    </div>
+    </Layer>
   );
 }
 
