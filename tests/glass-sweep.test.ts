@@ -342,8 +342,10 @@ describe('no face enters with an opacity fade (brief §4): every fading keyframe
     for (const cls of ['.ae-sheet.ae-drawer', '.ae-o-wf-sheet', '.lab-c-sheet']) {
       expect(anim(cls), cls).toMatch(/^gl-materialise-drawer var\(--gl-dur-drawer\) var\(--gl-spring-drawer\)/);
     }
-    // the pop-out panel keeps its 50ms beat after the scrim
-    expect(anim('.panel-in')).toMatch(/ 50ms backwards$/);
+    // the pop-out panel keeps its 50ms beat after the scrim (the materialise list reads --gl-delay)
+    const panel = RULES.filter((r) => r.at.length === 0 && r.selectors.some((s) => /\[data-ground\]/.test(s) && subject(s) === '.panel-in'));
+    expect(panel.map((r) => props(r.body).get('--gl-delay')).filter(Boolean).pop()).toBe('50ms');
+    expect(anim('.panel-in')).toMatch(/var\(--gl-delay, 0ms\) backwards/);
   });
 
   test('the centred Octane hint rises 6px without leaving its centre', () => {

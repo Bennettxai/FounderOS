@@ -218,8 +218,14 @@
 
 /* ── GLASS PACK · tokens (FounderOS Glass brief §2). The faces, states and motion are the
    GLASS PACK block at the end of this file. ── */
+/* The knobs Materialise and Melt move (glass canon): the light's alphas, and the outer groove and drop
+   (with the inner shade), which come in with the frost. */
 @property --gl-rim-a { syntax: '<percentage>'; inherits: false; initial-value: 15%; }
+@property --gl-low-a { syntax: '<percentage>'; inherits: false; initial-value: 30%; }
 @property --gl-pool-a { syntax: '<percentage>'; inherits: false; initial-value: 9%; }
+@property --gl-groove { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --gl-drop { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --gl-shade { syntax: '<color>'; inherits: true; initial-value: transparent; }
 
 :root {
   --gl-groove: color-mix(in srgb, #000 55%, transparent);
@@ -232,11 +238,15 @@
   --gl-r-chip: 999px;
   --gl-on: var(--accent); /* "on" glow: the theme accent; status meaning takes [data-glow='ok'] */
   --solid-bg: var(--surface);
-  /* Spring S { stiffness 170, damping 20, mass .8 } sampled over 580ms (settles ~14f at 24fps). */
-  --gl-spring: linear(0, 0.051, 0.166, 0.306, 0.446, 0.574, 0.683, 0.772, 0.842, 0.894, 0.933, 0.96, 0.979, 0.991, 0.998, 1.002, 1.005, 1.005, 1.005, 1.005, 1.004, 1.003, 1.002, 1.002, 1);
+  /* Spring S { stiffness 170, damping 20, mass .8 } sampled over Materialise's 500ms (12f at 24fps); the same
+     curve as founderos.sh and the content calendar (glass canon). */
+  --gl-spring: linear(0, 0.0539 5%, 0.1752 10%, 0.3207 15%, 0.4649 20%, 0.5943 25%, 0.7033 30%, 0.7905 35%, 0.8577 40%, 0.9076 45%, 0.9433 50%, 0.9679 55%, 0.9843 60%, 0.9946 65%, 1.0006 70%, 1.0038 75%, 1.0051 80%, 1.0053 85%, 1.0049 90%, 1.0042 95%, 1);
   /* Drawer spring { stiffness 210, damping 26, mass 1 } sampled over 500ms. */
-  --gl-spring-drawer: linear(0, 0.038, 0.127, 0.24, 0.359, 0.473, 0.576, 0.666, 0.741, 0.803, 0.853, 0.892, 0.922, 0.946, 0.963, 0.975, 0.984, 0.991, 0.995, 0.998, 1, 1.001, 1.001, 1.002, 1);
-  --gl-dur-materialise: 580ms;
+  --gl-spring-drawer: linear(0, 0.0529 5%, 0.1709 10%, 0.3117 15%, 0.4509 20%, 0.576 25%, 0.6818 30%, 0.7674 35%, 0.8343 40%, 0.885 45%, 0.9225 50%, 0.9494 55%, 0.9683 60%, 0.9812 65%, 0.9898 70%, 0.9952 75%, 0.9985 80%, 1.0003 85%, 1.0013 90%, 1.0016 95%, 1);
+  --gl-dur-materialise: 500ms; /* 12f */
+  --gl-dur-rim: 417ms; /* the rim draws in over 10f */
+  --gl-dur-pool: 333ms; /* then the pool rises over 8f, */
+  --gl-pool-after: 167ms; /* starting 4f in */
   --gl-dur-drawer: 500ms;
   --gl-dur-melt: 333ms; /* 8f at 24fps */
 }
@@ -16799,7 +16809,12 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 /* A new message rises; only its text fades in, and the glass bubble materialises (no face fades in). */
 .ch-g-msg[data-new] { animation: ch-rise 180ms var(--ease) both; }
 .ch-g-msg[data-new] > .ch-g-agent-text { animation: ch-arrive 180ms var(--ease) both; }
-.ch-g-msg[data-new] > .ch-g-bubble { animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) backwards; }
+.ch-g-msg[data-new] > .ch-g-bubble {
+  animation:
+    gl-materialise var(--gl-dur-materialise) var(--gl-spring) var(--gl-delay, 0ms) backwards,
+    gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+    gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards;
+}
 .ch-g-narrow-only { display: none !important; }
 @container ch-shell (max-width: 900px) {
   .ch-g-grid:not([data-collapsed]) { grid-template-columns: 260px minmax(0, 1fr); }
@@ -17865,39 +17880,59 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   --gl-on: var(--ok);
 }
 
-/* Motion. Materialise (12f): frost 0 to full, scale .965 and y +18 to rest on the spring, the rim
-   drawn by ~420ms, then the pool rising over ~330ms. No opacity, ever. Melt (8f, linear): rim, pool
-   and frost to 0, scale to .98. */
+/* Motion (glass canon). Materialise (12f, 500ms): the frost from 0 to full, the outer groove and drop with it,
+   scale .965 and y +18 to rest, all on the spring; the rim (and bottom edge) draw in over 10f, linear, and the
+   pool rises 4f later over 8f. No opacity, ever. Every face that enters plays the three together:
+     gl-materialise var(--gl-dur-materialise) var(--gl-spring) var(--gl-delay, 0ms) backwards,
+     gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+     gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards
+   (a stagger sets --gl-delay). Only the entering face animates its frost, and nothing is left animating at
+   rest (the fill is backwards). Melt (8f, linear): the knobs, groove, drop and frost to 0, scale to .98. */
 @keyframes gl-materialise {
-  0% {
+  from {
     transform: translateY(18px) scale(0.965);
     -webkit-backdrop-filter: blur(0px) saturate(100%);
     backdrop-filter: blur(0px) saturate(100%);
-    --gl-rim-a: 0%;
-    --gl-pool-a: 0%;
+    --gl-groove: transparent;
+    --gl-drop: transparent;
+    --gl-shade: transparent;
   }
-  42% { --gl-pool-a: 0%; }
-  72% { --gl-rim-a: 15%; }
 }
 /* The drawer slides from the right instead of rising (brief §5 B11). */
 @keyframes gl-materialise-drawer {
-  0% {
+  from {
     transform: translateX(100%);
     -webkit-backdrop-filter: blur(0px) saturate(100%);
     backdrop-filter: blur(0px) saturate(100%);
-    --gl-rim-a: 0%;
-    --gl-pool-a: 0%;
+    --gl-groove: transparent;
+    --gl-drop: transparent;
+    --gl-shade: transparent;
   }
-  42% { --gl-pool-a: 0%; }
-  72% { --gl-rim-a: 15%; }
 }
+/* The toast drops from the top right instead (brief §5 B12: y -40 to 0 on S). */
+@keyframes gl-materialise-toast {
+  from {
+    transform: translateY(-40px);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+    --gl-groove: transparent;
+    --gl-drop: transparent;
+    --gl-shade: transparent;
+  }
+}
+@keyframes gl-rim-in { from { --gl-rim-a: 0%; --gl-low-a: 0%; } }
+@keyframes gl-pool-in { from { --gl-pool-a: 0%; } }
 @keyframes gl-melt {
   to {
     transform: scale(0.98);
     -webkit-backdrop-filter: blur(0px) saturate(100%);
     backdrop-filter: blur(0px) saturate(100%);
     --gl-rim-a: 0%;
+    --gl-low-a: 0%;
     --gl-pool-a: 0%;
+    --gl-groove: transparent;
+    --gl-drop: transparent;
+    --gl-shade: transparent;
   }
 }
 /* Content inside a face may follow 3f (125ms) later, transform only. */
@@ -17908,14 +17943,31 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 @keyframes gl-orbit { to { transform: rotate(360deg); } }
 
 /* Faces that used to fade in materialise instead (their old keyframes keep the motion half only). */
-:root[data-ground] :is(.gl-materialise, .g-sheet, .g-dialog, .g-palette, .ui-toast, .l-dialog) {
-  animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) backwards;
+:root[data-ground] :is(.gl-materialise, .g-sheet, .g-dialog, .g-palette, .l-dialog) {
+  animation:
+    gl-materialise var(--gl-dur-materialise) var(--gl-spring) var(--gl-delay, 0ms) backwards,
+    gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+    gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards;
 }
 :root[data-ground] .g-drawer {
-  animation: gl-materialise-drawer var(--gl-dur-drawer) var(--gl-spring-drawer) backwards;
+  animation:
+    gl-materialise-drawer var(--gl-dur-drawer) var(--gl-spring-drawer) var(--gl-delay, 0ms) backwards,
+    gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+    gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards;
 }
+:root[data-ground] .ui-toast {
+  animation:
+    gl-materialise-toast var(--gl-dur-materialise) var(--gl-spring) var(--gl-delay, 0ms) backwards,
+    gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+    gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards;
+}
+/* Cards on a page come in 4f (167ms) apart, in reading order (chips 3f, 125ms). */
 :root[data-ground] .l-card.l-rise {
-  animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) calc(var(--l-rise-i, 0) * 90ms) backwards;
+  --gl-delay: calc(var(--l-rise-i, 0) * 167ms);
+  animation:
+    gl-materialise var(--gl-dur-materialise) var(--gl-spring) var(--gl-delay, 0ms) backwards,
+    gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+    gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards;
 }
 :root[data-ground] .gl-follow {
   animation: gl-follow var(--gl-dur-materialise) var(--gl-spring) 125ms backwards;
@@ -17969,6 +18021,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
    GDialog), .g-palette-layer and the Classic palette's fixed wrapper. */
 :root {
   --gl-scrim: color-mix(in srgb, black 20%, transparent); /* the page dims 20%, on every ground */
+  --gl-scrim-solid: color-mix(in srgb, black 50%, transparent); /* no frost: the dim alone separates the face, 50% */
   --gl-dur-scrim: 417ms; /* 10f at 24fps */
 }
 
@@ -18002,9 +18055,9 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   }
 }
 
-/* founderos/components/slab.tsx: a SlabCard is a glass face that materialises on the slab's 90ms
-   stagger (Rise sets --l-rise-i). */
-:root[data-ground] .gl-materialise.l-rise { animation-delay: calc(var(--l-rise-i, 0) * 90ms); }
+/* founderos/components/slab.tsx: a SlabCard is a glass face that materialises on the cards' 4f (167ms)
+   stagger (Rise sets --l-rise-i; the materialise list reads --gl-delay). */
+:root[data-ground] .gl-materialise.l-rise { --gl-delay: calc(var(--l-rise-i, 0) * 167ms); }
 
 /* Reduced motion: the scrim is simply there, and goes with its face. */
 @media (prefers-reduced-motion: reduce) {
@@ -18013,11 +18066,17 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
     animation: none;
   }
 }
-/* Reduced transparency: the dim only, no frost (a browser without backdrop-filter shows the same). */
+/* Reduced transparency: no frost, a stronger dim (.5) instead; a browser without backdrop-filter shows the same. */
 @media (prefers-reduced-transparency: reduce) {
   :root[data-ground] .gl-scrim {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+    background: var(--gl-scrim-solid);
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-ground] .gl-scrim {
+    background: var(--gl-scrim-solid);
   }
 }
 /* ── end glass phase 2a ── */
@@ -18107,19 +18166,29 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   to { transform: translateX(-50%); }
 }
 :root[data-ground] .panel-in {
-  animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) 50ms backwards;
+  --gl-delay: 50ms;
+  animation:
+    gl-materialise var(--gl-dur-materialise) var(--gl-spring) var(--gl-delay, 0ms) backwards,
+    gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+    gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards;
 }
 :root[data-ground] .ae-sheet,
 :root[data-ground] .trd-g-hero,
 :root[data-ground] .ae-o-wf-palette,
 :root[data-ground] .ae-o-wf-banner,
 :root[data-ground] .ae-o-gate > div {
-  animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) backwards;
+  animation:
+    gl-materialise var(--gl-dur-materialise) var(--gl-spring) var(--gl-delay, 0ms) backwards,
+    gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+    gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards;
 }
 :root[data-ground] .ae-sheet.ae-drawer,
 :root[data-ground] .ae-o-wf-sheet,
 :root[data-ground] .lab-c-sheet {
-  animation: gl-materialise-drawer var(--gl-dur-drawer) var(--gl-spring-drawer) backwards;
+  animation:
+    gl-materialise-drawer var(--gl-dur-drawer) var(--gl-spring-drawer) var(--gl-delay, 0ms) backwards,
+    gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+    gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards;
 }
 :root[data-ground] .ae-o-wf-hint {
   animation: gl-rise-centred var(--gl-dur-materialise) var(--gl-spring) backwards;
@@ -18247,7 +18316,10 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 }
 /* A face that slides in from the right as a drawer (brief §5 B11); the melt still takes it out. */
 :root[data-ground] .gl-materialise--drawer:not(.is-melting) {
-  animation: gl-materialise-drawer var(--gl-dur-drawer) var(--gl-spring-drawer) backwards;
+  animation:
+    gl-materialise-drawer var(--gl-dur-drawer) var(--gl-spring-drawer) var(--gl-delay, 0ms) backwards,
+    gl-rim-in var(--gl-dur-rim) linear var(--gl-delay, 0ms) backwards,
+    gl-pool-in var(--gl-dur-pool) linear calc(var(--gl-delay, 0ms) + var(--gl-pool-after)) backwards;
 }
 @media (prefers-reduced-motion: reduce) {
   :root[data-ground] .gl-materialise--drawer:not(.is-melting) {

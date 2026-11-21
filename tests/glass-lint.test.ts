@@ -331,6 +331,9 @@ describe('the scrim: light to strong frost over 10 frames, 20% dim (brief §5 B1
     expect(motion).toMatch(/\.gl-scrim[^{]*\{[^}]*animation: none/);
     const clear = [...block.matchAll(/@media \(prefers-reduced-transparency: reduce\) \{([\s\S]*?\})\s*\}/g)].map((m) => norm(m[1])).join(' ');
     expect(clear).toMatch(/\.gl-scrim[^{]*\{[^}]*backdrop-filter: none/);
+    // with no frost to separate the face from the page, the dim does it: 50% (glass canon, fallbacks)
+    expect(clear).toMatch(/\.gl-scrim[^{]*\{[^}]*background: var\(--gl-scrim-solid\)/);
+    expect(norm(block)).toMatch(/--gl-scrim-solid: color-mix\(in srgb, black 50%, transparent\);/);
   });
 
   test('scrims cover their layer; faces stack above them', () => {

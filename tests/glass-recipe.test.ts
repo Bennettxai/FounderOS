@@ -294,8 +294,8 @@ describe('motion (brief §2 keyframes, §4 Materialise and Melt)', () => {
     expect(keyframes('g-orbit')).toBe(keyframes('gl-orbit'));
   });
 
-  test('rim and pool are registered percentages, so the light can animate', () => {
-    for (const [name, initial] of [['--gl-rim-a', '15%'], ['--gl-pool-a', '9%']]) {
+  test('the knobs are registered, so Materialise and Melt can move them (glass canon)', () => {
+    for (const [name, initial] of [['--gl-rim-a', '15%'], ['--gl-low-a', '30%'], ['--gl-pool-a', '9%']]) {
       const b = atBlocks(new RegExp(`^@property ${name}$`));
       expect(b.length, name).toBe(1);
       const p = props(b[0]);
@@ -303,38 +303,82 @@ describe('motion (brief §2 keyframes, §4 Materialise and Melt)', () => {
       expect(p.get('inherits'), name).toBe('false');
       expect(p.get('initial-value'), name).toBe(initial);
     }
+    // the outer groove and drop (and the inner shade) come in with the frost, so they are colours that interpolate
+    for (const name of ['--gl-groove', '--gl-drop', '--gl-shade']) {
+      const b = atBlocks(new RegExp(`^@property ${name}$`));
+      expect(b.length, name).toBe(1);
+      const p = props(b[0]);
+      expect(p.get('syntax'), name).toBe("'<color>'");
+      expect(p.get('inherits'), name).toBe('true');
+      expect(p.get('initial-value'), name).toBe('transparent');
+    }
   });
 
-  test('Materialise: frost from 0, scale .965 and y +18 to rest, rim then pool, never opacity', () => {
+  test('Materialise (12f, 500ms): frost, groove, drop and shade from 0, scale .965 and y +18 on the spring; never opacity', () => {
     const k = keyframes('gl-materialise');
     expect(k).not.toMatch(/opacity/);
-    expect(k).toMatch(/0% \{[^}]*transform: translateY\(18px\) scale\(0\.965\)/);
-    expect(k).toMatch(/0% \{[^}]*backdrop-filter: blur\(0px\) saturate\(100%\)/);
-    expect(k).toMatch(/0% \{[^}]*--gl-rim-a: 0%/);
-    expect(k).toMatch(/0% \{[^}]*--gl-pool-a: 0%/);
-    // the rim is drawn by ~420ms of 580ms, the pool waits for it
-    expect(k).toMatch(/72% \{ --gl-rim-a: 15%; \}/);
-    expect(k).toMatch(/42% \{ --gl-pool-a: 0%; \}/);
+    expect(k).toMatch(/^(from|0%) \{[^}]*\}$/);
+    expect(k).toMatch(/transform: translateY\(18px\) scale\(0\.965\)/);
+    expect(k).toMatch(/[^-]backdrop-filter: blur\(0px\) saturate\(100%\)/);
+    for (const v of ['--gl-groove', '--gl-drop', '--gl-shade']) expect(k, v).toMatch(new RegExp(`${v}: transparent`));
+    // the light is not on the spring: the rim (and bottom edge) draw in over 10f, then the pool rises over 8f
+    expect(keyframes('gl-rim-in')).toBe('from { --gl-rim-a: 0%; --gl-low-a: 0%; }');
+    expect(keyframes('gl-pool-in')).toBe('from { --gl-pool-a: 0%; }');
   });
 
-  test('the spring is a linear() curve for stiffness 170, damping 20, mass .8 (~580ms)', () => {
+  test('every materialising face plays the frost on the spring, the rim over 417ms, then the pool 167ms later over 333ms', () => {
+    const LIST = /^gl-materialise(-drawer|-toast)? var\(--gl-dur-(materialise|drawer)\) var\(--gl-spring(-drawer)?\) var\(--gl-delay, 0ms\) backwards, gl-rim-in var\(--gl-dur-rim\) linear var\(--gl-delay, 0ms\) backwards, gl-pool-in var\(--gl-dur-pool\) linear calc\(var\(--gl-delay, 0ms\) \+ var\(--gl-pool-after\)\) backwards$/;
+    const plays = RULES.filter((r) => /(^|[;\s])animation\s*:\s*gl-materialise/.test(r.body));
+    expect(plays.length).toBeGreaterThan(5);
+    for (const r of plays) expect(props(r.body).get('animation'), r.selectors.join(', ')).toMatch(LIST);
     const root = RULES.find((r) => r.selectors[0] === ':root' && props(r.body).has('--gl-groove'))!;
     const p = props(root.body);
-    expect(p.get('--gl-spring')).toMatch(/^linear\(0, .*, 1\)$/);
-    expect(p.get('--gl-dur-materialise')).toBe('580ms');
+    expect(p.get('--gl-dur-rim')).toBe('417ms');
+    expect(p.get('--gl-dur-pool')).toBe('333ms');
+    expect(p.get('--gl-pool-after')).toBe('167ms');
+  });
+
+  test('the springs are linear() samplings of S {170, 20, .8} and the drawer spring {210, 26, 1}, both over 500ms', () => {
+    const root = RULES.find((r) => r.selectors[0] === ':root' && props(r.body).has('--gl-groove'))!;
+    const p = props(root.body);
+    const spring = (k: number, c: number, m: number) => (t: number) => {
+      const w0 = Math.sqrt(k / m);
+      const z = c / (2 * Math.sqrt(k * m));
+      const wd = w0 * Math.sqrt(1 - z * z);
+      return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + ((z * w0) / wd) * Math.sin(wd * t));
+    };
+    const check = (curve: string | undefined, f: (t: number) => number) => {
+      expect(curve).toMatch(/^linear\(0, .*, 1\)$/);
+      const stops = curve!.slice(7, -1).split(',').slice(1, -1).map((x) => x.trim().split(/\s+/));
+      expect(stops.length).toBeGreaterThanOrEqual(19);
+      for (const [v, at] of stops) expect(Math.abs(Number(v) - f((0.5 * parseFloat(at)) / 100)), `${v} at ${at}`).toBeLessThan(0.002);
+    };
+    check(p.get('--gl-spring'), spring(170, 20, 0.8));
+    check(p.get('--gl-spring-drawer'), spring(210, 26, 1));
+    expect(p.get('--gl-dur-materialise')).toBe('500ms');
+    expect(p.get('--gl-dur-drawer')).toBe('500ms');
     expect(p.get('--gl-dur-melt')).toBe('333ms');
   });
 
-  test('Melt: rim, pool and frost to 0, scale to .98, linear; .is-melting plays it', () => {
+  test('Melt: rim, bottom edge, pool, groove, drop, shade and frost to 0, scale to .98, linear; .is-melting plays it', () => {
     const k = keyframes('gl-melt');
     expect(k).not.toMatch(/opacity/);
-    expect(k).toMatch(/to \{[^}]*--gl-rim-a: 0%/);
-    expect(k).toMatch(/to \{[^}]*--gl-pool-a: 0%/);
+    for (const v of ['--gl-rim-a', '--gl-low-a', '--gl-pool-a']) expect(k, v).toMatch(new RegExp(`to \\{[^}]*${v}: 0%`));
+    for (const v of ['--gl-groove', '--gl-drop', '--gl-shade']) expect(k, v).toMatch(new RegExp(`to \\{[^}]*${v}: transparent`));
     expect(k).toMatch(/to \{[^}]*backdrop-filter: blur\(0px\) saturate\(100%\)/);
     expect(k).toMatch(/to \{[^}]*transform: scale\(0\.98\)/);
     const r = ruleWith((s) => /\.is-melting$/.test(s));
     expect(r.length).toBeGreaterThan(0);
     expect(props(r[0].body).get('animation')).toBe('gl-melt var(--gl-dur-melt) linear forwards');
+  });
+
+  test('staggers: cards 4f (167ms) apart, chips 3f (125ms)', () => {
+    for (const sel of [':root[data-ground] .l-card.l-rise', ':root[data-ground] .gl-materialise.l-rise']) {
+      const r = RULES.filter((x) => x.selectors.includes(sel));
+      expect(r.length, sel).toBeGreaterThan(0);
+      expect(r.map((x) => props(x.body).get('--gl-delay')).filter(Boolean).pop(), sel).toBe('calc(var(--l-rise-i, 0) * 167ms)');
+    }
+    expect(CSS_NO_COMMENTS).toMatch(/\.bh-ask-chip:nth-child\(2\) \{ animation-delay: 125ms; \}/);
   });
 
   test('no face entrance fades: every face keyframe moves only transform and the light', () => {
