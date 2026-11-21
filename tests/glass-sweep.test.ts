@@ -163,7 +163,9 @@ describe('lint rule: bars frost on a layer behind their content (brief §3.2)', 
   test('each style keeps its own bar frost, now as layer tokens', () => {
     const v = (sel: string, name: string) =>
       TOP.filter((r) => r.selectors.includes(sel)).map((r) => props(r.body).get(name)).filter(Boolean).pop();
-    expect(v('.os-topbar', '--gl-bar-frost')).toBe('blur(8px)'); // Classic: what Tailwind backdrop-blur painted
+    // Classic: what `bg-os-bg2/70 backdrop-blur` painted, now on the layer (review finding 2: the fill came back)
+    expect(v('.os-topbar', '--gl-bar-bg')).toBe('color-mix(in srgb, var(--bg-2) 70%, transparent)');
+    expect(v('.os-topbar', '--gl-bar-frost')).toBe('blur(8px)');
     expect(v(":root[data-ui='glados'] .g-topbar", '--gl-bar-bg')).toBe('color-mix(in srgb, var(--g-bg) 72%, transparent)');
     expect(v(":root[data-ui='glados'] .g-topbar", '--gl-bar-frost')).toBe('blur(16px)');
     expect(v(":root[data-ui='legacy'] .os-topbar", '--gl-bar-bg')).toBe('color-mix(in oklab, var(--l-bg-2) 70%, transparent)');
@@ -181,9 +183,20 @@ describe('lint rule: bars frost on a layer behind their content (brief §3.2)', 
     }
   });
 
-  test('the Classic top bar carries no blur utility of its own', () => {
+  test('the Classic top bar carries no blur or fill utility of its own: both sit on its layer', () => {
     const cls = /className="(os-topbar [^"]*)"/.exec(read('components/Topbar.tsx'))![1];
     expect(cls).not.toMatch(/backdrop-blur|bg-os-bg2\//);
+  });
+
+  test('reduced transparency: the bar layers drop the blur and take the solid face colour', () => {
+    const rt = RULES.filter(
+      (r) => r.at.some((a) => /prefers-reduced-transparency:\s*reduce/.test(a)) && r.selectors.some((s) => /\.os-topbar::before$/.test(s)) && r.selectors.some((s) => /\.os-sidebar::before$/.test(s)),
+    );
+    expect(rt.length).toBe(1);
+    const p = props(rt[0].body);
+    expect(p.get('backdrop-filter')).toBe('none');
+    expect(p.get('-webkit-backdrop-filter')).toBe('none');
+    expect(p.get('background')).toBe('var(--solid-bg)');
   });
 });
 

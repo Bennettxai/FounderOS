@@ -18031,8 +18031,10 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 /* Bars: the frost is a ::before layer under the bar's content, so the buttons and the sidebar's active
    pill are never inside a backdrop-filter ancestor. Each style sets the layer tokens on its own bar
    rule (GladOS .g-topbar, Legacy .os-topbar, the Lab's frosted sidebar and top bar); Classic keeps
-   what Tailwind's backdrop-blur painted: no fill, an 8px blur. */
+   what its Tailwind utilities painted (bg-os-bg2/70 backdrop-blur): the bar ground at 70% over an
+   8px blur. */
 .os-topbar {
+  --gl-bar-bg: color-mix(in srgb, var(--bg-2) 70%, transparent);
   --gl-bar-frost: blur(8px);
 }
 .os-topbar,
@@ -18049,6 +18051,15 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   background: var(--gl-bar-bg, transparent);
   -webkit-backdrop-filter: var(--gl-bar-frost, none);
   backdrop-filter: var(--gl-bar-frost, none);
+}
+/* Reduced transparency: no blur behind the bars either; they take the solid face colour. */
+@media (prefers-reduced-transparency: reduce) {
+  .os-topbar::before,
+  .os-sidebar::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--solid-bg);
+  }
 }
 
 /* Segmented control: when the options scroll, a 20px layer in the track colour shades the edge the
