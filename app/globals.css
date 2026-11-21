@@ -17880,6 +17880,31 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   opacity: 0.55;
   pointer-events: none;
 }
+/* "On" on a large face (glass canon amendment: cards, panels, docks). A ::before inside the face paints above
+   the face's own frost and light, so on a big face it reads as a wash behind the text, a fill in effect. There
+   the glow is a sibling behind the face instead: a host (.gl-glow-host) carries the face's place and isolates,
+   the glow (.gl-glow) comes first at z-index -1, and the face (.gl-on-rim: the rim takes the glow's colour)
+   frosts it like anything else behind it. The canon blob (blur 40px, --gl-on at full strength, .55) is moved
+   out to the face's edges (an outer shadow of the face's own shape), because centred under a text-bearing
+   face it fails text contrast in the light modes at any visible strength; tests/glass-review.test.ts
+   measures the text over what the frost pulls in. */
+.gl-glow-host {
+  position: relative;
+  isolation: isolate;
+}
+.gl-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: none;
+  box-shadow: 0 0 40px var(--gl-on);
+  opacity: 0.55;
+  pointer-events: none;
+}
+:root[data-ground] .gl-on-rim {
+  --gl-tint: var(--gl-on);
+}
 /* Status meaning glows status green. */
 :root[data-ground] [data-glow='ok'] {
   --gl-on: var(--ok);

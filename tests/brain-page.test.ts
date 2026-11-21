@@ -50,7 +50,7 @@ describe('/brain header capture + graph placement', () => {
     const dock = read('components/BrainDock.tsx');
     // both dock states are anchored to the bottom centre
     expect(dock).toMatch(/bd-line[^"]*absolute bottom-\[52px\] left-1\/2/);
-    expect(dock).toMatch(/bd-card absolute bottom-\[46px\] left-1\/2/);
+    expect(dock).toMatch(/bd-card (?:gl-glow-host )?absolute bottom-\[46px\] left-1\/2/);
     // and the card grows upward out of the line rather than floating mid-canvas
     expect(dock).toMatch(/transformOrigin: 'bottom center'/);
     expect(dock).not.toMatch(/top-1\/2/);

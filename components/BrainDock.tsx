@@ -147,9 +147,10 @@ export function BrainDock({ g = false }: { g?: boolean } = {}) {
 
       {/* ── open: the card over the graph ──────────────────────────────── */}
       <div
-        // the open dump is a strong glass face, lit (gl-on: a glow behind, a tinted rim); it opens by visibility and
-        // scale, never a fade (glass brief §4)
-        className="bd-card absolute bottom-[46px] left-1/2 z-30 w-[440px] max-w-[86vw] rounded-[24px] p-3 glass-face glass-face--strong gl-on"
+        // the open dump is a strong glass face, lit: a tinted rim and a glow behind it. On a face this large the glow
+        // is a sibling behind the face, moved out to its edges (glass canon amendment), so the face frosts it without
+        // washing the text. The card opens by visibility and scale, never a fade (glass brief §4).
+        className="bd-card gl-glow-host absolute bottom-[46px] left-1/2 z-30 w-[440px] max-w-[86vw] rounded-[24px]"
         style={{
           visibility: open ? 'visible' : 'hidden',
           pointerEvents: open ? 'auto' : 'none',
@@ -162,7 +163,10 @@ export function BrainDock({ g = false }: { g?: boolean } = {}) {
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
       >
-        <BrainDump compact />
+        <span className="gl-glow" aria-hidden />
+        <div className="glass-face glass-face--strong gl-on-rim rounded-[24px] p-3">
+          <BrainDump compact />
+        </div>
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `

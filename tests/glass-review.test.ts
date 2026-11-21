@@ -6,6 +6,8 @@
  * (four accents, dark and light), Classic (five themes) and Bennett Legacy (Monolith, Daylight), each
  * on the ground lib/appearance.ts groundFor gives it.
  */
+import fs from 'node:fs';
+import path from 'node:path';
 import { describe, expect, test } from 'vitest';
 import { groundFor } from '@/lib/appearance';
 import { CSS_NO_COMMENTS, splitSelectors, topLevelRules } from './helpers/theme-css';
@@ -74,4 +76,109 @@ describe('focus: a ring in the accent, 2px, 2px out, at least 3:1 on the ground 
   });
 });
 
-export { LOOKS, colour, over, topLevelRules };
+const read = (rel: string) => fs.readFileSync(path.join(__dirname, '..', rel), 'utf8');
+
+/**
+ * "On" on a large face. The glow is a sibling behind the face (a halo of the face's own shape: an outer shadow,
+ * blur 40px, --gl-on at full strength, opacity .55), so nothing coloured sits directly under the text; what
+ * reaches the text is what the face's frost pulls in from just outside its edge. Model (1D, across the nearest
+ * edge): the halo's alpha at x px outside is .55 * (1 - PHI(x / 20)) (a 40px CSS shadow blur is a Gaussian of
+ * sigma 20), and a frost of blur(s) is a Gaussian of sigma s, so the tint under text p px inside the edge is
+ * the integral of the halo against that kernel. The text is then measured over the page ground tinted that much.
+ */
+const erf = (x: number) => {
+  const t = 1 / (1 + 0.3275911 * Math.abs(x));
+  const y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  return x >= 0 ? y : -y;
+};
+const PHI = (z: number) => 0.5 * (1 + erf(z / Math.SQRT2));
+const pdf = (z: number) => Math.exp(-(z * z) / 2) / Math.sqrt(2 * Math.PI);
+function haloTint(alpha: number, frostSigma: number, padding: number): number {
+  let sum = 0;
+  for (let x = 0; x < 400; x += 0.25) sum += alpha * (1 - PHI(x / 20)) * (pdf((x + padding) / frostSigma) / frostSigma) * 0.25;
+  return sum;
+}
+
+/** The large "on" faces: where the glow lives, the face's frost and its tightest text padding. */
+const LARGE_ON = [
+  { file: 'components/BrainDock.tsx', face: /<div className="glass-face glass-face--strong gl-on-rim rounded-\[24px\] p-3">/, frost: 28, padding: 12 },
+  { file: 'components/GBrainRadial.tsx', face: /className=\{`glass-face glass-face--strong \$\{showAnswer \? 'gl-on-rim' : ''\} rounded-\[24px\] px-3\.5 py-2`\}/, frost: 28, padding: 8 },
+  { file: 'components/adpilot/AdPilotDeck.tsx', face: /<div className="ap-panel gl-on-rim h-full p-5">/, frost: 3, padding: 20 },
+];
+
+describe('"on" on a large face: a glow behind it, never a wash behind the text (review finding 3, canon amendment)', () => {
+  const rule = (sel: string) => RULES.filter((r) => r.selectors.map(norm).includes(sel)).map((r) => r.body).join(';');
+
+  test('the glow is a sibling: an isolating host, the glow first at z-index -1, a halo of the face at blur 40px and .55', () => {
+    const host = rule('.gl-glow-host');
+    expect(decl(host, 'position')).toBe('relative');
+    expect(decl(host, 'isolation')).toBe('isolate');
+    const glow = rule('.gl-glow');
+    expect(decl(glow, 'position')).toBe('absolute');
+    expect(decl(glow, 'inset')).toBe('0');
+    expect(decl(glow, 'z-index')).toBe('-1');
+    expect(decl(glow, 'border-radius')).toBe('inherit');
+    expect(decl(glow, 'background')).toBe('none');
+    expect(decl(glow, 'box-shadow')).toBe('0 0 40px var(--gl-on)');
+    expect(decl(glow, 'opacity')).toBe('0.55');
+    expect(decl(glow, 'pointer-events')).toBe('none');
+    expect(decl(rule(':root[data-ground] .gl-on-rim'), '--gl-tint')).toBe('var(--gl-on)');
+  });
+
+  test.each(LARGE_ON.map((f) => [f.file, f] as const))('%s: the host, then the glow, then the face with the tinted rim (no ::before glow)', (file, f) => {
+    const src = read(file);
+    const host = src.indexOf('gl-glow-host');
+    const glow = src.indexOf('className="gl-glow"', host);
+    const face = src.search(f.face);
+    expect(host, 'host').toBeGreaterThan(-1);
+    expect(glow, 'glow after the host').toBeGreaterThan(host);
+    expect(face, 'face after the glow').toBeGreaterThan(glow);
+    expect(src).not.toMatch(/[\s'"`]gl-on[\s'"`]/);
+  });
+
+  test('TSX keeps the ::before glow (gl-on) for small faces only: chips, pills and tabs', () => {
+    const SMALL_TABS: Record<string, string> = {
+      'components/content/Composer.tsx': 'the composer tab buttons (a row of text tabs)',
+      'founderos/components/SlidingTabs.tsx': 'the sliding tab buttons',
+    };
+    const offenders: string[] = [];
+    for (const dir of ['app', 'components', 'founderos']) {
+      const walk = (d: string) => {
+        for (const e of fs.readdirSync(path.join(__dirname, '..', d), { withFileTypes: true })) {
+          const rel = path.join(d, e.name);
+          if (e.isDirectory()) walk(rel);
+          else if (e.name.endsWith('.tsx')) {
+            read(rel).split('\n').forEach((line, i) => {
+              for (const m of line.matchAll(/['"`]([^'"`]*\bgl-on\b[^'"`]*)['"`]/g)) {
+                if (/(^|\s)gl-on(\s|$)/.test(m[1]) && !/\bglass-chip\b/.test(m[1]) && !SMALL_TABS[rel]) offenders.push(`${rel}:${i + 1} ${m[1]}`);
+              }
+            });
+          }
+        }
+      };
+      walk(dir);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  test.each(LOOKS.flatMap((l) => LARGE_ON.map((f) => [`${l.name} · ${f.file}`, l, f] as const)))('%s: body and secondary text stay at 4.5:1 over the glow', (_, look, f) => {
+    const env = rootCascade(look.attrs);
+    const ground = colour(env, look.ground);
+    const on = colour(env, '--gl-on');
+    const tint = haloTint(0.55, f.frost, f.padding);
+    expect(tint).toBeLessThan(0.06);
+    const under = over([on[0], on[1], on[2], tint], ground);
+    for (const t of ['--text', '--text-2']) expect(ratio(colour(env, t), under), t).toBeGreaterThanOrEqual(4.5);
+  });
+
+  test('the old model (the blob centred under the text at .55) would fail: the reason the glow moved out', () => {
+    const fails = LOOKS.filter((l) => {
+      const env = rootCascade(l.attrs);
+      const on = colour(env, '--gl-on');
+      return ratio(colour(env, '--text-2'), over([on[0], on[1], on[2], 0.55], colour(env, l.ground))) < 4.5;
+    });
+    expect(fails.length).toBe(LOOKS.length);
+  });
+});
+
+export { LOOKS, colour };

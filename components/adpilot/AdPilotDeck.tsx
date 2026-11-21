@@ -596,7 +596,11 @@ function HeroSpend({
 }) {
   const maxSpend = Math.max(...campaigns.map((c) => c.spend), 1);
   return (
-    <div className="ap-panel gl-on h-full p-5">
+    // "on" on a large face (glass canon amendment): the glow is a sibling behind the face, moved out to its edges so the
+    // face frosts it like anything else behind it without washing the text (tests/glass-review.test.ts measures it)
+    <div className="gl-glow-host h-full rounded-[24px]">
+      <span className="gl-glow" aria-hidden />
+      <div className="ap-panel gl-on-rim h-full p-5">
       <div className="text-[12.5px] text-os-dim">{windowLabel ? `Ad spend · ${windowLabel}` : 'Ad spend'}</div>
       <div className="mt-1 text-[36px] font-light tabular-nums leading-none text-os-text">{money(metrics.spend)}</div>
       <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -625,6 +629,7 @@ function HeroSpend({
             </button>
           );
         })}
+      </div>
       </div>
     </div>
   );

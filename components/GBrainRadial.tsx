@@ -747,13 +747,16 @@ export function GBrainRadial({
             // slot this portals into, so without it the ring painted on top and
             // backdrop-filter had nothing behind it to frost.
             // a glass face (strong frost over the ring); it shows and hides by visibility and a 6px rise, never a
-            // fade (glass brief §4), and an answer lights it: a glow behind and a tinted rim (gl-on), not a fill
-            className={`glass-face glass-face--strong ${showAnswer ? 'gl-on' : ''} absolute right-0 top-0 z-40 w-[560px] max-w-full rounded-[24px] px-3.5 py-2 transition-[transform,visibility] duration-500`}
+            // fade (glass brief §4), and an answer lights it: a tinted rim and a glow behind, never a fill. On a face
+            // this large the glow is a sibling behind the face, moved out to its edges (glass canon amendment).
+            className="gl-glow-host absolute right-0 top-0 z-40 w-[560px] max-w-full rounded-[24px] transition-[transform,visibility] duration-500"
             style={{
               visibility: showAnswer ? 'visible' : 'hidden',
               transform: showAnswer ? 'translateY(0)' : 'translateY(-6px)',
             }}
           >
+            {showAnswer && <span className="gl-glow" aria-hidden />}
+            <div className={`glass-face glass-face--strong ${showAnswer ? 'gl-on-rim' : ''} rounded-[24px] px-3.5 py-2`}>
             <div className="flex items-baseline gap-2">
               <span className="h-1.5 w-1.5 shrink-0 translate-y-[-2px] rounded-full" style={{ background: MINT }} />
               <span className="shrink-0 font-mono text-[10px]" style={{ color: 'var(--text-2)' }}>
@@ -781,6 +784,7 @@ export function GBrainRadial({
                 )}
               </div>
             )}
+            </div>
           </div>,
           noticeSlot,
         )}
