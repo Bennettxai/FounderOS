@@ -260,7 +260,7 @@
 
 /* The knobs: animation and state only ever move these. */
 :where(
-  .glass-face, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+  .glass-face, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
   .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
   .wiz-ask, .g-ask-box, .glass-face--strong, .glass-solid, .os-nav-tip, .g-pop, .g-tip, .g-chart-tip, .gl-on,
   .g-seg-opt[aria-checked='true'], .g-seg-opt.is-on, .l-toggle-chip[data-on='true'], .os-sidebar a.os-nav-link[aria-current='page']
@@ -474,7 +474,7 @@ body {
    stray blue glow on every hoverable card and nav row, so it gets a warm
    re-tone here instead of at each call site. */
 /* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
-:root[data-theme='red'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
+:root[data-theme='red'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(255, 170, 130, 0.22),
     0 0 30px -8px rgba(255, 130, 90, 0.42);
@@ -670,7 +670,7 @@ body {
   background-image: none;
 }
 /* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
-:root[data-theme='light'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
+:root[data-theme='light'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(20, 40, 80, 0.14),
     0 10px 24px -10px rgba(20, 24, 32, 0.22);
@@ -874,8 +874,8 @@ body {
   background-image: linear-gradient(155deg, rgba(36, 52, 84, 0.38) 0%, rgba(12, 18, 30, 0.18) 55%, rgba(5, 8, 14, 0.32) 100%);
 }
 /* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
-:root[data-theme='frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover,
-:root[data-theme='grey-frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
+:root[data-theme='frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover,
+:root[data-theme='grey-frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(170, 210, 255, 0.28),
     0 0 34px -8px rgba(120, 180, 255, 0.6);
@@ -14589,7 +14589,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   background-image: none;
 }
 /* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
-:root[data-theme='daylight'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
+:root[data-theme='daylight'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(20, 40, 80, 0.14),
     0 10px 24px -10px rgba(20, 24, 32, 0.22);
@@ -17751,7 +17751,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 
 /* The face. */
 :root[data-ground] :is(
-  .glass-face, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+  .glass-face, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
   .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
   .wiz-ask, .g-ask-box, .ap-panel, .ap-chip
 ) {
@@ -17938,7 +17938,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 /* No blur where the browser or the viewer asks for none: the same light on a solid face. */
 @media (prefers-reduced-transparency: reduce) {
   :root[data-ground] :is(
-    .glass-face, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+    .glass-face, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
     .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
     .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .glass-face--strong, .lab2-glass[data-tone='strong'], .wiz-ask-glass, .g-ask-glass
   ) {
@@ -17949,7 +17949,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root[data-ground] :is(
-    .glass-face, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+    .glass-face, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
     .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
     .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .glass-face--strong, .lab2-glass[data-tone='strong'], .wiz-ask-glass, .g-ask-glass
   ) {
@@ -18152,7 +18152,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 }
 :root[data-ground] .glass-well,
 :root[data-ground] :is(
-  .glass-face, .c-pop, .l-card, .l-slab, .l-dialog, .g-card, .g-card-raised, .g-sheet, .g-drawer, .g-dialog, .h6-card,
+  .glass-face, .c-pop, .l-card, .l-dialog, .g-card, .g-card-raised, .g-sheet, .g-drawer, .g-dialog, .h6-card,
   .glass-panel, .glass-panel-violet, .lab2-glass, .bg-os-surface.rounded-lg-t
 ) :not(.border-dashed).bg-os-surface.rounded-lg-t {
   background: transparent;
@@ -18196,11 +18196,11 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
    there sits over content, so it is a solid raised face. tests/glass-lint.test.ts holds the lists to
    the face rule (the lint's glass-over-glass exemption rests on this). */
 :root[data-ground] :is(
-  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
   .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
   .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
 ) :is(
-  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
   .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
   .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
 ) {
@@ -18208,7 +18208,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   backdrop-filter: none;
 }
 :root[data-ground] :is(
-  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
   .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
   .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
 ) :is(.c-chip, .g-chip, .l-chip, .glass-chip, .ap-chip) {
@@ -18218,7 +18218,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
     inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent);
 }
 :root[data-ground] :is(
-  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
   .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
   .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
 ) :is(.c-pop, .glass-face--strong, .lab2-glass[data-tone='strong']) {
@@ -18280,14 +18280,14 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
    brightens its rim, bottom edge and pool; the glow themes tint that light with their accent instead of the
    coloured glow they give other hoverables (those theme rules exclude the faces). */
 :root[data-ground] :is(
-  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
 ).hoverable:hover {
   --gl-rim-a: 28%;
   --gl-low-a: 40%;
   --gl-pool-a: 14%;
 }
 :root[data-ground]:is([data-theme='red'], [data-theme='frost'], [data-theme='grey-frost'], [data-theme='light'], [data-theme='daylight']) :is(
-  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t
 ).hoverable:hover {
   --gl-tint: var(--accent);
 }

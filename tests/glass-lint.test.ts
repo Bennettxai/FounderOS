@@ -74,7 +74,7 @@ describe('the lint itself', () => {
     expect(lint(`<div className="glass-face"><img className="opacity-50" /></div>`)).toEqual([]);
     expect(lint(`<div className="opacity-100 placeholder:opacity-50 blur-none"><div className="g-card" /></div>`)).toEqual([]);
     expect(lint(`<div className="dim"><div className="glass-face" /></div>`)).toEqual([]);
-    expect(lint(`<div className="l-slab"><div className="l-card"><span className="l-chip" /></div></div>`)).toEqual([]);
+    expect(lint(`<div className="g-card"><div className="l-card"><span className="l-chip" /></div></div>`)).toEqual([]);
     expect(lint(`<div style={{ opacity: 1, filter: 'none' }}><GChip /></div>`)).toEqual([]);
   });
 
@@ -93,7 +93,7 @@ describe('the lint itself', () => {
     const again = lint(`<div className="g-card"><span className="glass-chip backdrop-blur-md" /></div>`);
     expect(again).toHaveLength(1);
     expect(again[0].why).toMatch(/frosts again inside <div className="g-card">/);
-    expect(lint(`<div className="l-slab"><div style={{ backdropFilter: 'blur(4px)' }} className="l-card" /></div>`)).toHaveLength(1);
+    expect(lint(`<div className="g-card"><div style={{ backdropFilter: 'blur(4px)' }} className="l-card" /></div>`)).toHaveLength(1);
     // a face's own frost is fine where nothing frosts under it
     expect(lint(`<div><span className="glass-chip backdrop-blur-md" /></div>`)).toEqual([]);
   });

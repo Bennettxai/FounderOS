@@ -50,7 +50,7 @@ const noSubscribe = () => () => {};
  * the panel mounts once, in the portal, and useDialog's focus-in runs on the
  * real node.
  */
-function Layer({ children }: { children: ReactNode }) {
+export function Layer({ children }: { children: ReactNode }) {
   const target = useSyncExternalStore(
     noSubscribe,
     () => document.body,

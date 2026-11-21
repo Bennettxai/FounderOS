@@ -636,7 +636,7 @@ describe('component-local keyframes: no face fades in (CSS files and <style> blo
 describe('hover moves the glass knobs only (glass phase 3)', () => {
   /** Every face: the pack's classes, the wells and solid faces, the Classic card. */
   const FACES = [
-    '.glass-face', '.glass-face--strong', '.l-card', '.l-slab', '.l-chip', '.l-dialog', '.g-card', '.g-card-raised', '.g-well', '.g-chip',
+    '.glass-face', '.glass-face--strong', '.l-card', '.l-chip', '.l-dialog', '.g-card', '.g-card-raised', '.g-well', '.g-chip',
     '.g-sheet', '.g-drawer', '.g-dialog', '.g-palette', '.ui-toast', '.c-pop', '.c-chip', '.h6-card', '.glass-panel', '.glass-panel-violet',
     '.glass-chip', '.lab2-glass', '.wiz-ask', '.g-ask-box', '.glass-well', '.glass-solid', '.bg-os-surface.rounded-lg-t',
   ];
