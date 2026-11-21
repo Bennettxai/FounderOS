@@ -18319,11 +18319,18 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
     inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
     inset 0 12px 18px -14px var(--gl-shade);
 }
-:root[data-ground] .glass-well,
+/* The well, one rule for every style (review finding 7): the explicit wells (.glass-well, GladOS .g-well, the
+   wizard's cards) and any card face of any style (GladOS, Legacy, Classic, the Lab, AdPilot, the plain face)
+   nested in any frosting face. Pop-ups and solid faces nested in a face stay solid raised faces (glass phase 3);
+   chips there keep their pool (the nested chip rule). */
+:root[data-ground] :is(.glass-well, .g-well, .wz-card),
 :root[data-ground] :is(
-  .glass-face, .c-pop, .l-card, .l-dialog, .g-card, .g-card-raised, .g-sheet, .g-drawer, .g-dialog, .h6-card,
-  .glass-panel, .glass-panel-violet, .lab2-glass, .bg-os-surface.rounded-lg-t
-) :not(.border-dashed).bg-os-surface.rounded-lg-t {
+  .glass-face, .glass-face--strong, .c-pop, .l-card, .l-dialog, .g-card, .g-card-raised, .g-sheet, .g-drawer, .g-dialog,
+  .g-palette, .h6-card, .glass-panel, .glass-panel-violet, .lab2-glass, .ap-panel, .wz-panel, .bg-os-surface.rounded-lg-t:not(.border-dashed)
+) :is(
+  .glass-face, .l-card, .g-card, .g-card-raised, .h6-card, .glass-panel, .glass-panel-violet, .lab2-glass, .ap-panel,
+  .bg-os-surface.rounded-lg-t
+):not(.border-dashed, .glass-face--strong, .glass-solid, .c-pop, .ui-toast, [data-tone='strong'], [data-tone='solid'], [data-tone='tint']) {
   background: transparent;
   border-color: transparent;
   border-radius: var(--gl-r-well);

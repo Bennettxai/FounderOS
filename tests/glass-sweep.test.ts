@@ -451,9 +451,10 @@ describe('Classic ad-hoc cards are glass faces', () => {
   });
 
   test('a card inside a face is a well: rim light only, no second frost, radius 16', () => {
-    const wells = TOP.filter((r) => r.selectors.includes(':root[data-ground] .glass-well'));
+    // the well rule is shared by every style (review finding 7; its own describe at the end holds the lists)
+    const wells = TOP.filter((r) => r.selectors.some((s) => /^:root\[data-ground\] :is\(\.glass-well,/.test(norm(s))));
     expect(wells.length).toBe(1);
-    const nested = wells[0].selectors.find((s) => /\) :not\(\.border-dashed\)\.bg-os-surface\.rounded-lg-t$/.test(s));
+    const nested = wells[0].selectors.map(norm).find((s) => /\) :is\(.*\.bg-os-surface\.rounded-lg-t.*\):not\(.*\.border-dashed/.test(s));
     expect(nested, 'nested mapped cards share the well rule').toBeDefined();
     for (const face of ['.glass-face', '.c-pop', '.l-card', '.g-card', '.h6-card', '.glass-panel', '.bg-os-surface.rounded-lg-t']) {
       expect(nested!, face).toContain(face);
@@ -1062,5 +1063,84 @@ describe('review finding 6d: Legacy\'s "no Classic drop shadow" rule leaves ever
       const spared = excluded.some((m) => m.split('.').filter(Boolean).every((c) => tokens.includes(c)));
       expect(spared, f).toBe(true);
     }
+  });
+});
+
+describe('review finding 7: a nested face is a well, one rule for every style', () => {
+  const SIX_ = layers(
+    props(TOP.filter((r) => r.selectors.some((s) => /\[data-ground\] :is\(\s*\.glass-face,/.test(s)) && /box-shadow/.test(r.body))[0].body).get('box-shadow')!,
+  );
+  /** `:root[data-ground] :is(OUTER) :is(INNER):not(EXCL)` → its three lists. */
+  const parts = (sel: string): [string[], string[], string[]] | null => {
+    const s = norm(sel);
+    const groups: string[] = [];
+    for (const head of [':is(', ':is(', ':not(']) {
+      const from = groups.length ? s.indexOf(head, s.indexOf(groups[groups.length - 1]) + groups[groups.length - 1].length) : s.indexOf(head);
+      if (from < 0) return null;
+      let depth = 0;
+      for (let i = from + head.length - 1; i < s.length; i++) {
+        if (s[i] === '(') depth++;
+        else if (s[i] === ')' && --depth === 0) {
+          groups.push(s.slice(from + head.length, i));
+          break;
+        }
+      }
+    }
+    return groups.length === 3 ? (groups.map((g) => splitSelectors(g).map(norm)) as [string[], string[], string[]]) : null;
+  };
+  /** Every top-level rule that lights an element with only the rim and the bottom edge at the well radius. */
+  const WELL_RULES = TOP.filter((r) => {
+    const p = props(r.body);
+    return p.get('border-radius') === 'var(--gl-r-well)' && /box-shadow/.test(r.body) && sameLayers(p.get('box-shadow')!);
+  });
+  function sameLayers(v: string) {
+    const l = layers(v);
+    return l.length === 2 && l[0] === SIX_[2] && l[1] === SIX_[3];
+  }
+
+  test('exactly one rule draws the well: transparent, no frost, rim and bottom edge, radius 16', () => {
+    expect(WELL_RULES.length).toBe(1);
+    const p = props(WELL_RULES[0].body);
+    expect(p.get('background')).toBe('transparent');
+    expect(p.get('border-color')).toBe('transparent');
+    expect(p.get('backdrop-filter')).toBe('none');
+    expect(p.get('-webkit-backdrop-filter')).toBe('none');
+  });
+
+  test('the explicit wells of every style share it: .glass-well, GladOS .g-well, the wizard cards', () => {
+    const own = WELL_RULES[0].selectors.map(norm).find((s) => /^:root\[data-ground\] :is\(\.glass-well,/.test(s))!;
+    expect(own).toBeDefined();
+    const members = splitSelectors(own.slice(':root[data-ground] :is('.length, -1)).map(norm);
+    for (const m of ['.glass-well', '.g-well', '.wz-card']) expect(members, m).toContain(m);
+  });
+
+  test('a card face of any style nested in any frosting face is that well; pop-ups and solid faces are not', () => {
+    const nested = WELL_RULES[0].selectors.map(parts).find(Boolean)!;
+    expect(nested, 'the nested selector').toBeTruthy();
+    const [outer, inner, excl] = nested;
+    for (const f of ['.glass-face', '.glass-face--strong', '.c-pop', '.l-card', '.l-dialog', '.g-card', '.g-card-raised', '.g-sheet', '.g-drawer', '.g-dialog', '.g-palette', '.h6-card', '.glass-panel', '.glass-panel-violet', '.lab2-glass', '.ap-panel']) {
+      expect(outer, `outer ${f}`).toContain(f);
+    }
+    expect(outer.some((m) => m.startsWith('.bg-os-surface.rounded-lg-t')), 'outer: the mapped Classic card').toBe(true);
+    // GladOS, Legacy, Classic, the Lab and AdPilot cards, and the plain face
+    for (const f of ['.g-card', '.g-card-raised', '.l-card', '.bg-os-surface.rounded-lg-t', '.h6-card', '.glass-panel', '.lab2-glass', '.ap-panel', '.glass-face']) {
+      expect(inner, `inner ${f}`).toContain(f);
+    }
+    for (const x of ['.border-dashed', '.glass-face--strong', '.glass-solid', '.c-pop', "[data-tone='strong']", "[data-tone='solid']"]) expect(excl, `not ${x}`).toContain(x);
+  });
+
+  test('no style-scoped rule refills, refrosts or relights a well over it', () => {
+    const wellish = ['g-well', 'glass-well', 'wz-card'];
+    const own = WELL_RULES[0]?.selectors.join(', ');
+    const offenders = RULES.filter((r) => r.selectors.join(', ') !== own && r.selectors.some((s) => {
+      const subj = subject(s);
+      if (subj.includes('::') || !wellish.some((c) => hasClass(subj, c))) return false;
+      const p = props(r.body);
+      if (!['background', 'background-color', 'box-shadow', 'backdrop-filter'].some((k) => p.has(k))) return false;
+      if (/!important/.test(r.body)) return true;
+      const n = (s.replace(/:(?:where)\([^)]*\)/g, '').match(/\.[\w-]+|\[[^\]]+\]|:(?!:)[\w-]+/g) ?? []).length;
+      return n >= 3; // the well rule's own selector is :root[data-ground] :is(...): three class-level parts
+    }));
+    expect(offenders.map((r) => r.selectors.join(', '))).toEqual([]);
   });
 });
