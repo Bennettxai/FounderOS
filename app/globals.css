@@ -17991,6 +17991,15 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
     --gl-shade: transparent;
   }
 }
+/* A face nested in a frosted face has no frost of its own (glass over glass): it materialises lit only. */
+@keyframes gl-materialise-lit {
+  from {
+    transform: translateY(18px) scale(0.965);
+    --gl-groove: transparent;
+    --gl-drop: transparent;
+    --gl-shade: transparent;
+  }
+}
 @keyframes gl-rim-in { from { --gl-rim-a: 0%; --gl-low-a: 0%; } }
 @keyframes gl-pool-in { from { --gl-pool-a: 0%; } }
 @keyframes gl-melt {
@@ -18357,6 +18366,17 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 ) {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+}
+/* ...so when it enters it animates no frost either: only the entering top face pays for a backdrop pass
+   (glass review 10). Motion allowed only: reduced motion keeps these faces at rest. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-ground] :is(
+    .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
+    .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
+    .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
+  ) :is(.gl-materialise, .l-card.l-rise, .panel-in) {
+    animation-name: gl-materialise-lit, gl-rim-in, gl-pool-in;
+  }
 }
 :root[data-ground] :is(
   .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,

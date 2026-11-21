@@ -195,6 +195,20 @@ describe('frost costs nothing at rest (review finding 10)', () => {
     });
   };
 
+  test('a face nested in a frosted face (no frost of its own) materialises without animating a frost', () => {
+    const kf = /@keyframes gl-materialise-lit\s*\{([^{}]*\{[^{}]*\})\s*\}/.exec(CSS_NO_COMMENTS);
+    expect(kf, '@keyframes gl-materialise-lit').not.toBeNull();
+    expect(kf![1]).not.toMatch(/backdrop-filter|opacity/);
+    expect(norm(kf![1])).toMatch(/transform: translateY\(18px\) scale\(0\.965\)/);
+    // only where motion is allowed (reduced motion keeps animation: none), and with the entering names only
+    const nested = RULES.filter((r) => decl(r.body, 'animation-name') === 'gl-materialise-lit, gl-rim-in, gl-pool-in');
+    expect(nested.length).toBe(1);
+    const blocks = [...CSS_NO_COMMENTS.matchAll(/@media \(prefers-reduced-motion: no-preference\) \{([\s\S]*?\})\s*\}/g)].map((m) => m[1]);
+    expect(blocks.some((b) => b.includes('gl-materialise-lit, gl-rim-in, gl-pool-in'))).toBe(true);
+    const sel = norm(nested[0].selectors.join(', '));
+    for (const k of ['.gl-materialise', '.l-card.l-rise', '.panel-in']) expect(sel, k).toContain(k);
+  });
+
   test('no face transitions its frost (no transition on all or backdrop-filter)', () => {
     const bad = RULES.filter((r) => /\ball\b|backdrop-filter/.test(decl(r.body, 'transition') ?? decl(r.body, 'transition-property') ?? '')).flatMap((r) => r.selectors.filter(onFace));
     expect(bad).toEqual([]);
