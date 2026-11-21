@@ -146,6 +146,10 @@ describe('G0 token coverage (AC00.10, ACGP3.6)', () => {
     for (const [a, m] of combos) for (const [t, v] of Object.entries(FIXED)) expect(env(a, m).get(t), `${t} ${a}/${m}`).toBe(v);
   });
 
+  it('the elevation shadows carry no top-edge highlight (glass is lit from the bottom; review finding 6b)', () => {
+    for (const [a, m] of combos) for (const t of ['--g-shadow', '--g-shadow-sm']) expect(env(a, m).get(t), `${t} ${a}/${m}`).not.toMatch(/inset/);
+  });
+
   it('neutrals are palette independent (same in every accent of a mode)', () => {
     const neutral = [...TOKENS.surfaces, ...TOKENS.ink, ...TOKENS.lines, ...TOKENS.elevation, '--g-ok', '--g-warn', '--g-err'];
     for (const m of MODES) for (const a of ACCENTS) for (const t of neutral) expect(env(a, m).get(t), `${t} ${a}/${m}`).toBe(env(ACCENTS[0], m).get(t));

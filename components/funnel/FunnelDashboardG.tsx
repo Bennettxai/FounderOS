@@ -309,7 +309,7 @@ export function FunnelDashboardG({ journeys, archived, nowIso, source, connector
       status={summary.clients === 0 ? 'Nothing to read yet' : `${summary.converted} of ${summary.clients} leads converted`}
       title="Converted journeys over every active journey"
       strip={
-        <div className="fn-g-ins">
+        <div className="fn-g-ins glass-solid">
           <p className="fn-g-ins-head">
             {summary.clients === 0
               ? 'Connect Attio or GHL and this card starts reading the pipeline.'

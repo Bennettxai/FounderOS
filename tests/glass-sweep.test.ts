@@ -1144,3 +1144,95 @@ describe('review finding 7: a nested face is a well, one rule for every style', 
     expect(offenders.map((r) => r.selectors.join(', '))).toEqual([]);
   });
 });
+
+describe('review finding 6b: the GladOS surfaces that were filled cards on --g-shadow are faces of the pack', () => {
+  const SIX_ = layers(
+    props(TOP.filter((r) => r.selectors.some((s) => /\[data-ground\] :is\(\s*\.glass-face,/.test(s)) && /box-shadow/.test(r.body))[0].body).get('box-shadow')!,
+  );
+  const G = ":root[data-ground][data-ui='glados']";
+  const BP = `${G} .kg-blueprint`;
+  const WF = `${G} .wfc[data-skin='g']`;
+  const LIGHT = [`${BP} .bh-node:not(.start, .diamond) .bh-card`];
+  const STRONG = [`${BP} .bh-search-panel`, `${WF} :is(.minimap, .dock:not(.dock-ratio), .panel, .modal)`];
+  const SOLID = [`${WF} .menu`];
+  const ruleFor = (sel: string, media?: RegExp) =>
+    RULES.filter((r) => r.selectors.map(norm).includes(sel) && (media ? r.at.some((a) => media.test(a)) : r.at.length === 0));
+  const last = (sel: string, name: string, media?: RegExp) => ruleFor(sel, media).map((r) => props(r.body).get(name)).filter(Boolean).pop();
+
+  test('rendered by the kit: the skill file panel is a strong face, the campaign switcher a solid one, the credits pill a face', () => {
+    expect(read('components/SkillHierarchy.tsx')).toMatch(/className="wg-skh-panel glass-face glass-face--strong"/);
+    expect(read('components/creative-engine/classic.tsx')).toMatch(/return g \? 'ce-g-switcher glass-solid' : 'ae-pop';/);
+    expect(read('app/compute/page.tsx')).toMatch(/className="kg-credits glass-face"/);
+    expect(read('components/funnel/FunnelDashboardG.tsx')).toMatch(/className="fn-g-ins glass-solid"/);
+  });
+
+  test('their own rules paint no fill and no --g-shadow (the pack lights them)', () => {
+    const own = RULES.filter((r) => r.selectors.some((s) => {
+      const subj = subject(s);
+      return !subj.includes('::') && ['wg-skh-panel', 'ce-g-switcher', 'kg-credits', 'fn-g-ins'].some((c) => hasClass(subj, c));
+    }));
+    expect(own.length).toBeGreaterThan(0);
+    for (const r of own) {
+      const p = props(r.body);
+      expect(p.has('background') || p.has('background-color'), r.selectors.join()).toBe(false);
+      expect(p.get('box-shadow') ?? '', r.selectors.join()).not.toMatch(/--g-shadow/);
+    }
+  });
+
+  test('the funnel insight strip sits on the hero\'s bottom glow, where neither ink reads: so it is the solid raised face', async () => {
+    const { gCascade, gRules, resolve, tokenColour, worstContrast } = await import('./helpers/g-colour');
+    const R = gRules();
+    for (const m of ['dark', 'light'] as const) {
+      const e = gCascade('ice', m, R);
+      const bg = resolve(e, 'var(--g-hero-a)');
+      const strip = { x: [0.08, 0.92], y: [0.78, 0.94] } as const;
+      for (const ink of ['--g-ink', '--g-on-hero']) expect(worstContrast(bg, tokenColour(e, ink), strip), `${ink} ${m}`).toBeLessThan(4.5);
+    }
+  });
+
+  test('the Blueprint nodes are faces; its search panel and the canvas minimap, docks, side panel and modals are strong faces', () => {
+    for (const sel of [...LIGHT, ...STRONG]) {
+      expect(last(sel, 'background'), sel).toBe('transparent');
+      expect(last(sel, 'border-color'), sel).toBe('transparent');
+      expect(layers(last(sel, 'box-shadow') ?? ''), sel).toEqual(SIX_);
+    }
+    for (const sel of LIGHT) expect(last(sel, 'backdrop-filter'), sel).toBe('var(--gl-blur)');
+    for (const sel of STRONG) expect(last(sel, 'backdrop-filter'), sel).toBe('var(--gl-blur-strong)');
+  });
+
+  test('the canvas context menu is a solid raised face', () => {
+    for (const sel of SOLID) {
+      expect(last(sel, 'background'), sel).toBe('var(--solid-bg)');
+      expect(last(sel, 'backdrop-filter'), sel).toBe('none');
+      expect(layers(last(sel, 'box-shadow') ?? ''), sel).toEqual(SIX_);
+    }
+  });
+
+  test('the knobs are set at zero specificity, and the side panel\'s glow keyframe no longer replaces its light', () => {
+    const knobs = TOP.filter((r) => r.selectors.some((s) => /^:where\(/.test(s) && /\.bh-card/.test(s) && /\.minimap/.test(s)));
+    expect(knobs.length).toBe(1);
+    expect(props(knobs[0].body).get('--gl-tint')).toBe('white');
+    expect(last(`${WF} .panel.is-open`, 'animation')).toBe('none');
+  });
+
+  test('reduced transparency and no backdrop-filter: the same light on the solid face', () => {
+    for (const media of [/prefers-reduced-transparency: reduce/, /^@supports not/]) {
+      for (const sel of [...LIGHT, ...STRONG]) {
+        expect(last(sel, 'background', media), `${sel} ${media}`).toBe('var(--solid-bg)');
+        if (/reduced/.test(String(media))) expect(last(sel, 'backdrop-filter', media), sel).toBe('none');
+      }
+    }
+  });
+
+  test('no GladOS rule for these surfaces paints a card fill or --g-shadow any more (the ratio dock, a hero, aside)', () => {
+    const left = RULES.filter((r) => r.selectors.some((s) => {
+      if (!/\[data-ui='glados'\]/.test(s) || /\[data-ground\]/.test(s)) return false;
+      const subj = subject(s);
+      if (subj.includes('::') || hasClass(subj, 'dock-ratio')) return false;
+      const bp = /\.kg-blueprint/.test(s) && ['bh-card', 'bh-search-panel'].some((c) => hasClass(subj, c));
+      const wf = /\.wfc\[data-skin='g'\]/.test(s) && ['minimap', 'dock', 'panel', 'menu', 'modal'].some((c) => hasClass(subj, c));
+      return bp || wf;
+    }) && /var\(--g-shadow|background:\s*var\(--g-card/.test(r.body));
+    expect(left.map((r) => r.selectors.join(', '))).toEqual([]);
+  });
+});

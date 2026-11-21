@@ -169,9 +169,9 @@ export function ClassicPopAnchor({ children, className }: { children: ReactNode;
 
 /* ── campaign switcher (Classic tree) ───────────────────────────────────── */
 
-/** The switcher panel: the paper popover under Classic; under the kit the same panel on --g-* tokens. */
+/** The switcher panel: the paper popover under Classic; under the kit a solid raised face (a menu over text). */
 export function switcherPanelClass(g: boolean): string {
-  return g ? 'ce-g-switcher' : 'ae-pop';
+  return g ? 'ce-g-switcher glass-solid' : 'ae-pop';
 }
 
 export function ClassicSwitcherRow({ g, current, children }: { g: boolean; current: boolean; children: ReactNode }) {

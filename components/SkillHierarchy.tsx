@@ -531,7 +531,7 @@ export function SkillHierarchy({
 
       {/* GladOS: the file panel on the kit */}
       {G && sel && selDomain && selPath && (
-        <div className="wg-skh-panel" role="region" aria-label={`${sel.name} location`}>
+        <div className="wg-skh-panel glass-face glass-face--strong" role="region" aria-label={`${sel.name} location`}>
           <div className="wg-skh-panel-top">
             <span className="wg-cap">{sel.group}</span>
             <GButton variant="icon" size="compact" aria-label="Close" onClick={() => setSel(null)}>

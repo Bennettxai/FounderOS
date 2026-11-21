@@ -25,7 +25,7 @@ export default async function ComputePage() {
           caption="Cloud computers your agents work on"
           action={
             snap.configured && snap.ok && snap.credits != null ? (
-              <span className="kg-credits" title={`MIOSA credits on this account${snap.creditsExpireAt ? `, expiring ${snap.creditsExpireAt.slice(0, 10)}` : ''}`}>
+              <span className="kg-credits glass-face" title={`MIOSA credits on this account${snap.creditsExpireAt ? `, expiring ${snap.creditsExpireAt.slice(0, 10)}` : ''}`}>
                 <GDotNumber value={snap.credits} size={3} label={`${snap.credits} MIOSA credits`} />
                 <span className="kg-cap">MIOSA credits</span>
               </span>

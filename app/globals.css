@@ -8942,8 +8942,8 @@ a.h6-card { display: block; color: inherit; }
   --g-track: #32353c;
   --g-track-soft: #4a4e57;
   --g-scrim: rgba(0, 0, 0, 0.55);
-  --g-shadow: 0 24px 48px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --g-shadow-sm: 0 10px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --g-shadow: 0 24px 48px rgba(0, 0, 0, 0.45); /* no top-edge highlight: glass is lit from the bottom (glass pack) */
+  --g-shadow-sm: 0 10px 24px rgba(0, 0, 0, 0.35);
   --g-ok: #4fc16f;
   --g-warn: #f0a24a;
   --g-err: #f6867b;
@@ -10112,7 +10112,7 @@ html.conductor-dragging .g-dock { transition: none; }
 .g-btn.ce-g-overlay:hover:not(:disabled) { transform: none; box-shadow: none; }
 .g-btn.ce-g-overlay:focus-visible { outline-offset: -2px; }
 .ce-g-console-card { display: flex; flex-direction: column; }
-.ce-g-switcher { position: absolute; z-index: 40; top: calc(100% + 8px); left: 0; width: min(360px, calc(100vw - 32px)); padding: 10px; border-radius: var(--g-r-nested); background: var(--g-card-2); color: var(--g-ink); box-shadow: var(--g-shadow); }
+.ce-g-switcher { position: absolute; z-index: 40; top: calc(100% + 8px); left: 0; width: min(360px, calc(100vw - 32px)); padding: 10px; border-radius: var(--gl-r-card); color: var(--g-ink); } /* a solid raised face (.glass-solid): a menu over text */
 .ce-g-switcher-row { display: flex; align-items: center; gap: 6px; border-radius: var(--g-r-well); padding: 4px 4px 4px 2px; }
 .ce-g-switcher-row[data-current='true'] { background: var(--g-card); }
 .g-btn.ce-g-switcher-open { flex: 1; min-width: 0; display: block; padding: 6px 8px; border-radius: var(--g-r-input); background: transparent; box-shadow: none; text-align: left; white-space: normal; }
@@ -10360,7 +10360,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 .kg-empty-code code, .g-empty-body code { font-family: var(--font-mono); font-size: 0.92em; color: var(--g-ink); }
 
 /* Compute */
-.kg-credits { display: inline-flex; align-items: center; gap: var(--g-space-2); padding: 8px 14px; border-radius: var(--g-r-pill); background: var(--g-card); box-shadow: var(--g-shadow-sm); }
+.kg-credits { display: inline-flex; align-items: center; gap: var(--g-space-2); padding: 8px 14px; border-radius: var(--g-r-pill); } /* a glass face (.glass-face) */
 .kg-compute { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--g-space-5); align-items: start; }
 @container g-page (min-width: 1000px) { .kg-compute { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); } }
 .kg-compute-list, .kg-compute-desk { display: flex; flex-direction: column; gap: var(--g-space-4); }
@@ -10747,16 +10747,16 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 :root[data-ui='glados'] .kg-blueprint .bh-ask-orbit,
 :root[data-ui='glados'] .kg-blueprint .bh-ask-glass { display: none; }
 :root[data-ui='glados'] .kg-blueprint :is(.bh-card, .bh-card::before, .bh-tile, .bh-pill, .bh-hud, .bh-inspector, .bh-search-panel, .bh-ask, .bh-frame, .bh-crumb, .bh-badge, .bh-kchip, .bh-insp-handle) { text-shadow: none; }
-:root[data-ui='glados'] .kg-blueprint .bh-card { border: 0; border-radius: var(--g-r-well); background: var(--g-card); box-shadow: var(--g-shadow-sm); }
+:root[data-ui='glados'] .kg-blueprint .bh-card { border: 0; border-radius: var(--gl-r-well); } /* a glass face on the canvas (glass phase 3, review finding 6b); a small node takes the well's 16 */
 :root[data-ui='glados'] .kg-blueprint .bh-card::before { display: none; }
-:root[data-ui='glados'] .kg-blueprint .bh-node:is(.is-selected, .is-hot, .is-lit, .is-match) .bh-card { background: var(--g-card); box-shadow: var(--g-shadow-sm); outline: 2px solid var(--g-ring); outline-offset: 2px; }
+:root[data-ui='glados'] .kg-blueprint .bh-node:is(.is-selected, .is-hot, .is-lit, .is-match) .bh-card { outline: 2px solid var(--g-ring); outline-offset: 2px; }
 :root[data-ui='glados'] .kg-blueprint .bh-node.is-lit .bh-card, :root[data-ui='glados'] .kg-blueprint .bh-node.is-match .bh-card { outline-color: var(--g-accent); }
 :root[data-ui='glados'] .kg-blueprint .bh-tile { box-shadow: none; background: color-mix(in srgb, var(--c) 18%, var(--g-card-2)); }
 :root[data-ui='glados'] .kg-blueprint .bh-pill { border: 0; border-radius: var(--g-r-pill); background: var(--g-card-2); color: var(--g-muted); box-shadow: none; }
 :root[data-ui='glados'] .kg-blueprint .bh-hud, :root[data-ui='glados'] .kg-blueprint .bh-crumb { border: 0; border-radius: var(--g-r-pill); background: var(--g-viz-hud); box-shadow: var(--g-shadow-sm); backdrop-filter: none; }
 :root[data-ui='glados'] .kg-blueprint .bh-inspector { border: 0; } /* glass, not a solid card: the glass pack paints the face (glass phase 3) */
-:root[data-ui='glados'] .kg-blueprint .bh-search-panel { border: 0; border-radius: var(--g-r-nested); background: var(--g-card); box-shadow: var(--g-shadow); backdrop-filter: none; }
-:root[data-ui='glados'] .kg-blueprint .bh-ask { border: 0; border-radius: var(--g-r-nested); background: var(--g-card); box-shadow: var(--g-shadow); }
+:root[data-ui='glados'] .kg-blueprint .bh-search-panel { border: 0; border-radius: var(--gl-r-card); } /* a strong glass face over the canvas (glass phase 3, review finding 6b) */
+:root[data-ui='glados'] .kg-blueprint .bh-ask { border: 0; border-radius: var(--gl-r-card); background: var(--g-card); box-shadow: var(--g-shadow); }
 :root[data-ui='glados'] .kg-blueprint .bh-ask-row { background: transparent; }
 :root[data-ui='glados'] .kg-blueprint .g-input.kg-bp-ask-input { flex: 1; min-width: 0; background: transparent; box-shadow: none; padding: 6px 8px; }
 :root[data-ui='glados'] .kg-blueprint .g-input.kg-bp-search-input { flex: 1; min-width: 0; background: transparent; box-shadow: none; }
@@ -10951,7 +10951,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 .fn-g-insights.g-hero:has(.g-hero-strip) { padding-bottom: var(--g-space-5); }
 .fn-g-insights .g-hero-num { flex: 0 0 auto; min-height: 96px; }
 .fn-g-insights .g-hero-strip { position: static; width: 100%; margin-top: auto; }
-.fn-g-ins { display: flex; flex-direction: column; gap: var(--g-space-2); padding: var(--g-space-3) var(--g-space-4); border-radius: var(--g-r-nested); background: var(--g-card-2); box-shadow: var(--g-shadow-sm); color: var(--g-ink); text-align: left; }
+.fn-g-ins { display: flex; flex-direction: column; gap: var(--g-space-2); padding: var(--g-space-3) var(--g-space-4); border-radius: var(--gl-r-well); color: var(--g-ink); text-align: left; } /* a solid raised face (.glass-solid): it sits on the hero's bottom glow, where no ink reads through glass */
 .fn-g-ins-head { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--g-ink); }
 .fn-g-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--g-space-1); }
 /* tables */
@@ -11224,7 +11224,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 .wg-sk-search { max-width: 520px; }
 .wg-sk-tree { position: relative; height: clamp(420px, 60vh, 640px); overflow: hidden; }
 @container g-page (max-width: 559px) { .wg-sk-tree { height: 360px; } }
-.wg-skh-panel { position: absolute; top: 12px; right: 12px; bottom: 12px; width: 280px; max-width: calc(100% - 24px); overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: var(--g-space-4); border-radius: var(--g-r-nested); background: var(--g-card-2); box-shadow: var(--g-shadow); }
+.wg-skh-panel { position: absolute; top: 12px; right: 12px; bottom: 12px; width: 280px; max-width: calc(100% - 24px); overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: var(--g-space-4); border-radius: var(--gl-r-card); } /* a strong glass face over the graph (.glass-face--strong) */
 .wg-skh-panel-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .wg-skh-panel-name { font-size: var(--g-fs-card); color: var(--g-ink); }
 .wg-skh-path { padding: 10px 12px; border-radius: var(--g-r-well); background: var(--g-well); font-family: var(--font-mono, ui-monospace, monospace); font-size: 11px; line-height: 1.8; color: var(--g-muted); }
@@ -11349,20 +11349,21 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 :root[data-ui='glados'] .wfc[data-skin='g'] .node .tile { border: 0; background: var(--g-well); }
 :root[data-ui='glados'] .wfc[data-skin='g'] .edge-label { border: 0; box-shadow: var(--g-shadow-sm); }
 /* HUD, docks, panel, modal, menu: kit surfaces */
-:root[data-ui='glados'] .wfc[data-skin='g'] .minimap, :root[data-ui='glados'] .wfc[data-skin='g'] .dock, :root[data-ui='glados'] .wfc[data-skin='g'] .panel, :root[data-ui='glados'] .wfc[data-skin='g'] .menu { border: 0; backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--g-card); box-shadow: var(--g-shadow); }
-:root[data-ui='glados'] .wfc[data-skin='g'] .minimap { border-radius: var(--g-r-nested); }
+/* the minimap, docks, side panel and modals are strong glass faces over the graph, the menu a solid raised face
+   (glass phase 3, review finding 6b); the ratio dock is a hero */
+:root[data-ui='glados'] .wfc[data-skin='g'] .minimap, :root[data-ui='glados'] .wfc[data-skin='g'] .dock, :root[data-ui='glados'] .wfc[data-skin='g'] .panel, :root[data-ui='glados'] .wfc[data-skin='g'] .menu { border: 0; }
+:root[data-ui='glados'] .wfc[data-skin='g'] .minimap { border-radius: var(--gl-r-card); }
 :root[data-ui='glados'] .wfc[data-skin='g'] .dock-bar { border-radius: var(--g-r-pill); }
 :root[data-ui='glados'] .wfc[data-skin='g'] .bar-timer { border: 0; background: var(--g-well); color: var(--g-ink); }
 :root[data-ui='glados'] .wfc[data-skin='g'] .panel { border-radius: var(--g-r-card); }
-:root[data-ui='glados'] .wfc[data-skin='g'] .panel.is-open { box-shadow: var(--g-shadow); }
 :root[data-ui='glados'] .wfc[data-skin='g'] .pill-add, :root[data-ui='glados'] .wfc[data-skin='g'] .pill-set { border: 0; }
 :root[data-ui='glados'] .wfc[data-skin='g'] .pill-add::before, :root[data-ui='glados'] .wfc[data-skin='g'] .pill-set::before { display: none; }
 :root[data-ui='glados'] .wfc[data-skin='g'] .pill-add.is-open, :root[data-ui='glados'] .wfc[data-skin='g'] .pill-set.is-open, :root[data-ui='glados'] .wfc[data-skin='g'] .pill-set.is-visible { background: var(--g-ink); color: var(--g-ink-inverse); box-shadow: var(--g-shadow); }
 :root[data-ui='glados'] .wfc[data-skin='g'] .pill-set.is-visible .ic { animation: none; }
-:root[data-ui='glados'] .wfc[data-skin='g'] .modal { border: 0; border-radius: var(--g-r-card); background: var(--g-card); box-shadow: var(--g-shadow); }
-:root[data-ui='glados'] .wfc[data-skin='g'] .menu { border-radius: var(--g-r-nested); }
+:root[data-ui='glados'] .wfc[data-skin='g'] .modal { border: 0; border-radius: var(--gl-r-card); }
+:root[data-ui='glados'] .wfc[data-skin='g'] .menu { border-radius: var(--gl-r-card); }
 /* the human to agent ratio: the page's one hero (F-W5) */
-:root[data-ui='glados'] .wfc[data-skin='g'] .dock-ratio { border: 0; border-radius: var(--g-r-card); background: var(--g-hero-a); color: var(--g-on-hero); box-shadow: var(--g-shadow); }
+:root[data-ui='glados'] .wfc[data-skin='g'] .dock-ratio { border: 0; -webkit-backdrop-filter: none; backdrop-filter: none; border-radius: var(--g-r-card); background: var(--g-hero-a); color: var(--g-on-hero); box-shadow: var(--g-shadow); }
 :root[data-ui='glados'] .wfc[data-skin='g'] .dock-ratio .ratio-mini { color: var(--g-on-hero); }
 /* library: kit cards */
 :root[data-ui='glados'] .wfc[data-skin='g'] .lib-card { border: 0; border-radius: var(--g-r-card); background: var(--g-card); box-shadow: var(--g-shadow); overflow: hidden; }
@@ -18583,5 +18584,72 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 }
 :root[data-ground] .ae-chip[data-on='true'] {
   color: var(--p-ink);
+}
+/* GladOS surfaces that were filled cards on --g-shadow (review finding 6b) are faces of the pack, named here
+   because their markup is shared with Classic (the Blueprint) or built as HTML (the workflow canvas). The
+   Blueprint's node cards are faces on the canvas (its start and router glyphs are not cards); its search panel and
+   the canvas's minimap, docks, side panel and modals sit over the graph, so they take the strong frost; the
+   canvas's context menu sits over text, so it is a solid raised face. The ratio dock is a hero, not a face. */
+:where(
+  :root[data-ui='glados'] .kg-blueprint :is(.bh-card, .bh-search-panel),
+  :root[data-ui='glados'] .wfc[data-skin='g'] :is(.minimap, .dock, .panel, .menu, .modal)
+) {
+  --gl-tint: white;
+  --gl-rim-a: 15%;
+  --gl-low-a: 30%;
+  --gl-pool-a: 9%;
+}
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-node:not(.start, .diamond) .bh-card,
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-search-panel,
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] :is(.minimap, .dock:not(.dock-ratio), .panel, .modal) {
+  background: transparent;
+  border-color: transparent;
+  -webkit-backdrop-filter: var(--gl-blur);
+  backdrop-filter: var(--gl-blur);
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+:root[data-ground][data-ui='glados'] .kg-blueprint .bh-search-panel,
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] :is(.minimap, .dock:not(.dock-ratio), .panel, .modal) {
+  -webkit-backdrop-filter: var(--gl-blur-strong);
+  backdrop-filter: var(--gl-blur-strong);
+}
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .menu {
+  background: var(--solid-bg);
+  border-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+/* The side panel's open glow keyframe animated box-shadow, so it replaced the light for a second. */
+:root[data-ground][data-ui='glados'] .wfc[data-skin='g'] .panel.is-open {
+  animation: none;
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-node:not(.start, .diamond) .bh-card,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-search-panel,
+  :root[data-ground][data-ui='glados'] .wfc[data-skin='g'] :is(.minimap, .dock:not(.dock-ratio), .panel, .modal) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--solid-bg);
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-node:not(.start, .diamond) .bh-card,
+  :root[data-ground][data-ui='glados'] .kg-blueprint .bh-search-panel,
+  :root[data-ground][data-ui='glados'] .wfc[data-skin='g'] :is(.minimap, .dock:not(.dock-ratio), .panel, .modal) {
+    background: var(--solid-bg);
+  }
 }
 /* ── end glass phase 3 ── */
