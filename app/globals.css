@@ -237,6 +237,7 @@
   --gl-r-well: 16px;
   --gl-r-chip: 999px;
   --gl-on: var(--accent); /* "on" glow: the theme accent; status meaning takes [data-glow='ok'] */
+  --gl-focus: var(--accent); /* the focus ring: the accent, at least 3:1 on the ground (tests/glass-review.test.ts) */
   --solid-bg: var(--surface);
   /* Spring S { stiffness 170, damping 20, mass .8 } sampled over Materialise's 500ms (12f at 24fps); the same
      curve as founderos.sh and the content calendar (glass canon). */
@@ -259,10 +260,16 @@
 /* Each style's opaque surface and accent. */
 :root[data-ui='glados'] {
   --gl-on: var(--g-accent);
+  --gl-focus: var(--g-accent);
   --solid-bg: var(--g-card);
 }
 :root[data-ui='legacy'] {
+  --gl-focus: var(--l-accent);
   --solid-bg: var(--l-surface);
+}
+/* Daylight's sky accent is 2.2:1 on its white ground; the ring takes the deep sky (the accent as text). */
+:root[data-ui='legacy'][data-theme='daylight'] {
+  --gl-focus: var(--l-accent-deep);
 }
 .lab {
   --solid-bg: var(--lab-glass-solid);
@@ -8754,9 +8761,6 @@ a.h6-card { display: block; color: inherit; }
   border: 1px solid rgb(var(--accent-rgb) / 0.28);
   transition: border-color 0.3s var(--ease);
 }
-.wiz-ask:focus-within {
-  --gl-tint: var(--accent); /* the inner glass draws the tinted rim (glass pack) */
-}
 .wiz-ask-orbit {
   position: absolute;
   inset: -45%;
@@ -9357,7 +9361,6 @@ button.g-card, button.g-card-raised { display: flex; flex-direction: column; ali
 .g-ask-input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--g-ink); font: inherit; font-size: var(--g-fs-body); padding: 8px 0; }
 .g-ask-input::placeholder { color: var(--g-muted); }
 .g-ask-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
-.g-ask-box:focus-within { --gl-tint: var(--g-ring); } /* the inner glass draws the tinted rim (glass pack) */
 .g-ask[data-error] .g-ask-box { --gl-tint: var(--g-err); }
 .g-ask > .g-field-error { padding-left: 16px; }
 .g-swatch { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; min-width: 48px; }
@@ -17880,6 +17883,20 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 /* Status meaning glows status green. */
 :root[data-ground] [data-glow='ok'] {
   --gl-on: var(--ok);
+}
+
+/* Focus (glass canon): a ring in the accent, 2px, 2px out, at least 3:1 on the ground. Never the rim: the
+   light stays as it is. The ask bars ring when their field (or a button in them) has keyboard focus. */
+:root[data-ground] :is(
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+  .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
+  .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .glass-solid, .glass-well, .g-seg-opt, .l-toggle-chip, .os-nav-link, .gl-on,
+  .ap-pill, .bh-itab, .ib-chip, .ib-seg-btn, .ae-chip, .ae-pill, .g-pill, .wiz-bc-chip, .kg-radial-row, .lab2-seg-opt, .lab2c-fchip,
+  .ch-g-strip-btn, .ch-c-strip-btn, .fo-c-filter, .bg-os-surface.rounded-lg-t
+):focus-visible,
+:root[data-ground] :is(.wiz-ask, .g-ask-box):has(:focus-visible) {
+  outline: 2px solid var(--gl-focus);
+  outline-offset: 2px;
 }
 
 /* Motion (glass canon). Materialise (12f, 500ms): the frost from 0 to full, the outer groove and drop with it,

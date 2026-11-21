@@ -87,6 +87,25 @@ export function labCascade(style: LabStyle, rules: Rule[] = RULES): Map<string, 
   return out;
 }
 
+/**
+ * The custom properties <html> carries for any set of appearance attributes (data-ui, data-theme,
+ * data-mode, data-accent, data-ground): the root-level rules of app/globals.css in cascade order.
+ */
+export function rootCascade(a: Record<string, string>, rules: Rule[] = RULES): Map<string, string> {
+  const hits: { spec: number; order: number; decls: [string, string][] }[] = [];
+  rules.forEach((r, order) => {
+    const decls = declarations(r.body);
+    if (!decls.length) return;
+    for (const sel of r.selectors) {
+      const c = rootMatches(sel.trim(), a);
+      if (c?.ok) hits.push({ spec: c.spec, order, decls });
+    }
+  });
+  const out = new Map<string, string>();
+  for (const h of hits.sort((x, y) => x.spec - y.spec || x.order - y.order)) for (const [k, v] of h.decls) out.set(k, v);
+  return out;
+}
+
 /** Split on commas at paren depth 0. */
 function splitTop(s: string): string[] {
   const out: string[] = [];
