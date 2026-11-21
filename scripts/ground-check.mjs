@@ -12,6 +12,7 @@ import fs from 'node:fs';
 import zlib from 'node:zlib';
 import { THEME_IDS, cdp, routesFromEnv } from './audit-routes.mjs';
 import { GLASS_FACE_SELECTOR, coversPoint } from './ground-lib.mjs';
+import { setThemeExpr } from './theme-ground.mjs';
 
 const [,, themesArg = 'all', routesArg = 'all', outArg, widthsArg = '1440,2200'] = process.argv;
 const BASE = process.env.BASE ?? 'http://127.0.0.1:4302';
@@ -99,7 +100,7 @@ for (const theme of themes) {
       const row = { theme, width, route, samples: [], blackRegions: [] };
       try {
         await send('Page.navigate', { url: BASE + route }); await sleep(Number(process.env.WAIT ?? 4000));
-        await ev(`document.documentElement.setAttribute('data-theme', ${JSON.stringify(theme)})`);
+        await ev(setThemeExpr(theme)); // data-theme and the data-ground the glass light reads
         await ev(`(async()=>{for(let i=0;i<6;i++){window.scrollTo(0, document.documentElement.scrollHeight);document.querySelectorAll('main, main *').forEach(e=>{if(e.scrollHeight>e.clientHeight+4&&/(auto|scroll)/.test(getComputedStyle(e).overflowY))e.scrollTop=e.scrollHeight});await new Promise(r=>setTimeout(r,150))}})()`);
         await sleep(500);
         const expect = await ev(`(()=>{const g=document.querySelector('.ae-ground, .ap-ground, .lab2-aurora');return getComputedStyle(g||document.documentElement).backgroundColor})()`);

@@ -8,6 +8,7 @@
 // such as --live-badge-rgb or the engine paper hues back to a token. Non-GET /api requests are blocked.
 import fs from 'node:fs';
 import { THEME_IDS, ZERO_GREEN_THEMES, cdp, routesFromEnv } from './audit-routes.mjs';
+import { setThemeExpr } from './theme-ground.mjs';
 const [,, themesArg = 'all', routesArg = 'all', outArg] = process.argv;
 const BASE = process.env.BASE ?? 'http://127.0.0.1:4302';
 const OUT = outArg ?? `${process.env.S}/audit/out`; fs.mkdirSync(OUT, { recursive: true });
@@ -48,7 +49,7 @@ for (const theme of themes) {
     const name = `${theme}--${route === '/' ? 'home' : route.replace(/^\//, '').replace(/[/?=&]/g, '_')}`;
     try {
       await send('Page.navigate', { url: BASE + route }); await sleep(Number(process.env.WAIT ?? 4500));
-      await ev(`document.documentElement.setAttribute('data-theme', ${JSON.stringify(theme)})`); await sleep(400);
+      await ev(setThemeExpr(theme)); await sleep(400); // data-theme and the data-ground the glass light reads
       const r = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(`${OUT}/${name}.png`, Buffer.from(r.data, 'base64'));
       const scan = await ev(SCAN);
       const greens = scan.findings.filter((f) => f.kind === 'green'); const tokenGreens = scan.findings.filter((f) => f.kind === 'green-token'); const shadows = scan.findings.filter((f) => f.kind === 'text-shadow');

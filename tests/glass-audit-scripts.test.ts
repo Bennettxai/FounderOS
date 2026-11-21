@@ -6,6 +6,9 @@
  *   the ground), so a pixel on one is "covered", not a cut-off ground.
  * - The Content Lab blur budget (components/lab/v2/shared/tokens.ts GLASS_BUDGET) rose from 12 now
  *   that page glass takes the 3px light frost; g-audit's lab-glass-budget check reads the same cap.
+ * - ground-check, theme-audit and screenshot-matrix force <html data-theme> after load; the glass light
+ *   reads data-ground, so each switch sets it too, from lib/appearance.ts groundFor's own table
+ *   (scripts/theme-ground.mjs).
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,6 +17,9 @@ import { GLASS_FACE_SELECTOR, coversPoint } from '../scripts/ground-lib.mjs';
 import { LAB_GLASS_BUDGET } from '../scripts/g-audit/_lab.mjs';
 import { GLASS_BUDGET } from '@/components/lab/v2/shared/tokens';
 import { FACE_CLASSES } from './helpers/glass-lint';
+import { GROUND_BY_THEME as SCRIPT_GROUNDS, groundFor as scriptGroundFor, setThemeExpr } from '../scripts/theme-ground.mjs';
+import { GROUND_BY_THEME, LEGACY_THEMES, UI_STYLES, groundFor, type Mode, type UiStyle } from '@/lib/appearance';
+import { THEMES } from '@/lib/theme';
 
 const read = (rel: string) => fs.readFileSync(path.join(__dirname, '..', rel), 'utf8');
 const CLEAR = { backgroundColor: 'rgba(0, 0, 0, 0)', backgroundImage: 'none', backdropFilter: 'none', tagName: 'DIV', isFace: false };
@@ -73,5 +79,49 @@ describe('the Lab blur budget follows the light frost', () => {
     expect(src).toMatch(/g\.blurred > LAB_GLASS_BUDGET/);
     expect(src).toMatch(/\(max \$\{LAB_GLASS_BUDGET\}\)/);
     expect(src).not.toMatch(/blurred > 12|max 12\)/);
+  });
+});
+
+describe('the audit scripts set data-ground with every data-theme they force', () => {
+  const SCRIPTS = ['scripts/ground-check.mjs', 'scripts/theme-audit.mjs', 'scripts/screenshot-matrix.mjs'];
+  const MODES: Mode[] = ['dark', 'light'];
+  const STYLES: (UiStyle | undefined)[] = [...UI_STYLES, undefined];
+  const ALL_THEMES = [...THEMES, ...LEGACY_THEMES, 'not-a-theme'];
+
+  test('the ground table is the one in lib/appearance.ts', () => {
+    expect(SCRIPT_GROUNDS).toEqual(GROUND_BY_THEME);
+  });
+
+  test('groundFor agrees with lib/appearance.ts for every theme, mode and style', () => {
+    for (const theme of ALL_THEMES)
+      for (const mode of MODES)
+        for (const ui of STYLES) expect(scriptGroundFor(theme, mode, ui, SCRIPT_GROUNDS), `${theme} ${mode} ${ui}`).toBe(groundFor(theme, mode, ui));
+  });
+
+  test('groundFor closes over nothing (it is serialised into the page)', () => {
+    const body = scriptGroundFor.toString();
+    expect(body).toMatch(/^function groundFor\(/);
+    expect(body).not.toMatch(/GROUND_BY_THEME|import|require\(/);
+  });
+
+  test("the page expression sets data-theme and the matching data-ground from the page's own style and mode", () => {
+    for (const theme of ALL_THEMES)
+      for (const mode of MODES)
+        for (const ui of UI_STYLES) {
+          const attrs = new Map<string, string>([['data-ui', ui], ['data-mode', mode], ['data-theme', 'console'], ['data-ground', 'black']]);
+          const documentElement = { getAttribute: (n: string) => attrs.get(n) ?? null, setAttribute: (n: string, v: string) => void attrs.set(n, v) };
+          const ret = new Function('document', `return ${setThemeExpr(theme)}`)({ documentElement });
+          expect(attrs.get('data-theme')).toBe(theme);
+          expect(attrs.get('data-ground'), `${theme} ${mode} ${ui}`).toBe(groundFor(theme, mode, ui));
+          expect(ret).toBe(attrs.get('data-ground'));
+        }
+  });
+
+  test.each(SCRIPTS)('%s: every theme switch goes through setThemeExpr (no bare data-theme write)', (file) => {
+    const src = read(file);
+    expect(src).toMatch(/import \{[^}]*setThemeExpr[^}]*\} from '\.\/theme-ground\.mjs'/);
+    expect(src).not.toMatch(/setAttribute\(\s*\\?['"`]data-theme/);
+    expect(src).not.toMatch(/dataset\.theme\s*=/);
+    expect(src).toMatch(/\bev\(setThemeExpr\(theme\)\)/);
   });
 });

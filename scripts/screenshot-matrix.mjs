@@ -23,6 +23,7 @@ import path from 'node:path';
 import net from 'node:net';
 import { spawn } from 'node:child_process';
 import { THEME_IDS, routesFromEnv } from './audit-routes.mjs';
+import { setThemeExpr } from './theme-ground.mjs';
 
 const BASE = (process.env.GLADOS_URL ?? '').replace(/\/$/, '');
 const [, , outArg, themesArg = 'all', widthsArg = '1440,1024,390', routesArg = 'all'] = process.argv;
@@ -188,7 +189,7 @@ for (const theme of themes) {
         const { send, ev } = tab;
         await send('Page.navigate', { url: BASE + route });
         await sleep(WAIT);
-        await ev(`document.documentElement.setAttribute('data-theme', ${JSON.stringify(theme)})`);
+        await ev(setThemeExpr(theme)); // data-theme and the data-ground the glass light reads
         await sleep(300);
         const scan = await ev(SCAN);
         // full page beyond the viewport, so vh-sized sections keep their real size; a capture that
@@ -205,7 +206,7 @@ for (const theme of themes) {
           try {
             await tab.send('Page.navigate', { url: BASE + route });
             await sleep(WAIT);
-            await tab.ev(`document.documentElement.setAttribute('data-theme', ${JSON.stringify(theme)})`);
+            await tab.ev(setThemeExpr(theme));
             await sleep(300);
             const shot = await tab.send('Page.captureScreenshot', { format: 'png' }, 20000);
             fs.writeFileSync(path.join(OUT, `${name}.png`), Buffer.from(shot.data, 'base64'));
