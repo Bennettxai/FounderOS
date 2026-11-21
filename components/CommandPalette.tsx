@@ -22,7 +22,9 @@ function isTyping(): boolean {
 /**
  * The palette (Cmd/Ctrl+K). Glass (brief §3.2, §4): the scrim is the face's sibling, never its
  * parent, so the face keeps its own strong frost; a press on the scrim closes; on close the face
- * melts out (lib/use-melt) while the shortcuts already treat the palette as closed.
+ * melts out (lib/use-melt) while the shortcuts already treat the palette as closed. The face lets go
+ * of focus at once and runs nothing while it melts (it is inert too); its query and selection stay
+ * through the melt, so the list does not empty, and clear once it has gone.
  */
 export function CommandPalette({ commands, ui = 'classic', off = [] }: { commands: Command[]; ui?: UiStyle; /** modules switched off in Settings */ off?: string[] }) {
   const g = useUiStyle(ui) === 'glados';
@@ -33,22 +35,29 @@ export function CommandPalette({ commands, ui = 'classic', off = [] }: { command
   const inputRef = useRef<HTMLInputElement>(null);
   const faceRef = useRef<HTMLDivElement>(null);
   const melt = useMeltPhase(open);
-  const melting = melt.melting;
-  const onMeltEnd = useMeltEnd(faceRef, melting, melt.end);
+  const { melting, end } = melt;
+  const onMelted = useCallback(() => {
+    end();
+    setQuery('');
+    setIndex(0);
+  }, [end]);
+  const onMeltEnd = useMeltEnd(faceRef, melting, onMelted);
 
   const hits = useMemo(() => filterCommands(commands, query).slice(0, 9), [commands, query]);
 
+  // Closing starts the melt: the face drops its focus now, so no key (Enter) reaches its input.
   const close = useCallback(() => {
     setOpen(false);
-    setQuery('');
-    setIndex(0);
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && faceRef.current?.contains(active)) active.blur();
   }, []);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setOpen((v) => !v);
+        if (open) close();
+        else setOpen(true);
       } else if (e.key === 'Escape') {
         // GSearch clears a non-empty query first and marks the key handled
         if (e.defaultPrevented) return;
@@ -73,14 +82,9 @@ export function CommandPalette({ commands, ui = 'classic', off = [] }: { command
     if (open) inputRef.current?.focus();
   }, [open]);
 
-  // Closed but still melting: the face keeps no focus, so no key reaches its input.
-  useEffect(() => {
-    const active = document.activeElement;
-    if (melting && active instanceof HTMLElement && faceRef.current?.contains(active)) active.blur();
-  }, [melting]);
-
   function go(command: Command | undefined) {
-    if (!command) return;
+    // melting: the palette is closed, so a key or press that still lands runs nothing
+    if (!command || melting) return;
     close();
     // shell actions (Toggle sidebar) fire their window event instead of navigating
     if (command.action) window.dispatchEvent(new CustomEvent(command.action));
@@ -92,6 +96,7 @@ export function CommandPalette({ commands, ui = 'classic', off = [] }: { command
   if (!melt.mounted) return null;
 
   const onListKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (melting) return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setIndex((i) => Math.min(i + 1, hits.length - 1));
@@ -176,17 +181,7 @@ export function CommandPalette({ commands, ui = 'classic', off = [] }: { command
             setQuery(e.target.value);
             setIndex(0);
           }}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              setIndex((i) => Math.min(i + 1, hits.length - 1));
-            } else if (e.key === 'ArrowUp') {
-              e.preventDefault();
-              setIndex((i) => Math.max(i - 1, 0));
-            } else if (e.key === 'Enter') {
-              go(hits[index]);
-            }
-          }}
+          onKeyDown={onListKey}
           placeholder="Jump anywhere — views, agents, tools…"
           className="w-full border-b border-os-border bg-transparent px-[18px] py-4 font-mono text-sm text-os-text outline-none placeholder:text-os-dim"
         />

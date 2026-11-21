@@ -102,27 +102,52 @@ function prefersReducedMotion(): boolean {
 /**
  * While `melting`, wait for the face's own melt to end, then call `onGone`. Calls it at once when
  * no melt will play (reduced motion, `animation: none`, no face), and after MELT_FALLBACK_MS at
- * the latest. Returns the face's onAnimationEnd handler.
+ * the latest. Per melt `onGone` runs exactly once, whichever of those comes first: the parent may
+ * not drop the face in the same commit (useMeltClose never resets `melting`), so a later timer or
+ * animationend must not call it again. A new melt (`melting` false, then true again) re-arms it.
+ * The face is `inert` while it melts (glass canon: a closed face takes no focus, click or key); the
+ * attribute is set here, the one place every overlay passes through (@types/react 18 has no `inert`
+ * prop), and removed when the melt is cancelled (reopened) or the face unmounts.
+ * Returns the face's onAnimationEnd handler.
  */
 export function useMeltEnd(ref: RefObject<HTMLElement | null>, melting: boolean, onGone: () => void): (e: AnimationEvent<HTMLElement>) => void {
   const gone = useRef(onGone);
   gone.current = onGone;
+  // `live`: a melt is armed (its effect is mounted). `done`: this melt has called onGone; it is reset
+  // only by a commit that is not melting, so a re-run of the same melt (StrictMode) does not re-arm it.
+  const melt = useRef<{ live: boolean; done: boolean; timer?: ReturnType<typeof setTimeout> }>({ live: false, done: false });
+  const finish = useCallback(() => {
+    const m = melt.current;
+    if (!m.live || m.done) return;
+    m.done = true;
+    clearTimeout(m.timer);
+    gone.current();
+  }, []);
   useIsoLayoutEffect(() => {
-    if (!melting) return;
-    const el = ref.current;
-    const name = el ? getComputedStyle(el).animationName : null;
-    if (!el || skipMelt({ reducedMotion: prefersReducedMotion(), animationName: name })) {
-      gone.current();
+    const m = melt.current;
+    if (!melting) {
+      m.done = false;
       return;
     }
-    const t = setTimeout(() => gone.current(), MELT_FALLBACK_MS);
-    return () => clearTimeout(t);
-  }, [melting, ref]);
+    const el = ref.current;
+    el?.setAttribute('inert', '');
+    m.live = true;
+    if (!m.done) {
+      const name = el ? getComputedStyle(el).animationName : null;
+      if (!el || skipMelt({ reducedMotion: prefersReducedMotion(), animationName: name })) finish();
+      else m.timer = setTimeout(finish, MELT_FALLBACK_MS);
+    }
+    return () => {
+      m.live = false;
+      clearTimeout(m.timer);
+      el?.removeAttribute('inert');
+    };
+  }, [melting, ref, finish]);
   return useCallback(
     (e: AnimationEvent<HTMLElement>) => {
-      if (melting && isOwnMeltEnd(e)) gone.current();
+      if (melting && isOwnMeltEnd(e)) finish();
     },
-    [melting],
+    [melting, finish],
   );
 }
 
