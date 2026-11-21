@@ -11,7 +11,7 @@ import path from 'node:path';
 import { describe, expect, test } from 'vitest';
 import { groundFor } from '@/lib/appearance';
 import { CSS_NO_COMMENTS, splitSelectors, topLevelRules } from './helpers/theme-css';
-import { allRules, FACE_CLASSES } from './helpers/glass-lint';
+import { allRules, FACE_CLASSES, faceElementClasses, faceOf, tsxFiles } from './helpers/glass-lint';
 import { evalColour, over, ratio, rootCascade, substitute, type RGBA } from './helpers/lab-colour';
 
 type Look = { name: string; attrs: Record<string, string>; ground: string };
@@ -178,6 +178,45 @@ describe('"on" on a large face: a glow behind it, never a wash behind the text (
       return ratio(colour(env, '--text-2'), over([on[0], on[1], on[2], 0.55], colour(env, l.ground))) < 4.5;
     });
     expect(fails.length).toBe(LOOKS.length);
+  });
+});
+
+describe('frost costs nothing at rest (review finding 10)', () => {
+  const FACE_ELEMENTS = tsxFiles(path.join(__dirname, '..'), ['app', 'components', 'founderos']).flatMap((abs) => faceElementClasses(abs, fs.readFileSync(abs, 'utf8')));
+  const sets = FACE_ELEMENTS.map((t) => new Set(t));
+  /** Does a selector's subject land on a face (a face class, or classes some face element in TSX carries)? */
+  const onFace = (sel: string) => {
+    if (sel.includes('::')) return false;
+    const last = sel.replace(/:(?:not|has|where)\([^)]*\)/g, '').split(/\s*[\s>+~]\s*/).pop() ?? '';
+    const is = /:is\(([^)]*)\)/.exec(last);
+    return (is ? is[1].split(',').map((x) => x.trim()) : [last]).some((a) => {
+      const cls = [...a.matchAll(/\.([\w-]+)/g)].map((m) => m[1]);
+      return cls.length > 0 && (faceOf(cls) !== undefined || sets.some((x) => cls.every((c) => x.has(c)) && faceOf([...x]) !== undefined));
+    });
+  };
+
+  test('no face transitions its frost (no transition on all or backdrop-filter)', () => {
+    const bad = RULES.filter((r) => /\ball\b|backdrop-filter/.test(decl(r.body, 'transition') ?? decl(r.body, 'transition-property') ?? '')).flatMap((r) => r.selectors.filter(onFace));
+    expect(bad).toEqual([]);
+  });
+
+  test('no face loops an animation', () => {
+    const bad = RULES.filter((r) => /\binfinite\b/.test(decl(r.body, 'animation') ?? '')).flatMap((r) => r.selectors.filter(onFace));
+    expect(bad).toEqual([]);
+  });
+
+  test('the ask bars hold their orbit still at rest: it turns only while the bar has focus or is busy (it sits under a 24px frost)', () => {
+    for (const [orbit, live] of [
+      ['.bh-ask-orbit', ['.bh-ask:focus-within .bh-ask-orbit', '.bh-ask.is-busy .bh-ask-orbit']],
+      ['.wiz-ask-orbit', ['.wiz-ask:focus-within .wiz-ask-orbit', '.wiz-ask.is-busy .wiz-ask-orbit']],
+      ['.ap-orbit', [".ap-orbit[data-spin='1']"]],
+    ] as const) {
+      const rest = RULES.filter((r) => r.selectors.map(norm).includes(orbit)).map((r) => decl(r.body, 'animation-play-state')).filter(Boolean).pop();
+      expect(rest, orbit).toBe('paused');
+      for (const sel of live) expect(RULES.some((r) => r.selectors.map(norm).includes(sel) && decl(r.body, 'animation-play-state') === 'running'), sel).toBe(true);
+    }
+    // GladOS's bar has no animation at rest at all
+    expect(RULES.filter((r) => r.selectors.map(norm).includes('.g-ask-orbit') && decl(r.body, 'animation'))).toEqual([]);
   });
 });
 

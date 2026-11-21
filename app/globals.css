@@ -3588,7 +3588,9 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
   gap: 7px;
   color: var(--text-3);
   font-size: 12.5px;
-  transition: all 0.18s var(--ease);
+  transition-property: color, background-color, border-color, transform, --gl-rim-a, --gl-low-a, --gl-pool-a; /* never the frost (glass review 10) */
+  transition-duration: 0.18s;
+  transition-timing-function: var(--ease);
 }
 .bh-lvl svg {
   width: 14px;
@@ -3627,7 +3629,8 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
   background: var(--glass-c);
   backdrop-filter: blur(10px);
   cursor: pointer;
-  transition: all 0.15s;
+  transition-property: color, background-color, border-color, transform, --gl-rim-a, --gl-low-a, --gl-pool-a; /* never the frost */
+  transition-duration: 0.15s;
 }
 .bh-kind i.sw {
   width: 8px;
@@ -5081,6 +5084,15 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
 .bh-ask.is-busy .bh-ask-orbit {
   animation-duration: 1.6s;
 }
+/* The orbit turns only while the bar has focus or is busy: it sits under a 24px frost, which would otherwise
+   repaint every frame at rest (glass review 10). It holds its angle in between. */
+.bh-ask-orbit {
+  animation-play-state: paused;
+}
+.bh-ask:focus-within .bh-ask-orbit,
+.bh-ask.is-busy .bh-ask-orbit {
+  animation-play-state: running;
+}
 .bh-ask-glass {
   position: absolute;
   inset: 0;
@@ -5111,7 +5123,9 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
   background: rgb(var(--accent-rgb) / 0.08);
   white-space: nowrap;
   max-width: 260px;
-  transition: all 0.25s var(--ease);
+  transition-property: color, background-color, border-color, transform, opacity, max-width, padding, --gl-rim-a, --gl-low-a, --gl-pool-a; /* never the frost */
+  transition-duration: 0.25s;
+  transition-timing-function: var(--ease);
 }
 .bh-ask-scope span {
   overflow: hidden;
@@ -5204,7 +5218,8 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
   border: 1px solid rgb(var(--glass-line-rgb) / 0.14);
   background: rgb(var(--glass-line-rgb) / 0.04);
   white-space: nowrap;
-  transition: all 0.15s;
+  transition-property: color, background-color, border-color, transform, --gl-rim-a, --gl-low-a, --gl-pool-a; /* never the frost */
+  transition-duration: 0.15s;
 }
 .bh-ask-chip:hover {
   color: var(--text);
@@ -8775,6 +8790,14 @@ a.h6-card { display: block; color: inherit; }
 }
 .wiz-ask.is-busy .wiz-ask-orbit {
   animation-duration: 1.6s;
+}
+/* As the Blueprint bar: the orbit turns only with focus or while busy, never under the frost at rest. */
+.wiz-ask-orbit {
+  animation-play-state: paused;
+}
+.wiz-ask:focus-within .wiz-ask-orbit,
+.wiz-ask.is-busy .wiz-ask-orbit {
+  animation-play-state: running;
 }
 .wiz-ask-glass {
   position: absolute;
