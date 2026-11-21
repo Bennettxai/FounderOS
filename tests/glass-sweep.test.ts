@@ -843,3 +843,38 @@ describe('every element that still frosts itself in TSX is accounted for (glass 
     for (const [file, needle] of ALLOWED) expect(read(file), `${file}: ${needle}`).toContain(needle);
   });
 });
+
+describe('pop-ups over text take the strong frost (review finding 5)', () => {
+  const STRONG = RULES.find(
+    (r) => r.at.length === 0 && r.selectors.some((s) => /^:root\[data-ground\] :is\(\.glass-face--strong,/.test(s)) && props(r.body).get('backdrop-filter') === 'var(--gl-blur-strong)',
+  )!;
+  const strongMembers = () => /:is\(([^)]*)\)/.exec(STRONG.selectors[0])![1].split(/\s*,\s*/);
+
+  test('the toast is a strong-frost pill', () => {
+    expect(strongMembers()).toContain('.ui-toast');
+    const radius = TOP.filter((r) => r.selectors.includes('.ui-toast')).map((r) => props(r.body).get('border-radius')).filter(Boolean).pop();
+    expect(radius).toBe('var(--gl-r-chip)');
+  });
+
+  test('the toast drops from the top right (y -40 to 0 on S), holds, and melts', () => {
+    const stack = props(TOP.filter((r) => r.selectors.includes('.ui-toasts')).map((r) => r.body).join(';'));
+    expect(stack.get('top')).toBeDefined();
+    expect(stack.get('right')).toBeDefined();
+    expect(stack.get('bottom') ?? 'auto').toBe('auto');
+    expect(stack.get('left') ?? 'auto').toBe('auto');
+    expect(stack.get('align-items')).toBe('flex-end');
+    expect(KF.get('gl-materialise-toast')).toMatch(/^from \{ transform: translateY\(-40px\);/);
+    expect(KF.get('ui-toast-in')).toBe('from { transform: translateY(-40px); }');
+    const face = RULES.filter((r) => r.at.length === 0 && r.selectors.includes(':root[data-ground] .ui-toast')).map((r) => props(r.body).get('animation')).filter(Boolean).pop();
+    expect(face).toMatch(/^gl-materialise-toast var\(--gl-dur-materialise\) var\(--gl-spring\)/);
+  });
+
+  test('the detail panels over the graphs are strong glass faces', () => {
+    const kg = read('components/KnowledgeGraph.tsx');
+    const panel = /className=\{gc\('kg-panel kg-graph-panel[^']*', '([^']*)'\)\}/.exec(kg);
+    expect(panel, 'KnowledgeGraph detail overlay').not.toBeNull();
+    expect(panel![0]).toMatch(/'kg-panel kg-graph-panel[^']*glass-face--strong/);
+    expect(panel![1]).toMatch(/glass-face--strong/);
+    expect(read('components/SkillHierarchy.tsx')).toMatch(/className="skh-panel glass-face glass-face--strong /);
+  });
+});

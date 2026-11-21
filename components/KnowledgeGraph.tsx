@@ -2382,7 +2382,7 @@ export function KnowledgeGraph({
               or the Clients roster. The trail bar walks you back UP: node →
               pillar (this button) → home (the pillar bar's Back). */}
           {(agentCard || toolWiki || taskCard || humanCard || memoryCard) && (
-            <div className={gc('kg-panel kg-graph-panel glass-face absolute right-3 top-[46px] z-10 flex max-h-[calc(100%-58px)] w-[300px] flex-col overflow-hidden', 'kg-panel glass-face absolute right-3 top-[46px] z-10 flex max-h-[calc(100%-58px)] w-[300px] flex-col overflow-hidden rounded-[24px] [--solid-bg:var(--kg-panel-bg)]')}>
+            <div className={gc('kg-panel kg-graph-panel glass-face glass-face--strong absolute right-3 top-[46px] z-10 flex max-h-[calc(100%-58px)] w-[300px] flex-col overflow-hidden', 'kg-panel glass-face glass-face--strong absolute right-3 top-[46px] z-10 flex max-h-[calc(100%-58px)] w-[300px] flex-col overflow-hidden rounded-[24px] [--solid-bg:var(--kg-panel-bg)]')}>
               <button
                 onClick={clearDetail}
                 aria-label={`Back to the ${focusedTeam?.label ?? 'graph'} pillar`}

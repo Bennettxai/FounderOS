@@ -8409,19 +8409,20 @@ input.ae-o-value-input { width: 64px; border: 0; text-align: right; color: var(-
 @media (prefers-reduced-motion: reduce) { .db-zoom { animation: none; } .db-block { transition: none; } }
 
 /* ── Shared toasts (SPEC X2, components/ui/Toast.tsx) ─────────────────────
-   One stack, bottom-centre of the viewport, or of the nearest positioned
-   container when the provider is anchored (the workflow builder stage).
-   Tokens only; inside .ae-octane the surface reads --o-toast-bg. */
+   One stack, top right of the viewport (under the top bar), or of the nearest
+   positioned container when the provider is anchored (the workflow builder
+   stage). A toast is a strong-frost pill that drops in from above (glass brief
+   §5 B12), holds, and melts. Tokens only; inside .ae-octane the surface reads
+   --o-toast-bg. */
 .ui-toasts {
   position: fixed;
-  left: 50%;
-  bottom: 20px;
+  top: 64px;
+  right: 20px;
   /* above every sheet, drawer and full-screen layer (120 to 156): a toast that answers an action in a sheet must not sit under its scrim */
   z-index: 170;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
   width: max-content;
   max-width: calc(100vw - 32px);
@@ -8429,7 +8430,8 @@ input.ae-o-value-input { width: 64px; border: 0; text-align: right; color: var(-
 }
 .ui-toasts[data-anchor] {
   position: absolute;
-  bottom: 16px;
+  top: 16px;
+  right: 16px;
   max-width: calc(100% - 32px);
 }
 .ui-toast {
@@ -8441,7 +8443,7 @@ input.ae-o-value-input { width: 64px; border: 0; text-align: right; color: var(-
   max-width: 100%;
   padding: 6px 6px 6px 12px;
   border: 1px solid var(--border-strong);
-  border-radius: 10px;
+  border-radius: var(--gl-r-chip);
   background: var(--surface);
   color: var(--text);
   box-shadow: var(--shadow-pop);
@@ -8477,8 +8479,8 @@ input.ae-o-value-input { width: 64px; border: 0; text-align: right; color: var(-
 .ae-octane .ui-toast { background: var(--o-toast-bg); border-color: var(--o-toast-line); }
 .ae-octane .ui-toast[data-tone='err'] { border-color: var(--err); }
 @keyframes ui-toast-in {
-  /* the motion half of Materialise; the toast face plays gl-materialise (glass pack) */
-  from { transform: translateY(18px) scale(0.965); }
+  /* the motion half of the toast's drop; the toast face plays gl-materialise-toast (glass pack) */
+  from { transform: translateY(-40px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .ui-toast { animation: none; }
@@ -17800,8 +17802,8 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   --gl-rim-a: 45%; /* focus and error: a stronger tinted rim instead of a coloured border */
 }
 
-/* Strong frost: pop-ups, sheets, drawers, dialogs, the palette. */
-:root[data-ground] :is(.glass-face--strong, .g-sheet, .g-drawer, .g-dialog, .g-palette, .c-pop, .l-dialog, .lab2-glass[data-tone='strong']) {
+/* Strong frost: pop-ups, sheets, drawers, dialogs, the palette, the toast (it sits over text). */
+:root[data-ground] :is(.glass-face--strong, .g-sheet, .g-drawer, .g-dialog, .g-palette, .c-pop, .l-dialog, .ui-toast, .lab2-glass[data-tone='strong']) {
   -webkit-backdrop-filter: var(--gl-blur-strong);
   backdrop-filter: var(--gl-blur-strong);
 }
@@ -18301,7 +18303,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
   .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
   .lab2-glass, .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .bg-os-surface.rounded-lg-t:not(.border-dashed)
-) :is(.c-pop, .glass-face--strong, .lab2-glass[data-tone='strong']) {
+) :is(.c-pop, .glass-face--strong, .ui-toast, .lab2-glass[data-tone='strong']) {
   background: var(--solid-bg);
   border-color: transparent;
   -webkit-backdrop-filter: none;
