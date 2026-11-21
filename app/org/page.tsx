@@ -170,7 +170,7 @@ export default function OrgChartPage({ searchParams }: { searchParams?: { ventur
         <Link
           href="/org"
           className={`rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${
-            !venture ? 'border-os-text bg-os-text text-os-bg' : 'border-os-border bg-os-surface text-os-muted hover:text-os-text'
+            !venture ? 'glass-chip gl-on text-os-text' : 'border-os-border bg-os-surface text-os-muted hover:text-os-text'
           }`}
         >
           All ventures

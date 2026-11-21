@@ -746,19 +746,12 @@ export function GBrainRadial({
             // z-40 is load-bearing — the canvas is a LATER sibling of the header
             // slot this portals into, so without it the ring painted on top and
             // backdrop-filter had nothing behind it to frost.
-            className="absolute right-0 top-0 z-40 w-[560px] max-w-full rounded-[12px] border px-3.5 py-2 transition-all duration-500"
+            // a glass face (strong frost over the ring); it shows and hides by visibility and a 6px rise, never a
+            // fade (glass brief §4), and an answer lights it: a glow behind and a tinted rim (gl-on), not a fill
+            className={`glass-face glass-face--strong ${showAnswer ? 'gl-on' : ''} absolute right-0 top-0 z-40 w-[560px] max-w-full rounded-[24px] px-3.5 py-2 transition-[transform,visibility] duration-500`}
             style={{
-              // translucent on purpose: an opaque fill hides the backdrop blur
-              // entirely — the frost only reads through a see-through surface
-              background: 'var(--gbr-input-bg)',
-              borderColor: showAnswer ? 'color-mix(in srgb, var(--accent) 45%, transparent)' : 'var(--gbr-hairline)',
-              boxShadow: showAnswer
-                ? '0 22px 56px -10px color-mix(in srgb, var(--elevated) 92%, transparent), 0 0 34px -10px color-mix(in srgb, var(--accent) 35%, transparent)'
-                : '0 22px 56px -10px color-mix(in srgb, var(--elevated) 92%, transparent)',
-              opacity: showAnswer ? 1 : 0,
+              visibility: showAnswer ? 'visible' : 'hidden',
               transform: showAnswer ? 'translateY(0)' : 'translateY(-6px)',
-              backdropFilter: 'blur(40px) saturate(1.4)',
-              WebkitBackdropFilter: 'blur(40px) saturate(1.4)',
             }}
           >
             <div className="flex items-baseline gap-2">
@@ -1077,8 +1070,7 @@ function ExpandedView({
 
       {/* detail panel */}
       <div
-        className="flex h-full w-[330px] shrink-0 flex-col overflow-y-auto rounded-[20px] border p-5"
-        style={{ background: 'color-mix(in srgb, var(--elevated) 88%, transparent)', borderColor: 'rgb(var(--mist-rgb) / 0.1)', backdropFilter: 'blur(12px)' }}
+        className="glass-face flex h-full w-[330px] shrink-0 flex-col overflow-y-auto rounded-[24px] p-5"
       >
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: color }} />

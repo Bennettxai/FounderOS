@@ -106,7 +106,7 @@ export function StepLine({
         <rect className="l-fade" x={mx - 4.5} y={geo.py - 4.5} width={9} height={9} style={{ fill: 'var(--l-bg-2)', stroke: hue, strokeWidth: 2 }} />
       </svg>
       <div
-        className="l-fade l-peak"
+        className="l-peak glass-solid"
         style={{ left: `calc(24px + (100% - 48px) * ${(geo.peakIdx + 0.5) / series.length})`, top: `${(geo.py / H) * 100}%` }}
       >
         <span className="l-peak-n" style={{ color: hue }}>

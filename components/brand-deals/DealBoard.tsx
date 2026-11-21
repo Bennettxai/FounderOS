@@ -99,7 +99,7 @@ function CardHead({ title, onRefresh, botUrl }: { title: string; onRefresh: () =
       {open && (
         <>
           <div className="fixed inset-0 z-[30]" onClick={() => setOpen(false)} aria-hidden="true" />
-          <div className="glass-pop absolute right-5 top-14 z-[40] w-[210px] overflow-hidden rounded-md-t border border-os-border bg-os-bg2/95 py-1 backdrop-blur">
+          <div className="glass-solid absolute right-5 top-14 z-[40] w-[210px] overflow-hidden rounded-md-t py-1">
             <button
               onClick={() => {
                 setOpen(false);
@@ -737,7 +737,7 @@ export function DealBoard({ initial, botUrl = null }: { initial: BrandDealsSnaps
                   onClick={() => setStageFilter(key)}
                   className={`rounded-full px-4 py-1.5 text-[12.5px] transition-colors ${
                     stageFilter === key
-                      ? 'bg-os-accent font-semibold text-os-ink'
+                      ? 'glass-chip gl-on font-semibold text-os-text'
                       : 'border border-os-border text-os-muted hover:text-os-text'
                   }`}
                 >
@@ -816,7 +816,7 @@ export function DealBoard({ initial, botUrl = null }: { initial: BrandDealsSnaps
         <div className="fixed inset-0 z-[60] bg-black/45 backdrop-blur-[2px]" onClick={() => setSelectedId(null)} aria-hidden="true" />
       )}
       {selected && (
-        <aside className="glass-pop fixed right-0 top-0 z-[70] flex h-full w-[460px] max-w-[92vw] flex-col border-l border-os-border bg-os-bg2/95 backdrop-blur">
+        <aside className="glass-face glass-face--strong gl-materialise--drawer fixed right-0 top-0 z-[70] flex h-full w-[460px] max-w-[92vw] flex-col">
           <div className="flex items-start justify-between gap-4 border-b border-os-border px-6 py-5">
             <div className="min-w-0">
               <div className="truncate text-[17px] font-semibold">{selected.brand}</div>
@@ -948,7 +948,7 @@ export function DealBoard({ initial, botUrl = null }: { initial: BrandDealsSnaps
                     disabled={busy != null || selected.outcome === o}
                     className={
                       selected.outcome === o
-                        ? 'inline-flex items-center rounded-full bg-os-accent px-3.5 py-1.5 text-[12px] font-semibold text-os-ink'
+                        ? 'glass-chip gl-on inline-flex items-center rounded-full px-3.5 py-1.5 text-[12px] font-semibold text-os-text'
                         : BTN_GHOST
                     }
                   >

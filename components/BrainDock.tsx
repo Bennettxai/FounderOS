@@ -106,7 +106,7 @@ export function BrainDock({ g = false }: { g?: boolean } = {}) {
           <BrainCircuit size={14} strokeWidth={1.7} aria-hidden="true" />
           {hasDraft ? 'Draft waiting: click to finish' : 'Dump into the brain'}
         </button>
-        <div className="kg-dock-card" {...hoverProps} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
+        <div className="kg-dock-card glass-face glass-face--strong" {...hoverProps} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
           <BrainDump compact g />
         </div>
       </div>
@@ -147,13 +147,11 @@ export function BrainDock({ g = false }: { g?: boolean } = {}) {
 
       {/* ── open: the card over the graph ──────────────────────────────── */}
       <div
-        className="bd-card absolute bottom-[46px] left-1/2 z-30 w-[440px] max-w-[86vw] rounded-[16px] border p-3"
+        // the open dump is a strong glass face, lit (gl-on: a glow behind, a tinted rim); it opens by visibility and
+        // scale, never a fade (glass brief §4)
+        className="bd-card absolute bottom-[46px] left-1/2 z-30 w-[440px] max-w-[86vw] rounded-[24px] p-3 glass-face glass-face--strong gl-on"
         style={{
-          background: 'color-mix(in srgb, var(--elevated) 94%, transparent)',
-          borderColor: 'color-mix(in srgb, var(--accent) 40%, transparent)',
-          boxShadow: '0 0 44px -10px color-mix(in srgb, var(--accent) 40%, transparent), 0 20px 60px var(--bd-card-shadow)',
-          backdropFilter: 'blur(14px)',
-          opacity: open ? 1 : 0,
+          visibility: open ? 'visible' : 'hidden',
           pointerEvents: open ? 'auto' : 'none',
           // grows upward out of the collapsed line rather than floating in the
           // middle of the canvas — the graph owns the middle
@@ -168,7 +166,8 @@ export function BrainDock({ g = false }: { g?: boolean } = {}) {
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        .bd-card, .bd-line { transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.2,0.7,0.2,1), box-shadow 0.3s ease, border-color 0.3s ease; }
+        .bd-line { transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.2,0.7,0.2,1), box-shadow 0.3s ease, border-color 0.3s ease; }
+        .bd-card { transition: visibility 0.32s, transform 0.32s cubic-bezier(0.2,0.7,0.2,1); } /* a glass face: never fades */
         .bd-line:hover { border-color: color-mix(in srgb, var(--accent) 60%, transparent); box-shadow: 0 0 28px -6px color-mix(in srgb, var(--accent) 55%, transparent); }
         @media (prefers-reduced-motion: reduce) { .bd-card, .bd-line { transition: none; } }
       ` }} />

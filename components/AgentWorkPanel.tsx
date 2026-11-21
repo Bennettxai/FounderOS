@@ -188,7 +188,7 @@ export function AgentWorkPanel({
                     onClick={() => toggleCron(cron)}
                     title={cron.enabled ? 'Disable' : 'Enable'}
                     className={`shrink-0 rounded-[6px] px-1.5 py-0.5 text-[11px] ${
-                      cron.enabled ? 'bg-os-text text-os-bg' : 'border border-os-border text-os-dim'
+                      cron.enabled ? 'glass-chip gl-on text-os-text' : 'border border-os-border text-os-dim'
                     }`}
                   >
                     {cron.enabled ? 'on' : 'off'}

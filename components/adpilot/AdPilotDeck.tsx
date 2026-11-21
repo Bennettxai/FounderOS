@@ -596,7 +596,7 @@ function HeroSpend({
 }) {
   const maxSpend = Math.max(...campaigns.map((c) => c.spend), 1);
   return (
-    <div className="ap-panel ap-glow h-full p-5">
+    <div className="ap-panel gl-on h-full p-5">
       <div className="text-[12.5px] text-os-dim">{windowLabel ? `Ad spend · ${windowLabel}` : 'Ad spend'}</div>
       <div className="mt-1 text-[36px] font-light tabular-nums leading-none text-os-text">{money(metrics.spend)}</div>
       <div className="mt-2.5 flex flex-wrap gap-1.5">

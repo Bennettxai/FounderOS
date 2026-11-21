@@ -27,7 +27,7 @@ import { CSS_NO_COMMENTS, splitSelectors, topLevelRules, type Rule } from './the
 export const FACE_CLASSES = [
   'glass-face', 'glass-face--strong', 'l-card', 'l-slab', 'l-chip', 'l-dialog', 'g-card', 'g-card-raised', 'g-well', 'g-chip',
   'g-sheet', 'g-drawer', 'g-dialog', 'g-palette', 'ui-toast', 'c-pop', 'c-chip', 'h6-card', 'glass-panel', 'glass-panel-violet',
-  'glass-chip', 'lab2-glass', 'wiz-ask', 'g-ask-box',
+  'glass-chip', 'lab2-glass', 'wiz-ask', 'g-ask-box', 'ap-panel', 'ap-chip',
 ] as const;
 
 /**

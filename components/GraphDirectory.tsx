@@ -60,7 +60,7 @@ export function GraphDirectory({
   }
   return (
     <div
-      className={gc(`kg-dir flex flex-col overflow-hidden ${className}`, `flex flex-col overflow-hidden rounded-sm-t border border-os-border-strong bg-os-bg/95 backdrop-blur ${className}`)}
+      className={gc(`kg-dir flex flex-col overflow-hidden ${className}`, `glass-face flex flex-col overflow-hidden rounded-[24px] ${className}`)}
     >
       <div className="flex items-center justify-between border-b border-os-border px-3 py-3">
         <span className="text-[12.5px] font-medium text-os-muted">Directory</span>

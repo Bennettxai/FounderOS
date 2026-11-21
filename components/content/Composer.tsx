@@ -48,7 +48,7 @@ const inputCls =
 function chipCls(active: boolean): string {
   return `rounded-[8px] border px-2.5 py-1 font-mono text-[11.5px] transition-colors ${
     active
-      ? 'border-os-accent/45 bg-os-accent/12 text-os-accent'
+      ? 'glass-chip gl-on text-os-text'
       : 'border-[rgb(var(--mist-rgb) / 0.14)] text-os-muted hover:text-os-text'
   }`;
 }
@@ -170,7 +170,7 @@ function ReferenceSlot({
                   type="button"
                   onClick={() => setTab(t)}
                   className={`rounded-[6px] px-2 py-1 text-[11px] capitalize ${
-                    tab === t ? 'bg-os-accent/15 text-os-accent' : 'text-os-dim hover:text-os-text'
+                    tab === t ? 'gl-on text-os-text' : 'text-os-dim hover:text-os-text'
                   }`}
                 >
                   {t}

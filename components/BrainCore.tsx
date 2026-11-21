@@ -67,7 +67,7 @@ export function BrainCore({
           aria-label="Open Optimal Engine doctor and search"
           className="group absolute left-1/2 top-1/2 grid h-[27%] w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-end justify-center rounded-full pb-[6%] outline-none ring-os-accent/50 focus-visible:ring-2"
         >
-          <span className="pointer-events-none flex translate-y-3 items-center gap-1.5 rounded-[6px] border border-os-border-strong bg-os-surface2 px-2 py-0.5 text-[11.5px] text-os-muted opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
+          <span className="glass-solid pointer-events-none invisible flex translate-y-3 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11.5px] text-os-muted transition-transform duration-150 group-hover:visible group-hover:translate-y-1.5 group-focus-visible:visible group-focus-visible:translate-y-1.5">
             <Search className="h-2.5 w-2.5" strokeWidth={1.7} /> Doctor · search
           </span>
         </button>

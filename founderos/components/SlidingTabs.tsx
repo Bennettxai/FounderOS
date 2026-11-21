@@ -47,7 +47,7 @@ export function SlidingTabs<T extends string>({
             {t.count != null && (
               <span
                 className={`px-1.5 text-[9.5px] leading-[15px] tracking-normal ${
-                  active ? 'bg-os-text text-os-ink' : 'bg-os-surface text-os-dim'
+                  active ? 'gl-on text-os-text' : 'bg-os-surface text-os-dim'
                 }`}
               >
                 {t.count}

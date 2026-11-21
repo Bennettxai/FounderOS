@@ -31,9 +31,9 @@ export const PILL =
 /** The accent pill Brand Deals uses for "Open in Notion". */
 export const PILL_ACCENT =
   'inline-flex items-center gap-2 rounded-full border border-[var(--accent-line)] bg-[var(--accent-soft)] px-4 py-2 text-[13px] text-os-accent transition-transform hover:-translate-y-[1px]';
-/** Filter chips under a list head: the active one is solid accent. */
+/** Filter chips under a list head: the active one is a lit glass chip (a glow behind, a tinted rim; never a fill). */
 export const chipClass = (active: boolean) =>
-  `pressable rounded-full px-4 py-1.5 text-[12.5px] ${active ? 'bg-os-accent font-semibold text-os-ink' : 'border border-os-border text-os-muted hover:text-os-text'}`;
+  `pressable rounded-full px-4 py-1.5 text-[12.5px] ${active ? 'glass-chip gl-on font-semibold text-os-text' : 'border border-os-border text-os-muted hover:text-os-text'}`;
 
 /**
  * The page column. Under Bennett Legacy the page already sits on LegacySlab's .l-slab

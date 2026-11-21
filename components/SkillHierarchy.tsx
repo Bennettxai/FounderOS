@@ -556,8 +556,7 @@ export function SkillHierarchy({
       {/* vertical file-hierarchy panel */}
       {!G && sel && selDomain && selPath && (
         <div
-          className="skh-panel absolute bottom-4 right-4 top-4 w-[290px] overflow-y-auto rounded-[16px] border p-4"
-          style={{ background: 'color-mix(in srgb, var(--elevated) 92%, transparent)', borderColor: 'rgb(var(--mist-rgb) / 0.12)', backdropFilter: 'blur(10px)' }}
+          className="skh-panel glass-face absolute bottom-4 right-4 top-4 w-[290px] overflow-y-auto rounded-[24px] p-4"
         >
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full" style={{ background: domainColor(selDomain.ci) }} />

@@ -62,7 +62,7 @@ export function CreateAgentModal({
   return (
     <div className="fixed inset-0 z-40 grid place-items-center p-6">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" />
-      <div role="dialog" aria-modal="true" className="c-pop relative w-[440px] max-w-full p-6">
+      <div role="dialog" aria-modal="true" className="c-pop glass-face--strong gl-materialise relative w-[440px] max-w-full p-6">
         <div className="mb-1 flex items-center justify-between">
           <span className="text-[16px] text-os-text">Create an agent</span>
           <button type="button" aria-label="Close" onClick={onClose} className="wz-icon-btn">

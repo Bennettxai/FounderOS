@@ -85,7 +85,7 @@ export function KnowledgeGraphFullscreen({
 
         {/* pillar selector — compact, TOP-LEFT : current pillar + one dot per pillar to jump */}
         {!coreOpen && (
-          <div className="absolute left-5 top-5 z-20 flex items-center gap-3.5 rounded-sm-t border border-os-border-strong bg-os-bg/85 px-2.5 py-2.5 backdrop-blur">
+          <div className="glass-face absolute left-5 top-5 z-20 flex items-center gap-3.5 rounded-[24px] px-2.5 py-2.5">
             <div className="flex flex-col">
               <span
                 className="max-w-[150px] truncate text-[13.5px] font-medium leading-tight transition-colors duration-300"
@@ -169,7 +169,7 @@ export function KnowledgeGraphFullscreen({
       {/* detail panel — an absolute overlay so opening/closing a card never
           resizes the graph area (that reflow was the back-and-forth glitch) */}
       {hasDetail && (
-        <aside className="absolute right-0 top-0 z-30 flex h-full w-[300px] flex-col border-l border-os-border-strong bg-os-bg/95 backdrop-blur max-[820px]:inset-x-0 max-[820px]:bottom-0 max-[820px]:top-auto max-[820px]:max-h-[62vh] max-[820px]:w-full max-[820px]:rounded-t-lg-t max-[820px]:border-l-0 max-[820px]:border-t">
+        <aside className="glass-face glass-face--strong absolute right-0 top-0 z-30 flex h-full w-[300px] flex-col max-[820px]:inset-x-0 max-[820px]:bottom-0 max-[820px]:top-auto max-[820px]:max-h-[62vh] max-[820px]:w-full max-[820px]:rounded-t-[24px]">
           {/* the trail: node → pillar (this) → home. Same affordance inline. */}
           <button
             onClick={onBack}

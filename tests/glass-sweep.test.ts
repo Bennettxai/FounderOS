@@ -729,3 +729,102 @@ describe('cards that are cards only at a breakpoint, and the Creative Engine she
     for (const r of legacy) for (const x of r.selectors) expect(x).toMatch(/:not\(\.glass-face\)$/);
   });
 });
+
+describe('"on" is a glow behind and a tinted rim, never a fill: pills, chips and tabs across the app (glass phase 3)', () => {
+  const ON = [
+    ".ap-pill[aria-pressed='true']", '.bh-itab.is-on', '.ib-chip.is-on', '.ib-seg-btn.is-on', ".ae-chip[data-on='true']",
+    ".ae-pill[data-active='true']", '.g-pill[data-active]', ".wiz-bc-chip[aria-pressed='true']", ".g-btn.kg-radial-row[aria-pressed='true']",
+    ".lab2-seg-opt[aria-selected='true']", ".lab2c-fchip[aria-current='true']", ".ch-g-strip-btn[aria-pressed='true']",
+    ".ch-c-strip-btn[aria-pressed='true']", ".fo-c-filter[aria-pressed='true']",
+  ];
+  const onRule = TOP.filter((r) => r.selectors.some((s) => /^:root\[data-ground\] :is\(/.test(s) && s.includes(".fo-c-filter[aria-pressed='true']")) && /box-shadow/.test(r.body));
+
+  test('every listed on-state clears its fill and takes the tinted six layers', () => {
+    expect(onRule.length).toBe(1);
+    const members = splitSelectors(/:is\(([\s\S]*)\)$/.exec(onRule[0].selectors[0])![1]).map(norm);
+    expect(ON.filter((s) => !members.includes(s))).toEqual([]);
+    const p = props(onRule[0].body);
+    expect(p.get('background')).toBe('transparent');
+    expect(p.get('border-color')).toBe('transparent');
+    expect(layers(p.get('box-shadow')!)).toHaveLength(6);
+    expect(p.get('box-shadow')).toMatch(/var\(--gl-tint\) var\(--gl-rim-a\)/);
+  });
+
+  test('the glow sits behind (a blurred ::before at .55), the rim takes its colour, the inverted ones read in ink again', () => {
+    const glow = TOP.filter((r) => r.selectors.some((s) => s.includes(".fo-c-filter[aria-pressed='true']") && /::before$/.test(s)));
+    expect(glow.length).toBe(1);
+    const g = props(glow[0].body);
+    expect(g.get('z-index')).toBe('-1');
+    expect(g.get('filter')).toBe('blur(40px)');
+    expect(g.get('opacity')).toBe('0.55');
+    const knobs = TOP.filter((r) => r.selectors.some((s) => /^:where\(/.test(s) && s.includes(".fo-c-filter[aria-pressed='true']")));
+    expect(knobs.length).toBe(1);
+    expect(props(knobs[0].body).get('--gl-tint')).toBe('var(--gl-on)');
+    expect(props(knobs[0].body).get('isolation')).toBe('isolate');
+    const ink = (sel: string) => TOP.filter((r) => r.selectors.some((s) => s.includes(sel) && /\[data-ground\]/.test(s)) && props(r.body).has('color')).map((r) => props(r.body).get('color'));
+    expect(ink(".fo-c-filter[aria-pressed='true']")).toContain('var(--text)');
+    expect(ink('.ib-chip.is-on')).toContain('var(--text)');
+    expect(ink(".lab2-seg-opt[aria-selected='true']")).toContain('var(--lab-ink-hero)');
+    expect(ink(".ae-chip[data-on='true']")).toContain('var(--p-ink)');
+  });
+
+  test('TSX pills, chips and tabs mark "on" with gl-on instead of an accent or ink fill', () => {
+    const cases: [string, RegExp][] = [
+      ['founderos/components/slab.tsx', /active \? 'glass-chip gl-on /],
+      ['founderos/components/SlidingTabs.tsx', /active \? 'gl-on /],
+      ['app/org/page.tsx', /!venture \? 'glass-chip gl-on /],
+      ['components/content/Composer.tsx', /tab === t \? 'gl-on /],
+      ['components/AgentWorkPanel.tsx', /cron\.enabled \? 'glass-chip gl-on /],
+    ];
+    for (const [f, re] of cases) expect(read(f), f).toMatch(re);
+    for (const f of ['components/content/Composer.tsx', 'components/content/ParamFields.tsx']) {
+      expect(read(f), f).not.toMatch(/'border-os-accent\/45 bg-os-accent\/12 text-os-accent'/);
+    }
+    expect(read('components/brand-deals/DealBoard.tsx')).not.toMatch(/\? 'bg-os-accent font-semibold text-os-ink'/);
+  });
+});
+
+describe('every element that still frosts itself in TSX is accounted for (glass phase 3 sweep)', () => {
+  /** [file, a needle within 9 lines above the blur, why it is not a glass face]. Faces use the pack's classes. */
+  const ALLOWED: [string, string, string][] = [
+    ['founderos/components/slab.tsx', 'rotate-[24deg] rounded-[36px] border', 'InsightCard glass shard: a decorative leaf inside the one gradient card'],
+    ['components/brand-deals/DealBoard.tsx', 'rotate-[24deg]', 'insight card glass shard: a decorative leaf'],
+    ['components/brand-deals/DealBoard.tsx', 'bg-white/15 px-3 py-1', 'insight card badge on the gradient card (not glass, ink on the gradient)'],
+    ['components/brand-deals/DealBoard.tsx', 'fixed inset-0 z-[60] bg-black/45', 'drawer scrim, the sibling of the glass drawer'],
+    ['components/BrainCore.tsx', 'overlay-in fixed inset-0', 'pop-out scrim, the sibling of its panel'],
+    ['components/wizard/CreateAgentModal.tsx', 'aria-label="Close" onClick={onClose} className="absolute inset-0', 'modal scrim (a close button), the sibling of the dialog'],
+    ['components/adpilot/AdLibrary.tsx', 'ap-ask-glass absolute inset-0', 'the ask bar frost layer, under its content (like .wiz-ask-glass)'],
+    ['components/adpilot/AdLibrary.tsx', 'ap-save absolute right-2 top-2', 'save toggle over a media thumbnail: a control on a leaf'],
+    ['components/GBrainRadial.tsx', "title={fs ? 'Exit full screen (esc)'", 'full-screen toggle: a control'],
+    ['components/GBrainRadial.tsx', "phase === 'typing' || phase === 'scan'", 'the radial ask input pill: a control (its answer card is the glass face)'],
+    ['components/knowledge/KnowledgeVisualizer.tsx', "title={networkFs ? 'Exit full screen (esc)'", 'full-screen toggle: a control'],
+    ['components/BrainDock.tsx', 'bd-line group absolute', 'the collapsed dock line: a button (the open dock card is the glass face)'],
+    ['components/ConductorPanel.tsx', 'wiz-launch group fixed', 'the Conductor launcher: a button'],
+    ['components/KnowledgeGraphFullscreen.tsx', 'kg-paddle', 'pillar paddles: buttons'],
+    ['components/KnowledgeGraph.tsx', 'kg-paddle', 'pillar paddles: buttons'],
+    ['components/GraphDirectory.tsx', 'kg-dir-rail', 'directory rail: a button (the open directory is the glass face)'],
+    ['components/PipelineChart.tsx', 'AI prompt bar melting out of the chart base', 'prompt bar frost melting out of the chart: holds an input, no face'],
+  ];
+
+  test('no unlisted backdrop blur: an element that frosts itself is a glass face of the pack, a scrim, a leaf or a control', () => {
+    const walk = (d: string): string[] =>
+      require('node:fs')
+        .readdirSync(join(process.cwd(), d), { withFileTypes: true })
+        .flatMap((e: { name: string; isDirectory: () => boolean }) => (e.isDirectory() ? walk(`${d}/${e.name}`) : e.name.endsWith('.tsx') ? [`${d}/${e.name}`] : []));
+    const left: string[] = [];
+    for (const f of [...walk('app'), ...walk('components'), ...walk('founderos')]) {
+      const lines = read(f).split('\n');
+      lines.forEach((l, i) => {
+        if (!/backdrop-blur(?!-none)|backdropFilter|WebkitBackdropFilter/.test(l) || /^\s*(\/\/|\*|\/\*)/.test(l)) return;
+        const window = lines.slice(Math.max(0, i - 9), i + 1).join('\n');
+        if (ALLOWED.some(([file, needle]) => file === f && window.includes(needle))) return;
+        left.push(`${f}:${i + 1} ${l.trim().slice(0, 100)}`);
+      });
+    }
+    expect(left).toEqual([]);
+  });
+
+  test('every allowlisted line still exists (the list cannot rot)', () => {
+    for (const [file, needle] of ALLOWED) expect(read(file), `${file}: ${needle}`).toContain(needle);
+  });
+});
