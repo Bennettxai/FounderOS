@@ -262,7 +262,7 @@ export function NeedsYouList({
   const unread = queue.filter((c) => unseenOf(c) !== null).length;
 
   return (
-    <section data-part="card" className="rounded-panel border border-os-border bg-os-surface">
+    <section data-part="card" className="glass-well">
       <div data-part="card-head" className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-os-border px-4 py-2.5">
         <Label>Needs you</Label>
         <span className="font-mono text-[10px] text-os-dim">

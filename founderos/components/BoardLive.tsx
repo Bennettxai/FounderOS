@@ -247,7 +247,7 @@ export function BoardLive({ initial, boardUrl }: { initial: BoardLivePayload; bo
   const agentRunning = new Set(data.agents.filter((a) => a.status === 'running').map((a) => a.name));
 
   return (
-    <section className="flex h-full min-h-0 flex-col rounded-panel border border-os-border bg-os-surface">
+    <section className="glass-well flex h-full min-h-0 flex-col">
       <div className="shrink-0 border-b border-os-border px-4 py-2.5">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className={`h-1.5 w-1.5 ${data.connected ? 'bg-os-ok animate-pulse' : 'bg-os-err'}`} />

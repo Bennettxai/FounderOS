@@ -125,7 +125,7 @@ export function ConductorChat({
   return (
     <div
       className={`flex h-full min-h-0 flex-col p-4 ${
-        bare ? '' : 'rounded-2xl border border-os-border-strong bg-os-surface'
+        bare ? '' : 'glass-well'
       }`}
     >
       <div className="flex shrink-0 items-center gap-2.5">

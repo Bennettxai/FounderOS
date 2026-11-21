@@ -494,8 +494,11 @@ describe('Classic ad-hoc cards are glass faces', () => {
     ['components/tasks/Board.tsx', 'tasks-card', 'calendar event chips inside grid cells'],
     ['components/BrainQuery.tsx', 'border-b-2 bg-os-surface', 'keyboard hint badge'],
     ['app/org/page.tsx', 'mb-4 rounded-lg border bg-os-surface', 'venture banner, lit by its own inline venture colour'],
+    ['founderos/components/InstagramDmInbox.tsx', 'inline-flex gap-1 rounded-md-t', 'tab track'],
+    ['founderos/components/terminal.tsx', 'border-b-2 bg-os-surface', 'keyboard hint badge'],
   ];
-  const SKIP_DIRS = /^(founderos)\//;
+  // founderos/ (the /agents and /social slab kit) is scanned too (review finding 6a): its cards sat in a SlabCard
+  // (a glass face) filled and at 8 to 16px, or on a radius class that does not exist (rounded-panel)
   const PHASE_2A = new Set(['components/CommandPalette.tsx', 'components/legacy/Dialog.tsx', 'components/g/GSheet.tsx', 'components/g/GDrawer.tsx', 'components/g/GDialog.tsx', 'components/ui/Toast.tsx']);
   const walk = (dir: string): string[] =>
     require('node:fs')
@@ -503,10 +506,10 @@ describe('Classic ad-hoc cards are glass faces', () => {
       .flatMap((d: { name: string; isDirectory: () => boolean }) =>
         d.isDirectory() ? walk(`${dir}/${d.name}`) : /\.tsx?$/.test(d.name) ? [`${dir}/${d.name}`] : [],
       );
-  const FILES = [...walk('app'), ...walk('components')].filter((f) => !SKIP_DIRS.test(f) && !PHASE_2A.has(f));
+  const FILES = [...walk('app'), ...walk('components'), ...walk('founderos')].filter((f) => !PHASE_2A.has(f));
   // a variant-prefixed surface (wide:bg-os-surface) is a card at that breakpoint, so it counts too
   const SURFACE = /(^|[\s'"`:])bg-os-surface(?![\w/-])/;
-  const CARD_RADIUS = /\brounded-(?:lg|xl|2xl)(?![\w-])|\brounded-\[(?:1\d|2\d)px\]|\brounded-(?:md|sm)-t\b/;
+  const CARD_RADIUS = /\brounded-(?:lg|xl|2xl|panel)(?![\w-])|\brounded-\[(?:[89]|1\d|2\d)px\]|\brounded-(?:md|sm)-t\b/;
 
   test('no os-surface card keeps an ad-hoc radius: cards take the card token, insets are wells, pop-ups are solid', () => {
     const left: string[] = [];
@@ -968,5 +971,45 @@ describe('pop-ups over text take the strong frost (review finding 5)', () => {
     expect(panel![0]).toMatch(/'kg-panel kg-graph-panel[^']*glass-face--strong/);
     expect(panel![1]).toMatch(/glass-face--strong/);
     expect(read('components/SkillHierarchy.tsx')).toMatch(/className="skh-panel glass-face glass-face--strong /);
+  });
+});
+
+describe('review finding 6a: the founderos kit is on the glass recipe', () => {
+  const lineOf = (f: string, needle: RegExp) => read(f).split('\n').find((l) => needle.test(l)) ?? '';
+
+  test('the Conductor rail, the Needs-you queue and the live board sit in a SlabCard: wells, not filled cards', () => {
+    expect(lineOf('founderos/components/ConductorChat.tsx', /bare \? '' :/)).toMatch(/bare \? '' : 'glass-well'/);
+    for (const [f, needle] of [
+      ['founderos/components/NeedsYouList.tsx', /<section data-part="card"/],
+      ['founderos/components/BoardLive.tsx', /<section className=/],
+    ] as const) {
+      const l = lineOf(f, needle);
+      expect(l, f).toMatch(/\bglass-well\b/);
+      expect(l, f).not.toMatch(/\bbg-os-(surface|bg)\b|\brounded-panel\b|\bborder\b/);
+    }
+  });
+
+  test('a newsletter row and its metric cells are wells (the list sits in a SlabCard)', () => {
+    const src = read('founderos/components/NewsletterList.tsx');
+    expect(src).not.toMatch(/rounded-\[\d+px\] border border-os-border bg-os-(surface|bg)/);
+    expect(src).toMatch(/<div className="glass-well [^"]*px-3 py-2\.5">/);
+    expect(src).toMatch(/<div key=\{n\.id\} className="glass-well overflow-hidden">/);
+  });
+
+  test('the page skeleton: card placeholders are glass faces at the card radius, at rest; only their leaves pulse', async () => {
+    const { createElement } = await import('react');
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { PageSkeleton } = await import('@/founderos/components/PageSkeleton');
+    const html = renderToStaticMarkup(createElement(PageSkeleton));
+    const classes = [...html.matchAll(/class="([^"]*)"/g)].map((m) => m[1].split(/\s+/));
+    const faces = classes.filter((c) => c.includes('glass-face'));
+    expect(faces.length).toBe(6); // the hero, the volume card, a row of three and the wide one
+    for (const c of faces) {
+      expect(c, c.join(' ')).toContain('rounded-[var(--gl-r-card)]');
+      expect(c, c.join(' ')).not.toContain('animate-pulse'); // a face never fades; the bars inside do
+      expect(c.filter((k) => /^(bg-|border$|border-os)/.test(k)), c.join(' ')).toEqual([]);
+    }
+    expect(html).not.toMatch(/rounded-\[(8|12)px\]/);
+    expect(classes.filter((c) => c.includes('animate-pulse')).every((c) => !c.includes('border'))).toBe(true);
   });
 });

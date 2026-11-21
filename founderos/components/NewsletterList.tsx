@@ -13,7 +13,7 @@ const dateLabel = (iso: string) =>
 function Metric({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: 'ok' | 'warn' | 'err' }) {
   const color = tone === 'ok' ? 'text-os-ok' : tone === 'warn' ? 'text-os-warn' : tone === 'err' ? 'text-os-err' : 'text-os-text';
   return (
-    <div className="rounded-[8px] border border-os-border bg-os-surface px-3 py-2.5">
+    <div className="glass-well px-3 py-2.5">
       <div className="font-mono text-[9px] uppercase tracking-[0.16em] text-os-dim">{label}</div>
       <div className={`mt-1 font-mono text-[17px] font-semibold leading-none tracking-[-0.02em] ${color}`}>{value}</div>
       {sub && <div className="mt-1 font-mono text-[9.5px] text-os-dim">{sub}</div>}
@@ -38,7 +38,7 @@ export function NewsletterList({ newsletters }: { newsletters: Newsletter[] }) {
       {newsletters.map((n) => {
         const expanded = openId === n.id;
         return (
-          <div key={n.id} className="overflow-hidden rounded-[10px] border border-os-border bg-os-bg">
+          <div key={n.id} className="glass-well overflow-hidden">
             <button
               onClick={() => setOpenId(expanded ? null : n.id)}
               aria-expanded={expanded}
