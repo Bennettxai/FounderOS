@@ -76,11 +76,23 @@ const keyframes = (name: string) => {
   return norm(b[b.length - 1]);
 };
 
-/** :is(...) members of a selector, or its last compound (`:root[data-ground] .g-drawer` → `.g-drawer`). */
+/**
+ * The subject's members: a trailing :is(...) group's members, or the last compound
+ * (`:root[data-ground] .g-drawer` → `.g-drawer`). In `:root[data-ground] :is(A) :is(B)` the subject is B.
+ */
 function members(sel: string): string[] {
-  const m = /:is\(([\s\S]*)\)\s*$/.exec(sel);
-  if (!m) return [sel.trim().split(/\s+/).pop()!];
-  return splitSelectors(m[1]);
+  const t = sel.trim();
+  if (t.endsWith(')')) {
+    let depth = 0;
+    for (let i = t.length - 1; i >= 0; i--) {
+      if (t[i] === ')') depth++;
+      else if (t[i] === '(' && --depth === 0) {
+        if (t.slice(i - 3, i) === ':is') return splitSelectors(t.slice(i + 1, -1));
+        break;
+      }
+    }
+  }
+  return [t.split(/\s+/).pop()!];
 }
 
 const RULES = topLevelRules();
@@ -193,7 +205,8 @@ describe('the face (brief §2)', () => {
   });
 
   test('pop-ups, sheets, drawers, dialogs and the palette take the strong frost', () => {
-    const strong = ruleWith((s) => members(s).includes('.glass-face--strong') && /\[data-ground\]/.test(s));
+    // the glass-over-glass rules (glass phase 3: `:is(faces) :is(...)`) unfrost nested faces; this is the frost itself
+    const strong = ruleWith((s) => members(s).includes('.glass-face--strong') && /\[data-ground\]/.test(s) && !/\) :is\(/.test(s));
     expect(strong.length).toBe(1);
     const p = props(strong[0].body);
     expect(p.get('backdrop-filter')).toBe('var(--gl-blur-strong)');

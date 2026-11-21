@@ -18,7 +18,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, test } from 'vitest';
 import { LDialog } from '@/components/legacy/Dialog';
-import { CSS_NO_COMMENTS, GLOBALS_CSS, topLevelRules } from './helpers/theme-css';
+import { CSS_NO_COMMENTS, GLOBALS_CSS, splitSelectors, topLevelRules } from './helpers/theme-css';
 import {
   FACE_CLASSES,
   allRules,
@@ -32,42 +32,18 @@ import {
 } from './helpers/glass-lint';
 
 const ROOT = path.join(__dirname, '..');
-const SCAN_DIRS = ['components', 'founderos'];
+const SCAN_DIRS = ['app', 'components', 'founderos'];
 const FILES = tsxFiles(ROOT, SCAN_DIRS).map((abs) => ({ file: path.relative(ROOT, abs), src: fs.readFileSync(abs, 'utf8') }));
 const KILLERS = cssKillers();
 const FINDINGS = FILES.flatMap(({ file, src }) => lintSource(file, src, KILLERS));
 const keyOf = (f: { file: string; face: string; why: string }) => `${f.file}: ${f.face} in ${f.why}`;
 
 /**
- * PENDING_NESTING_OUTSIDE_PHASE_2A: faces that still sit inside a frost killer, in files phase 2a
- * does not own (ad-hoc modals that blur their own wrapper, fading parents, a dimmed panel).
- * Phase 2a fixed its overlays (LDialog, both palettes); the follow-up sweep (phase 2b or the next
- * pass) moves each scrim beside its face and removes the line here. The list must only shrink:
- * a new violation fails, and so does a line that no longer matches (delete it).
+ * PENDING_NESTING_OUTSIDE_PHASE_2A: faces that still sit inside a frost killer. Phase 3 moved every
+ * ad-hoc modal's scrim beside its face and dimmed leaves instead of parents, so the list is empty
+ * and must stay empty: any new violation fails.
  */
-const PENDING_NESTING_OUTSIDE_PHASE_2A = [
-  'components/AgentPanel.tsx: glass-panel in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/AgentPanel.tsx: glass-chip in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/AudienceConsistency.tsx: c-pop in backdrop-blur-sm (backdrop-filter)',
-  'components/BrainCore.tsx: c-pop in backdrop-blur-sm (backdrop-filter), .overlay-in (animation overlay-in)',
-  'components/SocialStatStrip.tsx: c-pop in backdrop-blur-sm (backdrop-filter)',
-  'components/adpilot/Globe.tsx: g-chip in .ap-globe (opacity)',
-  'components/blueprint/AskBar.tsx: g-chip in .bh-ask-chips (opacity)',
-  'components/blueprint/HierarchyInspector.tsx: g-chip in .bh-inspector (backdrop-filter)',
-  'components/chats/ChatsG.tsx: g-card-raised in .ch-g-msg (animation ch-arrive)',
-  'components/content/Composer.tsx: glass-panel in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/content/Composer.tsx: glass-chip in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/content/MediaDetail.tsx: glass-panel in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/content/MediaDetail.tsx: glass-chip in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/content/MediaLibrary.tsx: glass-panel in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/content/PipelineBoard.tsx: glass-panel in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/content/PipelineBoard.tsx: glass-chip in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/content/PipelineBuilder.tsx: glass-panel in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/content/PipelineBuilder.tsx: glass-chip in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/content/PipelineBuilder.tsx: glass-panel-violet in style.backdropFilter, style.WebkitBackdropFilter',
-  'components/knowledge/DriftRail.tsx: glass-chip in opacity-60 (opacity)',
-  'components/trading/TradingClassic.tsx: c-pop in .trd-c-scrim (backdrop-filter)',
-];
+const PENDING_NESTING_OUTSIDE_PHASE_2A: string[] = [];
 
 /**
  * PENDING_FACE_FADE_KEYFRAMES_PHASE_2B: face entrance keyframes that still animate opacity.
@@ -100,6 +76,26 @@ describe('the lint itself', () => {
     expect(lint(`<div className="dim"><div className="glass-face" /></div>`)).toEqual([]);
     expect(lint(`<div className="l-slab"><div className="l-card"><span className="l-chip" /></div></div>`)).toEqual([]);
     expect(lint(`<div style={{ opacity: 1, filter: 'none' }}><GChip /></div>`)).toEqual([]);
+  });
+
+  test('glass over glass: the Classic card (os surface + card radius) is a face, so what it holds is not inside a killer', () => {
+    const card = ':root[data-ground] .bg-os-surface.rounded-lg-t:not(.border-dashed) { backdrop-filter: var(--gl-blur); }';
+    expect(cssKillers(card), 'the mapped card is a face, not a frost killer').toEqual([]);
+    const k = cssKillers(card);
+    expect(lintSource('f.tsx', `<div className="rounded-lg-t border bg-os-surface p-6"><span className="c-chip" /><span className="c-pop glass-solid" /></div>`, k)).toEqual([]);
+    // the mapped card is itself checked like any face; a dashed drop zone is not a card
+    expect(lint(`<div className="fixed inset-0 backdrop-blur-sm"><div className="rounded-lg-t bg-os-surface" /></div>`)).toHaveLength(1);
+    expect(lint(`<div className="fixed inset-0 backdrop-blur-sm"><div className="rounded-lg-t border-dashed bg-os-surface" /></div>`)).toEqual([]);
+    expect(lint(`<div className="fixed inset-0 backdrop-blur-sm"><div className="rounded-lg-t bg-os-surface2" /></div>`)).toEqual([]);
+  });
+
+  test('glass over glass stays strict: a face that frosts itself again inside a face is reported', () => {
+    const again = lint(`<div className="g-card"><span className="glass-chip backdrop-blur-md" /></div>`);
+    expect(again).toHaveLength(1);
+    expect(again[0].why).toMatch(/frosts again inside <div className="g-card">/);
+    expect(lint(`<div className="l-slab"><div style={{ backdropFilter: 'blur(4px)' }} className="l-card" /></div>`)).toHaveLength(1);
+    // a face's own frost is fine where nothing frosts under it
+    expect(lint(`<div><span className="glass-chip backdrop-blur-md" /></div>`)).toEqual([]);
   });
 
   test('utilities: only the ones that set the property on the element itself', () => {
@@ -143,6 +139,69 @@ describe('no glass face inside a filter, opacity < 1, mask or backdrop-filter (b
   });
 });
 
+describe('glass over glass (brief §3.2): a face inside a frosted face is lit, never frosted again', () => {
+  const P3 = (() => {
+    const s = GLOBALS_CSS.indexOf('/* ── glass phase 3 ── */');
+    const e = GLOBALS_CSS.indexOf('/* ── end glass phase 3 ── */');
+    return s > -1 && e > s ? GLOBALS_CSS.slice(s, e).replace(/\/\*[\s\S]*?\*\//g, '') : '';
+  })();
+  const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
+  /** `:root[data-ground] :is(OUTER) :is(INNER)` -> [outer members, inner members]. */
+  const nested = (sel: string): [string[], string[]] | null => {
+    const m = /^:root\[data-ground\] :is\(([^)]*(?:\([^)]*\)[^)]*)*)\) :is\(([^)]*(?:\([^)]*\)[^)]*)*)\)$/.exec(norm(sel));
+    return m ? [m[1].split(',').map((x) => x.trim()), m[2].split(',').map((x) => x.trim())] : null;
+  };
+  const rules = topLevelRules(P3).filter((r) => r.selectors.some((s) => nested(s)));
+  const face = topLevelRules().find((r) => r.selectors.some((s) => /^:root\[data-ground\] :is\(\s*\.glass-face,/.test(s)) && /box-shadow/.test(r.body))!;
+  const shadowOf = (body: string) => {
+    const v = /box-shadow:([^;]+);/.exec(body);
+    return v ? splitSelectors(norm(v[1])).map(norm) : [];
+  };
+  const six = shadowOf(face.body);
+  const FROSTING = [...FACE_CLASSES.map((c) => `.${c}`), '.bg-os-surface.rounded-lg-t:not(.border-dashed)'];
+
+  test('the phase 3 block sits at the end of globals.css with no literal colour', () => {
+    expect(P3, 'glass phase 3 block').not.toBe('');
+    expect(P3).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(\s*\d/);
+  });
+
+  test('every face nested in any frosting face drops its own frost (the lint exemption rests on this rule)', () => {
+    const unfrost = rules.find((r) => /(^|;)\s*backdrop-filter:\s*none/.test(r.body) && /-webkit-backdrop-filter:\s*none/.test(r.body) && !/box-shadow/.test(r.body));
+    expect(unfrost, 'the glass-over-glass rule').toBeTruthy();
+    const [outer, inner] = nested(unfrost!.selectors[0])!;
+    expect([...FROSTING].filter((f) => !outer.includes(f)), 'outer faces missing').toEqual([]);
+    expect([...FROSTING].filter((f) => !inner.includes(f.replace(':not(.border-dashed)', '')) && !inner.includes(f)), 'inner faces missing').toEqual([]);
+  });
+
+  test('a chip inside a frosted face is lit like a well: rim, bottom edge and pool, no groove, drop or shade', () => {
+    const chips = rules.find((r) => {
+      const n = nested(r.selectors[0]);
+      return n && ['.c-chip', '.g-chip', '.l-chip', '.glass-chip'].every((c) => n[1].includes(c)) && /box-shadow/.test(r.body);
+    });
+    expect(chips, 'the nested chip rule').toBeTruthy();
+    expect(nested(chips!.selectors[0])![0]).toEqual(nested(rules[0].selectors[0])![0]);
+    expect(shadowOf(chips!.body)).toEqual([six[2], six[3], six[4]]);
+    expect(chips!.body).not.toMatch(/background/);
+  });
+
+  test('a pop-up inside a frosted face is a solid raised face (brief: small pop-ups over content never frost)', () => {
+    const pops = rules.find((r) => {
+      const n = nested(r.selectors[0]);
+      return n && ['.c-pop', '.glass-face--strong'].every((c) => n[1].includes(c)) && !n[1].includes('.l-card');
+    });
+    expect(pops, 'the nested pop-up rule').toBeTruthy();
+    expect(norm(pops!.body)).toMatch(/(^|; )background: var\(--solid-bg\)/);
+    expect(norm(pops!.body)).toMatch(/(^|; )backdrop-filter: none/);
+    expect(shadowOf(pops!.body)).toEqual(six);
+  });
+
+  test('the three Classic cards that hold a chip or a pop-up are clean', () => {
+    for (const f of ['components/BusinessIncomeChart.tsx', 'components/IntegrationCategory.tsx', 'components/PostComposer.tsx']) {
+      expect(FINDINGS.filter((x) => x.file === f), f).toEqual([]);
+    }
+  });
+});
+
 describe('scrims are siblings: the face sits above its scrim, not in it', () => {
   test('LDialog: a layer holding the scrim, then the strong-frost face with its dialog roles', () => {
     const html = renderToStaticMarkup(createElement(LDialog, { open: true, onClose: () => {}, title: 'Rename', sub: 'one line', children: 'body', footer: 'foot' }));
@@ -183,6 +242,45 @@ describe('scrims are siblings: the face sits above its scrim, not in it', () => 
   test('sheets, drawers and dialogs: the scrim frosts as a sibling too', () => {
     const src = fs.readFileSync(path.join(ROOT, 'components/g/Overlays.tsx'), 'utf8');
     expect(src.match(/<div className="g-scrim gl-scrim" aria-hidden/g)?.length).toBe(3);
+  });
+});
+
+describe('ad-hoc modals: the scrim beside the face, the face materialises and melts (phase 3)', () => {
+  /** Modals that used to blur their own wrapper (or a scrim around the face). */
+  const MODALS = [
+    'components/AgentPanel.tsx',
+    'components/AudienceConsistency.tsx',
+    'components/SocialStatStrip.tsx',
+    'founderos/components/SocialStatStrip.tsx',
+    'components/content/Composer.tsx',
+    'components/content/MediaDetail.tsx',
+    'components/content/MediaLibrary.tsx',
+    'components/content/PipelineBoard.tsx',
+    'components/content/PipelineBuilder.tsx',
+    'components/trading/TradingClassic.tsx',
+  ];
+
+  test.each(MODALS)('%s: a gl-scrim closes it, nothing frosts around the face, the face melts', (file) => {
+    const src = fs.readFileSync(path.join(ROOT, file), 'utf8');
+    expect(src).toMatch(/<div className="gl-scrim" aria-hidden onClick=\{[\w.]+\} \/>/);
+    // the scrim is the only closer: the layer takes no click, the face stops nothing
+    for (const m of src.matchAll(/<div className="gl-scrim"/g)) {
+      const before = src.slice(0, m.index);
+      expect(before.slice(before.lastIndexOf('<div')), 'the layer holding the scrim').not.toMatch(/onClick/);
+    }
+    expect(src).not.toMatch(/glass-face--strong[^<]*?stopPropagation/);
+    expect(src).not.toMatch(/backdropFilter|backdrop-blur/);
+    expect(src).toMatch(/useMeltClose\(|useMeltPhase\(/);
+    expect(src).toMatch(/glass-face--strong/);
+    expect(src).toMatch(/gl-materialise/);
+    expect(src).toMatch(/is-melting/);
+    expect(FINDINGS.filter((f) => f.file === file)).toEqual([]);
+  });
+
+  test('useMeltClose: close starts the melt; the parent unmounts the face when it has melted', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'lib/use-melt.ts'), 'utf8');
+    expect(src).toMatch(/export function useMeltClose/);
+    expect(src).toMatch(/useMeltEnd\(faceRef, melting, onClose\)/);
   });
 });
 

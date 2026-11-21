@@ -39,6 +39,7 @@ import type {
   PipelineNode,
   PipelineNodeKind,
 } from '@/lib/content-pipelines';
+import { useMeltClose } from '@/lib/use-melt';
 
 const NODE_KINDS: PipelineNodeKind[] = ['input', 'generate', 'transform', 'output'];
 const NODE_KIND_LABEL: Record<PipelineNodeKind, string> = {
@@ -149,6 +150,9 @@ export function PipelineBuilder({
   onClose: () => void;
 }) {
   const router = useRouter();
+  // Close melts the face (lib/use-melt); the board unmounts it once it has melted.
+  const melt = useMeltClose(onClose);
+  const close = melt.close;
   const editing = pipeline !== null;
   const initial = pipeline ?? draft ?? null;
 
@@ -167,14 +171,14 @@ export function PipelineBuilder({
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') close();
     }
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener('keydown', onKey);
     };
-  }, [onClose]);
+  }, [close]);
 
   const columns = useMemo(() => flowColumns(nodes, edges), [nodes, edges]);
   const selectedNode = nodes.find((n) => n.id === selectedId) ?? null;
@@ -239,7 +243,7 @@ export function PipelineBuilder({
         return;
       }
       router.refresh();
-      onClose();
+      close();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -259,7 +263,7 @@ export function PipelineBuilder({
       const res = await fetch(`/api/content/pipelines/${pipeline.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`delete failed (HTTP ${res.status})`);
       router.refresh();
-      onClose();
+      close();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setDeleteArmed(false);
@@ -269,22 +273,20 @@ export function PipelineBuilder({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: 'rgba(3, 7, 6, 0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="presentation" {...melt.layer}>
+      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+      <div className="gl-scrim" aria-hidden onClick={close} />
       <div
-        className="glass-panel relative flex w-full max-w-[1180px] flex-col overflow-hidden"
+        ref={melt.faceRef}
+        onAnimationEnd={melt.onAnimationEnd}
+        className={`glass-panel glass-face--strong gl-materialise relative flex w-full max-w-[1180px] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
         style={{ maxHeight: '92vh' }}
-        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={editing ? `Edit ${pipeline!.name}` : 'New pipeline'}
       >
         <button
-          onClick={onClose}
+          onClick={close}
           aria-label="Close"
           className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] bg-black/30 text-os-dim transition-colors hover:text-os-text"
         >
@@ -391,7 +393,7 @@ export function PipelineBuilder({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button type="button" onClick={onClose} className="c-btn">
+            <button type="button" onClick={close} className="c-btn">
               Cancel
             </button>
             <button type="button" onClick={submit} disabled={busy} className="c-btn c-btn-primary">

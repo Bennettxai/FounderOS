@@ -7,6 +7,7 @@ import type { DmThread } from '@/lib/social';
 import { InstagramDmInbox } from '@/components/InstagramDmInbox';
 import { seriesColor } from '@/lib/series';
 import { channelsNetChange, netChange, seriesWindow, windowPoints } from '@/lib/social-range';
+import { useMeltClose } from '@/lib/use-melt';
 
 type Range = 7 | 30 | 60 | 'all';
 const RANGES: Range[] = [7, 30, 60, 'all'];
@@ -122,11 +123,14 @@ function StatPopout({
   const [range, setRange] = useState<Range>(30);
   const [active, setActive] = useState<Set<string>>(new Set(metric === 'audience' ? ['all'] : ['total']));
 
+  // Close melts the face (lib/use-melt); the strip unmounts it once it has melted.
+  const melt = useMeltClose(onClose);
+  const close = melt.close;
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [close]);
 
   useEffect(() => {
     let cancelled = false;
@@ -145,17 +149,20 @@ function StatPopout({
   const title = metric === 'audience' ? 'Audience growth' : 'Total DMs';
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-os-bg/70 p-6 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-6" {...melt.layer}>
+      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+      <div className="gl-scrim" aria-hidden onClick={close} />
       <div
-        className="c-pop w-full max-w-3xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        ref={melt.faceRef}
+        onAnimationEnd={melt.onAnimationEnd}
+        className={`c-pop glass-face--strong gl-materialise relative w-full max-w-3xl overflow-hidden${melt.melting ? ' is-melting' : ''}`}
       >
         <div className="flex items-center justify-between border-b border-os-border px-5 py-3.5">
           <div className="flex items-center gap-4">
             <h2 className="text-[15px] font-medium">{title}</h2>
             <RangeChips value={range} onChange={setRange} />
           </div>
-          <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-sm-t border border-os-border text-os-muted transition-colors hover:bg-os-surface2 hover:text-os-text">
+          <button onClick={close} className="grid h-7 w-7 place-items-center rounded-sm-t border border-os-border text-os-muted transition-colors hover:bg-os-surface2 hover:text-os-text">
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -272,17 +279,23 @@ function MetricTile({
 /** Wide modal that expands the DM tile into the full Instagram inbox with a
     reply box — the "answer DMs from here" view. */
 function DmInboxPopout({ threads, nowMs, onClose }: { threads: DmThread[]; nowMs: number; onClose: () => void }) {
+  // Close melts the face (lib/use-melt); the strip unmounts it once it has melted.
+  const melt = useMeltClose(onClose);
+  const close = melt.close;
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [close]);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-os-bg/70 p-3 backdrop-blur-sm sm:p-6" onClick={onClose}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6" {...melt.layer}>
+      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+      <div className="gl-scrim" aria-hidden onClick={close} />
       <div
-        className="c-pop max-h-[92vh] w-full max-w-6xl overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+        ref={melt.faceRef}
+        onAnimationEnd={melt.onAnimationEnd}
+        className={`c-pop glass-face--strong gl-materialise relative max-h-[92vh] w-full max-w-6xl overflow-y-auto${melt.melting ? ' is-melting' : ''}`}
       >
         <div className="flex items-center justify-between border-b border-os-border px-5 py-3.5">
           <div className="flex items-center gap-3">
@@ -290,7 +303,7 @@ function DmInboxPopout({ threads, nowMs, onClose }: { threads: DmThread[]; nowMs
             <h2 className="text-[15px] font-medium">Instagram DMs</h2>
           </div>
           <button
-            onClick={onClose}
+            onClick={close}
             className="grid h-7 w-7 place-items-center rounded-sm-t border border-os-border text-os-muted transition-colors hover:bg-os-surface2 hover:text-os-text"
           >
             <X className="h-3.5 w-3.5" />

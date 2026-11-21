@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Sparkles, X } from 'lucide-react';
 import { ParamFields, type ParamValues } from '@/components/content/ParamFields';
@@ -40,6 +40,7 @@ import {
 import type { Campaign } from '@/lib/content-campaigns';
 import type { HiggsfieldAccount, IdentityAsset } from '@/lib/higgsfield/account';
 import type { UploadAsset } from '@/lib/content-uploads';
+import { useMeltEnd, useMeltPhase } from '@/lib/use-melt';
 
 const inputCls =
   'w-full rounded-[9px] border border-[rgb(var(--mist-rgb) / 0.14)] bg-[var(--surface-2)] px-3 py-2 text-[13px] text-os-text outline-none placeholder:text-os-dim';
@@ -327,7 +328,12 @@ export function Composer({
     };
   }, [open]);
 
-  if (!open || !tool || !model || !spec) return null;
+  // Close melts the drawer (lib/use-melt): `open` goes false at once (Escape, scroll lock), and only
+  // the face lingers for the melt.
+  const faceRef = useRef<HTMLDivElement>(null);
+  const melt = useMeltPhase(open);
+  const onMeltEnd = useMeltEnd(faceRef, melt.melting, melt.end);
+  if (!melt.mounted || !tool || !model || !spec) return null;
 
   function handleModelChange(id: string) {
     const next = findModel(id);
@@ -411,15 +417,13 @@ export function Composer({
   const credits = estimateCredits({ model: model.id, batch: spec.batch });
 
   return (
-    <div
-      className="fixed inset-0 z-[100]"
-      style={{ background: 'rgba(3, 7, 6, 0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-      onClick={closeComposer}
-      role="presentation"
-    >
+    <div className="fixed inset-0 z-[100]" role="presentation" data-melting={melt.melting ? '' : undefined}>
+      {/* The scrim is the drawer's sibling (glass brief §3.2): it frosts and dims the page; the drawer frosts on its own. */}
+      <div className="gl-scrim" aria-hidden onClick={closeComposer} />
       <div
-        className="glass-panel fixed inset-y-0 right-0 flex w-full max-w-[560px] flex-col overflow-hidden rounded-l-[20px] rounded-r-none"
-        onClick={(e) => e.stopPropagation()}
+        ref={faceRef}
+        onAnimationEnd={onMeltEnd}
+        className={`glass-panel glass-face--strong gl-materialise--drawer fixed inset-y-0 right-0 flex w-full max-w-[560px] flex-col overflow-hidden rounded-l-[24px] rounded-r-none${melt.melting ? ' is-melting' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label={`Compose ${tool.label}`}

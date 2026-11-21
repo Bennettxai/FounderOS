@@ -31,6 +31,7 @@ import {
 import { VerbButton } from '@/components/content/ActionRow';
 import { HoverVideo } from '@/components/content/MediaPreview';
 import { MediaDetailOverlay } from '@/components/content/MediaDetail';
+import { useMeltClose } from '@/lib/use-melt';
 
 /** Filename inside public/content-media/uploads/ — mirrors lib/content-uploads.ts's
  * uploadUrl without importing that (server-only, node:fs) module into the client bundle. */
@@ -158,18 +159,21 @@ function TrainAvatarModal({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Close melts the face (lib/use-melt); the library unmounts it once it has melted.
+  const melt = useMeltClose(onClose);
+  const close = melt.close;
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') close();
     }
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener('keydown', onKey);
     };
-  }, [onClose]);
+  }, [close]);
 
   async function submit() {
     const trimmed = name.trim();
@@ -196,7 +200,7 @@ function TrainAvatarModal({ onClose }: { onClose: () => void }) {
         }),
       });
       if (res.ok) {
-        onClose();
+        close();
         router.refresh();
       } else {
         const body = await res.json().catch(() => ({}));
@@ -208,15 +212,13 @@ function TrainAvatarModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-6"
-      style={{ background: 'rgba(3, 7, 6, 0.7)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" role="presentation" {...melt.layer}>
+      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+      <div className="gl-scrim" aria-hidden onClick={close} />
       <div
-        className="glass-panel w-full max-w-md p-6"
-        onClick={(e) => e.stopPropagation()}
+        ref={melt.faceRef}
+        onAnimationEnd={melt.onAnimationEnd}
+        className={`glass-panel glass-face--strong gl-materialise relative w-full max-w-md p-6${melt.melting ? ' is-melting' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label="Train new avatar"
@@ -238,7 +240,7 @@ function TrainAvatarModal({ onClose }: { onClose: () => void }) {
         </label>
         {error && <p className="mt-2 text-[12px] text-os-err">{error}</p>}
         <div className="mt-5 flex items-center justify-end gap-2">
-          <button type="button" onClick={onClose} className="c-btn">
+          <button type="button" onClick={close} className="c-btn">
             Cancel
           </button>
           <button type="button" onClick={submit} disabled={busy} className="c-btn c-btn-primary">

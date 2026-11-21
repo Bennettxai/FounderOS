@@ -64,7 +64,7 @@ export function HierarchyInspector({
         <PanelRightOpen />
         <span>{handleLabel}</span>
       </button>
-      <aside className="bh-inspector" aria-hidden={!has || minimized}>
+      <aside className="bh-inspector glass-face glass-face--strong" aria-hidden={!has || minimized}>
         <div className="bh-insp-bar">
           <div className="bh-insp-tabs">
             {opened.map((id) => (

@@ -2247,13 +2247,19 @@ html.conductor-dragging .os-shell {
   --ap-globe-land-rgb: 200 210 225;
 }
 .ap-globe {
-  opacity: 0;
   transform: scale(0.965);
-  transition: opacity 1100ms ease-out, transform 1100ms ease-out;
+  transition: transform 1100ms ease-out;
 }
 .ap-globe[data-entered='1'] {
-  opacity: 1;
   transform: none;
+}
+/* The planet (a leaf) fades in; the slot never does, so its glass chips keep their frost (glass brief §3.2). */
+.ap-globe .ap-globe-canvas {
+  opacity: 0;
+  transition: opacity 1100ms ease-out;
+}
+.ap-globe[data-entered='1'] .ap-globe-canvas {
+  opacity: 1;
 }
 .ap-globe-canvas {
   cursor: grab;
@@ -2276,14 +2282,18 @@ html.conductor-dragging .os-shell {
   border: 1px solid var(--ap-label-line);
   background: var(--ap-label-bg);
   cursor: pointer;
-  opacity: 0;
+  /* a chip pops in from .9 (glass brief §5 B9) and hides without a fade; the render loop owns transform */
+  visibility: hidden;
+  scale: 0.9;
   pointer-events: none;
-  transition: opacity 200ms, border-color 200ms;
+  transition: scale 200ms var(--ease), visibility 0s linear 200ms, border-color 200ms;
   will-change: transform;
 }
 .ap-globe-chip[data-show='1'] {
-  opacity: 1;
+  visibility: visible;
+  scale: 1;
   pointer-events: auto;
+  transition: scale var(--gl-dur-materialise) var(--gl-spring), visibility 0s, border-color 200ms;
 }
 .ap-globe-chip[data-focused='1'],
 .ap-globe-chip:hover {
@@ -4687,27 +4697,27 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
   bottom: 14px;
   width: 338px;
   z-index: 11;
-  border-radius: 20px;
-  border: 1px solid rgb(var(--glass-line-rgb) / 0.12);
-  background: linear-gradient(170deg, var(--glass-a), var(--glass-b) 40%, var(--glass-c));
-  backdrop-filter: blur(24px) saturate(1.15);
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgb(var(--glass-line-rgb) / 0.08);
+  /* a strong glass face (.glass-face--strong in HierarchyInspector.tsx): the glass pack paints it; it never
+     fades, so the chips on it keep their light (glass brief §3.2). Hidden: it melts (scale .98, linear 8f)
+     a short way right, then leaves; shown: it slides in on the drawer spring. */
+  border-radius: var(--gl-r-card);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transform: translateX(24px);
-  opacity: 0;
+  transform: translateX(24px) scale(0.98);
+  visibility: hidden;
   pointer-events: none;
   transition:
-    transform 0.4s var(--bh-spring),
-    opacity 0.25s var(--ease);
+    transform var(--gl-dur-melt) linear,
+    visibility 0s linear var(--gl-dur-melt);
 }
 .bh-stage.has-inspector .bh-inspector {
   transform: none;
-  opacity: 1;
+  visibility: visible;
   pointer-events: auto;
+  transition:
+    transform var(--gl-dur-drawer) var(--gl-spring-drawer),
+    visibility 0s;
 }
 .bh-insp-bar {
   display: flex;
@@ -4777,9 +4787,12 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
   text-overflow: ellipsis;
 }
 .bh-stage.inspector-min .bh-inspector {
-  transform: translateX(40px);
-  opacity: 0;
+  transform: translateX(40px) scale(0.98);
+  visibility: hidden;
   pointer-events: none;
+  transition:
+    transform var(--gl-dur-melt) linear,
+    visibility 0s linear var(--gl-dur-melt);
 }
 .bh-stage.inspector-min .bh-canvas {
   right: 0;
@@ -5146,16 +5159,21 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
   margin-top: 10px;
   max-height: 0;
   overflow: hidden;
-  opacity: 0;
+  /* hidden, not faded: the row holds glass chips (glass brief §3.2); they pop in from .9 (glass phase 3) */
+  visibility: hidden;
   transition:
     max-height 0.35s var(--ease),
-    opacity 0.25s var(--ease),
+    visibility 0s linear 0.35s,
     margin 0.25s;
 }
 .bh-ask.has-scope .bh-ask-chips,
 .bh-ask.has-chips .bh-ask-chips {
   max-height: 80px;
-  opacity: 1;
+  visibility: visible;
+  transition:
+    max-height 0.35s var(--ease),
+    visibility 0s,
+    margin 0.25s;
 }
 .bh-ask-chip {
   height: 26px;
@@ -10691,7 +10709,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
 :root[data-ui='glados'] .kg-blueprint .bh-tile { box-shadow: none; background: color-mix(in srgb, var(--c) 18%, var(--g-card-2)); }
 :root[data-ui='glados'] .kg-blueprint .bh-pill { border: 0; border-radius: var(--g-r-pill); background: var(--g-card-2); color: var(--g-muted); box-shadow: none; }
 :root[data-ui='glados'] .kg-blueprint .bh-hud, :root[data-ui='glados'] .kg-blueprint .bh-crumb { border: 0; border-radius: var(--g-r-pill); background: var(--g-viz-hud); box-shadow: var(--g-shadow-sm); backdrop-filter: none; }
-:root[data-ui='glados'] .kg-blueprint .bh-inspector { border: 0; border-radius: var(--g-r-nested); background: var(--g-card); box-shadow: var(--g-shadow); backdrop-filter: none; }
+:root[data-ui='glados'] .kg-blueprint .bh-inspector { border: 0; } /* glass, not a solid card: the glass pack paints the face (glass phase 3) */
 :root[data-ui='glados'] .kg-blueprint .bh-search-panel { border: 0; border-radius: var(--g-r-nested); background: var(--g-card); box-shadow: var(--g-shadow); backdrop-filter: none; }
 :root[data-ui='glados'] .kg-blueprint .bh-ask { border: 0; border-radius: var(--g-r-nested); background: var(--g-card); box-shadow: var(--g-shadow); }
 :root[data-ui='glados'] .kg-blueprint .bh-ask-row { background: transparent; }
@@ -16118,7 +16136,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 .trd-c-switch[aria-checked='true'] { background: var(--accent); border-color: var(--accent); }
 .trd-c-switch[aria-checked='true'] > i { transform: translateX(16px); background: var(--accent-ink); }
 .trd-c-switch:disabled { opacity: 0.5; cursor: not-allowed; }
-.trd-c-scrim { position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center; padding: 16px; background: color-mix(in oklab, var(--bg) 84%, transparent); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+.trd-c-layer { position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center; padding: 16px; } /* places only: the scrim is the modal's sibling (.gl-scrim, glass phase 3) */
 .trd-c-modal { outline: none; }
 .trd-c-spin { animation: trd-c-spin 0.9s linear infinite; }
 @keyframes trd-c-spin { to { transform: rotate(360deg); } }
@@ -16751,7 +16769,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 .ch-g-msg { display: flex; gap: var(--g-space-3); max-width: 78%; }
 .ch-g-msg[data-role='user'] { align-self: flex-end; flex-direction: column; align-items: flex-end; gap: var(--g-space-1); }
 .ch-g-msg .ch-g-bubble { padding: 10px 14px; border-radius: var(--g-r-well); }
-.ch-g-msg[data-state='failed'] .ch-g-bubble { opacity: 0.6; }
+.ch-g-msg[data-state='failed'] .ch-g-bubble p { color: color-mix(in srgb, var(--g-ink) 60%, transparent); } /* the text dims, never the glass bubble */
 .ch-g-bubble p, .ch-g-agent-text p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--g-fs-body); line-height: 1.6; color: var(--g-ink); }
 .ch-g-agent-text { display: flex; flex-direction: column; gap: var(--g-space-1); min-width: 0; padding-top: 2px; }
 .ch-g-routed { display: flex; flex-wrap: wrap; align-items: center; gap: var(--g-space-2); }
@@ -16763,7 +16781,10 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 .ch-g-compose { display: flex; flex-direction: column; gap: var(--g-space-2); padding-bottom: var(--g-space-1); }
 .ch-g-compose-note { display: flex; flex-wrap: wrap; align-items: center; gap: var(--g-space-2); margin: 0; padding-left: var(--g-space-1); }
 .ch-g-hint { margin: 0; padding-left: var(--g-space-4); font-size: var(--g-fs-faint); color: var(--g-muted); }
-.ch-g-msg[data-new] { animation: ch-arrive 180ms var(--ease) both; }
+/* A new message rises; only its text fades in, and the glass bubble materialises (no face fades in). */
+.ch-g-msg[data-new] { animation: ch-rise 180ms var(--ease) both; }
+.ch-g-msg[data-new] > .ch-g-agent-text { animation: ch-arrive 180ms var(--ease) both; }
+.ch-g-msg[data-new] > .ch-g-bubble { animation: gl-materialise var(--gl-dur-materialise) var(--gl-spring) backwards; }
 .ch-g-narrow-only { display: none !important; }
 @container ch-shell (max-width: 900px) {
   .ch-g-grid:not([data-collapsed]) { grid-template-columns: 260px minmax(0, 1fr); }
@@ -16781,6 +16802,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   .ch-g-thread-head > .g-btn:last-child { display: none; }
 }
 @keyframes ch-arrive { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes ch-rise { from { transform: translateY(6px); } to { transform: none; } }
 @keyframes ch-slide { from { transform: translateX(18px); } to { transform: none; } }
 
 /* Classic */
@@ -16837,7 +16859,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   .ch-c-thread > div:last-child { padding-right: 60px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ch-g-msg[data-new], .ch-g-grid > .ch-g-thread, .ch-c-new, .ch-c-grid > .ch-c-thread, .ch-c-skel { animation: none !important; }
+  .ch-g-msg[data-new], .ch-g-msg[data-new] > *, .ch-g-grid > .ch-g-thread, .ch-c-new, .ch-c-grid > .ch-c-thread, .ch-c-skel { animation: none !important; }
 }
 
 /* ── fo/clients: /clients and /lead-magnets (founderos-ui pages/clients.md, lead-magnets.md) ──
@@ -18148,3 +18170,71 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   }
 }
 /* ── end glass phase 2b ── */
+
+/* ── glass phase 3 ── */
+/* The finish of the glass pack (FounderOS Glass brief §2, §3.2, §4, §5B). Literal colours stay out of
+   this block (the fo/chats tail check reads to the end of the file): tokens and color-mix only. */
+
+/* Glass over glass. A face inside a frosted face does not frost again: the lower face frosted the page
+   once, and a backdrop-filter inside it would stop at it (a backdrop root) anyway. The upper face keeps
+   its light. A chip there is lit like a well (rim, bottom edge, pool: no groove, drop or shade); a pop-up
+   there sits over content, so it is a solid raised face. tests/glass-lint.test.ts holds the lists to
+   the face rule (the lint's glass-over-glass exemption rests on this). */
+:root[data-ground] :is(
+  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
+  .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
+  .lab2-glass, .wiz-ask, .g-ask-box, .bg-os-surface.rounded-lg-t:not(.border-dashed)
+) :is(
+  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
+  .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
+  .lab2-glass, .wiz-ask, .g-ask-box, .bg-os-surface.rounded-lg-t
+) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+:root[data-ground] :is(
+  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
+  .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
+  .lab2-glass, .wiz-ask, .g-ask-box, .bg-os-surface.rounded-lg-t:not(.border-dashed)
+) :is(.c-chip, .g-chip, .l-chip, .glass-chip) {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent);
+}
+:root[data-ground] :is(
+  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet,
+  .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip,
+  .lab2-glass, .wiz-ask, .g-ask-box, .bg-os-surface.rounded-lg-t:not(.border-dashed)
+) :is(.c-pop, .glass-face--strong, .lab2-glass[data-tone='strong']) {
+  background: var(--solid-bg);
+  border-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+/* A face that slides in from the right as a drawer (brief §5 B11); the melt still takes it out. */
+:root[data-ground] .gl-materialise--drawer:not(.is-melting) {
+  animation: gl-materialise-drawer var(--gl-dur-drawer) var(--gl-spring-drawer) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-ground] .gl-materialise--drawer:not(.is-melting) {
+    animation: none;
+  }
+}
+
+/* A dimmed face (a resolved insight, a settled row) keeps its glass: its text fades toward transparent and
+   its icons (leaves) dim, never the face itself (an opacity below 1 would kill its frost). */
+.gl-dim {
+  -webkit-text-fill-color: color-mix(in srgb, currentColor 60%, transparent);
+}
+.gl-dim :is(svg, img) {
+  opacity: 0.6;
+}
+/* ── end glass phase 3 ── */

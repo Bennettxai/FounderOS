@@ -119,11 +119,12 @@ const PHASE_START = '/* ── glass phase 2b ── */';
 const PHASE_END = '/* ── end glass phase 2b ── */';
 
 describe('the phase 2b block', () => {
-  test('sits once, delimited, at the very end of globals.css, with no literal colour (the fo/chats tail check)', () => {
+  test('sits once, delimited, at the end of globals.css (only the later glass phase blocks follow), with no literal colour (the fo/chats tail check)', () => {
     expect(GLOBALS_CSS.split(PHASE_START).length).toBe(2);
     const end = GLOBALS_CSS.indexOf(PHASE_END);
     expect(end).toBeGreaterThan(GLOBALS_CSS.indexOf(PHASE_START));
-    expect(GLOBALS_CSS.slice(end + PHASE_END.length).trim()).toBe('');
+    const tail = GLOBALS_CSS.slice(end + PHASE_END.length).trim();
+    expect(tail.replace(/^\/\* ── glass phase 3 ── \*\/[\s\S]*\/\* ── end glass phase 3 ── \*\/$/, '')).toBe('');
     const block = GLOBALS_CSS.slice(GLOBALS_CSS.indexOf(PHASE_START), end);
     expect(block).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     expect(block).not.toMatch(/rgba?\(\s*\d/);

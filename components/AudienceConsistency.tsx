@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Maximize2, X } from 'lucide-react';
 import {
   bucketPostingByDay,
@@ -11,6 +11,7 @@ import {
   type PostingActivityDay,
 } from '@/lib/posting-activity';
 import { channelColor } from '@/lib/series';
+import { useMeltEnd, useMeltPhase } from '@/lib/use-melt';
 import { channelsNetChange, rangeWindow } from '@/lib/social-range';
 
 type Range = 7 | 30 | 60 | 'all';
@@ -286,6 +287,11 @@ export function AudienceConsistency({
 }) {
   const [range, setRange] = useState<Range>(30);
   const [expanded, setExpanded] = useState(false);
+  // Collapse melts the expanded face (lib/use-melt): `expanded` goes false at once, the face lingers for the melt.
+  const collapse = () => setExpanded(false);
+  const faceRef = useRef<HTMLDivElement>(null);
+  const melt = useMeltPhase(expanded);
+  const onMeltEnd = useMeltEnd(faceRef, melt.melting, melt.end);
 
   const { axis, audienceVals, carried, from, days, platforms, net, stale, lastSynced } = useMemo(() => {
     // One window for the line, the bars and "+N net" (lib/social-range.ts):
@@ -386,14 +392,14 @@ export function AudienceConsistency({
         )}
       </div>
 
-      {expanded && (
-        <div
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm sm:p-6"
-          onClick={() => setExpanded(false)}
-        >
+      {melt.mounted && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6" data-melting={melt.melting ? '' : undefined}>
+          {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+          <div className="gl-scrim" aria-hidden onClick={collapse} />
           <div
-            className="c-pop flex max-h-[94vh] w-[min(1240px,96vw)] flex-col overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            ref={faceRef}
+            onAnimationEnd={onMeltEnd}
+            className={`c-pop glass-face--strong gl-materialise relative flex max-h-[94vh] w-[min(1240px,96vw)] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
           >
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-os-border px-5 py-3.5">
               <div>
@@ -403,7 +409,7 @@ export function AudienceConsistency({
               <div className="flex items-center gap-4">
                 <RangeChips value={range} onChange={setRange} />
                 <button
-                  onClick={() => setExpanded(false)}
+                  onClick={collapse}
                   aria-label="Close"
                   className="flex h-7 w-7 items-center justify-center rounded-sm-t border border-os-border text-os-dim transition-colors hover:bg-os-surface2 hover:text-os-text"
                 >

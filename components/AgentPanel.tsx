@@ -11,6 +11,7 @@
  */
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useMeltClose } from '@/lib/use-melt';
 import type { Agent, AgentRun, Department, Skill } from '@/lib/schemas';
 import { AgentAvatar } from '@/components/AgentAvatar';
 import { Badge, Dot } from '@/components/terminal';
@@ -46,18 +47,21 @@ export function AgentPanel({
   onClose: () => void;
   onSelectAgent: (id: string) => void;
 }) {
+  // Close melts the face (lib/use-melt); the roster unmounts it once it has melted.
+  const melt = useMeltClose(onClose);
+  const close = melt.close;
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') close();
     }
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener('keydown', onKey);
     };
-  }, [onClose]);
+  }, [close]);
 
   const department = departments.find((d) => d.id === agent.departmentId) ?? null;
   const ownedSkills = skills.filter((s) => s.ownerAgentId === agent.id);
@@ -69,22 +73,20 @@ export function AgentPanel({
   const rules = buildLogicRules(agent, worksWith, ownedSkills, latestRun);
 
   return (
-    <div
-      className="agentpanel-backdrop fixed inset-0 z-[100] flex items-center justify-center p-6"
-      style={{ background: 'rgba(3, 7, 6, 0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" role="presentation" {...melt.layer}>
+      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the panel frosts on its own. */}
+      <div className="gl-scrim" aria-hidden onClick={close} />
       <div
-        className="agentpanel-panel glass-panel relative flex w-full max-w-[880px] flex-col overflow-hidden"
+        ref={melt.faceRef}
+        onAnimationEnd={melt.onAnimationEnd}
+        className={`glass-panel glass-face--strong gl-materialise relative flex w-full max-w-[880px] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
         style={{ maxHeight: '86vh' }}
-        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={`${agent.name} profile`}
       >
         <button
-          onClick={onClose}
+          onClick={close}
           aria-label="Close"
           className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] bg-black/30 text-os-dim transition-colors hover:text-os-text"
         >
@@ -123,7 +125,7 @@ export function AgentPanel({
                     <span className="agentpanel-node-dot mt-3.5" />
                     {i < steps.length - 1 && <span className="agentpanel-connector flex-1" />}
                   </div>
-                  <div className="agentpanel-step mb-2.5 flex-1 px-3.5 py-2.5 text-[13px] leading-snug text-os-muted">
+                  <div className="agentpanel-step glass-well mb-2.5 flex-1 px-3.5 py-2.5 text-[13px] leading-snug text-os-muted">
                     {step.label}
                   </div>
                 </div>
@@ -197,10 +199,6 @@ export function AgentPanel({
       </div>
 
       <style>{`
-        .agentpanel-backdrop { animation: agentpanel-fade 0.2s ease-out both; }
-        .agentpanel-panel { animation: agentpanel-in 0.2s ease-out both; }
-        @keyframes agentpanel-fade { from { opacity: 0; } }
-        @keyframes agentpanel-in { from { opacity: 0; transform: scale(0.97); } }
         .agentpanel-node-dot {
           width: 6px;
           height: 6px;
@@ -217,9 +215,6 @@ export function AgentPanel({
           border-radius: 10px;
           border: 1px solid rgb(var(--mist-rgb) /  0.1);
           background: rgba(20, 34, 31, 0.35);
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .agentpanel-backdrop, .agentpanel-panel { animation: none; }
         }
       `}</style>
     </div>

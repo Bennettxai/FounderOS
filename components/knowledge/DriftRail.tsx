@@ -112,7 +112,7 @@ function DriftCard({ insight }: { insight: DriftInsight }) {
   };
 
   return (
-    <div data-resolved={resolved || undefined} className={`glass-panel-violet hoverable p-5 transition-opacity ${resolved ? 'opacity-60' : ''}`}>
+    <div data-resolved={resolved || undefined} className={`glass-panel-violet hoverable p-5 ${resolved ? 'gl-dim' : ''}`}>
       {/* claim + resolved state */}
       <button
         onClick={() => resolved && setCollapsed((c) => !c)}

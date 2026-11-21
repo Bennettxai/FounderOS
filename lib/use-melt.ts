@@ -125,3 +125,24 @@ export function useMeltEnd(ref: RefObject<HTMLElement | null>, melting: boolean,
     [melting],
   );
 }
+
+/**
+ * Melt for a face its parent unmounts on close (an ad-hoc modal with no `open` prop): `close` starts
+ * the melt and the parent's `onClose` runs once the face has melted (at once under reduced motion,
+ * MELT_FALLBACK_MS at the latest). Put `layer` on the element that holds the scrim and the face (the
+ * scrim clears with the face and stops taking clicks), `faceRef` and `onAnimationEnd` on the face,
+ * and add `is-melting` to the face while `melting`. Pass the face's own ref when it has one (useDialog).
+ *
+ *   const m = useMeltClose(onClose);
+ *   <div className="fixed inset-0 z-[100] grid place-items-center" {...m.layer}>
+ *     <div className="gl-scrim" aria-hidden onClick={m.close} />
+ *     <div ref={m.faceRef} onAnimationEnd={m.onAnimationEnd} className={cx('c-pop glass-face--strong gl-materialise relative', m.melting && 'is-melting')} />
+ */
+export function useMeltClose<T extends HTMLElement = HTMLDivElement>(onClose: () => void, ref?: RefObject<T>) {
+  const own = useRef<T>(null);
+  const faceRef = ref ?? own;
+  const [melting, setMelting] = useState(false);
+  const close = useCallback(() => setMelting(true), []);
+  const onAnimationEnd = useMeltEnd(faceRef, melting, onClose);
+  return { melting, close, faceRef, onAnimationEnd, layer: { 'data-melting': melting ? '' : undefined } as const };
+}

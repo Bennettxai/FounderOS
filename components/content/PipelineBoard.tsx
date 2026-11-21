@@ -30,6 +30,7 @@ import { estimateCredits, type ProductionTask } from '@/lib/content-schema';
 import type { Campaign } from '@/lib/content-campaigns';
 import type { Pipeline, PipelineInput, PipelineNode, PipelineNodeKind } from '@/lib/content-pipelines';
 import { PipelineBuilder } from '@/components/content/PipelineBuilder';
+import { useMeltClose } from '@/lib/use-melt';
 
 export type PipelineBoardProps = {
   pipelines: Pipeline[];
@@ -361,6 +362,9 @@ function RunModal({
   onClose: () => void;
 }) {
   const router = useRouter();
+  // Close melts the face (lib/use-melt); the board unmounts it once it has melted.
+  const melt = useMeltClose(onClose);
+  const close = melt.close;
   const inputNodes = useMemo(() => pipeline.nodes.filter((n) => n.kind === 'input'), [pipeline.nodes]);
   const startOnForm = asForm && inputNodes.length > 0;
   const [step, setStep] = useState<'form' | 'confirm'>(startOnForm ? 'form' : 'confirm');
@@ -389,7 +393,7 @@ function RunModal({
         throw new Error(typeof body?.error === 'string' ? body.error : `run failed (HTTP ${res.status})`);
       }
       router.refresh();
-      onClose();
+      close();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -398,22 +402,20 @@ function RunModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-6"
-      style={{ background: 'rgba(3, 7, 6, 0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" role="presentation" {...melt.layer}>
+      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+      <div className="gl-scrim" aria-hidden onClick={close} />
       <div
-        className="glass-panel relative flex w-full max-w-[560px] flex-col overflow-hidden"
+        ref={melt.faceRef}
+        onAnimationEnd={melt.onAnimationEnd}
+        className={`glass-panel glass-face--strong gl-materialise relative flex w-full max-w-[560px] flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
         style={{ maxHeight: '85vh' }}
-        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={`Run ${pipeline.name}`}
       >
         <button
-          onClick={onClose}
+          onClick={close}
           aria-label="Close"
           className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] bg-black/30 text-os-dim transition-colors hover:text-os-text"
         >
@@ -501,7 +503,7 @@ function RunModal({
         </div>
 
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[rgb(var(--mist-rgb) / 0.1)] px-6 py-4">
-          <button type="button" onClick={onClose} className="c-btn">
+          <button type="button" onClick={close} className="c-btn">
             Cancel
           </button>
           {step === 'form' ? (

@@ -15,7 +15,12 @@ import { CSS_NO_COMMENTS, splitSelectors, topLevelRules, type Rule } from './the
  * className names a face class, or a kit component that renders one in place (not a portal).
  *
  * Faces inside faces are not reported: glass over glass is the brief's own pattern (the lower
- * face frosts the page once; the upper one is lit, not frosted again).
+ * face frosts the page once; the upper one is lit, not frosted again). app/globals.css holds that
+ * exemption up (glass phase 3: every face nested in a frosting face drops its own frost, chips are
+ * lit like wells, pop-ups are solid raised faces; tests/glass-lint.test.ts checks the rule covers
+ * every face). A face that frosts itself again inside a face (a backdrop utility or style of its
+ * own) is reported. The Classic card, an os surface with the card radius (glass phase 2b), is a
+ * face like the classes are (FACE_COMPOUNDS).
  */
 
 /** The face classes of the glass pack (app/globals.css, "The face." rule). */
@@ -24,6 +29,23 @@ export const FACE_CLASSES = [
   'g-sheet', 'g-drawer', 'g-dialog', 'g-palette', 'ui-toast', 'c-pop', 'c-chip', 'h6-card', 'glass-panel', 'glass-panel-violet',
   'glass-chip', 'lab2-glass', 'wiz-ask', 'g-ask-box',
 ] as const;
+
+/**
+ * Faces named by a compound: an element that carries every class (and none of `unless`) is a face.
+ * The Classic card: bg-os-surface + rounded-lg-t (glass phase 2b maps it), a dashed drop zone excepted.
+ */
+export const FACE_COMPOUNDS: readonly { label: string; classes: readonly string[]; unless: readonly string[] }[] = [
+  { label: 'bg-os-surface.rounded-lg-t', classes: ['bg-os-surface', 'rounded-lg-t'], unless: ['border-dashed'] },
+];
+
+/** The face an element's class tokens make it, if any: a face class, else a face compound's label. */
+export function faceOf(tokens: readonly string[]): string | undefined {
+  const faces = new Set<string>(FACE_CLASSES);
+  const hit = tokens.find((t) => faces.has(t));
+  if (hit) return hit;
+  const have = new Set(tokens);
+  return FACE_COMPOUNDS.find((c) => c.classes.every((k) => have.has(k)) && !c.unless.some((k) => have.has(k)))?.label;
+}
 
 /** Kit components that render a face in place. GSheet, GDrawer and GDialog portal to <body>, so nothing wraps them. */
 export const FACE_COMPONENTS: Record<string, string> = {
@@ -170,6 +192,7 @@ export function cssKillers(css: string = CSS_NO_COMMENTS): Killer[] {
       const last = sel.replace(/:(?:not|is|where|has)\([^)]*\)/g, '').split(/\s*[\s>+~]\s*/).pop() ?? '';
       const classes = [...last.matchAll(/\.([\w-]+)/g)].map((m) => m[1]);
       if (!classes.length || classes.some((c) => faces.has(c))) continue;
+      if (FACE_COMPOUNDS.some((f) => f.classes.every((k) => classes.includes(k)))) continue;
       const key = [...classes].sort().join('.');
       if (seen.has(key)) continue;
       seen.add(key);
@@ -182,20 +205,18 @@ export function cssKillers(css: string = CSS_NO_COMMENTS): Killer[] {
 /** Scan one TSX source against the CSS-derived killers (and the Tailwind utilities and style objects). */
 export function lintSource(file: string, src: string, killers: readonly Killer[] = []): Finding[] {
   const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const faces = new Set<string>(FACE_CLASSES);
   const findings: Finding[] = [];
   type Frame = { label: string; why: string };
-  const walk = (x: ts.Node, stack: Frame[]) => {
+  const labelOf = (tag: string, tokens: string[]) => `<${tag} className="${tokens.join(' ').slice(0, 80)}">`;
+  /** `stack`: the frost killers above; `inFace`: the nearest face above with no killer between. */
+  const walk = (x: ts.Node, stack: Frame[], inFace: string | null) => {
     if (ts.isJsxElement(x) || ts.isJsxSelfClosingElement(x)) {
       const tag = tagName(x);
       const tokens = classTokens(x);
-      const face = tokens.find((t) => faces.has(t)) ?? FACE_COMPONENTS[tag];
-      if (face && stack.length) {
-        const k = stack[stack.length - 1];
-        findings.push({ file, line: sf.getLineAndCharacterOfPosition(x.getStart()).line + 1, face, ancestor: k.label, why: k.why });
-      }
+      const face = faceOf(tokens) ?? FACE_COMPONENTS[tag];
+      const line = () => sf.getLineAndCharacterOfPosition(x.getStart()).line + 1;
       const have = new Set(tokens);
-      const why = [
+      const own = [
         ...tokens.flatMap((t) => {
           const u = killerUtility(t);
           return u ? [`${t} (${u})`] : [];
@@ -203,27 +224,35 @@ export function lintSource(file: string, src: string, killers: readonly Killer[]
         ...killers.filter((k) => k.classes.every((c) => have.has(c))).map((k) => `.${k.classes.join('.')} (${k.why})`),
         ...styleKillers(x),
       ];
-      const next = why.length ? [...stack, { label: `<${tag} className="${tokens.join(' ').slice(0, 80)}">`, why: why.join(', ') }] : stack;
-      ts.forEachChild(x, (c) => walk(c, next));
+      if (face && stack.length) {
+        const k = stack[stack.length - 1];
+        findings.push({ file, line: line(), face, ancestor: k.label, why: k.why });
+      } else if (face && inFace) {
+        // glass over glass: the lower face frosts once; this one must not frost again
+        const again = own.filter((w) => /backdrop-filter|[bB]ackdropFilter/.test(w));
+        if (again.length) findings.push({ file, line: line(), face, ancestor: inFace, why: `${again.join(', ')} frosts again inside ${inFace}` });
+      }
+      const next = own.length ? [...stack, { label: labelOf(tag, tokens), why: own.join(', ') }] : stack;
+      const nextFace = own.length ? null : face ? labelOf(tag, tokens) : inFace;
+      ts.forEachChild(x, (c) => walk(c, next, nextFace));
       return;
     }
-    ts.forEachChild(x, (c) => walk(c, stack));
+    ts.forEachChild(x, (c) => walk(c, stack, inFace));
   };
-  walk(sf, []);
+  walk(sf, [], null);
   return findings;
 }
 
 /** The class tokens of every face element in a TSX source (what CSS can match on a face). */
 export function faceElementClasses(file: string, src: string): string[][] {
   const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const faces = new Set<string>(FACE_CLASSES);
   const out: string[][] = [];
   const walk = (x: ts.Node) => {
     if (ts.isJsxElement(x) || ts.isJsxSelfClosingElement(x)) {
       const tokens = classTokens(x);
       const comp = FACE_COMPONENTS[tagName(x)];
       if (comp) out.push([comp, ...tokens]);
-      else if (tokens.some((t) => faces.has(t))) out.push(tokens);
+      else if (faceOf(tokens)) out.push(tokens);
     }
     ts.forEachChild(x, walk);
   };
@@ -288,7 +317,7 @@ export function faceKeyframes(faceElements: readonly string[][], css: string = C
         const classes = [...sub.replace(/:(?:not|has)\([^)]*\)/g, '').matchAll(/\.([\w-]+)/g)].map((m) => m[1]);
         if (!classes.length) return false;
         if (classes.some((c) => faces.has(c))) return true;
-        return sets.some((s) => classes.every((c) => s.has(c)) && [...s].some((c) => faces.has(c)));
+        return sets.some((s) => classes.every((c) => s.has(c)) && faceOf([...s]) !== undefined);
       });
       if (!onFace) continue;
       for (const n of names) out.set(n, [...(out.get(n) ?? []), sel]);

@@ -12,6 +12,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { SetupLink } from '@/components/SetupLink';
 import { Badge, type BadgeTone } from '@/components/terminal';
 import { useDialog } from '@/components/ui/use-dialog';
+import { useMeltClose } from '@/lib/use-melt';
 import { areaPaths, extent, nearestIndex, seriesPaths, spreadX } from '@/lib/chart-geometry';
 import {
   ago, day, logRows, qty, signedUsd, stamp, toneOf, tradeLine, usd, whoOf, type ActivityFilter, type TradingModel,
@@ -558,10 +559,18 @@ function TradeLog({ m, ui }: { m: TradingModel; ui: TradingUi }) {
 
 function Modal({ title, sub, onClose, children, wide = false }: { title: string; sub?: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
   const titleId = useId();
-  const dlg = useDialog({ open: true, onClose, labelledBy: titleId });
+  // Escape, the scrim and the close button melt the face (lib/use-melt); the page unmounts it once it has melted.
+  const dlg = useDialog({ open: true, onClose: () => melt.close(), labelledBy: titleId });
+  const melt = useMeltClose(onClose, dlg.ref);
   return (
-    <div className="trd-c-scrim" onClick={onClose}>
-      <div {...dlg.props} className={`c-pop trd-c-modal w-full ${wide ? 'max-w-[720px]' : 'max-w-[480px]'}`} onClick={(e) => e.stopPropagation()}>
+    <div className="trd-c-layer" {...melt.layer}>
+      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own. */}
+      <div className="gl-scrim" aria-hidden onClick={melt.close} />
+      <div
+        {...dlg.props}
+        onAnimationEnd={melt.onAnimationEnd}
+        className={`c-pop glass-face--strong gl-materialise trd-c-modal relative w-full ${wide ? 'max-w-[720px]' : 'max-w-[480px]'}${melt.melting ? ' is-melting' : ''}`}
+      >
         <div className="flex items-start justify-between gap-3 px-5 pb-3 pt-4">
           <div className="min-w-0">
             <h2 id={titleId} className="text-[15px] font-medium text-os-text">
@@ -569,7 +578,7 @@ function Modal({ title, sub, onClose, children, wide = false }: { title: string;
             </h2>
             {sub && <p className="mt-0.5 font-mono text-[11.5px] text-os-dim">{sub}</p>}
           </div>
-          <button type="button" data-dialog-close onClick={onClose} aria-label="Close" className="rounded-[6px] p-1 text-os-muted hover:text-os-text">
+          <button type="button" data-dialog-close onClick={melt.close} aria-label="Close" className="rounded-[6px] p-1 text-os-muted hover:text-os-text">
             <X size={15} strokeWidth={1.7} aria-hidden />
           </button>
         </div>

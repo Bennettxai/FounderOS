@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Download, X } from 'lucide-react';
 import type { TaskSpec } from '@/lib/content-schema';
 import { formatTimestamp, modelDisplayName } from '@/lib/content-feed';
+import { useMeltClose } from '@/lib/use-melt';
 
 /**
  * The detail overlay shared by Production's delivered cards and the
@@ -39,36 +40,37 @@ export function MediaDetailOverlay({
   onClose: () => void;
   actions?: React.ReactNode;
 }) {
+  // Close melts the face (lib/use-melt); the page unmounts it once it has melted.
+  const melt = useMeltClose(onClose);
+  const close = melt.close;
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') close();
     }
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener('keydown', onKey);
     };
-  }, [onClose]);
+  }, [close]);
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-6"
-      style={{ background: 'rgba(3, 7, 6, 0.7)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" role="presentation" {...melt.layer}>
+      {/* The scrim is the face's sibling (glass brief §3.2): it frosts and dims the page; the face frosts on its own and melts on close. */}
+      <div className="gl-scrim" aria-hidden onClick={close} />
       <div
-        className="glass-panel relative flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        ref={melt.faceRef}
+        onAnimationEnd={melt.onAnimationEnd}
+        className={`glass-panel glass-face--strong gl-materialise relative flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden${melt.melting ? ' is-melting' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label={title}
       >
         <button
           type="button"
-          onClick={onClose}
+          onClick={close}
           aria-label="Close"
           className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-[rgb(var(--mist-rgb) / 0.14)] bg-black/30 text-os-dim transition-colors hover:text-os-text"
         >
@@ -91,7 +93,6 @@ export function MediaDetailOverlay({
                 href={outputRef}
                 download
                 className="c-btn"
-                onClick={(e) => e.stopPropagation()}
               >
                 <Download className="h-3.5 w-3.5" strokeWidth={1.7} />
                 Download
