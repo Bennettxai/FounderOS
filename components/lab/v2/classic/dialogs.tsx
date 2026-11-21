@@ -6,26 +6,39 @@
  * opens it, exactly as GladOS's `LabCapHost` does. The dialogs themselves stay per tree because each tree
  * draws its own control set (02); the GladOS ones are in g/Dialogs.tsx.
  */
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Glass, RoundButton } from '@/components/lab/v2/shared';
 import { CLASSIC_COPY as C } from '@/lib/lab/view/classic-copy';
 import { LabCapProvider, useLabPost, type CapRequest } from '@/components/lab/v2/shared/useLabPost';
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+const noSubscribe = () => () => {};
+
+/**
+ * Where a Lab layer renders: the Lab root (`.lab[data-lab-root]`, which scopes the --lab-* tokens and
+ * never frosts), beside the page, never inside a frosted Glass card (a frosted ancestor is the containing
+ * block of a fixed layer). Nothing on the server or during hydration, like the kit's Layer.
+ */
+function useLabLayerRoot(): Element | null {
+  return useSyncExternalStore(noSubscribe, () => document.querySelector('.lab[data-lab-root]') ?? document.body, () => null);
+}
+
 export function Dialog({ open, onClose, title, children, footer, wide }: { open: boolean; onClose: () => void; title: ReactNode; children?: ReactNode; footer?: ReactNode; wide?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const back = useRef<HTMLElement | null>(null);
   const tid = useId();
+  const root = useLabLayerRoot();
   useEffect(() => {
-    if (!open) return;
+    if (!open || !root) return;
     back.current = document.activeElement as HTMLElement | null;
     const first = ref.current?.querySelector<HTMLElement>('[data-autofocus]') ?? ref.current?.querySelector<HTMLElement>(FOCUSABLE);
     first?.focus();
     return () => back.current?.focus?.({ preventScroll: true });
-  }, [open]);
-  if (!open) return null;
-  return (
+  }, [open, root]);
+  if (!open || !root) return null;
+  return createPortal(
     <div className="lab2c-dialog-layer" data-lab="Dialog">
       <div className="lab2-scrim" onClick={onClose} aria-hidden="true" />
       <Glass
@@ -55,7 +68,8 @@ export function Dialog({ open, onClose, title, children, footer, wide }: { open:
         <div className="lab2c-dialog-body">{children}</div>
         {footer && <footer className="lab2c-dialog-foot">{footer}</footer>}
       </Glass>
-    </div>
+    </div>,
+    root,
   );
 }
 

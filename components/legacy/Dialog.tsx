@@ -3,6 +3,7 @@
 import { useId, useState, type ReactNode } from 'react';
 import { Bot, X } from 'lucide-react';
 import { useDialog } from '@/components/ui/use-dialog';
+import { Layer } from '@/components/g/Overlays';
 import { useMeltEnd, useMeltPhase } from '@/lib/use-melt';
 import { cx } from './format';
 
@@ -16,17 +17,10 @@ import { cx } from './format';
  * Modal over a scrim: focus trapped and returned, Esc closes (components/ui/use-dialog). The scrim
  * is the face's sibling, never its parent (glass brief §3.2: a frosting parent kills the face's
  * own frost): it frosts and dims the page, closes on a press, and the face sits above it. On
- * close the dialog releases at once and the face melts out (lib/use-melt).
+ * close the dialog releases at once and the face melts out (lib/use-melt). The layer renders in
+ * a portal to <body> (the kit's Layer): a frosted ancestor would trap a fixed layer.
  */
-export function LDialog({
-  open = true,
-  onClose,
-  title,
-  sub,
-  children,
-  footer,
-  width = 520,
-}: {
+export type LDialogProps = {
   open?: boolean;
   onClose: () => void;
   title: ReactNode;
@@ -34,16 +28,37 @@ export function LDialog({
   children?: ReactNode;
   footer?: ReactNode;
   width?: number;
-}) {
-  const titleId = useId();
-  const dlg = useDialog({ open, onClose, labelledBy: titleId });
+};
+
+export function LDialog({ open = true, ...rest }: LDialogProps) {
   const melt = useMeltPhase(open);
-  const onMeltEnd = useMeltEnd(dlg.ref, melt.melting, melt.end);
   if (!melt.mounted) return null;
   return (
-    <div data-l="DialogLayer" className="l-layer" data-melting={melt.melting ? '' : undefined}>
+    <Layer>
+      <LDialogLayer {...rest} open={open} melting={melt.melting} onMelted={melt.end} />
+    </Layer>
+  );
+}
+
+/** The layer LDialog portals: the scrim, then the face. Exported for markup tests (Layer renders nothing on the server). */
+export function LDialogLayer({
+  open,
+  onClose,
+  title,
+  sub,
+  children,
+  footer,
+  width = 520,
+  melting,
+  onMelted,
+}: LDialogProps & { open: boolean; melting: boolean; onMelted: () => void }) {
+  const titleId = useId();
+  const dlg = useDialog({ open, onClose, labelledBy: titleId });
+  const onMeltEnd = useMeltEnd(dlg.ref, melting, onMelted);
+  return (
+    <div data-l="DialogLayer" className="l-layer" data-melting={melting ? '' : undefined}>
       <div data-l="DialogScrim" className="l-scrim gl-scrim" aria-hidden onClick={onClose} />
-      <div {...dlg.props} data-l="Dialog" className={cx('l-dialog glass-face--strong', melt.melting && 'is-melting')} style={{ maxWidth: width }} onAnimationEnd={onMeltEnd}>
+      <div {...dlg.props} data-l="Dialog" className={cx('l-dialog glass-face--strong', melting && 'is-melting')} style={{ maxWidth: width }} onAnimationEnd={onMeltEnd}>
         <div className="l-dialog-head">
           <div className="min-w-0">
             <h2 id={titleId} className="l-dialog-title">

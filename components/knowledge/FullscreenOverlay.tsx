@@ -9,6 +9,7 @@
  */
 import { useEffect } from 'react';
 import { Minimize2 } from 'lucide-react';
+import { Layer } from '@/components/g/Overlays';
 
 export function FullscreenOverlay({
   title,
@@ -30,19 +31,23 @@ export function FullscreenOverlay({
     };
   }, [onClose]);
 
+  // Portalled to <body> (a frosted ancestor would trap it). It carries the page's token scope (.kv-page:
+  // Legacy re-points the --seq/--cat ramps the matrix paints with) now that it renders outside the page.
   return (
-    <div className="fixed inset-0 z-[130] flex flex-col" style={{ background: 'var(--bg)' }}>
-      <div className="flex shrink-0 items-center justify-between border-b border-os-border px-5 py-3">
-        <span className="text-[13px] text-os-text">{title}</span>
-        <button
-          onClick={onClose}
-          className="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] text-os-accent transition-colors hover:bg-[var(--accent-soft)]"
-          style={{ borderColor: 'var(--accent-line)' }}
-        >
-          <Minimize2 className="h-3.5 w-3.5" /> Exit (esc)
-        </button>
+    <Layer>
+      <div className="kv-page fixed inset-0 z-[130] flex flex-col" style={{ background: 'var(--bg)' }}>
+        <div className="flex shrink-0 items-center justify-between border-b border-os-border px-5 py-3">
+          <span className="text-[13px] text-os-text">{title}</span>
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] text-os-accent transition-colors hover:bg-[var(--accent-soft)]"
+            style={{ borderColor: 'var(--accent-line)' }}
+          >
+            <Minimize2 className="h-3.5 w-3.5" /> Exit (esc)
+          </button>
+        </div>
+        <div className="min-h-0 flex-1">{children}</div>
       </div>
-      <div className="min-h-0 flex-1">{children}</div>
-    </div>
+    </Layer>
   );
 }

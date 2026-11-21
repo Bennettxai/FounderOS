@@ -9,6 +9,7 @@
 import { useId, useMemo, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { useDialog } from '@/components/ui/use-dialog';
+import { Layer } from '@/components/g/Overlays';
 
 export function CCard({ title, right, children, className = '', id }: { title?: ReactNode; right?: ReactNode; children: ReactNode; className?: string; id?: string }) {
   return (
@@ -47,19 +48,22 @@ export function CModal({ open, onClose, title, children, footer, width = 520 }: 
   const titleId = useId();
   const dlg = useDialog({ open, onClose, labelledBy: titleId });
   if (!open) return null;
+  // Portalled to <body>: a frosted ancestor would trap the fixed scrim.
   return (
-    <div className="fo-c-scrim" onClick={onClose}>
-      <div {...dlg.props} className="fo-c-modal c-pop" style={{ maxWidth: width }} onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-start justify-between gap-4">
-          <h2 id={titleId} className="text-[16px] font-medium text-os-text">{title}</h2>
-          <button type="button" data-dialog-close="" onClick={onClose} className="fo-c-icon-btn" aria-label="Close">
-            <X size={15} strokeWidth={1.75} aria-hidden />
-          </button>
+    <Layer>
+      <div className="fo-c-scrim" onClick={onClose}>
+        <div {...dlg.props} className="fo-c-modal c-pop" style={{ maxWidth: width }} onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-start justify-between gap-4">
+            <h2 id={titleId} className="text-[16px] font-medium text-os-text">{title}</h2>
+            <button type="button" data-dialog-close="" onClick={onClose} className="fo-c-icon-btn" aria-label="Close">
+              <X size={15} strokeWidth={1.75} aria-hidden />
+            </button>
+          </div>
+          <div className="mt-4">{children}</div>
+          {footer && <div className="mt-5 flex flex-wrap justify-end gap-2">{footer}</div>}
         </div>
-        <div className="mt-4">{children}</div>
-        {footer && <div className="mt-5 flex flex-wrap justify-end gap-2">{footer}</div>}
       </div>
-    </div>
+    </Layer>
   );
 }
 

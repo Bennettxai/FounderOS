@@ -17,7 +17,7 @@ import path from 'node:path';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, test } from 'vitest';
-import { LDialog } from '@/components/legacy/Dialog';
+import { LDialog, LDialogLayer } from '@/components/legacy/Dialog';
 import { CSS_NO_COMMENTS, GLOBALS_CSS, splitSelectors, topLevelRules } from './helpers/theme-css';
 import {
   FACE_CLASSES,
@@ -204,7 +204,11 @@ describe('glass over glass (brief §3.2): a face inside a frosted face is lit, n
 
 describe('scrims are siblings: the face sits above its scrim, not in it', () => {
   test('LDialog: a layer holding the scrim, then the strong-frost face with its dialog roles', () => {
-    const html = renderToStaticMarkup(createElement(LDialog, { open: true, onClose: () => {}, title: 'Rename', sub: 'one line', children: 'body', footer: 'foot' }));
+    // LDialog portals the layer to <body> (the kit's Layer renders nothing on the server): render the layer itself.
+    expect(renderToStaticMarkup(createElement(LDialog, { open: true, onClose: () => {}, title: 'Rename' }))).toBe('');
+    const src = fs.readFileSync(path.join(ROOT, 'components/legacy/Dialog.tsx'), 'utf8');
+    expect(src).toMatch(/<Layer>\s*<LDialogLayer \{\.\.\.rest\} open=\{open\} melting=\{melt\.melting\} onMelted=\{melt\.end\} \/>\s*<\/Layer>/);
+    const html = renderToStaticMarkup(createElement(LDialogLayer, { open: true, melting: false, onMelted: () => {}, onClose: () => {}, title: 'Rename', sub: 'one line', children: 'body', footer: 'foot' }));
     const m = /^<div data-l="DialogLayer" class="l-layer">(<div[^>]*><\/div>)(<div[^>]*>)/.exec(html);
     expect(m, html.slice(0, 300)).toBeTruthy();
     const [, scrim, face] = m!;

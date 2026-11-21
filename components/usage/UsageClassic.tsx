@@ -9,6 +9,7 @@ import type { UsagePayload } from '@/lib/usage-payload';
 import { USAGE_SUBTITLE, USAGE_TITLE, type PlanCardView, type UsageReadyView } from '@/lib/usage-view';
 import { setupHrefFor } from '@/lib/integrations-catalog';
 import { pushUrl, useUsage } from './use-usage';
+import { Layer } from '@/components/g/Overlays';
 
 /**
  * /usage under the Classic style (pages/usage.md §7): PageHeader with range
@@ -72,23 +73,26 @@ function CopyPushUrl({ path }: { path: string }) {
 }
 
 function Panel({ title, caption, onClose, children, footer }: { title: string; caption?: string; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
+  // Portalled to <body>: a frosted ancestor would trap the fixed layer.
   return (
-    <div className="us-c-layer" role="presentation" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-      <div className="us-c-scrim" aria-hidden onClick={onClose} />
-      <div role="dialog" aria-modal="true" aria-label={title} className={`${CARD} us-c-panel`}>
-        <header className="mb-4 flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h2 className="text-[18px] font-medium text-os-text">{title}</h2>
-            {caption && <p className="mt-1 text-[12.5px] text-os-muted">{caption}</p>}
-          </div>
-          <button type="button" className="c-btn" onClick={onClose} autoFocus>
-            Close
-          </button>
-        </header>
-        <div className="us-c-panel-body">{children}</div>
-        {footer && <footer className="mt-4 flex justify-end gap-2">{footer}</footer>}
+    <Layer>
+      <div className="us-c-layer" role="presentation" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
+        <div className="us-c-scrim" aria-hidden onClick={onClose} />
+        <div role="dialog" aria-modal="true" aria-label={title} className={`${CARD} us-c-panel`}>
+          <header className="mb-4 flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="text-[18px] font-medium text-os-text">{title}</h2>
+              {caption && <p className="mt-1 text-[12.5px] text-os-muted">{caption}</p>}
+            </div>
+            <button type="button" className="c-btn" onClick={onClose} autoFocus>
+              Close
+            </button>
+          </header>
+          <div className="us-c-panel-body">{children}</div>
+          {footer && <footer className="mt-4 flex justify-end gap-2">{footer}</footer>}
+        </div>
       </div>
-    </div>
+    </Layer>
   );
 }
 

@@ -14079,7 +14079,8 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   .lab2c-page :is(.lab2-tab, .lab2-seg-opt, .lab2-scrub-mid, .lab2-setup, .lab2-narr-action, .lab2-back, .lab2c-skip, .lab2c-disclose, .lab2c-tag-link, .lab2c-rowlink, .lab2c-linkbtn, .lab2c-setup-toggle, .lab2c-version-row, .lab2c-section-toggle, .lab2-textlink)::after {
     content: ''; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
   }
-  .lab2c-page select.lab2c-input, .lab2c-page input.lab2c-input { min-height: 44px; }
+  /* the dialogs portal to the Lab root, beside the page (components/lab/v2/classic/dialogs.tsx) */
+  .lab2c-page select.lab2c-input, .lab2c-page input.lab2c-input, .lab2c-dialog select.lab2c-input, .lab2c-dialog input.lab2c-input { min-height: 44px; }
   /* the tab strip scrolls sideways, which clips a tab's ::after hit area vertically: the tab itself is 44 tall */
   .lab2c-page .lab2-tab, .lab2c-page .lab2c-itab { display: inline-flex; align-items: flex-end; min-height: 44px; }
   .lab2c-page .lab2c-itab { min-width: 44px; justify-content: center; }
