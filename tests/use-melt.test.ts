@@ -14,7 +14,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, test } from 'vitest';
 import { MELT_FALLBACK_MS, MELT_MS, isOwnMeltEnd, meltNext, mergeLeaving, skipMelt, type MeltPhase } from '@/lib/use-melt';
 import { ToastStack, toToastItem } from '@/components/ui/Toast';
-import { LDialog } from '@/components/legacy/Dialog';
+import { LDialog, LDialogLayer } from '@/components/legacy/Dialog';
 
 const read = (rel: string) => fs.readFileSync(path.join(__dirname, '..', rel), 'utf8');
 
@@ -138,10 +138,18 @@ describe('the overlays wire the melt', () => {
     expect(renderToStaticMarkup(createElement(ToastStack, { items: [], onDismiss: () => {} }))).toBe('');
   });
 
-  test('LDialog: closed renders nothing; open renders the face as a sibling of its scrim', () => {
+  test('LDialog: closed renders nothing; the layer it portals is the face beside its scrim, melting only while it melts', () => {
     expect(renderToStaticMarkup(createElement(LDialog, { open: false, onClose: () => {}, title: 'x' }))).toBe('');
-    const html = renderToStaticMarkup(createElement(LDialog, { open: true, onClose: () => {}, title: 'Rename', children: 'body' }));
-    expect(html).not.toContain('is-melting');
-    expect(html).not.toContain('data-melting');
+    // LDialog portals to <body> (Layer renders nothing on the server): render the layer it portals
+    const at = (melting: boolean) =>
+      renderToStaticMarkup(createElement(LDialogLayer, { open: !melting, melting, onMelted: () => {}, onClose: () => {}, title: 'Rename', children: 'body' }));
+    const open = at(false);
+    expect(open).toMatch(/class="l-scrim gl-scrim"[^>]*><\/div><div[^>]*class="l-dialog glass-face--strong"/);
+    expect(open).toContain('body');
+    expect(open).not.toContain('is-melting');
+    expect(open).not.toContain('data-melting');
+    const melting = at(true);
+    expect(melting).toContain('l-dialog glass-face--strong is-melting');
+    expect(melting).toMatch(/data-melting=""/);
   });
 });
