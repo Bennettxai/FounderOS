@@ -124,4 +124,13 @@ describe('the audit scripts set data-ground with every data-theme they force', (
     expect(src).not.toMatch(/dataset\.theme\s*=/);
     expect(src).toMatch(/\bev\(setThemeExpr\(theme\)\)/);
   });
+
+  test('no other script writes data-theme on its own either (every .mjs under scripts/)', () => {
+    const walk = (d: string): string[] =>
+      fs.readdirSync(path.join(__dirname, '..', d), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : e.name.endsWith('.mjs') ? [`${d}/${e.name}`] : []));
+    const bare = walk('scripts')
+      .filter((f) => f !== 'scripts/theme-ground.mjs')
+      .filter((f) => /setAttribute\(\s*\\?['"`]data-theme|dataset\.theme\s*=/.test(read(f)));
+    expect(bare).toEqual([]);
+  });
 });

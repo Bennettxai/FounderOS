@@ -17,6 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { cdp } from './audit-routes.mjs';
+import { setThemeExpr } from './theme-ground.mjs';
 
 const BASE = process.env.BASE ?? 'http://127.0.0.1:4000';
 const OUT = process.argv[2] ?? `${process.env.S ?? '.'}/audit/globe`;
@@ -157,7 +158,7 @@ for (const theme of ['red']) {
 await open('console');
 {
   await ev(`window.__globeCanvas = document.querySelector('[data-globe] canvas'); true`);
-  await ev(`document.documentElement.setAttribute('data-theme', 'frost'); new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))`);
+  await ev(`${setThemeExpr('frost')}; new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))`); // data-theme and its data-ground
   const g = await geo();
   const data = await capture();
   const hue = await pixels(data, `(px, hsv) => { const g = ${JSON.stringify(g)}; const cx = g.left + g.w / 2, cy = g.top + g.h / 2; const hs = [];
