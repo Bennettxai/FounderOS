@@ -1236,3 +1236,53 @@ describe('review finding 6b: the GladOS surfaces that were filled cards on --g-s
     expect(left.map((r) => r.selectors.join(', '))).toEqual([]);
   });
 });
+
+describe('review finding 6c: the wizard panels are faces and its cards are wells', () => {
+  const SIX_ = layers(
+    props(TOP.filter((r) => r.selectors.some((s) => /\[data-ground\] :is\(\s*\.glass-face,/.test(s)) && /box-shadow/.test(r.body))[0].body).get('box-shadow')!,
+  );
+  const FACE = ':root[data-ground] :is(.wz-panel, .l-wz-shell)';
+  const at = (sel: string, media?: RegExp) =>
+    RULES.filter((r) => r.selectors.map(norm).includes(sel) && (media ? r.at.some((a) => media.test(a)) : r.at.length === 0));
+
+  test('a wizard panel (and Legacy\'s one shell) is a glass face: transparent, light frost, the six layers', () => {
+    const r = at(FACE);
+    expect(r.length).toBe(1);
+    const p = props(r[0].body);
+    expect(p.get('background')).toBe('transparent');
+    expect(p.get('border-color')).toBe('transparent');
+    expect(p.get('backdrop-filter')).toBe('var(--gl-blur)');
+    expect(layers(p.get('box-shadow')!)).toEqual(SIX_);
+    for (const media of [/prefers-reduced-transparency: reduce/, /^@supports not/]) {
+      expect(at(FACE, media).map((x) => props(x.body).get('background')).pop(), String(media)).toBe('var(--solid-bg)');
+    }
+  });
+
+  test('the panels Legacy lays flush inside its shell are not faces of their own', () => {
+    const p = props(at(':root[data-ground] .l-wz-shell .wz-panel')[0]?.body ?? '');
+    expect(p.get('background')).toBe('transparent');
+    expect(p.get('backdrop-filter')).toBe('none');
+    expect(p.get('box-shadow')).toBe('none');
+  });
+
+  test('"on" is a tinted, stronger rim; hover moves the knobs; nothing fills, borders or glows a panel or a card', () => {
+    const on = TOP.filter((r) => r.selectors.includes('.wz-card.wz-card-on')).map((r) => props(r.body));
+    expect(on.map((p) => p.get('--gl-tint')).pop()).toBe('var(--gl-on)');
+    expect(on.map((p) => p.get('--gl-rim-a')).pop()).toBe('45%');
+    const hover = TOP.filter((r) => r.selectors.includes('.wz-card:hover')).map((r) => props(r.body));
+    expect(hover.map((p) => p.get('--gl-rim-a')).pop()).toBe('28%');
+    const own = RULES.filter((r) => r.selectors.some((s) => {
+      if (/\[data-ground\]/.test(s)) return false;
+      const subj = subject(s);
+      return ['wz-panel', 'wz-card', 'wz-card-on', 'l-wz-shell'].some((c) => hasClass(subj, c));
+    }));
+    for (const r of own) {
+      const p = props(r.body);
+      const sel = r.selectors.join(', ');
+      expect(p.has('background') || p.has('background-color'), sel).toBe(false);
+      expect(p.has('box-shadow'), sel).toBe(false);
+      expect(p.get('border') ?? 'none', sel).toMatch(/^(0|none)$/);
+      expect(p.has('border-color'), sel).toBe(false);
+    }
+  });
+});

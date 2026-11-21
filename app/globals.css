@@ -3026,46 +3026,29 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
     grid-column: 1 / -1;
   }
 }
+/* A wizard panel is a glass face at the card radius and a card in it is a well (review finding 6c): the glass
+   pack at the end of this file lights them. No fill, no border, no glow wash; "on" is a tinted, stronger rim and
+   hover moves the knobs. */
 .wz-panel {
   position: relative;
   overflow: hidden;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: var(--h6-card-bg);
-}
-.wz-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--h6-glow-bg);
-  pointer-events: none;
+  border-radius: var(--gl-r-card);
 }
 .wz-panel > * {
   position: relative;
 }
 .wz-card {
   display: block;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--surface-2) 72%, transparent);
-  transition:
-    border-color 160ms var(--ease),
-    transform 160ms var(--ease),
-    box-shadow 160ms var(--ease);
+  transition: transform 160ms var(--ease);
 }
 .wz-card:hover {
-  border-color: var(--border-strong);
   transform: translateY(-1px);
+  --gl-rim-a: 28%;
+  --gl-low-a: 40%;
 }
-.wz-card-on {
-  border-color: var(--accent-line);
-  background: color-mix(in oklab, var(--accent) 7%, var(--surface-2));
-  box-shadow:
-    0 0 0 1px var(--accent-soft),
-    0 10px 30px color-mix(in oklab, var(--accent) 14%, transparent);
-}
-.wz-card-on:hover {
-  border-color: var(--accent-line);
+.wz-card.wz-card-on {
+  --gl-tint: var(--gl-on);
+  --gl-rim-a: 45%;
 }
 .wz-tile {
   display: inline-grid;
@@ -16251,9 +16234,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   height: max(520px, calc(100vh - 168px));
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--l-border);
-  border-radius: var(--l-r-tile);
-  background: var(--l-surface);
+  border-radius: var(--l-r-tile); /* a glass face (review finding 6c): the glass pack lights it */
 }
 .l-wz-rail,
 .l-wz-thread {
@@ -16305,35 +16286,19 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-/* the Classic parts sit flush inside the one shell */
+/* the Classic parts sit flush inside the one shell (the shell is the face; the glass pack keeps them unlit) */
 .l-wz .l-wz-shell .wz-panel {
   flex: 1;
   min-height: 0;
   border: 0;
   border-radius: 0;
-  background: var(--l-surface);
-}
-.l-wz .wz-panel::before {
-  display: none;
 }
 .l-wz .wz-panel {
-  border-color: var(--l-border);
   border-radius: var(--l-r-tile);
-  background: var(--l-surface);
 }
-.l-wz .wz-card {
-  border-radius: var(--l-r-card);
-  border-color: var(--l-border);
-  background: var(--l-surface);
-}
+/* the cards are wells (the glass pack); Monolith does not lift them */
 .l-wz .wz-card:hover {
   transform: none;
-  border-color: var(--l-border-strong);
-}
-.l-wz .wz-card-on {
-  border-color: var(--l-border);
-  background: var(--l-surface-2);
-  box-shadow: inset 2px 0 0 var(--l-text);
 }
 .l-wz .wz-bubble-user {
   border: 1px solid var(--l-border-strong);
@@ -18649,6 +18614,45 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   :root[data-ground][data-ui='glados'] .kg-blueprint .bh-node:not(.start, .diamond) .bh-card,
   :root[data-ground][data-ui='glados'] .kg-blueprint .bh-search-panel,
   :root[data-ground][data-ui='glados'] .wfc[data-skin='g'] :is(.minimap, .dock:not(.dock-ratio), .panel, .modal) {
+    background: var(--solid-bg);
+  }
+}
+/* The wizard (review finding 6c): its panels, and Legacy's one shell, are glass faces at the card radius; the panels
+   Legacy lays flush inside that shell are not faces of their own; the cards in them are wells (the one well rule). */
+:where(.wz-panel, .l-wz-shell, .wz-card) {
+  --gl-tint: white;
+  --gl-rim-a: 15%;
+  --gl-low-a: 30%;
+  --gl-pool-a: 9%;
+}
+:root[data-ground] :is(.wz-panel, .l-wz-shell) {
+  background: transparent;
+  border-color: transparent;
+  -webkit-backdrop-filter: var(--gl-blur);
+  backdrop-filter: var(--gl-blur);
+  box-shadow:
+    0 0 0 1px var(--gl-groove),
+    0 8px 18px -8px var(--gl-drop),
+    inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+    inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+    inset 0 12px 18px -14px var(--gl-shade);
+}
+:root[data-ground] .l-wz-shell .wz-panel {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-ground] :is(.wz-panel, .l-wz-shell) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--solid-bg);
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-ground] :is(.wz-panel, .l-wz-shell) {
     background: var(--solid-bg);
   }
 }
