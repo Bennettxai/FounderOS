@@ -28,6 +28,7 @@ export type LlmChatRequest = {
   messages: LlmMessage[];
   tools?: LlmToolSpec[];
   model?: string;
+  abortSignal?: AbortSignal;
 };
 
 export type LlmChatResult = { text: string; toolCalls: LlmToolCall[] };
@@ -95,6 +96,7 @@ export function createGatewayProvider(model: string = DEFAULT_MODEL): LlmProvide
       const result = await generateText({
         model: gateway(req.model ?? model),
         system: req.system,
+        abortSignal: req.abortSignal,
         messages,
         tools: req.tools?.length ? tools : undefined,
         stopWhen: stepCountIs(6),
