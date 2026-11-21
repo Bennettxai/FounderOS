@@ -60,7 +60,8 @@ describe('red theme — globals.css contract', () => {
   });
 
   test('hoverable/nav cold-hover blue is re-toned under red', () => {
-    expect(css).toContain("[data-theme='red'] .hoverable:hover");
+    // glass faces are excluded from the glow (their hover moves the glass knobs, glass phase 3)
+    expect(css).toMatch(/\[data-theme='red'\] \.hoverable:not\([^{]*\):hover \{/);
     expect(css).toContain("[data-theme='red'] .os-sidebar a:hover");
   });
 });

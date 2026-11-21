@@ -631,3 +631,59 @@ describe('component-local keyframes: no face fades in (CSS files and <style> blo
     expect(src).toMatch(/<div className="fc-layer">\s*<div className="fc-scrim" aria-hidden \/>\s*<aside className="fc-drawer/);
   });
 });
+
+describe('hover moves the glass knobs only (glass phase 3)', () => {
+  /** Every face: the pack's classes, the wells and solid faces, the Classic card. */
+  const FACES = [
+    '.glass-face', '.glass-face--strong', '.l-card', '.l-slab', '.l-chip', '.l-dialog', '.g-card', '.g-card-raised', '.g-well', '.g-chip',
+    '.g-sheet', '.g-drawer', '.g-dialog', '.g-palette', '.ui-toast', '.c-pop', '.c-chip', '.h6-card', '.glass-panel', '.glass-panel-violet',
+    '.glass-chip', '.lab2-glass', '.wiz-ask', '.g-ask-box', '.glass-well', '.glass-solid', '.bg-os-surface.rounded-lg-t',
+  ];
+  const notList = (sel: string) => {
+    const m = /\.hoverable:not\(([^)]*(?:\([^)]*\)[^)]*)*)\):hover$/.exec(sel);
+    return m ? splitSelectors(m[1]).map(norm) : [];
+  };
+
+  test('the theme hover glows (red, white, frost, grey frost, daylight) never land on a face', () => {
+    const glows = RULES.filter((r) => r.selectors.some((s) => /^:root\[data-theme='[\w-]+'\] \.hoverable/.test(s) && /:hover$/.test(s)));
+    expect(glows.length).toBeGreaterThanOrEqual(4);
+    for (const r of glows) {
+      for (const s of r.selectors) {
+        const excluded = notList(s);
+        expect(FACES.filter((f) => !excluded.includes(f)), s).toEqual([]);
+      }
+    }
+  });
+
+  test('no other :hover rule replaces a face shadow or adds a fill at the face rule specificity or above', () => {
+    const offenders = RULES.filter((r) => r.at.length === 0 && r.selectors.some((s) => {
+      if (!/:hover/.test(s) || /\[data-ground\]/.test(s)) return false;
+      const subj = subject(s);
+      if (!FACES.some((f) => f.split('.').filter(Boolean).every((c) => hasClass(subj, c)))) return false;
+      const p = props(r.body);
+      if (!p.has('box-shadow') && !p.has('background') && !p.has('background-color')) return false;
+      // the face rule is :root[data-ground] :is(...) = 3 class-level parts; count this selector's
+      const parts = (s.replace(/:(?:where)\([^)]*\)/g, '').match(/\.[\w-]+|\[[^\]]+\]|:(?!:)[\w-]+/g) ?? []).length;
+      return parts >= 3;
+    }));
+    expect(offenders.map((r) => r.selectors.join(', '))).toEqual([]);
+  });
+
+  test('a hovered face brightens its rim, bottom edge and pool; the glow themes tint the light with their accent', () => {
+    const knob = TOP.filter((r) => r.selectors.some((s) => /^:root\[data-ground\] :is\(/.test(s) && /\)\.hoverable:hover$/.test(s)) && /--gl-pool-a/.test(r.body));
+    expect(knob.length).toBe(1);
+    const members = splitSelectors(/:is\(([\s\S]*)\)\.hoverable:hover$/.exec(knob[0].selectors[0])![1]).map(norm);
+    expect(FACES.filter((f) => !members.includes(f))).toEqual([]);
+    const p = props(knob[0].body);
+    expect([...p.keys()].every((k) => k.startsWith('--gl-')), [...p.keys()].join()).toBe(true);
+    expect(p.get('--gl-rim-a')).toBe('28%');
+    expect(p.get('--gl-low-a')).toBe('40%');
+    expect(p.get('--gl-pool-a')).toBe('14%');
+    const tint = TOP.filter((r) => r.selectors.some((s) => /data-theme='frost'/.test(s) && /\.hoverable:hover$/.test(s) && /\[data-ground\]/.test(s)));
+    expect(tint.length).toBe(1);
+    const t = props(tint[0].body);
+    expect([...t.keys()]).toEqual(['--gl-tint']);
+    expect(t.get('--gl-tint')).toBe('var(--accent)');
+    for (const theme of ['red', 'grey-frost', 'light', 'daylight']) expect(tint[0].selectors[0], theme).toContain(`[data-theme='${theme}']`);
+  });
+});

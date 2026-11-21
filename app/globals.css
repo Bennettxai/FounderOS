@@ -473,7 +473,8 @@ body {
    purpose"); under red that same rgb(120-170,180-230,255) family reads as a
    stray blue glow on every hoverable card and nav row, so it gets a warm
    re-tone here instead of at each call site. */
-:root[data-theme='red'] .hoverable:hover {
+/* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
+:root[data-theme='red'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(255, 170, 130, 0.22),
     0 0 30px -8px rgba(255, 130, 90, 0.42);
@@ -668,7 +669,8 @@ body {
 :root[data-theme='light'] .bg-os-surface {
   background-image: none;
 }
-:root[data-theme='light'] .hoverable:hover {
+/* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
+:root[data-theme='light'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(20, 40, 80, 0.14),
     0 10px 24px -10px rgba(20, 24, 32, 0.22);
@@ -871,8 +873,9 @@ body {
 :root[data-theme='grey-frost'] .bg-os-surface {
   background-image: linear-gradient(155deg, rgba(36, 52, 84, 0.38) 0%, rgba(12, 18, 30, 0.18) 55%, rgba(5, 8, 14, 0.32) 100%);
 }
-:root[data-theme='frost'] .hoverable:hover,
-:root[data-theme='grey-frost'] .hoverable:hover {
+/* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
+:root[data-theme='frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover,
+:root[data-theme='grey-frost'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(170, 210, 255, 0.28),
     0 0 34px -8px rgba(120, 180, 255, 0.6);
@@ -9168,7 +9171,7 @@ a.h6-card { display: block; color: inherit; }
 .g-card[data-p='24'], .g-card-raised[data-p='24'] { padding: var(--g-space-6); }
 button.g-card, button.g-card-raised { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; width: 100%; cursor: pointer; }
 .g-card[data-action], .g-card-raised[data-action], .g-hero[data-action], .g-stat[data-action] { cursor: pointer; transition: transform var(--g-dur-lift) var(--ease), box-shadow var(--g-dur-lift) var(--ease); }
-.g-card[data-action]:hover, .g-card-raised[data-action]:hover, .g-hero[data-action]:hover { transform: translateY(-1px); box-shadow: var(--g-shadow); }
+.g-card[data-action]:hover, .g-card-raised[data-action]:hover, .g-hero[data-action]:hover { transform: translateY(-1px); --gl-rim-a: 28%; --gl-low-a: 40%; --gl-pool-a: 14%; } /* lifts and brightens its light; the glass keeps its six layers */
 .g-card-media { position: relative; aspect-ratio: 16 / 9; margin-bottom: var(--g-space-4); border-radius: var(--g-r-nested); overflow: hidden; background: var(--g-well); }
 .g-card-media > img, .g-card-media > video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .g-card-media-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--g-space-3) var(--g-space-4); background: linear-gradient(to top, var(--g-scrim), transparent); color: var(--g-on-hero); font-size: var(--g-fs-cap); }
@@ -14585,7 +14588,8 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-theme='daylight'] .bg-os-surface {
   background-image: none;
 }
-:root[data-theme='daylight'] .hoverable:hover {
+/* glass faces are excluded: their hover moves the glass knobs (glass phase 3) */
+:root[data-theme='daylight'] .hoverable:not(.glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t):hover {
   box-shadow:
     inset 0 0 0 1px rgba(20, 40, 80, 0.14),
     0 10px 24px -10px rgba(20, 24, 32, 0.22);
@@ -18271,5 +18275,20 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   .bh-ask:is(.has-scope, .has-chips) .bh-ask-chip {
     animation: none;
   }
+}
+/* Hover moves the glass knobs only (brief §2: animation moves the knobs, never adds a fill). A hovered face
+   brightens its rim, bottom edge and pool; the glow themes tint that light with their accent instead of the
+   coloured glow they give other hoverables (those theme rules exclude the faces). */
+:root[data-ground] :is(
+  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t
+).hoverable:hover {
+  --gl-rim-a: 28%;
+  --gl-low-a: 40%;
+  --gl-pool-a: 14%;
+}
+:root[data-ground]:is([data-theme='red'], [data-theme='frost'], [data-theme='grey-frost'], [data-theme='light'], [data-theme='daylight']) :is(
+  .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t
+).hoverable:hover {
+  --gl-tint: var(--accent);
 }
 /* ── end glass phase 3 ── */
