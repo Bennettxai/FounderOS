@@ -56,7 +56,7 @@ export function Synthesizing({
         <span
           aria-hidden
           className="h-[6px] w-[6px] shrink-0 bg-os-text"
-          style={{ animation: 'om-blink 1s steps(1) infinite' }}
+          style={{ animation: 'blink 1s steps(1) infinite' }}
         />
         <span className="synth-shimmer truncate">
           synthesizing{secs !== null ? ` · ${secs}s` : ''}

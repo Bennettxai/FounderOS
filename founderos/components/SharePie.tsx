@@ -84,7 +84,7 @@ export function SharePie({
             d={arcPath(C, C, R, s.startAngle + 0.6, s.endAngle - 0.6)}
             pathLength={1}
             className="sweep"
-            style={{ animation: `os-sweep ${dur}ms linear both`, animationDelay: `${delay}ms` }}
+            style={{ strokeDasharray: 1, strokeDashoffset: 1, animation: `l-draw ${dur}ms linear both`, animationDelay: `${delay}ms` }}
             fill="none"
             stroke={`var(${SLICE_VARS[i % SLICE_VARS.length]})`}
             strokeWidth={17}

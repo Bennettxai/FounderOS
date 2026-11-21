@@ -21,7 +21,7 @@ export function VolumeMeter({ label, frac: rawFrac, display, hue, delay = 0 }: {
             width: `${frac * 100}%`,
             background: `linear-gradient(90deg, transparent 72%, color-mix(in oklab, ${hue} 60%, white) 100%), repeating-linear-gradient(45deg, ${hue}, ${hue} 6px, color-mix(in oklab, ${hue} 45%, transparent) 6px, color-mix(in oklab, ${hue} 45%, transparent) 12px)`,
             boxShadow: `0 0 14px color-mix(in oklab, ${hue} 45%, transparent), inset 0 0 5px color-mix(in oklab, ${hue} 55%, transparent)`,
-            animation: `vol-meter-in 1.2s ${EASE} ${delay}ms both`,
+            animation: `l-meter-in 1.2s ${EASE} ${delay}ms both`,
           }}
         />
       </div>

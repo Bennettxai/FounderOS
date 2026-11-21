@@ -56,21 +56,47 @@ describe('the founderos slab kit uses classes that exist', () => {
     expect(src).not.toMatch(/\bos-slab\b|['" `]rise-card\b|\bos-rise\b|\bos-drift\b|--rise-i\b|className=\{`rise /);
   });
 
-  test('every keyframe an inline animation names in the slab kit exists', () => {
-    // (The founderos charts still name os-draw, os-fade, os-sweep, vol-meter-in and om-blink, which
-    // do not exist either; they are chart motion, not faces, and are left for their own pass.)
+  test('every keyframe an inline animation names anywhere in founderos/ exists (charts included)', () => {
     const kf = keyframeBodies();
-    const files = ['founderos/components/slab.tsx', 'founderos/components/motion.tsx'].map((f) => path.join(ROOT, f));
+    const walk = (d: string): string[] =>
+      fs.readdirSync(path.join(ROOT, d), { withFileTypes: true }).flatMap((e) =>
+        e.isDirectory() ? walk(path.join(d, e.name)) : /\.tsx?$/.test(e.name) ? [path.join(d, e.name)] : [],
+      );
     const missing: string[] = [];
-    for (const f of files) {
-      for (const m of fs.readFileSync(f, 'utf8').matchAll(/animation:\s*['"`]([^'"`]+)['"`]/g)) {
+    for (const f of walk('founderos')) {
+      for (const m of fs.readFileSync(path.join(ROOT, f), 'utf8').matchAll(/animation:\s*['"`]([^'"`]+)['"`]/g)) {
         for (const part of m[1].split(/,(?![^(]*\))/)) {
           const name = part.trim().split(/\s+/)[0];
-          if (name && name !== 'none' && !kf.has(name)) missing.push(`${path.relative(ROOT, f)}: ${name}`);
+          if (name && name !== 'none' && !/^\$\{/.test(name) && !kf.has(name)) missing.push(`${f}: ${name}`);
         }
       }
     }
     expect(missing).toEqual([]);
+  });
+
+  test('the charts map to real motion: a dashoffset draw, leaf fades, the meter grow, the caret blink; the peak label pops', () => {
+    const read = (f: string) => fs.readFileSync(path.join(ROOT, f), 'utf8');
+    const charts = read('founderos/components/slab-charts.tsx');
+    expect(charts).toMatch(/strokeDasharray: 1, strokeDashoffset: 1, animation: `l-draw /);
+    expect(charts).toMatch(/className="glass-solid pointer-events-none absolute/);
+    expect(charts).toMatch(/animation: `gl-pop /);
+    expect(charts).not.toMatch(/backdrop-blur/);
+    const pie = read('founderos/components/SharePie.tsx');
+    expect(pie).toMatch(/strokeDasharray: 1, strokeDashoffset: 1, animation: `l-draw \$\{dur\}ms linear both`/);
+    expect(read('founderos/components/VolumeMeter.tsx')).toMatch(/animation: `l-meter-in /);
+    expect(read('founderos/components/Synthesizing.tsx')).toMatch(/animation: 'blink 1s steps\(1\) infinite'/);
+    expect(keyframeBodies().get('gl-pop')).toMatch(/from \{\s*visibility: hidden;\s*scale: 0\.9;\s*\}/);
+    expect(keyframeBodies().get('gl-pop')).not.toMatch(/opacity/);
+  });
+
+  test('the InsightCard paints from tokens that exist in every style (no undefined var, no literal white)', () => {
+    const m = html(createElement(InsightCard, { badge: 'Insight', headline: 'h', display: '42', frac: 0.5 }));
+    const names = [...m.matchAll(/var\((--[\w-]+)/g)].map((x) => x[1]);
+    expect(names.length).toBeGreaterThan(0);
+    const missing = [...new Set(names)].filter((n) => !new RegExp(`${n}\\s*:`).test(CSS_NO_COMMENTS));
+    expect(missing).toEqual([]);
+    expect(m).not.toMatch(/text-white|bg-white|border-white|#fff\b|rgba\(255,\s*255,\s*255/);
+    expect(m).toMatch(/color:var\(--fc-ins-ink\)/);
   });
 
   test('the InsightCard rises and drifts on the Legacy keyframes', () => {

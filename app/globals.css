@@ -18248,4 +18248,28 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 .gl-dim :is(svg, img) {
   opacity: 0.6;
 }
+/* Pop (brief §5 B9, C20): a chip or a label over a chart pops from .9 on its beat, hidden until then. It moves
+   the individual scale property, so it composes with a transform the element already carries. */
+@keyframes gl-pop {
+  from {
+    visibility: hidden;
+    scale: 0.9;
+  }
+  to {
+    visibility: visible;
+    scale: 1;
+  }
+}
+/* The Blueprint ask chips pop in as their row opens, 3 frames apart. */
+.bh-ask:is(.has-scope, .has-chips) .bh-ask-chip {
+  animation: gl-pop var(--gl-dur-materialise) var(--gl-spring) backwards;
+}
+.bh-ask:is(.has-scope, .has-chips) .bh-ask-chip:nth-child(2) { animation-delay: 125ms; }
+.bh-ask:is(.has-scope, .has-chips) .bh-ask-chip:nth-child(3) { animation-delay: 250ms; }
+.bh-ask:is(.has-scope, .has-chips) .bh-ask-chip:nth-child(n + 4) { animation-delay: 375ms; }
+@media (prefers-reduced-motion: reduce) {
+  .bh-ask:is(.has-scope, .has-chips) .bh-ask-chip {
+    animation: none;
+  }
+}
 /* ── end glass phase 3 ── */

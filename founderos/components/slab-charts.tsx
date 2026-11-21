@@ -3,8 +3,8 @@ import { useId } from 'react';
 /**
  * Brand Deals' two mini charts, lent to the whole OS (2026-09-24): the
  * stepped line over fading pinstripes that draws itself and pins its peak,
- * and the waffle dot-matrix. Pure SVG/markup on global keyframes (os-draw,
- * os-fade), so server pages can use them without shipping a client island.
+ * and the waffle dot-matrix. Pure SVG/markup on global keyframes (l-draw,
+ * l-fade, gl-pop), so server pages can use them without shipping a client island.
  */
 
 const EASE = 'cubic-bezier(.2,.7,.2,1)';
@@ -65,18 +65,18 @@ export function StepLine({
           strokeWidth="3"
           strokeLinejoin="round"
           pathLength={1}
-          style={{ strokeDasharray: 1, strokeDashoffset: 1, animation: `os-draw 1.6s ${EASE} .5s both` }}
+          style={{ strokeDasharray: 1, strokeDashoffset: 1, animation: `l-draw 1.6s ${EASE} .5s both` }}
         />
-        <circle cx={(peakIdx + 0.5) * stepW} cy={y(peak.count)} r="4.5" fill={hue} style={{ animation: `os-fade .4s ${EASE} 1.9s both` }} />
+        <circle cx={(peakIdx + 0.5) * stepW} cy={y(peak.count)} r="4.5" fill={hue} style={{ animation: `l-fade .4s ${EASE} 1.9s both` }} />
       </svg>
       <div
-        className="pointer-events-none absolute whitespace-nowrap rounded-full border border-os-border px-2.5 py-1 text-[11px] backdrop-blur"
+        className="glass-solid pointer-events-none absolute whitespace-nowrap rounded-full px-2.5 py-1 text-[11px]"
         style={{
           left: `calc(24px + (100% - 48px) * ${(peakIdx + 0.5) / series.length})`,
           top: `${(y(peak.count) / H) * 100}%`,
           transform: 'translate(-50%, -140%)',
-          background: 'color-mix(in oklab, var(--bg) 75%, transparent)',
-          animation: `os-fade .5s ${EASE} 2s both`,
+          // a label over the chart is a solid raised face: it pops from .9 as the line reaches it, never fades
+          animation: `gl-pop .5s ${EASE} 2s both`,
         }}
       >
         <span className="font-semibold tabular-nums" style={{ color: hue }}>
@@ -109,7 +109,7 @@ export function DotMatrix({ cols, hue }: { cols: SeriesPoint[]; hue: string }) {
                   key={i}
                   data-dot
                   className="block h-[7px] w-[7px] rounded-full"
-                  style={{ background: hue, opacity: strength, animation: `os-fade .3s ${EASE} ${900 + ci * 90 + i * 55}ms both` }}
+                  style={{ background: hue, opacity: strength, animation: `l-fade .3s ${EASE} ${900 + ci * 90 + i * 55}ms both` }}
                 />
               ))}
               {dots === 0 && <span className="block h-[7px] w-[7px] rounded-full" style={{ background: hue, opacity: 0.12 }} />}

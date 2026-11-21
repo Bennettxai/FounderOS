@@ -191,11 +191,14 @@ export function InsightCard({
       i={i}
       className={`l-rise-card relative min-w-0 overflow-hidden rounded-[var(--gl-r-card)] border border-transparent ${className}`.trim()}
       style={{
+        // the one loud card: the insight tokens every theme defines (--fc-ins-*: Monolith re-keys them to
+        // metallic grey, White to a pale wash with dark ink), so the card never renders transparent
+        color: 'var(--fc-ins-ink)',
         background: [
-          'radial-gradient(120% 90% at 85% 8%, color-mix(in oklab, var(--tile-glow-a) 55%, transparent), transparent 60%)',
-          'radial-gradient(130% 110% at 12% 92%, color-mix(in oklab, var(--tile-glow-b) 55%, transparent), transparent 62%)',
-          'radial-gradient(110% 110% at 55% 55%, color-mix(in oklab, var(--tile-glow-c) 45%, transparent), transparent 70%)',
-          'var(--insight-base)',
+          'radial-gradient(120% 90% at 85% 8%, color-mix(in oklab, var(--fc-ins-d) 55%, transparent), transparent 60%)',
+          'radial-gradient(130% 110% at 12% 92%, color-mix(in oklab, var(--fc-ins-b) 55%, transparent), transparent 62%)',
+          'radial-gradient(110% 110% at 55% 55%, color-mix(in oklab, var(--fc-ins-b) 45%, transparent), transparent 70%)',
+          'linear-gradient(160deg, var(--fc-ins-a), var(--fc-ins-c) 60%, var(--fc-ins-a))',
         ].join(', '),
         backgroundSize: '160% 160%',
         // the rise beat and the slow glow drift share one animation list (the Legacy kit's keyframes)
@@ -203,17 +206,20 @@ export function InsightCard({
       }}
     >
       <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: GRAIN, mixBlendMode: 'overlay', opacity: 0.85 }} />
-      <div className="pointer-events-none absolute -right-14 -top-16 h-56 w-56 rotate-[24deg] rounded-[36px] border border-white/25 bg-white/5" style={{ backdropFilter: 'blur(3px)' }} />
-      <div className="relative flex h-full flex-col px-6 py-5 text-white">
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[12px] backdrop-blur">
+      <div
+        className="pointer-events-none absolute -right-14 -top-16 h-56 w-56 rotate-[24deg] rounded-[36px] border"
+        style={{ borderColor: 'color-mix(in oklab, var(--fc-ins-ink) 25%, transparent)', background: 'color-mix(in oklab, var(--fc-ins-ink) 5%, transparent)', backdropFilter: 'blur(3px)' }}
+      />
+      <div className="relative flex h-full flex-col px-6 py-5">
+        <span className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-[12px]" style={{ background: 'color-mix(in oklab, var(--fc-ins-ink) 15%, transparent)' }}>
           {icon ?? <Lightbulb size={13} strokeWidth={1.7} />} {badge}
         </span>
         <div className="mt-4 text-[64px] font-semibold leading-none tracking-[-0.03em] tabular-nums">{display ?? <CountUp value={value ?? 0} kind={kind} />}</div>
         <div className="mt-2 text-[16px] font-semibold leading-snug">{headline}</div>
-        {body && <div className="mt-1.5 text-[12.5px] leading-relaxed text-white/75">{body}</div>}
+        {body && <div className="mt-1.5 text-[12.5px] leading-relaxed" style={{ color: 'color-mix(in oklab, var(--fc-ins-ink) 75%, transparent)' }}>{body}</div>}
         <div className="mt-auto flex gap-1.5 pt-4">
           {Array.from({ length: 8 }, (_, t) => (
-            <span key={t} data-tick className="h-[3px] flex-1 rounded-full" style={{ background: t < lit ? '#fff' : 'rgba(255,255,255,.25)' }} />
+            <span key={t} data-tick className="h-[3px] flex-1 rounded-full" style={{ background: t < lit ? 'var(--fc-ins-ink)' : 'color-mix(in oklab, var(--fc-ins-ink) 25%, transparent)' }} />
           ))}
         </div>
       </div>
