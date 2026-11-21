@@ -15152,8 +15152,16 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 }
 
 /* Cards in the slab: no Classic drop shadow (Monolith rules). Glass faces keep their light: the
-   glass pack at the end of this file shapes them (no fills; a glow only behind an "on" face). */
-:root[data-ui='legacy'] [data-l-frame] :is(.card, [class*='shadow-']):not(.l-insight):not([data-l]):not(.glass-face, .glass-panel, .glass-panel-violet, .glass-chip, .c-pop, .c-chip, .h6-card) {
+   glass pack at the end of this file shapes them (no fills; a glow only behind an "on" face). The
+   exclusions are the pack's full face and control list (its focus list), the solid raised faces
+   (menus and tips that carry a shadow-* utility), the wells and the mapped Classic card. */
+:root[data-ui='legacy'] [data-l-frame] :is(.card, [class*='shadow-']):not(.l-insight):not([data-l]):not(
+  .glass-face, .glass-face--strong, .l-card, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer,
+  .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass,
+  .wiz-ask, .g-ask-box, .ap-panel, .ap-chip, .glass-solid, .glass-well, .g-seg-opt, .l-toggle-chip, .os-nav-link, .gl-on,
+  .ap-pill, .bh-itab, .ib-chip, .ib-seg-btn, .ae-chip, .ae-pill, .g-pill, .wiz-bc-chip, .kg-radial-row, .lab2-seg-opt, .lab2c-fchip,
+  .ch-g-strip-btn, .ch-c-strip-btn, .fo-c-filter, .bg-os-surface.rounded-lg-t, .os-nav-tip, .g-pop, .g-tip, .g-chart-tip
+) {
   box-shadow: none !important;
 }
 :root[data-ui='legacy'] [data-l-frame] :is(.rounded-lg-t.border, .bg-os-surface.border) {

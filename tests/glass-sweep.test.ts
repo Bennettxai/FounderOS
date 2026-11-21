@@ -1013,3 +1013,54 @@ describe('review finding 6a: the founderos kit is on the glass recipe', () => {
     expect(classes.filter((c) => c.includes('animate-pulse')).every((c) => !c.includes('border'))).toBe(true);
   });
 });
+
+describe('review finding 6d: Legacy\'s "no Classic drop shadow" rule leaves every glass face its light', () => {
+  /** The members of the first :is(...) in a selector, attribute and pseudo parts dropped. */
+  const isMembers = (sel: string) => {
+    const open = sel.indexOf(':is(');
+    let depth = 0;
+    for (let i = open + 3; i < sel.length; i++) {
+      if (sel[i] === '(') depth++;
+      else if (sel[i] === ')' && --depth === 0) return splitSelectors(sel.slice(open + 4, i)).map(norm);
+    }
+    return [];
+  };
+  /** Every argument of every :not(...) in a selector. */
+  const notArgs = (sel: string) => {
+    const out: string[] = [];
+    for (let at = sel.indexOf(':not('); at > -1; at = sel.indexOf(':not(', at + 1)) {
+      let depth = 0;
+      for (let i = at + 4; i < sel.length; i++) {
+        if (sel[i] === '(') depth++;
+        else if (sel[i] === ')' && --depth === 0) {
+          out.push(...splitSelectors(sel.slice(at + 5, i)).map(norm));
+          break;
+        }
+      }
+    }
+    return out;
+  };
+  const KILL = RULES.filter((r) => r.selectors.some((s) => /\[data-l-frame\] :is\(\.card, \[class\*='shadow-'\]\)/.test(s)) && /box-shadow:\s*none\s*!important/.test(r.body));
+  const focus = TOP.find((r) => r.selectors.some((s) => /^:root\[data-ground\] :is\(\s*\.glass-face,[\s\S]*\):focus-visible$/.test(norm(s))))!;
+  const solid = TOP.find((r) => r.selectors.some((s) => /^:root\[data-ground\] :is\(\.glass-solid,/.test(norm(s))) && /box-shadow/.test(r.body))!;
+  const bare = (m: string) => m.replace(/\[[^\]]*\]/g, '').replace(/:not\([^)]*\)/g, '');
+
+  test('one kill rule, and it excludes the full face and control lists, the solid faces, the wells and the mapped Classic card', () => {
+    expect(KILL.length).toBe(1);
+    const excluded = KILL[0].selectors.flatMap(notArgs);
+    const want = [...new Set([...isMembers(focus.selectors.find((s) => /:focus-visible$/.test(norm(s)))!), ...isMembers(solid.selectors[0])].map(bare))];
+    for (const m of ['.glass-solid', '.glass-well', '.bg-os-surface.rounded-lg-t', '.ap-panel', '.ap-chip', '.ap-pill', '.gl-on', '.g-pop', '.os-nav-tip']) expect(want, m).toContain(m);
+    expect(want.filter((m) => !excluded.includes(m))).toEqual([]);
+  });
+
+  test('the task menus (glass-solid with a shadow utility) keep their raised look in Legacy', () => {
+    const excluded = KILL[0].selectors.flatMap(notArgs);
+    for (const f of ['components/tasks/TaskOverview.tsx', 'components/tasks/RangePill.tsx']) {
+      const menu = read(f).split('\n').find((l) => /absolute right-0 z-20 mt-1/.test(l))!;
+      const tokens = /className="([^"]*)"/.exec(menu)![1].split(/\s+/);
+      expect(tokens, f).toContain('shadow-lg'); // what the kill rule's [class*='shadow-'] catches
+      const spared = excluded.some((m) => m.split('.').filter(Boolean).every((c) => tokens.includes(c)));
+      expect(spared, f).toBe(true);
+    }
+  });
+});
