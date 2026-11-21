@@ -501,11 +501,11 @@ a.l-lab-gen-line:hover { color: var(--l-text); text-decoration: underline; text-
 .l-lab-sheet-layer[data-kind='ask'] .l-lab-sheet { width: min(760px, calc(100vw - 32px)); }
 .l-lab-sheet-layer[data-kind='script'] .l-lab-sheet { left: 24px; right: 24px; top: 24px; bottom: 24px; width: auto; max-width: 1240px; margin-inline: auto; }
 .l-lab-sheet-layer[data-closing] .l-lab-scrim { animation: bn-overlay-out 0.2s ease-in both; }
-.l-lab-sheet-layer[data-closing] .l-lab-sheet { animation: bn-panel-out 0.2s var(--l-ease) both; }
+.l-lab-sheet-layer[data-closing] .l-lab-sheet { animation: bn-panel-out 0.2s linear both; }
 @keyframes bn-overlay-in { from { opacity: 0; } }
 @keyframes bn-overlay-out { to { opacity: 0; } }
-@keyframes bn-panel-in { from { opacity: 0; transform: translateY(16px) scale(0.98); } }
-@keyframes bn-panel-out { to { opacity: 0; transform: translateY(10px) scale(0.99); } }
+@keyframes bn-panel-in { from { transform: translateY(18px) scale(0.965); } } /* the sheet materialises: it never fades (glass brief §4) */
+@keyframes bn-panel-out { to { transform: scale(0.98); } } /* and melts: scale .98, linear */
 .l-lab-sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 18px 20px 14px; border-bottom: 1px solid var(--l-border); }
 .l-lab-sheet-titles { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
 .l-lab-sheet-title { font-size: 18px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: var(--l-text); overflow-wrap: anywhere; }

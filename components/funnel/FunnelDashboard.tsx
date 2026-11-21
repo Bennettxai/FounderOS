@@ -839,7 +839,8 @@ function LeadDrawer({
   const reached = stageIndex(j.status);
   const lane = laneOf(j);
   return (
-    <div className="fc-scrim">
+    <div className="fc-layer">
+      <div className="fc-scrim" aria-hidden />
       <aside className="fc-drawer" ref={ref} role="dialog" aria-label={`${j.person ?? j.name} dossier`}>
         <div className="fc-drawer-head">
           <div>

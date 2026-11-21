@@ -135,7 +135,7 @@
   box-shadow: 0 24px 48px -24px color-mix(in srgb, var(--lab-shade) 70%, transparent), 0 0 0 1px color-mix(in srgb, var(--lab-ink-hero) 10%, transparent);
   animation: lab2-verse-in var(--lab-dur-m, 240ms) var(--lab-ease-out) both;
 }
-@keyframes lab2-verse-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+@keyframes lab2-verse-in { from { transform: translateX(12px); } to { transform: none; } } /* a panel slides in, never fades */
 .lab .lab2-verse-stage[data-selected] .lab2-verse-zoom { transform: translateX(-328px); }
 .lab .lab2-verse-panel-head { display: flex; align-items: flex-start; gap: 10px; }
 .lab .lab2-verse-panel-titles { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
@@ -182,7 +182,7 @@ html:has(.lab .lab2-verse[data-full]) { overflow: hidden; }
   .lab .lab2-verse-stage[data-selected] .lab2-verse-zoom { transform: none; }
   .lab .lab2-verse-icon { width: 38px; height: 38px; }
 }
-@keyframes lab2-verse-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes lab2-verse-up { from { transform: translateY(16px); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .lab .lab2-verse *, .lab .lab2-verse *::before { animation: none !important; transition-duration: 0ms !important; }
 }

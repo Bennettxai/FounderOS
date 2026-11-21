@@ -230,13 +230,13 @@ function StepLine({ events }: { events: DealEvent[] }) {
       </svg>
       {/* peak pill anchored on the peak step (reference grammar) */}
       <div
-        className="pointer-events-none absolute whitespace-nowrap rounded-full border border-os-border px-2.5 py-1 text-[11px] backdrop-blur"
+        className="glass-solid pointer-events-none absolute whitespace-nowrap rounded-full px-2.5 py-1 text-[11px]"
         style={{
           left: `calc(24px + (100% - 48px) * ${(peakIdx + 0.5) / buckets.length})`,
           top: `${(y(buckets[peakIdx].count) / H) * 100}%`,
           transform: 'translate(-50%, -140%)',
-          background: 'color-mix(in oklab, var(--bg) 75%, transparent)',
-          animation: `bd-fadein .5s ${EASE} 2s both`,
+          // the peak label is a solid raised face: it pops from .9 as the line reaches it, never fades
+          animation: `bd-pop .5s ${EASE} 2s both`,
         }}
       >
         <span className="font-semibold tabular-nums" style={{ color: HUE.send }}>
@@ -477,6 +477,7 @@ export function DealBoard({ initial, botUrl = null }: { initial: BrandDealsSnaps
       <style>{`
         @keyframes bd-rise { from { transform: translateY(10px) scale(.992); } to { transform: none; } }
         @keyframes bd-fadein { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bd-pop { from { visibility: hidden; scale: 0.9; } to { visibility: visible; scale: 1; } }
         @keyframes bd-draw { to { stroke-dashoffset: 0; } }
         @keyframes bd-meter-in { from { width: 0; } }
         @keyframes bd-drift { from { background-position: 0% 0%; } to { background-position: 12% 8%; } }

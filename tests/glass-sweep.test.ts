@@ -12,6 +12,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import { CSS_NO_COMMENTS, GLOBALS_CSS, splitSelectors, topLevelRules, type Rule } from './helpers/theme-css';
+import { inlineAnimations, localStyleSources, tsxFiles } from './helpers/glass-lint';
 
 const read = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
 const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
@@ -495,5 +496,138 @@ describe('Classic ad-hoc cards are glass faces', () => {
     const kf = /@keyframes bd-rise \{([^}]*\}[^}]*)\}/.exec(read('components/brand-deals/DealBoard.tsx'));
     expect(kf).not.toBeNull();
     expect(kf![1]).not.toMatch(/opacity/);
+  });
+});
+
+describe('component-local keyframes: no face fades in (CSS files and <style> blocks, glass phase 3)', () => {
+  const ROOT = process.cwd();
+  const SOURCES = localStyleSources(ROOT, ['app', 'components', 'founderos', 'lib']);
+  /** name -> [file, body without comments] for every local @keyframes. */
+  const LOCAL = new Map<string, { file: string; body: string }[]>();
+  for (const { file, css } of SOURCES) {
+    const flat = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const [name, body] of keyframeBlocks(flat)) LOCAL.set(name, [...(LOCAL.get(name) ?? []), { file, body }]);
+  }
+  /** Face entrances and exits (panels, sheets, drawers, dialogs, menus, chips, tooltips, slabs, cards, and the
+   *  wrappers that hold faces): transform and the light only. */
+  const LOCAL_FACE: Record<string, string> = {
+    'gbr-view-in': 'G-Brain radial ring view: holds the legend card and the year chips',
+    'gbr-view-out': 'G-Brain radial ring view leaving',
+    'gbr-panel-in': 'G-Brain expanded view (holds its cards)',
+    'gbr-panel-out': 'G-Brain expanded view leaving',
+    'skh-in': 'Skill hierarchy root (holds the location panel)',
+    'skh-panel-in': 'Skill hierarchy panel',
+    'kg-panel-in': 'Knowledge graph detail card',
+    'kv-panel-in': 'Knowledge focus panel',
+    'kv-in': 'Knowledge canvas root (holds the canvas chips)',
+    'pc-rise': 'Pipeline chart active-stage label pill',
+    'bd-pop': 'Brand Deals peak label pill',
+    'fc-slab-in': 'Funnel slab (holds the cards)',
+    'fc-card-in': 'Funnel cards and secondary panels',
+    'fc-tip-in': 'Funnel menu, tooltip and peak label (solid raised faces): rise',
+    'fc-drawer-in': 'Funnel lead drawer',
+    'bn-panel-in': 'Lab (Legacy) sheet',
+    'bn-panel-out': 'Lab (Legacy) sheet leaving',
+    'lab2-verse-in': 'Lab Creatorverse creator panel',
+    'lab2-verse-up': 'Lab Creatorverse creator panel (phone)',
+    'lab2-enter': 'Lab page blocks (glass panels and the wrappers of glass panels)',
+    'lab2-pop-in': 'Lab menus and run pop-ups (solid raised faces)',
+    'lab2-pop-out': 'Lab menus and run pop-ups leaving',
+    'lab2-chip-in': 'Lab badges and action chips: pop from .9',
+    'lab2-dialog-in': 'Lab dialogs',
+    pop: 'Workflow canvas modal, menu and toast',
+  };
+  /** Not faces: SVG and canvas leaves, dots, carets, scrims (siblings of their faces), text, skeletons, loops. */
+  const LOCAL_NOT_FACE: Record<string, string> = {
+    'labv-pulse': 'Lab loading skeleton',
+    'gbr-grow': 'G-Brain radial spokes (SVG)',
+    'gbr-leaf-in': 'G-Brain radial ring (SVG)',
+    'gbr-leaf-out': 'G-Brain radial ring (SVG) leaving',
+    'kg-fade-in': 'Knowledge graph branches (SVG)',
+    'kg-leaf-in': 'Knowledge graph leaves (SVG)',
+    'kg-glow-in': 'Knowledge graph glow (SVG)',
+    'kg-breathe': 'Knowledge graph memory layer breathing (SVG)',
+    'kg-glow-breathe': 'Knowledge graph core glow (SVG)',
+    'kg-mem-in': 'Knowledge graph deeper notes (SVG)',
+    'kg-exit-fade': 'Knowledge graph tree skeleton leaving (SVG)',
+    'kg-web-fade-in': 'Knowledge graph resting web (SVG)',
+    'kv-leaf-in': 'Knowledge canvas graph (SVG)',
+    'pc-fadein': 'Pipeline chart ramps and bar caps (SVG)',
+    'pc-caret': 'Pipeline chart caret',
+    'bd-fadein': 'Brand Deals peak dot (SVG) and heat dots',
+    'fc-blink': 'Funnel caret',
+    'fc-pop': 'Funnel chart dots',
+    'fc-scrim-in': 'Funnel drawer scrim, a sibling of the drawer',
+    'fc-dot-in': 'Funnel peak dot and the copied note (text)',
+    'l-lab-blink': 'Lab (Legacy) caret',
+    'bn-overlay-in': 'Lab (Legacy) sheet scrim, a sibling of the sheet',
+    'bn-overlay-out': 'Lab (Legacy) sheet scrim leaving',
+    'lab2-ripple': 'Lab search focus ring (a pseudo-element)',
+    'lab2-hold': 'Lab count-up text',
+    'lab2-scrim-in': 'Lab dialog scrim, a sibling of the dialog',
+    rise: 'Workflow canvas node body content (fields and text)',
+    sweep: 'Workflow canvas panel light band (a pseudo-element)',
+  };
+
+  test('the scan reads CSS files and <style> blocks', () => {
+    const files = SOURCES.map((s) => s.file);
+    for (const f of ['components/funnel/funnel.css', 'components/lab/v2/shared/lab-motion.css', 'components/GBrainRadial.tsx <style>', 'components/KnowledgeGraph.tsx <style>']) {
+      expect(files, f).toContain(f);
+    }
+  });
+
+  test.each(Object.keys(LOCAL_FACE))('%s (a face entrance or exit) moves only transform and the light', (name) => {
+    const k = LOCAL.get(name);
+    expect(k, name).toBeDefined();
+    for (const { file, body } of k!) expect(body, `${file} ${name}`).not.toMatch(/opacity/);
+  });
+
+  test('every local keyframe that touches opacity is classified as not a face', () => {
+    const fading = [...LOCAL].filter(([, v]) => v.some((x) => /opacity/.test(x.body))).map(([n, v]) => `${n} (${v[0].file})`);
+    expect(fading.filter((n) => !(n.split(' ')[0] in LOCAL_NOT_FACE))).toEqual([]);
+  });
+
+  test('a face that plays a local entrance does not start transparent (no opacity: 0 waiting for the keyframe)', () => {
+    const bad: string[] = [];
+    for (const { file, css } of SOURCES) {
+      const flat = css.replace(/\/\*[\s\S]*?\*\//g, '');
+      for (const r of allRules(flat)) {
+        const anim = /(?:^|[;\s])animation(?:-name)?\s*:([^;]+)/.exec(r.body)?.[1] ?? '';
+        const names = anim.split(/[\s,]+/).filter((n) => n in LOCAL_FACE || /^gl-materialise/.test(n));
+        if (names.length && /(?:^|[;\s])opacity\s*:\s*0\s*(;|$)/.test(r.body)) bad.push(`${file}: ${r.selectors.join(', ')}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  test('inline style animations name a classified keyframe (a face never plays a fading one)', () => {
+    const fadingLocal = new Set([...LOCAL].filter(([, v]) => v.some((x) => /opacity/.test(x.body))).map(([n]) => n));
+    const unclassified: string[] = [];
+    for (const abs of tsxFiles(ROOT, ['app', 'components', 'founderos'])) {
+      for (const n of inlineAnimations(readFileSync(abs, 'utf8'))) {
+        if (fadingLocal.has(n) && !(n in LOCAL_NOT_FACE)) unclassified.push(`${abs.slice(ROOT.length + 1)}: ${n}`);
+      }
+    }
+    expect(unclassified).toEqual([]);
+  });
+
+  test('the Pipeline chart label and the Brand Deals peak pill rise or pop, never fade', () => {
+    const pc = read('components/PipelineChart.tsx');
+    expect(pc).toMatch(/animation: `pc-rise /);
+    expect(pc.match(/animation: `pc-fadein [^`]*`/g)?.length).toBe(2); // the SVG ramps and caps only
+    const bd = read('components/brand-deals/DealBoard.tsx');
+    expect(bd).toMatch(/animation: `bd-pop /);
+  });
+
+  test('the workflow canvas modal root frosts on a layer under the modal, not around it', () => {
+    const css = read('components/workflow-canvas/canvas.css').replace(/\/\*[\s\S]*?\*\//g, '');
+    const root = allRules(css).filter((r) => r.selectors.some((s) => /\.modal-root$/.test(s)));
+    for (const r of root) expect(r.body, r.selectors.join()).not.toMatch(/backdrop-filter\s*:\s*(?!none)/);
+    expect(allRules(css).some((r) => r.selectors.some((s) => /\.modal-root::before$/.test(s)) && /backdrop-filter/.test(r.body))).toBe(true);
+  });
+
+  test('the funnel drawer sits beside its scrim, not in it', () => {
+    const src = read('components/funnel/FunnelDashboard.tsx');
+    expect(src).toMatch(/<div className="fc-layer">\s*<div className="fc-scrim" aria-hidden \/>\s*<aside className="fc-drawer/);
   });
 });

@@ -439,7 +439,7 @@ export function GBrainRadial({
         <svg
           ref={svgRef}
           viewBox={`-${VB / 2} -${VB / 2} ${VB} ${VB}`}
-          className={`absolute inset-0 h-full w-full ${ringAnim}`}
+          className={`gbr-leaf absolute inset-0 h-full w-full ${ringAnim}`}
           style={{ overflow: 'visible' }}
         >
           <defs>
@@ -686,8 +686,7 @@ export function GBrainRadial({
       {/* legend */}
       {!g && ringVisible && (
         <div
-          className={`absolute bottom-7 left-7 z-20 w-[196px] rounded-[16px] border p-4 max-sm:hidden ${ringAnim}`}
-          style={{ background: 'color-mix(in srgb, var(--bg) 82%, transparent)', borderColor: 'rgb(var(--mist-rgb) / 0.1)', backdropFilter: 'blur(10px)' }}
+          className={`glass-face absolute bottom-7 left-7 z-20 w-[196px] rounded-[24px] p-4 max-sm:hidden ${ringAnim}`}
         >
           <div className="mb-2.5 text-[9.5px] tracking-[0.3em]" style={{ color: 'var(--text-2)' }}>
             LEGEND
@@ -865,17 +864,22 @@ export function GBrainRadial({
         .gbr-node:hover .gbr-glowc, .gbr-fnode:hover .gbr-glowc { opacity: 1; }
         .gbr-widget { transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.2s ease, border-color 0.2s ease; }
         .gbr-widget:hover { transform: translateY(-2px); box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 8%, transparent), 0 12px 28px var(--gbr-widget-shadow); }
-        /* view transitions */
+        /* view transitions: the views hold glass (the legend card, the year chips, the expanded cards), so
+           they move without fading (glass brief §3.2, §4); only the ring itself, an SVG leaf, fades. */
         .gbr-vin { animation: gbr-view-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-        .gbr-vout { animation: gbr-view-out 0.2s ease-in forwards; }
-        @keyframes gbr-view-in { from { opacity: 0; transform: scale(0.985); } }
-        @keyframes gbr-view-out { to { opacity: 0; transform: scale(0.99); } }
-        .gbr-pv { animation: gbr-panel-in 0.38s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-        .gbr-pv-out { animation: gbr-panel-out 0.22s ease-in forwards; }
-        @keyframes gbr-panel-in { from { opacity: 0; transform: translateY(14px) scale(0.985); } }
-        @keyframes gbr-panel-out { to { opacity: 0; transform: translateY(10px) scale(0.99); } }
+        .gbr-vout { animation: gbr-view-out 0.2s linear forwards; }
+        @keyframes gbr-view-in { from { transform: scale(0.985); } }
+        @keyframes gbr-view-out { to { transform: scale(0.98); } }
+        .gbr-leaf.gbr-vin { animation-name: gbr-leaf-in; }
+        .gbr-leaf.gbr-vout { animation-name: gbr-leaf-out; }
+        @keyframes gbr-leaf-in { from { opacity: 0; transform: scale(0.985); } }
+        @keyframes gbr-leaf-out { to { opacity: 0; transform: scale(0.99); } }
+        .gbr-pv { animation: gbr-panel-in var(--gl-dur-materialise) var(--gl-spring) both; }
+        .gbr-pv-out { animation: gbr-panel-out 0.22s linear forwards; }
+        @keyframes gbr-panel-in { from { transform: translateY(18px) scale(0.965); } }
+        @keyframes gbr-panel-out { to { transform: scale(0.98); } }
         @media (prefers-reduced-motion: reduce) {
-          .gbr-spoke, .gbr-tick, .gbr-vin, .gbr-vout, .gbr-pv, .gbr-pv-out { animation: none; }
+          .gbr-spoke, .gbr-tick, .gbr-vin, .gbr-vout, .gbr-leaf.gbr-vin, .gbr-leaf.gbr-vout, .gbr-pv, .gbr-pv-out { animation: none; }
           .gbr-node, .gbr-fnode, .gbr-widget { transition: none; }
         }
       `}</style>

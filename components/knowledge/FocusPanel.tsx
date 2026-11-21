@@ -182,8 +182,8 @@ export function FocusPanel({
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        .kv-panel { animation: kv-panel-in 0.28s cubic-bezier(0.2,0.7,0.2,1) both; }
-        @keyframes kv-panel-in { from { opacity: 0; transform: translateX(14px); } }
+        .kv-panel { animation: kv-panel-in var(--gl-dur-drawer) var(--gl-spring-drawer) both; }
+        @keyframes kv-panel-in { from { transform: translateX(14px); } } /* a panel slides in; it never fades (glass brief §4) */
         @media (prefers-reduced-motion: reduce) { .kv-panel { animation: none; } }
       ` }} />
     </div>

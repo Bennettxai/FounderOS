@@ -14,14 +14,12 @@
   border: 1px solid var(--fc-hair);
   border-radius: 24px;
   padding: 22px 28px 30px;
-  opacity: 0;
-  transform: translateY(10px) scale(0.992);
-  animation: fc-slab-in 0.7s var(--fc-ease) 0.05s forwards;
+  /* faces never fade in (glass brief §4): the slab and its cards rise into place on their own timing */
+  animation: fc-slab-in 0.7s var(--fc-ease) 0.05s backwards;
 }
 @keyframes fc-slab-in {
-  to {
-    opacity: 1;
-    transform: none;
+  from {
+    transform: translateY(10px) scale(0.992);
   }
 }
 
@@ -244,9 +242,7 @@
   border-radius: 16px;
   padding: 20px 22px;
   position: relative;
-  opacity: 0;
-  transform: translateY(14px);
-  animation: fc-card-in 0.6s var(--fc-ease) forwards;
+  animation: fc-card-in 0.6s var(--fc-ease) backwards;
   transition:
     transform 0.25s,
     border-color 0.25s;
@@ -256,9 +252,8 @@
   border-color: var(--fc-hair-strong);
 }
 @keyframes fc-card-in {
-  to {
-    opacity: 1;
-    transform: none;
+  from {
+    transform: translateY(14px);
   }
 }
 .fc-c1 {
@@ -437,21 +432,21 @@
   color: var(--text-2);
   box-shadow: var(--shadow-pop);
   white-space: nowrap;
-  opacity: 0;
-  animation: fc-tip-in 0.5s ease 1.3s forwards;
+  animation: fc-tip-in 0.5s ease 1.3s both;
   pointer-events: none;
 }
 .fc-tip b {
   color: var(--text);
   font-weight: 600;
 }
+/* tooltips, menus and the peak label are solid raised faces: hidden until their beat, then they rise 6px */
 @keyframes fc-tip-in {
   from {
-    opacity: 0;
+    visibility: hidden;
     transform: translateX(-50%) translateY(6px);
   }
   to {
-    opacity: 1;
+    visibility: visible;
     transform: translateX(-50%) translateY(0);
   }
 }
@@ -706,7 +701,13 @@
   transform: translate(-50%, -50%);
   box-shadow: 0 0 0 3px var(--fc-card);
   opacity: 0;
-  animation: fc-tip-in 0.4s ease 1.9s forwards;
+  animation: fc-dot-in 0.4s ease 1.9s forwards;
+}
+/* the peak dot and the copied note are leaves: they may fade */
+@keyframes fc-dot-in {
+  to {
+    opacity: 1;
+  }
 }
 .fc-peak {
   position: absolute;
@@ -718,8 +719,7 @@
   padding: 5px 11px;
   font-size: 12.5px;
   font-weight: 600;
-  opacity: 0;
-  animation: fc-tip-in 0.5s ease 1.6s forwards;
+  animation: fc-tip-in 0.5s ease 1.6s both;
   white-space: nowrap;
 }
 .fc-months {
@@ -841,7 +841,7 @@
     linear-gradient(160deg, var(--fc-ins-a), var(--fc-ins-c) 60%, var(--fc-ins-a));
   background-size: 160% 160%;
   animation:
-    fc-card-in 0.6s var(--fc-ease) 0.42s forwards,
+    fc-card-in 0.6s var(--fc-ease) 0.42s backwards,
     fc-drift 14s ease-in-out infinite alternate;
 }
 @keyframes fc-drift {
@@ -936,9 +936,7 @@
   border: 1px solid var(--fc-hair);
   border-radius: 16px;
   padding: 6px 0 2px;
-  opacity: 0;
-  transform: translateY(14px);
-  animation: fc-card-in 0.5s var(--fc-ease) 0.1s forwards;
+  animation: fc-card-in 0.5s var(--fc-ease) 0.1s backwards;
 }
 .fc-panel-head {
   display: flex;
@@ -1289,7 +1287,7 @@ a.fc-pill {
 .fc-copied {
   font-size: 12.5px;
   color: var(--accent);
-  animation: fc-tip-in 0.2s var(--fc-ease) both;
+  animation: fc-dot-in 0.2s var(--fc-ease) both;
   transform: none;
 }
 .fc-menu .hint {
@@ -1403,10 +1401,15 @@ a.fc-pill {
 }
 
 /* ---------- lead drawer ---------- */
-.fc-scrim {
+/* the layer places the scrim and the drawer side by side: the scrim dims the page, never the drawer */
+.fc-layer {
   position: fixed;
   inset: 0;
   z-index: 60;
+}
+.fc-scrim {
+  position: absolute;
+  inset: 0;
   background: color-mix(in oklab, var(--bg) 55%, transparent);
   animation: fc-scrim-in 0.2s ease both;
 }
@@ -1431,7 +1434,6 @@ a.fc-pill {
 @keyframes fc-drawer-in {
   from {
     transform: translateX(24px);
-    opacity: 0;
   }
 }
 .fc-drawer-head {

@@ -302,14 +302,16 @@ export function KnowledgeCanvas({
 
       <style dangerouslySetInnerHTML={{ __html: `
         .kv-canvas { animation: kv-in 0.4s cubic-bezier(0.2,0.7,0.2,1) both; }
-        @keyframes kv-in { from { opacity: 0; } }
+        @keyframes kv-in { from { transform: translateY(6px); } } /* holds glass chips: rises, never fades */
+        .kv-canvas > svg { animation: kv-leaf-in 0.4s cubic-bezier(0.2,0.7,0.2,1) both; }
+        @keyframes kv-leaf-in { from { opacity: 0; } } /* the graph itself is a leaf */
         .kv-fade { transition: opacity 0.35s ease; }
         .kv-node { transition: transform 0.22s cubic-bezier(0.2,0.9,0.3,1.4); transform-box: fill-box; transform-origin: center; }
         g:hover > .kv-node { transform: scale(1.4); }
         .kv-glow { transition: opacity 0.25s ease; }
         g:hover > .kv-node .kv-glow { opacity: 0.28; }
         @media (prefers-reduced-motion: reduce) {
-          .kv-canvas { animation: none; }
+          .kv-canvas, .kv-canvas > svg { animation: none; }
           .kv-node, .kv-fade, .kv-glow { transition: none; }
         }
       ` }} />

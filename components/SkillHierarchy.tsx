@@ -599,7 +599,7 @@ export function SkillHierarchy({
 
       <style dangerouslySetInnerHTML={{ __html: `
         .skh { animation: skh-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-        @keyframes skh-in { from { opacity: 0; transform: translateY(8px); } }
+        @keyframes skh-in { from { transform: translateY(8px); } } /* holds the glass panel: rises, never fades */
         .skh-fade { transition: opacity 0.35s ease; }
         .skh-node { transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.4); transform-box: fill-box; transform-origin: center; }
         g:hover > .skh-node { transform: scale(1.25); }
@@ -609,7 +609,7 @@ export function SkillHierarchy({
         g:hover > .skh-hover-label { opacity: 1; }
         g:hover > .skh-node .skh-glow { opacity: 0.3; }
         .skh-panel { animation: skh-panel-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-        @keyframes skh-panel-in { from { opacity: 0; transform: translateX(12px); } }
+        @keyframes skh-panel-in { from { transform: translateX(12px); } }
         @media (prefers-reduced-motion: reduce) {
           .skh, .skh-panel { animation: none; }
           .skh-node, .skh-fade, .skh-glow, .skh-move, .skh-hover-label { transition: none; }

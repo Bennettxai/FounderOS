@@ -162,6 +162,8 @@ export function PipelineChart<T extends PipelineStage>({
       <style>{`
         @keyframes pc-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
         @keyframes pc-fadein { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pc-rise { from { visibility: hidden; translate: 0 6px; } to { visibility: visible; translate: 0 0; } }
+        @media (prefers-reduced-motion: reduce) { [data-pc] .pc-tip { animation: none !important; } }
         @keyframes pc-caret { 0%, 45% { opacity: 1; } 55%, 100% { opacity: 0; } }
       `}</style>
       <div className={contentClassName}>
@@ -307,7 +309,7 @@ export function PipelineChart<T extends PipelineStage>({
           {/* tooltip pill anchored just above the active stage's top edge */}
           {showTooltip && activeStage?.note && (
             <div
-              className="pointer-events-none absolute flex items-center gap-2 whitespace-nowrap rounded-full border border-os-border px-3.5 py-1.5 text-[12px] backdrop-blur"
+              className="pc-tip glass-solid pointer-events-none absolute flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px]"
               style={(() => {
                 // clamp near the edges — a centered pill over the first or
                 // last column half-clips outside the card
@@ -317,9 +319,8 @@ export function PipelineChart<T extends PipelineStage>({
                 left: `${centerPct}%`,
                 top: Math.max(6, activeTopPx - 40),
                 transform: `translateX(${tx})`,
-                background: 'color-mix(in oklab, var(--bg) 72%, transparent)',
-                boxShadow: '0 8px 24px -10px rgba(0,0,0,.6)',
-                animation: `pc-fadein .6s ${EASE} 1100ms both`,
+                // a tooltip is a solid raised face: it rises 6px into place, never fades (glass brief §5 B13)
+                animation: `pc-rise .6s ${EASE} 1100ms both`,
                 };
               })()}
             >

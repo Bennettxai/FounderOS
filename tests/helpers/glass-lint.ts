@@ -338,3 +338,29 @@ export function tsxFiles(root: string, dirs: string[]): string[] {
   for (const d of dirs) visit(path.join(root, d));
   return out.sort();
 }
+
+/**
+ * Component-local styles: every .css file under `dirs` (app/globals.css aside, it has its own scans) and
+ * every <style> block in a .tsx (`<style>{`…`}</style>`, `<style jsx>`, `dangerouslySetInnerHTML={{ __html: `…` }}`).
+ */
+export function localStyleSources(root: string, dirs: string[]): { file: string; css: string }[] {
+  const out: { file: string; css: string }[] = [];
+  const visit = (d: string) => {
+    for (const e of fs.readdirSync(path.join(root, d), { withFileTypes: true })) {
+      const rel = path.join(d, e.name);
+      if (e.isDirectory()) visit(rel);
+      else if (e.name.endsWith('.css') && rel !== path.join('app', 'globals.css')) out.push({ file: rel, css: fs.readFileSync(path.join(root, rel), 'utf8') });
+      else if (e.name.endsWith('.tsx')) {
+        const src = fs.readFileSync(path.join(root, rel), 'utf8');
+        for (const m of src.matchAll(/<style\b[^>]*?(?:>\s*\{\s*`|__html:\s*`)([\s\S]*?)`/g)) out.push({ file: `${rel} <style>`, css: m[1] });
+      }
+    }
+  };
+  for (const d of dirs) visit(d);
+  return out.sort((a, b) => a.file.localeCompare(b.file));
+}
+
+/** Keyframes a TSX file plays from inline style objects (`animation: \`name …\``). */
+export function inlineAnimations(src: string): string[] {
+  return [...src.matchAll(/\banimation:\s*[`'"]([\w-]+)/g)].map((m) => m[1]);
+}

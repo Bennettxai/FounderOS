@@ -468,13 +468,15 @@
 .wfc .trace .tr .ic { width: 14px; height: 14px; color: var(--accent); }
 .wfc .trace .tr.fail .ic { color: var(--err); }
 .wfc /* ── Modals, .wfc menus, .wfc toasts ───────────────────────────────────────────── */
-.modal-root { position: fixed; inset: 0; z-index: 60; display: none; place-items: center; background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(6px); }
+.modal-root { position: fixed; inset: 0; z-index: 60; display: none; place-items: center; isolation: isolate; }
+/* the scrim is a layer under the modal (glass brief §3.2: a frosting parent would kill the modal's own frost) */
+.wfc .modal-root::before { content: ''; position: absolute; inset: 0; z-index: -1; background: color-mix(in srgb, var(--bg) 55%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
 .wfc .modal-root.is-open { display: grid; }
 .wfc .modal { width: 520px; max-width: calc(100vw - 40px); border-radius: 20px; background: linear-gradient(155deg, var(--wf-modal-a) 0%, var(--wf-modal-b) 55%, var(--wf-node-c) 100%); border: 1px solid var(--border-strong); box-shadow: 0 40px 100px rgb(var(--wf-shadow-rgb) / calc(0.7 * var(--wf-shadow-k))), 0 0 100px rgb(var(--accent-rgb) / 0.08); padding: 24px; animation: pop .22s var(--ease); position: relative; overflow: hidden; }
 .wfc .modal::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 160px; background: radial-gradient(600px 160px at 20% 0%, rgb(var(--accent-rgb) / 0.14), transparent 70%); pointer-events: none; }
 .wfc .modal.mint { background: var(--mint-grad); border-color: rgb(var(--accent-rgb) / 0.45); color: var(--wf-on-grad); }
 .wfc .modal.mint::before { display: none; }
-@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes pop { from { transform: translateY(8px) scale(.98); } to { transform: none; } } /* modals, menus and toasts never fade in */
 .wfc .modal h4 { margin: 0 0 4px; font-size: 18px; font-weight: 500; position: relative; }
 .wfc .modal p { margin: 0 0 16px; color: var(--text-2); font-size: 13.5px; position: relative; }
 .wfc .modal.mint p { color: rgb(var(--wf-on-grad-rgb) / 0.8); }

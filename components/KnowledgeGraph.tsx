@@ -2239,8 +2239,9 @@ export function KnowledgeGraph({
 .kg-glow { opacity: 0; animation: kg-glow-in 0.9s ease forwards; }
 
 /* detail cards glide in with the camera instead of popping */
-@keyframes kg-panel-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-.kg-panel { animation: kg-panel-in 340ms cubic-bezier(0.22, 1, 0.36, 1); }
+/* a detail card is glass: it materialises (rises on the spring), never fades (glass brief §4) */
+@keyframes kg-panel-in { from { transform: translateY(18px) scale(0.965); } to { transform: none; } }
+.kg-panel { animation: kg-panel-in var(--gl-dur-materialise) var(--gl-spring); }
 
 @media (prefers-reduced-motion: reduce) {
   .kg-grid { animation: none; }
@@ -2381,7 +2382,7 @@ export function KnowledgeGraph({
               or the Clients roster. The trail bar walks you back UP: node →
               pillar (this button) → home (the pillar bar's Back). */}
           {(agentCard || toolWiki || taskCard || humanCard || memoryCard) && (
-            <div className={gc('kg-panel kg-graph-panel absolute right-3 top-[46px] z-10 flex max-h-[calc(100%-58px)] w-[300px] flex-col overflow-hidden', 'kg-panel absolute right-3 top-[46px] z-10 flex max-h-[calc(100%-58px)] w-[300px] flex-col overflow-hidden rounded-[16px] border border-white/10 bg-[var(--kg-panel-bg)] backdrop-blur-md')}>
+            <div className={gc('kg-panel kg-graph-panel glass-face absolute right-3 top-[46px] z-10 flex max-h-[calc(100%-58px)] w-[300px] flex-col overflow-hidden', 'kg-panel glass-face absolute right-3 top-[46px] z-10 flex max-h-[calc(100%-58px)] w-[300px] flex-col overflow-hidden rounded-[24px] [--solid-bg:var(--kg-panel-bg)]')}>
               <button
                 onClick={clearDetail}
                 aria-label={`Back to the ${focusedTeam?.label ?? 'graph'} pillar`}

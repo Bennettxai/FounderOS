@@ -44,13 +44,15 @@
 /* Console stays flat: no glow, only movement. */
 :root:not([data-ui='glados'])[data-theme='console'] .lab { --lab-glow: 0 0 0 1px var(--lab-dot-off); --lab-ring-glow: transparent; }
 
-@keyframes lab2-enter { from { opacity: 0; transform: translate3d(0, var(--lab-enter-rise, 10px), 0); } to { opacity: 1; transform: none; } }
-@keyframes lab2-pop-in { from { opacity: 0; transform: translateY(-4px) scale(0.96); } to { opacity: 1; transform: none; } }
-@keyframes lab2-pop-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-4px) scale(0.97); } }
-@keyframes lab2-chip-in { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: none; } }
+/* Faces never fade in or out (glass brief §4): page blocks (glass panels and their wrappers), menus, chips and
+   dialogs move on transform only; scrims, rings and text may still fade. */
+@keyframes lab2-enter { from { transform: translate3d(0, var(--lab-enter-rise, 10px), 0); } to { transform: none; } }
+@keyframes lab2-pop-in { from { transform: translateY(-4px) scale(0.96); } to { transform: none; } }
+@keyframes lab2-pop-out { from { transform: none; } to { transform: scale(0.98); } }
+@keyframes lab2-chip-in { from { transform: scale(0.9); } to { transform: none; } }
 @keyframes lab2-ripple { from { opacity: 0.9; transform: scale(1); } to { opacity: 0; transform: scale(1.06, 1.35); } }
 @keyframes lab2-hold { from { opacity: 0; } to { opacity: 0; } }
-@keyframes lab2-dialog-in { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes lab2-dialog-in { from { transform: translateY(18px) scale(0.965); } to { transform: none; } }
 @keyframes lab2-scrim-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ── 1. page entrance: one orchestrated rise per page, every page, both trees ─────────────────────────
