@@ -8,11 +8,12 @@
  * - No face enters with an opacity fade: every keyframe that fades from transparent is classified,
  *   and the face ones move only transform and the light.
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import ts from 'typescript';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import { CSS_NO_COMMENTS, GLOBALS_CSS, splitSelectors, topLevelRules, type Rule } from './helpers/theme-css';
-import { inlineAnimations, localStyleSources, tsxFiles } from './helpers/glass-lint';
+import { classTokens, faceElementClasses, faceKeyframes, faceOf, inlineAnimations, killerUtility, localStyleSources, tsxFiles } from './helpers/glass-lint';
 
 const read = (p: string) => readFileSync(join(process.cwd(), p), 'utf8');
 const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
@@ -105,6 +106,30 @@ const hasClass = (compound: string, cls: string) => new RegExp(`\\.${cls.replace
 const RULES = allRules();
 const TOP = topLevelRules();
 const KF = keyframeBlocks();
+
+/** Every TSX source the sweeps read. */
+const TSX = tsxFiles(process.cwd(), ['app', 'components', 'founderos']).map((abs) => ({ file: abs.slice(process.cwd().length + 1), src: readFileSync(abs, 'utf8') }));
+/** The class tokens of every face element in TSX (what a CSS rule can match on a face). */
+const FACE_ELEMENTS = TSX.flatMap(({ file, src }) => faceElementClasses(file, src));
+/** Faces that play a keyframe from a literal style object: [file:line, keyframe, face]. */
+function inlineFaceAnimations(): [string, string, string][] {
+  const out: [string, string, string][] = [];
+  for (const { file, src } of TSX) {
+    if (!/animation/.test(src)) continue;
+    const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const visit = (x: ts.Node) => {
+      if (ts.isJsxElement(x) || ts.isJsxSelfClosingElement(x)) {
+        const open = ts.isJsxElement(x) ? x.openingElement : x;
+        const style = open.attributes.properties.find((a) => ts.isJsxAttribute(a) && a.name.getText() === 'style')?.getText() ?? '';
+        const face = faceOf(classTokens(x));
+        if (face) for (const n of inlineAnimations(style)) out.push([`${file}:${sf.getLineAndCharacterOfPosition(open.getStart()).line + 1}`, n, face]);
+      }
+      ts.forEachChild(x, visit);
+    };
+    visit(sf);
+  }
+  return out;
+}
 
 /** Rules whose subject carries one of `classes` (no pseudo-element), optionally filtered. */
 function rulesOn(classes: string[], pred: (compound: string) => boolean = () => true) {
@@ -323,6 +348,18 @@ describe('no face enters with an opacity fade (brief §4): every fading keyframe
     const fading = [...KF].filter(([, body]) => /opacity/.test(body)).map(([name]) => name);
     const unclassified = fading.filter((n) => !(n in NOT_FACE));
     expect(unclassified).toEqual([]);
+  });
+
+  test('by usage too: no face plays a keyframe classified as not a face (CSS rules and inline styles)', () => {
+    const played = faceKeyframes(FACE_ELEMENTS, CSS_NO_COMMENTS);
+    const on = (n: string) => (played.get(n) ?? []).filter((sel) => !sel.includes('::'));
+    expect(Object.keys(NOT_FACE).filter((n) => on(n).length).map((n) => `${n}: ${on(n).join(' | ')}`)).toEqual([]);
+    expect(inlineFaceAnimations().filter(([, n]) => n in NOT_FACE)).toEqual([]);
+  });
+
+  test('the usage check bites: a face playing a scrim fade is caught', () => {
+    const css = '.x-card { animation: overlay-in 1s; } @keyframes overlay-in { from { opacity: 0; } }';
+    expect([...faceKeyframes([['glass-face', 'x-card']], css).keys()]).toEqual(['overlay-in']);
   });
 
   test('the Octane grounds and veils fade their fill, not their opacity (they hold faces)', () => {
@@ -603,6 +640,20 @@ describe('component-local keyframes: no face fades in (CSS files and <style> blo
     expect(fading.filter((n) => !(n.split(' ')[0] in LOCAL_NOT_FACE))).toEqual([]);
   });
 
+  test('by usage too: no face plays a local keyframe classified as not a face (local CSS and inline styles)', () => {
+    const wrong: string[] = [];
+    for (const { file, css } of SOURCES) {
+      const played = faceKeyframes(FACE_ELEMENTS, css.replace(/\/\*[\s\S]*?\*\//g, ''));
+      // a rule on the face's ::before/::after animates a pseudo-element (a ring, a band), not the face
+      for (const n of Object.keys(LOCAL_NOT_FACE)) {
+        const on = (played.get(n) ?? []).filter((sel) => !sel.includes('::'));
+        if (on.length) wrong.push(`${file} ${n}: ${on.join(' | ')}`);
+      }
+    }
+    expect(wrong).toEqual([]);
+    expect(inlineFaceAnimations().filter(([, n]) => n in LOCAL_NOT_FACE)).toEqual([]);
+  });
+
   test('a face that plays a local entrance does not start transparent (no opacity: 0 waiting for the keyframe)', () => {
     const bad: string[] = [];
     for (const { file, css } of SOURCES) {
@@ -800,7 +851,11 @@ describe('"on" is a glow behind and a tinted rim, never a fill: pills, chips and
 });
 
 describe('every element that still frosts itself in TSX is accounted for (glass phase 3 sweep)', () => {
-  /** [file, a needle within 9 lines above the blur, why it is not a glass face]. Faces use the pack's classes. */
+  /**
+   * [file, a needle in the element's own opening tag, why it is not a glass face]. Faces use the pack's classes.
+   * Each entry names exactly one element: the needle must sit in the opening tag of the element that frosts
+   * (review finding 9: the old check accepted a blur if a needle appeared anywhere in the 9 lines above it).
+   */
   const ALLOWED: [string, string, string][] = [
     ['founderos/components/slab.tsx', 'rotate-[24deg] rounded-[36px] border', 'InsightCard glass shard: a decorative leaf inside the one gradient card'],
     ['components/brand-deals/DealBoard.tsx', 'rotate-[24deg]', 'insight card glass shard: a decorative leaf'],
@@ -815,32 +870,68 @@ describe('every element that still frosts itself in TSX is accounted for (glass 
     ['components/knowledge/KnowledgeVisualizer.tsx', "title={networkFs ? 'Exit full screen (esc)'", 'full-screen toggle: a control'],
     ['components/BrainDock.tsx', 'bd-line group absolute', 'the collapsed dock line: a button (the open dock card is the glass face)'],
     ['components/ConductorPanel.tsx', 'wiz-launch group fixed', 'the Conductor launcher: a button'],
-    ['components/KnowledgeGraphFullscreen.tsx', 'kg-paddle', 'pillar paddles: buttons'],
-    ['components/KnowledgeGraph.tsx', 'kg-paddle', 'pillar paddles: buttons'],
+    ['components/KnowledgeGraphFullscreen.tsx', 'aria-label="Previous department"', 'the previous-pillar paddle: a button'],
+    ['components/KnowledgeGraphFullscreen.tsx', 'aria-label="Next department"', 'the next-pillar paddle: a button'],
+    ['components/KnowledgeGraph.tsx', 'aria-label="Turn to the previous pillar"', 'the previous-pillar paddle: a button'],
+    ['components/KnowledgeGraph.tsx', 'aria-label="Turn to the next pillar"', 'the next-pillar paddle: a button'],
     ['components/GraphDirectory.tsx', 'kg-dir-rail', 'directory rail: a button (the open directory is the glass face)'],
-    ['components/PipelineChart.tsx', 'AI prompt bar melting out of the chart base', 'prompt bar frost melting out of the chart: holds an input, no face'],
+    ['components/PipelineChart.tsx', 'rounded-[16px] p-3 backdrop-blur', 'prompt bar frost melting out of the chart: holds an input, no face'],
   ];
+
+  /** Every JSX element whose own className or literal style frosts it, with its opening tag. */
+  const frosting = (file: string, src: string) => {
+    const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const out: { line: number; tag: string }[] = [];
+    const visit = (x: ts.Node) => {
+      if (ts.isJsxElement(x) || ts.isJsxSelfClosingElement(x)) {
+        const open = ts.isJsxElement(x) ? x.openingElement : x;
+        const tag = open.getText();
+        const style = open.attributes.properties.find((a) => ts.isJsxAttribute(a) && a.name.getText() === 'style')?.getText() ?? '';
+        if (classTokens(x).some((t) => killerUtility(t) === 'backdrop-filter') || /\b(?:Webkit)?[bB]ackdropFilter\s*:\s*(?!['"`]none['"`])/.test(style))
+          out.push({ line: sf.getLineAndCharacterOfPosition(open.getStart()).line + 1, tag });
+      }
+      ts.forEachChild(x, visit);
+    };
+    visit(sf);
+    return out;
+  };
+  /** Which allowance covers an element: a needle in its own opening tag, and only that element in the file. */
+  const covered = (file: string, tag: string, all: { tag: string }[]) =>
+    ALLOWED.filter(([f, needle]) => f === file && tag.includes(needle) && all.filter((e) => e.tag.includes(needle)).length === 1);
+
+  test('the match is per element: a needle in a neighbour or in a comment above covers nothing', () => {
+    const src = `export function X() {
+      // bd-line group absolute
+      return (<div className="bd-line group absolute"><span className="backdrop-blur" /><div className="bd-line group absolute backdrop-blur-sm" /></div>);
+    }`;
+    const els = frosting('components/BrainDock.tsx', src);
+    expect(els.map((e) => covered('components/BrainDock.tsx', e.tag, els).length)).toEqual([0, 1]);
+  });
 
   test('no unlisted backdrop blur: an element that frosts itself is a glass face of the pack, a scrim, a leaf or a control', () => {
     const walk = (d: string): string[] =>
-      require('node:fs')
-        .readdirSync(join(process.cwd(), d), { withFileTypes: true })
-        .flatMap((e: { name: string; isDirectory: () => boolean }) => (e.isDirectory() ? walk(`${d}/${e.name}`) : e.name.endsWith('.tsx') ? [`${d}/${e.name}`] : []));
+      readdirSync(join(process.cwd(), d), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : e.name.endsWith('.tsx') ? [`${d}/${e.name}`] : []));
     const left: string[] = [];
     for (const f of [...walk('app'), ...walk('components'), ...walk('founderos')]) {
-      const lines = read(f).split('\n');
-      lines.forEach((l, i) => {
+      const src = read(f);
+      const els = frosting(f, src);
+      for (const e of els) if (covered(f, e.tag, els).length !== 1) left.push(`${f}:${e.line} ${norm(e.tag).slice(0, 110)}`);
+      // a blur outside any JSX opening tag (a style object built elsewhere) must be in one too
+      src.split('\n').forEach((l, i) => {
         if (!/backdrop-blur(?!-none)|backdropFilter|WebkitBackdropFilter/.test(l) || /^\s*(\/\/|\*|\/\*)/.test(l)) return;
-        const window = lines.slice(Math.max(0, i - 9), i + 1).join('\n');
-        if (ALLOWED.some(([file, needle]) => file === f && window.includes(needle))) return;
-        left.push(`${f}:${i + 1} ${l.trim().slice(0, 100)}`);
+        const inTag = els.some((e) => i + 1 >= e.line && i + 1 < e.line + e.tag.split('\n').length);
+        const isFace = /className=/.test(l) && !/backdrop-blur(?!-none)/.test(l);
+        if (!inTag && !isFace && !/backdrop-blur-none/.test(l)) left.push(`${f}:${i + 1} (outside a tag) ${l.trim().slice(0, 100)}`);
       });
     }
     expect(left).toEqual([]);
   });
 
-  test('every allowlisted line still exists (the list cannot rot)', () => {
-    for (const [file, needle] of ALLOWED) expect(read(file), `${file}: ${needle}`).toContain(needle);
+  test('every allowance still names exactly one element (the list cannot rot)', () => {
+    for (const [file, needle] of ALLOWED) {
+      const els = frosting(file, read(file));
+      expect(els.filter((e) => e.tag.includes(needle)).length, `${file}: ${needle}`).toBe(1);
+    }
   });
 });
 
