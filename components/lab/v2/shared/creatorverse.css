@@ -41,7 +41,7 @@
 .lab .lab2-verse-input::-webkit-search-cancel-button { display: none; }
 .lab .lab2-verse-options {
   position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; width: max(100%, 300px); margin: 0; padding: 6px; list-style: none;
-  border-radius: var(--lab-r-chip); background: var(--lab-glass-solid); color: var(--lab-ink-hero);
+  border-radius: var(--lab-r-tile); background: var(--lab-glass-solid); color: var(--lab-ink-hero);
   box-shadow: 0 16px 40px -18px color-mix(in srgb, var(--lab-shade) 60%, transparent), 0 0 0 1px color-mix(in srgb, var(--lab-ink-hero) 10%, transparent);
   animation: lab2-pop-in var(--lab-pop-in, 180ms) var(--lab-ease-out) both;
 }
@@ -72,7 +72,7 @@
 /* hover card */
 .lab .lab2-verse-tip {
   position: absolute; z-index: 5; top: 0; left: 0; display: flex; flex-direction: column; gap: 3px; min-width: 190px; max-width: 260px; padding: 10px 12px;
-  border-radius: var(--lab-r-chip); background: var(--lab-glass-solid); color: var(--lab-ink-hero); pointer-events: none;
+  border-radius: var(--lab-r-well); background: var(--lab-glass-solid); color: var(--lab-ink-hero); pointer-events: none;
   box-shadow: 0 14px 34px -16px color-mix(in srgb, var(--lab-shade) 65%, transparent), 0 0 0 1px color-mix(in srgb, var(--lab-ink-hero) 10%, transparent);
   opacity: 0; transition: opacity var(--lab-dur-s, 160ms) var(--lab-ease-out);
 }
@@ -99,7 +99,7 @@
 /* legend */
 .lab .lab2-verse-legend {
   position: absolute; z-index: 3; left: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 5px; width: 292px; max-width: calc(100% - 24px); padding: 12px 14px;
-  border-radius: var(--lab-r-chip); background: color-mix(in srgb, var(--lab-glass-solid) 86%, transparent); color: var(--lab-ink-hero);
+  border-radius: var(--lab-r-well); background: color-mix(in srgb, var(--lab-glass-solid) 86%, transparent); color: var(--lab-ink-hero);
   font-size: var(--lab-fs-cap); line-height: 1.4;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--lab-ink-hero) 8%, transparent);
 }
@@ -142,7 +142,7 @@
 .lab .lab2-verse-panel-title { margin: 0; font-size: calc(var(--lab-fs-section) + 4px); font-weight: var(--lab-fw-strong); line-height: 1.25; overflow-wrap: anywhere; }
 .lab .lab2-verse-panel-meta { font-size: var(--lab-fs-cap); opacity: .78; }
 .lab .lab2-verse-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
-.lab .lab2-verse-stats > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: var(--lab-r-chip); background: color-mix(in srgb, var(--lab-ink-hero) 6%, transparent); }
+.lab .lab2-verse-stats > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: var(--lab-r-well); background: color-mix(in srgb, var(--lab-ink-hero) 6%, transparent); }
 .lab .lab2-verse-stats dt { font-size: var(--lab-fs-micro); opacity: .75; }
 .lab .lab2-verse-stats dd { display: flex; flex-direction: column; margin: 0; font-size: calc(var(--lab-fs-section) + 6px); font-weight: var(--lab-fw-num, 500); font-variant-numeric: tabular-nums; line-height: 1.2; }
 .lab .lab2-verse-stats dd small { font-size: var(--lab-fs-micro); font-weight: var(--lab-fw-text); opacity: .75; }

@@ -1286,3 +1286,38 @@ describe('review finding 6c: the wizard panels are faces and its cards are wells
     }
   });
 });
+
+describe('review finding 7: radii are the pack\'s (card 24, well 16, chip a pill) in Legacy and the Lab', () => {
+  const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, '');
+  const LAB_CSS = ['components/lab/v2/g/lab-g.css', 'components/lab/v2/shared/creatorverse.css', 'app/lab/lab-pages.css'];
+  const labRules = [...RULES, ...LAB_CSS.flatMap((f) => allRules(strip(read(f))))];
+  const declared = (name: string) => labRules.flatMap((r) => (props(r.body).has(name) ? [props(r.body).get(name)!] : []));
+
+  test('the Legacy dialog is a pop-up face at the card radius', () => {
+    const r = TOP.filter((x) => x.selectors.includes('.l-dialog')).map((x) => props(x.body).get('border-radius')).filter(Boolean).pop();
+    expect(r).toBe('var(--gl-r-card)');
+  });
+
+  test('Lab tokens: a chip is a pill; sheets and narrative cards are cards (24); a new well token (16) for boxes', () => {
+    const chip = declared('--lab-r-chip');
+    expect(chip.length).toBeGreaterThanOrEqual(5);
+    for (const v of chip) expect(['999px', 'var(--l-r-chip)']).toContain(v);
+    const well = declared('--lab-r-well');
+    expect(well.length).toBe(chip.length); // declared in every Lab scope that declares the chip
+    for (const v of well) expect(['16px', 'var(--gl-r-well)']).toContain(v);
+    for (const t of ['--lab-r-sheet', '--lab-r-narrative']) for (const v of declared(t)) expect(['24px', 'var(--l-r-tile)'], t).toContain(v);
+  });
+
+  test('only chips use the chip radius; boxes, rows, graphs, inputs and stat cells use the well radius', () => {
+    const CHIPS = ['.lab2c-skip', '.lab2c-field-q'];
+    const users = labRules.filter((r) => /var\(--lab-r-chip\)/.test(r.body));
+    const notChips = users.flatMap((r) => r.selectors.map(norm)).filter((s) => !CHIPS.some((c) => subject(s) === c));
+    expect(notChips).toEqual([]);
+  });
+
+  test('Glass radius "chip" (rows, banners, checklists) is a well; Glass pop-ups and menus on it are cards', () => {
+    const r = (sel: string) => RULES.filter((x) => x.at.length === 0 && x.selectors.map(norm).includes(sel)).map((x) => props(x.body).get('border-radius')).filter(Boolean).pop();
+    expect(r(".lab2-glass[data-radius='chip']")).toBe('var(--lab-r-well)');
+    expect(r(".lab2-glass[data-radius='chip']:is([role='dialog'], [role='menu'])")).toBe('var(--lab-r-tile)');
+  });
+});

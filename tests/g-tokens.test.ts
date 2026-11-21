@@ -58,16 +58,20 @@ const TOKENS = {
   states: ['--g-state-ready', '--g-state-approved', '--g-state-draft', '--g-state-sent'],
   viz: ['--g-viz-stage', '--g-viz-ink', '--g-viz-hud'],
   diff: ['--g-diff-del-bg', '--g-diff-del-fg', '--g-diff-add-bg', '--g-diff-add-fg'],
-  shape: ['--g-r-card', '--g-r-nested', '--g-r-well', '--g-r-input', '--g-r-pill'],
+  shape: ['--g-r-card', '--g-r-well', '--g-r-input', '--g-r-pill'],
   type: ['--g-fs-display', '--g-fs-section', '--g-fs-title', '--g-fs-card', '--g-fs-body', '--g-fs-cap', '--g-fs-faint', '--g-fw-light', '--g-fw-body', '--g-fw-badge'],
   space: [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `--g-space-${n}`),
   motion: ['--g-dur-colour', '--g-dur-lift', '--g-dur-sheet', '--g-dur-arrive'],
 };
 const ALL = Object.values(TOKENS).flat();
 
-/** Fixed values X2 / S00 §5.1 give for the mode-independent tokens (card and well radii: the glass pack, card 24, well 16). */
+/**
+ * Fixed values X2 / S00 §5.1 give for the mode-independent tokens. Radii are the glass pack's: card 24, well 16, chip a
+ * pill. The old 20px nested radius is gone (review finding 7): dialogs, drawers and the palette are pop-up faces at
+ * the card radius, nested faces are wells at the well radius.
+ */
 const FIXED: Record<string, string> = {
-  '--g-r-card': '24px', '--g-r-nested': '20px', '--g-r-well': '16px', '--g-r-input': '12px', '--g-r-pill': '999px',
+  '--g-r-card': '24px', '--g-r-well': '16px', '--g-r-input': '12px', '--g-r-pill': '999px',
   '--g-fs-display': '44px', '--g-fs-section': '26px', '--g-fs-title': '28px', '--g-fs-card': '15px',
   '--g-fs-body': '13.5px', '--g-fs-cap': '11.5px', '--g-fs-faint': '11px',
   '--g-fw-light': '300', '--g-fw-body': '400', '--g-fw-badge': '500',
@@ -144,6 +148,16 @@ describe('G0 token coverage (AC00.10, ACGP3.6)', () => {
 
   it('shape, type, space and motion carry the X2 values in every accent × mode', () => {
     for (const [a, m] of combos) for (const [t, v] of Object.entries(FIXED)) expect(env(a, m).get(t), `${t} ${a}/${m}`).toBe(v);
+  });
+
+  it('radii: pop-up faces (dialog, drawer, palette, menu) and the raised card at the card radius; no 20px nested radius left', () => {
+    expect(GLOBALS_CSS).not.toMatch(/--g-r-nested/);
+    const radius = (sel: string) =>
+      topLevelRules(CSS_NO_COMMENTS).filter((r) => r.selectors.includes(sel)).map((r) => /(?:^|[;{\s])border-radius\s*:\s*([^;]+)/.exec(r.body)?.[1].trim()).filter(Boolean).pop();
+    // the kit block reads its own --g-r-card (24, the pack's card radius); rules outside it may name the pack's --gl-r-card
+    const CARD = /^var\(--gl?-r-card\)$/;
+    for (const sel of ['.g-dialog', '.g-palette', '.g-pop', '.g-card-raised']) expect(radius(sel), sel).toMatch(CARD);
+    expect(radius('.g-drawer')).toMatch(/^var\(--gl?-r-card\) 0 0 var\(--gl?-r-card\)$/);
   });
 
   it('the elevation shadows carry no top-edge highlight (glass is lit from the bottom; review finding 6b)', () => {
