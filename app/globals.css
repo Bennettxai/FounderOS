@@ -16400,7 +16400,7 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
 :root[data-ui='legacy'] .ae-paper .ae-ground {
   background: var(--l-bg);
 }
-:root[data-ui='legacy'] .ae-paper :is(.ae-card, .ae-card-2, .ae-card-3, .ae-hero, .ae-pill, .ae-btn, .ae-chip, .ae-tag, .ae-pop, .ae-thumb, .ae-check, .ae-pill-badge) {
+:root[data-ui='legacy'] .ae-paper :is(.ae-card, .ae-card-2, .ae-card-3, .ae-hero, .ae-pill, .ae-btn, .ae-chip, .ae-tag, .ae-pop, .ae-thumb, .ae-check, .ae-pill-badge):not(.glass-face) {
   box-shadow: inset 0 0 0 1px var(--l-border);
 }
 /* (no .ae-paper in this selector: a transform rule on the paper would trap its fixed ground, tests/page-ground T7) */
@@ -18290,5 +18290,41 @@ textarea.lab2c-input { height: auto; min-height: 96px; padding: 10px 12px; line-
   .glass-face, .glass-face--strong, .l-card, .l-slab, .l-chip, .l-dialog, .g-card, .g-card-raised, .g-well, .g-chip, .g-sheet, .g-drawer, .g-dialog, .g-palette, .ui-toast, .c-pop, .c-chip, .h6-card, .glass-panel, .glass-panel-violet, .glass-chip, .lab2-glass, .wiz-ask, .g-ask-box, .glass-well, .glass-solid, .bg-os-surface.rounded-lg-t
 ).hoverable:hover {
   --gl-tint: var(--accent);
+}
+/* The Creative Engine sheets, drawer and delete confirm: the scrim covers the viewport beside the sheet (which
+   is a strong glass face), never around it. The layer scrolls a tall sheet; the scrim stays put. */
+.ae-sheet-layer > .ae-sheet-scrim {
+  position: fixed;
+  inset: 0;
+}
+
+/* The org page's department column is a card only from the wide breakpoint up (Tailwind `wide`, 1800px):
+   there it is a glass face; below it the columns sit on the page. */
+@media (min-width: 1800px) {
+  :root[data-ground] .org-connector {
+    --gl-tint: white;
+    --gl-rim-a: 15%;
+    --gl-low-a: 30%;
+    --gl-pool-a: 9%;
+    border-radius: var(--gl-r-card);
+    background: transparent;
+    border-color: transparent;
+    -webkit-backdrop-filter: var(--gl-blur);
+    backdrop-filter: var(--gl-blur);
+    box-shadow:
+      0 0 0 1px var(--gl-groove),
+      0 8px 18px -8px var(--gl-drop),
+      inset 0 0 0 1px color-mix(in srgb, var(--gl-tint) var(--gl-rim-a), transparent),
+      inset 0 -1px 0 color-mix(in srgb, var(--gl-tint) var(--gl-low-a), transparent),
+      inset 0 -18px 26px -18px color-mix(in srgb, var(--gl-tint) var(--gl-pool-a), transparent),
+      inset 0 12px 18px -14px var(--gl-shade);
+  }
+}
+@media (min-width: 1800px) and (prefers-reduced-transparency: reduce) {
+  :root[data-ground] .org-connector {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--solid-bg);
+  }
 }
 /* ── end glass phase 3 ── */

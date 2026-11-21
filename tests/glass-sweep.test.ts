@@ -452,7 +452,8 @@ describe('Classic ad-hoc cards are glass faces', () => {
         d.isDirectory() ? walk(`${dir}/${d.name}`) : /\.tsx?$/.test(d.name) ? [`${dir}/${d.name}`] : [],
       );
   const FILES = [...walk('app'), ...walk('components')].filter((f) => !SKIP_DIRS.test(f) && !PHASE_2A.has(f));
-  const SURFACE = /(^|[\s'"`])bg-os-surface(?![\w/-])/;
+  // a variant-prefixed surface (wide:bg-os-surface) is a card at that breakpoint, so it counts too
+  const SURFACE = /(^|[\s'"`:])bg-os-surface(?![\w/-])/;
   const CARD_RADIUS = /\brounded-(?:lg|xl|2xl)(?![\w-])|\brounded-\[(?:1\d|2\d)px\]|\brounded-(?:md|sm)-t\b/;
 
   test('no os-surface card keeps an ad-hoc radius: cards take the card token, insets are wells, pop-ups are solid', () => {
@@ -685,5 +686,46 @@ describe('hover moves the glass knobs only (glass phase 3)', () => {
     expect([...t.keys()]).toEqual(['--gl-tint']);
     expect(t.get('--gl-tint')).toBe('var(--accent)');
     for (const theme of ['red', 'grey-frost', 'light', 'daylight']) expect(tint[0].selectors[0], theme).toContain(`[data-theme='${theme}']`);
+  });
+});
+
+describe('cards that are cards only at a breakpoint, and the Creative Engine sheets (glass phase 3)', () => {
+  test('the org connector is a glass card from the wide breakpoint up (no wide: surface utilities)', () => {
+    const line = read('app/org/page.tsx').split('\n').find((l) => /org-connector/.test(l))!;
+    expect(line).not.toMatch(/wide:(bg-os-surface|border|rounded)/);
+    const wide = RULES.filter((r) => r.at.some((a) => /min-width: 1800px/.test(a) && !/reduced/.test(a)) && r.selectors.some((x) => /\[data-ground\] \.org-connector$/.test(x)));
+    expect(wide.length).toBe(1);
+    const p = props(wide[0].body);
+    expect(p.get('background')).toBe('transparent');
+    expect(p.get('backdrop-filter')).toBe('var(--gl-blur)');
+    expect(p.get('border-radius')).toBe('var(--gl-r-card)');
+    expect(layers(p.get('box-shadow')!)).toEqual(
+      layers(props(TOP.filter((r) => r.selectors.some((x) => /\[data-ground\] :is\(\s*\.glass-face,/.test(x)) && /box-shadow/.test(r.body))[0].body).get('box-shadow')!),
+    );
+    for (const k of ['--gl-tint', '--gl-low-a']) expect(p.has(k) || TOP.some((r) => r.selectors.some((x) => /org-connector/.test(x)) && props(r.body).has(k)), k).toBe(true);
+  });
+
+  const classic = read('components/creative-engine/classic.tsx');
+  const fn = (name: string) => {
+    const i = classic.indexOf(`function ${name}(`);
+    const j = classic.indexOf('\nexport function', i + 1);
+    return classic.slice(i, j < 0 ? undefined : j);
+  };
+  test.each(['ClassicSheet', 'ClassicDrawer', 'ClassicConfirmDelete'])('%s: the scrim is the sheet\'s sibling and the sheet a strong glass face', (name) => {
+    const src = fn(name);
+    expect(src).toMatch(/<div className="[^"]*\bae-sheet-layer\b[^"]*">\s*<div className="ae-sheet-scrim gl-scrim" aria-hidden onClick=\{\w+\} \/>/);
+    expect(src).toMatch(/className=\{?[`"][^`"]*\bae-sheet\b[^`"]*\bglass-face glass-face--strong\b/);
+    expect(src).not.toMatch(/stopPropagation/);
+    expect(src).not.toMatch(/bg-\[var\(--p-card-2\)\]|shadow-\[var\(--p-shadow\)\]/);
+  });
+
+  test('the sheet scrim is a viewport layer, not a wrapper; Legacy\'s ae hairline leaves glass faces alone', () => {
+    const layer = RULES.filter((r) => r.selectors.some((x) => /\.ae-sheet-layer > \.ae-sheet-scrim$/.test(x)));
+    expect(layer.length).toBe(1);
+    expect(props(layer[0].body).get('position')).toBe('fixed');
+    expect(props(layer[0].body).get('inset')).toBe('0');
+    const legacy = RULES.filter((r) => r.selectors.some((x) => /^:root\[data-ui='legacy'\] \.ae-paper :is\(\.ae-card,/.test(x)));
+    expect(legacy.length).toBeGreaterThan(0);
+    for (const r of legacy) for (const x of r.selectors) expect(x).toMatch(/:not\(\.glass-face\)$/);
   });
 });

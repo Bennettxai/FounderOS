@@ -279,7 +279,7 @@ export default function OrgChartPage({ searchParams }: { searchParams?: { ventur
             return (
               <section
                 key={department.id}
-                className="org-connector flex w-72 shrink-0 flex-col items-center gap-3.5 wide:rounded-2xl wide:border wide:border-os-border wide:bg-os-surface wide:px-4 wide:py-5"
+                className="org-connector flex w-72 shrink-0 flex-col items-center gap-3.5 wide:px-4 wide:py-5"
               >
                 <div className="text-[13px] font-medium">{department.name}</div>
                 {area && (

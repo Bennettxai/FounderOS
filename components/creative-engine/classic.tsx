@@ -258,8 +258,9 @@ export function ClassicSheet({ title, onClose, backLabel, children }: { title: s
   const titleId = useId();
   const dlg = useDialog({ open: true, onClose, labelledBy: titleId });
   return (
-    <div className="ae-sheet-scrim fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>
-      <div {...dlg.props} className="ae-paper ae-sheet ae-card my-6 w-full max-w-[1200px] p-7 outline-none" onClick={(e) => e.stopPropagation()}>
+    <div className="ae-sheet-layer fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto p-4">
+      <div className="ae-sheet-scrim gl-scrim" aria-hidden onClick={onClose} />
+      <div {...dlg.props} className="ae-paper ae-sheet ae-card glass-face glass-face--strong relative my-6 w-full max-w-[1200px] p-7 outline-none">
         <div className="flex items-center justify-between gap-3">
           <h2 id={titleId} className="ae-section !text-[30px]">{title}</h2>
           <button type="button" onClick={onClose} className="ae-btn" data-dialog-close title={backLabel ? `${backLabel} (Esc)` : 'Close (Esc)'}>{backLabel ? <><ChevronLeft className="h-4 w-4" strokeWidth={1.8} /> {backLabel}</> : <><X className="h-4 w-4" strokeWidth={1.8} /> Close</>}</button>
@@ -280,8 +281,9 @@ export function ClassicDrawer({ title, onClose, children, width = 'max-w-[520px]
   const titleId = useId();
   const dlg = useDialog({ open: true, onClose, labelledBy: titleId });
   return (
-    <div className="ae-paper ae-sheet-scrim fixed inset-0 z-[125] flex justify-end" onClick={onClose}>
-      <div {...dlg.props} className={`ae-sheet ae-drawer h-full w-full ${width} overflow-y-auto bg-[var(--p-card-2)] p-6 shadow-[var(--p-shadow)] outline-none`} onClick={(e) => e.stopPropagation()}>
+    <div className="ae-paper ae-sheet-layer fixed inset-0 z-[125] flex justify-end">
+      <div className="ae-sheet-scrim gl-scrim" aria-hidden onClick={onClose} />
+      <div {...dlg.props} className={`ae-sheet ae-drawer glass-face glass-face--strong relative h-full w-full ${width} overflow-y-auto p-6 outline-none`}>
         <div className="mb-5 flex items-center justify-between gap-3">
           <span className="flex min-w-0 items-center gap-2">
             {back && <button type="button" onClick={back.onClick} className="ae-btn ae-btn-sm" title={back.label}><ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.8} /> {back.label}</button>}
@@ -298,10 +300,14 @@ export function ClassicDrawer({ title, onClose, children, width = 'max-w-[520px]
 /** Hard-delete confirm (S03 FR-6, Q-ENG-4) on the X1 dialog: Cancel has focus, Escape closes. */
 export function ClassicConfirmDelete({ title, body, error, busy, onCancel, onConfirm }: { title: ReactNode; body: ReactNode; error: string | null; busy: boolean; onCancel: () => void; onConfirm: () => void }) {
   const titleId = useId();
-  const dlg = useDialog({ open: true, onClose: () => { if (!busy) onCancel(); }, labelledBy: titleId });
+  const cancel = () => {
+    if (!busy) onCancel();
+  };
+  const dlg = useDialog({ open: true, onClose: cancel, labelledBy: titleId });
   return (
-    <div className="ae-paper ae-sheet-scrim fixed inset-0 z-[140] flex items-center justify-center p-4" onClick={() => { if (!busy) onCancel(); }}>
-      <div {...dlg.props} className="ae-sheet ae-card w-full max-w-[460px] p-6" onClick={(e) => e.stopPropagation()}>
+    <div className="ae-paper ae-sheet-layer fixed inset-0 z-[140] flex items-center justify-center p-4">
+      <div className="ae-sheet-scrim gl-scrim" aria-hidden onClick={cancel} />
+      <div {...dlg.props} className="ae-sheet ae-card glass-face glass-face--strong relative w-full max-w-[460px] p-6">
         <h2 id={titleId} className="ae-title text-[22px]">{title}</h2>
         <p className="mt-3 text-[13px] leading-snug text-[var(--p-muted)]">{body}</p>
         {error && <p role="alert" className="mt-3 text-[12.5px] text-[var(--p-red)]">{error}</p>}
