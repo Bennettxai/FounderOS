@@ -3690,18 +3690,20 @@ html:not([data-sidebar]):has(.os-sidebar[data-canvas='1']) .os-shell main > div 
   box-shadow:
     0 30px 70px rgba(0, 0, 0, 0.6),
     0 0 60px rgb(var(--accent-rgb) / 0.12);
-  opacity: 0;
+  /* a face: it goes by visibility and a 6px rise, never a fade (glass brief §4) */
+  visibility: hidden;
   transform: translateY(-6px) scale(0.98);
   pointer-events: none;
   transition:
-    opacity 0.22s var(--ease),
-    transform 0.3s var(--bh-spring);
+    transform 0.3s var(--bh-spring),
+    visibility 0s 0.3s;
   overflow: hidden;
 }
 .bh-search.is-open .bh-search-panel {
-  opacity: 1;
+  visibility: visible;
   transform: none;
   pointer-events: auto;
+  transition-delay: 0s;
 }
 .bh-search-row {
   display: flex;

@@ -242,8 +242,8 @@
 .wfc .hud-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--wf-glass); border: 1px solid var(--border); color: var(--text-2); display: grid; place-items: center; backdrop-filter: blur(12px); transition: all .15s var(--ease); }
 .wfc .hud-btn:hover { color: var(--text); border-color: var(--border-strong); background: var(--surface-2); }
 .wfc .dock { position: absolute; z-index: 14; background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: var(--shadow-pop); }
-.wfc .dock-chat { left: 18px; bottom: 18px; width: 320px; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; transition: transform .3s var(--ease), opacity .25s; }
-.wfc .dock-chat.is-hidden { transform: translateY(24px); opacity: 0; pointer-events: none; }
+.wfc .dock-chat { left: 18px; bottom: 18px; width: 320px; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; transition: transform .3s var(--ease), visibility 0s; }
+.wfc .dock-chat.is-hidden { transform: translateY(24px); visibility: hidden; pointer-events: none; transition: transform .3s var(--ease), visibility 0s .3s; } /* a face: hides by visibility, never a fade */
 .wfc .chat-head { padding: 14px 16px 6px; display: flex; flex-direction: column; gap: 2px; }
 .wfc .chat-title { font-size: 15px; font-weight: 500; }
 .wfc .chat-id { font-size: 11px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -275,8 +275,8 @@
 .wfc .bar-icon:hover { background: var(--surface-2); color: var(--text); border-color: var(--border); }
 .wfc .bar-danger { color: var(--err); }
 .wfc .bar-danger:hover { background: color-mix(in srgb, var(--err) 12%, transparent); color: var(--err); border-color: color-mix(in srgb, var(--err) 35%, transparent); }
-.wfc .dock-logs { left: 50%; bottom: 88px; width: 600px; transform: translateX(-50%); border-radius: 16px; overflow: hidden; transition: transform .3s var(--ease), opacity .25s; }
-.wfc .dock-logs.is-hidden { transform: translate(-50%, 24px); opacity: 0; pointer-events: none; }
+.wfc .dock-logs { left: 50%; bottom: 88px; width: 600px; transform: translateX(-50%); border-radius: 16px; overflow: hidden; transition: transform .3s var(--ease), visibility 0s; }
+.wfc .dock-logs.is-hidden { transform: translate(-50%, 24px); visibility: hidden; pointer-events: none; transition: transform .3s var(--ease), visibility 0s .3s; } /* a face: hides by visibility, never a fade */
 .wfc .logs-head .lh { display: flex; gap: 6px; }
 .wfc .logs-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 10px 12px 16px; font-size: 13.5px; }
 .wfc .logs-toggle { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: var(--text-2); border: 1px solid var(--border); background: var(--surface); }
@@ -342,11 +342,12 @@
 .wfc .panel {
   position: absolute; right: 18px; top: 74px; width: 352px; bottom: 208px; z-index: 15; border-radius: 18px; background: var(--glass); border: 1px solid var(--border);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: var(--shadow-pop); display: flex; flex-direction: column; overflow: hidden;
-  opacity: 0; transform: translateX(28px) scale(0.965); transform-origin: 100% 0; visibility: hidden; pointer-events: none;
-  transition: opacity .28s var(--ease), transform .38s var(--ease), box-shadow .5s var(--ease), border-color .4s, visibility 0s .38s;
+  /* a glass face: it goes by visibility and transform, never a fade (glass brief §4) */
+  transform: translateX(28px) scale(0.965); transform-origin: 100% 0; visibility: hidden; pointer-events: none;
+  transition: transform .38s var(--ease), box-shadow .5s var(--ease), border-color .4s, visibility 0s .38s;
 }
 .wfc .panel.is-open {
-  opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition-delay: 0s; border-color: rgb(var(--accent-rgb) / 0.3);
+  transform: none; visibility: visible; pointer-events: auto; transition-delay: 0s; border-color: rgb(var(--accent-rgb) / 0.3);
   box-shadow: var(--shadow-pop), 0 0 0 1px rgb(var(--accent-rgb) / 0.14), 0 0 70px rgb(var(--accent-rgb) / 0.16);
   animation: panelGlow 1.1s var(--ease);
 }

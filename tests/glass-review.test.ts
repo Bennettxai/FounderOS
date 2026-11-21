@@ -234,4 +234,26 @@ describe('frost costs nothing at rest (review finding 10)', () => {
   });
 });
 
+describe('faces that became glass in phase 4 never fade (brief §4: faces appear and go by visibility, transform and light)', () => {
+  const canvas = allRules(read('components/workflow-canvas/canvas.css').replace(/\/\*[\s\S]*?\*\//g, ''));
+  const CASES: [typeof RULES, string[]][] = [
+    [RULES, ['.bh-search-panel', '.bh-search.is-open .bh-search-panel']],
+    [canvas, ['.wfc .panel', '.wfc .panel.is-open', '.wfc .dock-chat', '.wfc .dock-chat.is-hidden', '.wfc .dock-logs', '.wfc .dock-logs.is-hidden']],
+  ];
+  test.each(CASES.flatMap(([rules, sels]) => sels.map((sel) => [sel, rules] as const)))('%s: no opacity, no opacity transition', (sel, rules) => {
+    const bodies = rules.filter((r) => r.selectors.map(norm).includes(sel)).map((r) => r.body);
+    expect(bodies.length, sel).toBeGreaterThan(0);
+    for (const b of bodies) {
+      expect(decl(b, 'opacity'), sel).toBeUndefined();
+      expect(decl(b, 'transition') ?? '', sel).not.toMatch(/\bopacity\b/);
+    }
+  });
+
+  test('the founderos toast is a strong-frost glass pill, not a filled card', () => {
+    const src = read('founderos/components/Toaster.tsx');
+    expect(src).toMatch(/className=\{`pressable pointer-events-auto relative flex items-center gap-2 glass-face glass-face--strong rounded-full /);
+    expect(src).not.toMatch(/rounded-panel|bg-os-bg px-2\.5|shadow-\[0_12px_30px/);
+  });
+});
+
 export { LOOKS, colour };

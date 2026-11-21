@@ -70,7 +70,7 @@ export function Toaster({ children }: { children: ReactNode }) {
               data-lens="r"
               onMouseEnter={() => setList((l) => l.map((x) => (x.id === t.id ? { ...x, held: true } : x)))}
               onMouseLeave={() => setList((l) => l.map((x) => (x.id === t.id ? { ...x, held: false, born: Date.now() } : x)))}
-              className={`pressable pointer-events-auto relative flex items-center gap-2 rounded-panel border bg-os-bg px-2.5 py-2 font-mono text-[10.5px] shadow-[0_12px_30px_rgba(0,0,0,.7)] animate-enter ${t.kind === 'err' ? 'border-os-err' : 'border-os-border-strong'}`}
+              className={`pressable pointer-events-auto relative flex items-center gap-2 glass-face glass-face--strong rounded-full px-3 py-2 font-mono text-[10.5px] ${t.kind === 'err' ? '[--gl-tint:var(--err)]' : ''}`}
             >
               {t.kind === 'busy' ? (
                 <span className="inline-block h-[10px] w-[10px] animate-[om-spin_.8s_linear_infinite] rounded-full border-[1.5px] border-os-text border-r-transparent" />
