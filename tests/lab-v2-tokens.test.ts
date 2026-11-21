@@ -151,3 +151,40 @@ describe('AC-02-10, AC-02-16, AC-02-17 source scans of components/lab/v2', () =>
     }
   });
 });
+
+describe('glass phase 3: Lab glass frosts in every style (the brief: light 3px/150%, strong 28px/160%)', () => {
+  const FROST = { '--lab-glass-blur': '3px', '--lab-glass-sat': '150%', '--lab-glass-blur-strong': '28px', '--lab-glass-sat-strong': '160%' };
+
+  it.each(LAB_STYLES.map((s) => [styleName(s), s] as const))('%s: the light and strong frost tokens are the brief values', (_n, style) => {
+    const env = labCascade(style);
+    for (const [t, v] of Object.entries(FROST)) expect(labResolveText(env, t), t).toBe(v);
+  });
+
+  it('no style (Legacy and Console included) sets a Lab blur of 0 outside the reduced-transparency fallback', () => {
+    const flat = GLOBALS_CSS.replace(/\/\*[\s\S]*?\*\//g, '');
+    const outside = flat.replace(/@media \(prefers-reduced-transparency: reduce\) \{[\s\S]*?\}\s*\}/g, '').replace(/@supports not [^{]*\{[\s\S]*?\}\s*\}/g, '');
+    const decls = [...outside.matchAll(/(--lab-glass-(?:blur|sat)(?:-strong)?)\s*:\s*([^;]+);/g)].map((m) => `${m[1]}: ${m[2].trim()}`);
+    expect(decls.length).toBeGreaterThan(0);
+    for (const d of decls) expect(Object.entries(FROST).map(([k, v]) => `${k}: ${v}`), d).toContain(d);
+    // the Legacy Lab block re-keys colours only; it inherits the frost
+    const legacy = [...flat.matchAll(/:root\[data-ui='legacy'\] \.lab \{([^}]*)\}/g)].map((m) => m[1]).join('');
+    expect(legacy).not.toMatch(/--lab-glass-(blur|sat)/);
+  });
+
+  it('console blurs too: no rule switches Lab glass frost off by theme', () => {
+    expect(GLOBALS_CSS.replace(/\/\*[\s\S]*?\*\//g, '')).not.toMatch(/\[data-theme='console'\] \.lab2-glass \{[^}]*backdrop-filter: none/);
+  });
+
+  it('frosted Lab glass uses the light frost; strong glass the strong frost', () => {
+    const flat = GLOBALS_CSS.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+    expect(flat).toMatch(/\.lab2-glass\[data-blur='on'\] \{ backdrop-filter: blur\(var\(--lab-glass-blur\)\) saturate\(var\(--lab-glass-sat\)\);/);
+    expect(flat).toMatch(/\.lab2-glass\[data-blur='on'\]\[data-tone='strong'\] \{ backdrop-filter: blur\(var\(--lab-glass-blur-strong\)\) saturate\(var\(--lab-glass-sat-strong\)\);/);
+  });
+
+  it('the solid fallback stays: reduced transparency and no backdrop-filter zero the blur; the cap stays 24', () => {
+    const flat = GLOBALS_CSS.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+    expect(flat).toMatch(/@media \(prefers-reduced-transparency: reduce\) \{ \.lab \{ [^}]*--lab-glass-blur: 0px;/);
+    expect(flat).toMatch(/@supports not \(\(backdrop-filter: blur\(1px\)\) or \(-webkit-backdrop-filter: blur\(1px\)\)\) \{ \.lab \{ [^}]*--lab-glass-blur: 0px;/);
+    expect(readFileSync(join(process.cwd(), 'components/lab/v2/shared/tokens.ts'), 'utf8')).toMatch(/export const GLASS_BUDGET = 24;/);
+  });
+});

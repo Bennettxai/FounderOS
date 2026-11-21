@@ -12694,8 +12694,10 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
   --lab-glass-strong: color-mix(in srgb, var(--g-card) 72%, transparent);
   --lab-glass-solid: color-mix(in srgb, var(--g-card) 90%, var(--lab-aurora-cool));
   --lab-glass-tint: color-mix(in srgb, var(--g-ink) 10%, transparent);
-  --lab-glass-blur: 20px;
-  --lab-glass-sat: 140%;
+  --lab-glass-blur: 3px;
+  --lab-glass-sat: 150%;
+  --lab-glass-blur-strong: 28px;
+  --lab-glass-sat-strong: 160%; /* the glass pack's light and strong frost, in every style (glass phase 3) */
   --lab-glass-edge: inset 0 1px 0 color-mix(in srgb, var(--g-ink) 8%, transparent);
   --lab-glass-border: 0 solid transparent;
   --lab-glass-shadow: 0 10px 24px color-mix(in srgb, var(--g-ink-inverse) 35%, transparent);
@@ -12754,7 +12756,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
   --lab-narr-shadow: 0 30px 60px color-mix(in srgb, var(--g-ink) 10%, transparent);
 }
 
-/* Classic base = Console (no blur, solid panels, accent hairline, mono numerals, tight radii). */
+/* Classic base = Console (solid panel colours, accent hairline, mono numerals, tight radii); its glass frosts like every style's. */
 :root:not([data-ui='glados']) .lab {
   --lab-aurora-anchor: var(--lab-ladder-2);
   --lab-aurora-hot: var(--accent);
@@ -12767,8 +12769,10 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
   --lab-glass-strong: var(--surface);
   --lab-glass-solid: var(--surface);
   --lab-glass-tint: color-mix(in srgb, var(--accent) 8%, transparent);
-  --lab-glass-blur: 0px;
-  --lab-glass-sat: 100%;
+  --lab-glass-blur: 3px;
+  --lab-glass-sat: 150%;
+  --lab-glass-blur-strong: 28px;
+  --lab-glass-sat-strong: 160%; /* the glass pack's light and strong frost, in every style (glass phase 3) */
   --lab-glass-edge: 0 0 0 0 transparent;
   --lab-glass-border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   --lab-glass-shadow: 0 0 0 0 transparent;
@@ -12790,7 +12794,7 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
   --lab-font-num: var(--font-mono);
   --lab-r-narrative: 8px; --lab-r-tile: 6px; --lab-r-sheet: 8px; --lab-r-chip: 4px; --lab-r-pill: 4px;
 }
-/* Classic Red, Frost, Grey Frost: blurred glass at 12px, lower-saturation mesh, theme sans. */
+/* Classic Red, Frost, Grey Frost: lower-saturation mesh, theme sans. */
 :root:not([data-ui='glados'])[data-theme='red'] .lab,
 :root:not([data-ui='glados'])[data-theme='frost'] .lab,
 :root:not([data-ui='glados'])[data-theme='grey-frost'] .lab {
@@ -12799,8 +12803,10 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
   --lab-glass-strong: color-mix(in srgb, var(--surface) 78%, transparent);
   --lab-glass-solid: color-mix(in srgb, var(--surface) 92%, var(--lab-aurora-cool));
   --lab-glass-tint: color-mix(in srgb, var(--text) 9%, transparent);
-  --lab-glass-blur: 12px;
-  --lab-glass-sat: 120%;
+  --lab-glass-blur: 3px;
+  --lab-glass-sat: 150%;
+  --lab-glass-blur-strong: 28px;
+  --lab-glass-sat-strong: 160%; /* the glass pack's light and strong frost, in every style (glass phase 3) */
   --lab-glass-edge: inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent);
   --lab-glass-border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
   --lab-glass-shadow: 0 12px 28px color-mix(in srgb, var(--bg-2) 60%, transparent);
@@ -12833,8 +12839,10 @@ input.ae-o-value-input.ce-g-orow { width: 64px; border: 0; text-align: right; co
   --lab-glass-strong: color-mix(in srgb, var(--surface) 88%, transparent);
   --lab-glass-solid: var(--surface);
   --lab-glass-tint: color-mix(in srgb, var(--text) 6%, transparent);
-  --lab-glass-blur: 12px;
-  --lab-glass-sat: 120%;
+  --lab-glass-blur: 3px;
+  --lab-glass-sat: 150%;
+  --lab-glass-blur-strong: 28px;
+  --lab-glass-sat-strong: 160%; /* the glass pack's light and strong frost, in every style (glass phase 3) */
   --lab-glass-edge: inset 0 1px 0 color-mix(in srgb, var(--surface) 80%, transparent);
   --lab-glass-border: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
   --lab-glass-shadow: 0 8px 24px color-mix(in srgb, var(--text) 8%, transparent);
@@ -12943,12 +12951,15 @@ html:has(.lab[data-lab-root]) .os-topbar {
   backdrop-filter: blur(var(--lab-glass-blur)) saturate(var(--lab-glass-sat));
   -webkit-backdrop-filter: blur(var(--lab-glass-blur)) saturate(var(--lab-glass-sat));
 }
+.lab2-glass[data-blur='on'][data-tone='strong'] {
+  backdrop-filter: blur(var(--lab-glass-blur-strong)) saturate(var(--lab-glass-sat-strong));
+  -webkit-backdrop-filter: blur(var(--lab-glass-blur-strong)) saturate(var(--lab-glass-sat-strong));
+}
 .lab2-glass[data-radius='narrative'] { border-radius: var(--lab-r-narrative); }
 .lab2-glass[data-radius='sheet']     { border-radius: var(--lab-r-sheet); }
 .lab2-glass[data-radius='chip']      { border-radius: var(--lab-r-chip); }
 .lab2-glass[data-radius='pill']      { border-radius: var(--lab-r-pill); }
-/* Console never blurs (AC-02-39); reduced transparency never blurs (§15.4). */
-:root:not([data-ui='glados'])[data-theme='console'] .lab2-glass { backdrop-filter: none; -webkit-backdrop-filter: none; }
+/* Reduced transparency never blurs (§15.4). Console frosts like every style (glass phase 3 retires AC-02-39). */
 @media (prefers-reduced-transparency: reduce) { .lab .lab2-glass { backdrop-filter: none; -webkit-backdrop-filter: none; } }
 /* ...and goes solid: the token swap above (`.lab { --lab-glass-strong: … }`) loses to the per-style token blocks
    (`:root[data-ui='glados'] .lab`), which left a blurred strong panel (/lab/ledger Calibration) at 72% alpha. */
