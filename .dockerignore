@@ -1,0 +1,92 @@
+# FounderOS - Docker ignore file
+# Optimizes build context by excluding unnecessary files
+
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next
+.next-preview
+out
+build
+
+# Environment files (use docker-compose env vars instead)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Test coverage
+coverage
+.nyc_output
+
+# TypeScript
+*.tsbuildinfo
+
+# Data directories (mounted as volumes in docker-compose)
+data
+demo-data
+
+# Public content media (mounted as volume)
+public/content-media/creative-engine
+
+# Brain store (mounted as volume)
+knowledge/brain-store
+
+# Automation (mounted as volume)
+Automation
+
+# Mode file (mounted as volume)
+.gladios-mode
+
+# Documentation
+docs
+README.md
+LICENSE
+AGENTS.md
+CLAUDE.md
+
+# Scripts not needed in production
+scripts/seed.ts
+scripts/generate-brain-docs.ts
+scripts/adscout.ts
+scripts/lab-sync.ts
+scripts/lab-agent.ts
+scripts/lab-e2e-dry.ts
+
+# Tests
+tests
+vitest.config.ts
+
+# Config files not needed at runtime (but needed for build)
+# tailwind.config.ts
+# postcss.config.mjs
+# tsconfig.json
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Archive
+archive

@@ -10,6 +10,7 @@ import { FrameComponents } from './FrameComponents';
 import { FrameTodayView } from './FrameToday';
 
 export const metadata: Metadata = { title: 'Content Lab frames', robots: { index: false, follow: false } };
+export const dynamic = 'force-dynamic';
 export const dynamicParams = false;
 
 export function generateStaticParams() {

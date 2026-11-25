@@ -1,0 +1,238 @@
+version: '3.8'
+
+services:
+  founderos:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:4100}
+    container_name: founderos
+    restart: unless-stopped
+    # Change host port as needed (e.g., "8080:4100" or "3000:4100")
+    ports:
+      - "4100:4100"
+    env_file:
+      - .env
+    environment:
+      # Core app settings
+      - PORT=4100
+      - GLADOS_HOST=0.0.0.0
+      - NODE_ENV=production
+      
+      # Database & data persistence
+      - GLADOS_DB=/data/glados.db
+      - GLADOS_DATA_DIR=/data
+      
+      # Brand (FounderOS or GladOS)
+      - GLADOS_BRAND=${GLADOS_BRAND:-founderos}
+      
+      # Default mode (demo or real)
+      - GLADOS_DEFAULT_MODE=${GLADOS_DEFAULT_MODE:-demo}
+      
+      # Operator name
+      - GLADOS_OPERATOR_NAME=${GLADOS_OPERATOR_NAME:-Operator}
+      
+      # Security (set via UI at /setup after first deploy)
+      # GLADOS_PASSWORD_HASH and GLADOS_SESSION_SECRET are written by the app
+      # when you set a password at /setup. Do not set manually.
+      
+      # Email (IMAP) - configure up to 4 inboxes
+      - INBOX_1_HOST=${INBOX_1_HOST:-}
+      - INBOX_1_USER=${INBOX_1_USER:-}
+      - INBOX_1_PASS=${INBOX_1_PASS:-}
+      - INBOX_1_NAME=${INBOX_1_NAME:-}
+      - INBOX_1_PORT=${INBOX_1_PORT:-993}
+      - INBOX_2_HOST=${INBOX_2_HOST:-}
+      - INBOX_2_USER=${INBOX_2_USER:-}
+      - INBOX_2_PASS=${INBOX_2_PASS:-}
+      - INBOX_3_HOST=${INBOX_3_HOST:-}
+      - INBOX_3_USER=${INBOX_3_USER:-}
+      - INBOX_3_PASS=${INBOX_3_PASS:-}
+      - INBOX_4_HOST=${INBOX_4_HOST:-}
+      - INBOX_4_USER=${INBOX_4_USER:-}
+      - INBOX_4_PASS=${INBOX_4_PASS:-}
+      
+      # Slack
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN:-}
+      
+      # Recordings
+      - PLAUD_INGEST_TOKEN=${PLAUD_INGEST_TOKEN:-}
+      - FATHOM_API_KEY=${FATHOM_API_KEY:-}
+      
+      # Payment processors
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID:-}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET:-}
+      - SQUARE_ACCESS_TOKEN=${SQUARE_ACCESS_TOKEN:-}
+      - WHOP_API_KEY=${WHOP_API_KEY:-}
+      
+      # Trading
+      - TRADING_PUSH_TOKEN=${TRADING_PUSH_TOKEN:-}
+      - PHANTOM_WALLET_ADDRESS=${PHANTOM_WALLET_ADDRESS:-}
+      - SOLANA_RPC_URL=${SOLANA_RPC_URL:-https://api.mainnet-beta.solana.com}
+      
+      # Usage tracking
+      - USAGE_PUSH_TOKEN=${USAGE_PUSH_TOKEN:-}
+      - CLAUDE_PROJECTS_DIR=${CLAUDE_PROJECTS_DIR:-/root/.claude/projects}
+      - CODEX_SESSIONS_DIR=${CODEX_SESSIONS_DIR:-/root/.codex/sessions}
+      - GLADOS_USAGE_MACHINE=${GLADOS_USAGE_MACHINE:-founderos}
+      
+      # Clients / Superset
+      - SUPERSET_API_KEY=${SUPERSET_API_KEY:-}
+      - SUPERSET_BIN=${SUPERSET_BIN:-superset}
+      - SUPERSET_PROJECT_ID=${SUPERSET_PROJECT_ID:-}
+      
+      # Notion
+      - NOTION_API_KEY=${NOTION_API_KEY:-}
+      
+      # Offer funnel (GoHighLevel)
+      - WEBINARJAM_API_KEY=${WEBINARJAM_API_KEY:-}
+      - TRAKYO_API_KEY=${TRAKYO_API_KEY:-}
+      - TRAKYO_ACCOUNT_ID=${TRAKYO_ACCOUNT_ID:-}
+      - GHL_API_KEY=${GHL_API_KEY:-}
+      - GHL_LOCATION_ID=${GHL_LOCATION_ID:-}
+      
+      # G-Brain
+      - BRAIN_PROVIDER=${BRAIN_PROVIDER:-gbrain}
+      - GBRAIN_BIN=${GBRAIN_BIN:-gbrain}
+      - GBRAIN_STORE=${GBRAIN_STORE:-/data/brain-store}
+      - GBRAIN_DISABLE_DIRECT_POOL=${GBRAIN_DISABLE_DIRECT_POOL:-}
+      
+      # LLM (Vercel AI Gateway)
+      - AI_GATEWAY_API_KEY=${AI_GATEWAY_API_KEY:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-gateway}
+      - LLM_MODEL=${LLM_MODEL:-anthropic/claude-sonnet-4-6}
+      
+      # Beehiiv
+      - BEEHIIV_API_KEY=${BEEHIIV_API_KEY:-}
+      - BEEHIIV_PUBLICATION_ID=${BEEHIIV_PUBLICATION_ID:-}
+      
+      # ManyChat
+      - MANYCHAT_API_KEY=${MANYCHAT_API_KEY:-}
+      - MANYCHAT_WEBHOOK_SECRET=${MANYCHAT_WEBHOOK_SECRET:-}
+      
+      # Finances (additional payment processors)
+      - FANBASIS_KEY_1=${FANBASIS_KEY_1:-}
+      - FANBASIS_KEY_2=${FANBASIS_KEY_2:-}
+      - WISE_1_TOKEN=${WISE_1_TOKEN:-}
+      - WISE_2_TOKEN=${WISE_2_TOKEN:-}
+      
+      # Email send (SMTP)
+      - INBOX_1_SMTP_HOST=${INBOX_1_SMTP_HOST:-}
+      - INBOX_1_SMTP_PORT=${INBOX_1_SMTP_PORT:-465}
+      
+      # Comms lane routing
+      - COMMS_WORK_KEYWORDS=${COMMS_WORK_KEYWORDS:-}
+      
+      # App flags
+      - GLADOS_WARM=${GLADOS_WARM:-1}
+      - GLADOS_SWR=${GLADOS_SWR:-1}
+      - GLADOS_WRITES=${GLADOS_WRITES:-}
+      - GLADOS_CRON=${GLADOS_CRON:-}
+      
+      # WhatsApp (sending only)
+      - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID:-}
+      - WHATSAPP_ACCESS_TOKEN=${WHATSAPP_ACCESS_TOKEN:-}
+      
+      # Creative Engine
+      - FOREPLAY_API_KEY=${FOREPLAY_API_KEY:-}
+      - MIOSA_API_KEY=${MIOSA_API_KEY:-}
+      - ARCADS_BASIC_AUTH=${ARCADS_BASIC_AUTH:-}
+      - CREATIVE_ENGINE_DRY=${CREATIVE_ENGINE_DRY:-}
+      - CREATIVE_ENGINE_CREDIT_CAP=${CREATIVE_ENGINE_CREDIT_CAP:-200}
+      - CREATIVE_ENGINE_STORE_DIR=${CREATIVE_ENGINE_STORE_DIR:-/data/creative-engine}
+      - CREATIVE_ENGINE_ASSET_DIR=${CREATIVE_ENGINE_ASSET_DIR:-/app/public/content-media/creative-engine}
+      
+      # Content Lab
+      - APIFY_API_TOKEN=${APIFY_API_TOKEN:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LAB_YT_CLIENT_ID=${LAB_YT_CLIENT_ID:-}
+      - LAB_YT_CLIENT_SECRET=${LAB_YT_CLIENT_SECRET:-}
+      - LAB_YT_REFRESH_TOKEN=${LAB_YT_REFRESH_TOKEN:-}
+      - LAB_YT_CHANNEL_ID=${LAB_YT_CHANNEL_ID:-}
+      - LAB_YT_CONNECTED_AT=${LAB_YT_CONNECTED_AT:-}
+      - LAB_YT_REDIRECT_URI=${LAB_YT_REDIRECT_URI:-}
+      - LAB_IG_APP_ID=${LAB_IG_APP_ID:-}
+      - LAB_IG_APP_SECRET=${LAB_IG_APP_SECRET:-}
+      - LAB_IG_ACCESS_TOKEN=${LAB_IG_ACCESS_TOKEN:-}
+      - LAB_IG_TOKEN_EXPIRES_AT=${LAB_IG_TOKEN_EXPIRES_AT:-}
+      - LAB_IG_USER_ID=${LAB_IG_USER_ID:-}
+      - LAB_IG_REDIRECT_URI=${LAB_IG_REDIRECT_URI:-}
+      - PRODUCTHUNT_TOKEN=${PRODUCTHUNT_TOKEN:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - LAB_APIFY_CAP_USD=${LAB_APIFY_CAP_USD:-98}
+      - LAB_APIFY_SYNC_CAP_USD=${LAB_APIFY_SYNC_CAP_USD:-46}
+      - LAB_APIFY_SNAPSHOTS_CAP_USD=${LAB_APIFY_SNAPSHOTS_CAP_USD:-22}
+      - LAB_APIFY_X_CAP_USD=${LAB_APIFY_X_CAP_USD:-10}
+      - LAB_APIFY_VERIFY_CAP_USD=${LAB_APIFY_VERIFY_CAP_USD:-1}
+      - LAB_APIFY_RADAR_X_CAP_USD=${LAB_APIFY_RADAR_X_CAP_USD:-15}
+      - LAB_APIFY_RADAR_TIKTOK_CAP_USD=${LAB_APIFY_RADAR_TIKTOK_CAP_USD:-3}
+      - LAB_APIFY_RADAR_PRODUCTHUNT_CAP_USD=${LAB_APIFY_RADAR_PRODUCTHUNT_CAP_USD:-1}
+      - LAB_STT_CAP_USD=${LAB_STT_CAP_USD:-13}
+      - LAB_STT_CONTROLS_CAP_USD=${LAB_STT_CONTROLS_CAP_USD:-3}
+      - LAB_COMMENTS_CAP_USD=${LAB_COMMENTS_CAP_USD:-0}
+      - LAB_DOWNLOADS_CAP_USD=${LAB_DOWNLOADS_CAP_USD:-0}
+      - LAB_EMBED_CAP_USD=${LAB_EMBED_CAP_USD:-0}
+      - LAB_RUN_MAX_USD=${LAB_RUN_MAX_USD:-3}
+      - LAB_COMMENTS=${LAB_COMMENTS:-}
+      - LAB_TIKTOK_DOWNLOADS=${LAB_TIKTOK_DOWNLOADS:-}
+      - LAB_TIKTOK_DOWNLOAD_PRICE_USD=${LAB_TIKTOK_DOWNLOAD_PRICE_USD:-}
+      - LAB_EMBED_PROVIDER=${LAB_EMBED_PROVIDER:-local}
+      - LAB_FRAMES=${LAB_FRAMES:-}
+      - LAB_JUDGE=${LAB_JUDGE:-}
+      - LAB_JUDGE_MODEL=${LAB_JUDGE_MODEL:-}
+      - LAB_GROUNDING_CONTROL=${LAB_GROUNDING_CONTROL:-0}
+      - LAB_COMMENT_SALT=${LAB_COMMENT_SALT:-}
+      - LAB_X_POLL_MIN=${LAB_X_POLL_MIN:-120}
+      - LAB_BRIEF_TELEGRAM=${LAB_BRIEF_TELEGRAM:-}
+      - GLADOS_TZ=${GLADOS_TZ:-}
+      - LAB_DRY=${LAB_DRY:-}
+      - LAB_FIXTURE_SCENARIO=${LAB_FIXTURE_SCENARIO:-full}
+      - LAB_SYNC_WAIT_MIN=${LAB_SYNC_WAIT_MIN:-20}
+      - LAB_DISSECT_MODEL=${LAB_DISSECT_MODEL:-}
+      
+      # Agent health checks
+      - BDPILOT_STATE=${BDPILOT_STATE:-/root/.config/bdpilot/state.json}
+      - BDPILOT_BOT_URL=${BDPILOT_BOT_URL:-}
+      - BRAND_DEALS_SKILL=${BRAND_DEALS_SKILL:-/root/.claude/skills/brand-deals/SKILL.md}
+      - GSEND_BIN=${GSEND_BIN:-/root/bin/gsend}
+      - GSEND_QUEUE_PLIST=${GSEND_QUEUE_PLIST:-}
+      - GLADOS_AUTOMATION_DIR=${GLADOS_AUTOMATION_DIR:-/data/Automation}
+      - GLADOS_AGENT_JOB_PREFIX=${GLADOS_AGENT_JOB_PREFIX:-glados.agent.}
+      
+    volumes:
+      # Persist SQLite database and all data
+      - founderos-data:/data
+      # Persist brain store
+      - founderos-brain:/data/brain-store
+      # Persist creative engine assets
+      - founderos-creative:/app/public/content-media/creative-engine
+      # Persist automation directory
+      - founderos-automation:/data/Automation
+      # Persist .glados-mode file (demo/real toggle)
+      - founderos-mode:/app/.glados-mode
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4100/api/auth/check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+volumes:
+  founderos-data:
+    driver: local
+  founderos-brain:
+    driver: local
+  founderos-creative:
+    driver: local
+  founderos-automation:
+    driver: local
+  founderos-mode:
+    driver: local
