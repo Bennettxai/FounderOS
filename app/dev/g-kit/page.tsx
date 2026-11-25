@@ -7,6 +7,7 @@ import { KitGallery } from './KitGallery';
  * not served by a production build.
  */
 export const metadata = { title: 'Kit gallery' };
+export const dynamic = 'force-dynamic';
 
 export default function GKitPage() {
   if (process.env.NODE_ENV === 'production') notFound();

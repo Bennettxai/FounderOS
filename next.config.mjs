@@ -34,6 +34,8 @@ const nextConfig = {
       { source: '/content-media/ad-engine/:path*', destination: '/content-media/creative-engine/:path*' },
     ];
   },
+  // Skip static generation for dev-only and dynamic pages that use notFound() or have dynamic params that can't be resolved at build time.
+  staticPageGenerationTimeout: 120,
   experimental: {
     serverComponentsExternalPackages: ['better-sqlite3', 'node-ical', 'nodemailer'],
     // instrumentation.ts: warms the live-read caches at boot (lib/warm.ts) and starts the cron tick when GLADOS_CRON=1 (SPEC O7).
